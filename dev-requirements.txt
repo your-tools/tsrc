@@ -1,0 +1,13 @@
+# linters:
+pycodestyle==2.3.1
+astroid==1.4.9
+pylint==1.6.5
+pyflakes==1.5.0
+mccabe==0.6.1
+
+# tests
+apipkg==1.4
+coverage==4.2
+execnet==1.4.1
+py==1.4.31
+pytest==3.0.4
