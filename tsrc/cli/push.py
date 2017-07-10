@@ -1,9 +1,6 @@
 """ Entry point for tsrc push """
 
-import argparse
 import unidecode
-
-import path
 
 from tsrc import ui
 import tsrc.gitlab
@@ -11,47 +8,23 @@ import tsrc.git
 import tsrc.cli
 
 
-def push(repo_path, branch, *, force=False):
-    ui.info_2("Running git push")
-    cmd = ["push", "-u", "origin", "%s:%s" % (branch, branch)]
-    if force:
-        cmd.append("--force")
-    tsrc.git.run_git(repo_path, *cmd)
+WIP_PREFIX = "WIP: "
 
 
-def get_project_id(workspace, repo_path):
-    repo_src = repo_path.relpath(workspace.root_path)
-    repo_url = workspace.get_url(repo_src)
-    project_name = tsrc.gitlab.project_name_form_url(repo_url)
-    project_id = tsrc.gitlab.get_project_id(project_name)
-    return project_id
+def get_project_name(repo_path):
+    rc, out = tsrc.git.run_git(repo_path, "remote", "get-url", "origin", raises=False)
+    if rc != 0:
+        ui.fatal("Could not get url of 'origin' remote:", out)
+    repo_url = out
+    return project_name_from_url(repo_url)
 
 
-def main(args):
-    workspace = tsrc.cli.get_workspace(args)
-    repo_path = tsrc.git.get_repo_root()
-
-    current_branch = tsrc.git.get_current_branch(repo_path)
-    push(repo_path, current_branch, force=args.force)
-
-    source_branch = current_branch
-    target_branch = args.target_branch
-    project_id = get_project_id(workspace, repo_path)
-    active_users = tsrc.gitlab.get_active_users()
-
-    assignee = None
-    if args.assignee:
-        assignee = get_assignee(active_users, args.assignee)
-
-    merge_request = tsrc.gitlab.ensure_merge_request(project_id, source_branch,
-                                                     target_branch=target_branch,
-                                                     title=args.mr_title,
-                                                     assignee=assignee)
-    if args.accept:
-        tsrc.gitlab.accept_merge_request(merge_request)
-
-    ui.info(ui.green, "::",
-            ui.reset, "See merge request at", merge_request["web_url"])
+def project_name_from_url(url):
+    """
+    >>> project_name_from_url(git@example.com:foo/bar.git)
+    'foo/bar'
+    """
+    return "/".join(url.split("/")[-2:]).replace(".git", "")
 
 
 def get_assignee(users, pattern):
@@ -81,32 +54,85 @@ def get_assignee(users, pattern):
         return matches[0]
 
 
-def test_mr_creation():
-    """ Integration testing. This creates a real MR, handle with care """
+def ensure_merge_request(project_id, source_branch, target_branch):
+    merge_request = tsrc.gitlab.find_opened_merge_request(project_id, source_branch)
+    if merge_request:
+        ui.info_2("Found existing merge request: !%s" % merge_request["iid"])
+        return merge_request
+    else:
+        res = tsrc.gitlab.create_merge_request(project_id, source_branch,
+                                               title=source_branch,
+                                               target_branch=target_branch)
+        return res
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("working_path", type=path.Path)
-    parser.add_argument("project_name")
-    parser.add_argument("-b", "--branch", required=True)
-    parser.add_argument("-a", "--assignee")
-    args = parser.parse_args()
-    working_path = args.working_path
-    project_name = args.project_name
-    branch = args.branch
+
+def wipify(title):
+    if not title.startswith(WIP_PREFIX):
+        return WIP_PREFIX + title
+
+
+def unwipify(title):
+    if title.startswith(WIP_PREFIX):
+        return title[len(WIP_PREFIX):]
+
+
+def handle_title(args, merge_request):
+    # If set from command line: use it
+    if args.mr_title:
+        return args.mr_title
+    else:
+        # Change the title if we need to
+        title = merge_request["title"]
+        if args.ready:
+            return unwipify(title)
+        if args.wip:
+            return wipify(title)
+
+
+def handle_merge_request(args, repo_path, current_branch):
+    source_branch = current_branch
+    target_branch = args.target_branch
+    project_name = get_project_name(repo_path)
+    project_id = tsrc.gitlab.get_project_id(project_name)
 
     active_users = tsrc.gitlab.get_active_users()
     assignee = None
     if args.assignee:
         assignee = get_assignee(active_users, args.assignee)
 
-    tsrc.git.run_git(working_path, "checkout", "-B", branch)
-    tsrc.git.run_git(working_path, "commit", "-m", "test", "--allow-empty")
-    tsrc.git.run_git(working_path, "push", "-u", "origin", "%s:%s" % (branch, branch))
-    project_id = tsrc.gitlab.get_project_id(project_name)
-    merge_request = tsrc.gitlab.ensure_merge_request(project_id, branch, assignee=assignee)
-    tsrc.gitlab.accept_merge_request(merge_request)
-    print(merge_request["web_url"])
+    merge_request = ensure_merge_request(project_id, source_branch=source_branch,
+                                         target_branch=args.target_branch)
+
+    title = handle_title(args, merge_request)
+    params = {
+        "title": title,
+        "target_branch": target_branch,
+        "remove_source_branch": True,
+    }
+    if assignee:
+        params["assignee_id"] = assignee["id"]
+
+    tsrc.gitlab.update_merge_request(merge_request, **params)
+
+    if args.accept:
+        tsrc.gitlab.accept_merge_request(merge_request)
+
+    ui.info(ui.green, "::",
+            ui.reset, "See merge request at", merge_request["web_url"])
 
 
-if __name__ == "__main__":
-    test_mr_creation()
+def push(args, repo_path, branch):
+    ui.info_2("Running git push")
+    cmd = ["push", "-u", "origin", "%s:%s" % (branch, branch)]
+    if args.force:
+        cmd.append("--force")
+    tsrc.git.run_git(repo_path, *cmd)
+
+
+def main(args):
+    repo_path = tsrc.git.get_repo_root()
+
+    current_branch = tsrc.git.get_current_branch(repo_path)
+
+    push(args, repo_path, current_branch)
+    handle_merge_request(args, repo_path, current_branch)

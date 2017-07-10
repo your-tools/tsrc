@@ -1,5 +1,6 @@
 """ Tiny wrapper for gitlab REST API """
 
+import json
 import netrc
 import os
 import shutil
@@ -13,12 +14,11 @@ import tsrc
 from tsrc import ui
 
 GITLAB_URL = "http://10.100.0.1:8000"
-GITLAB_API_URL = GITLAB_URL + "/api/v3"
+GITLAB_API_URL = GITLAB_URL + "/api/v4"
 
 
 class GitLabError(tsrc.Error):
-    def __init__(self, message):
-        super().__init__(*message)
+    pass
 
 
 def get_token():
@@ -27,20 +27,53 @@ def get_token():
     return password
 
 
+def handle_errors(response, stream=False):
+    if stream:
+        _handle_stream_errors(response)
+    else:
+        _handle_json_errors(response)
+
+
+def _handle_json_errors(response):
+    # Make sure we always have a dict containing some
+    # kind of error:
+    json_details = dict()
+    try:
+        json_details = response.json()
+    except json.JSONDecodeError:
+        json_details["error"] = ("Expecting json result, got %s" % response.text)
+
+    if 400 <= response.status_code < 500:
+        for key in ["error", "message"]:
+            if key in json_details:
+                raise GitLabError("Client error:", json_details[key])
+        raise GitLabError(json_details)
+    if response.status_code >= 500:
+        raise GitLabError("Server error:", response.text)
+
+
+def _handle_stream_errors(response):
+    if response.status_code >= 400:
+        raise GitLabError("Incorrect status code:", response.status_code)
+
+
 def make_request(verb, url, *, data=None, params=None, stream=False):
     token = get_token()
     full_url = GITLAB_API_URL + url
     response = requests.request(verb, full_url,
                                 headers={"PRIVATE-TOKEN": token},
                                 data=data, params=params, stream=stream)
-    return response
+    handle_errors(response, stream=stream)
+    if stream:
+        return response
+    else:
+        return response.json()
 
 
 def get_project_id(project_name):
     encoded_project_name = urllib.parse.quote(project_name, safe=list())
     res = make_request("GET", "/projects/%s" % encoded_project_name)
-    res.raise_for_status()
-    return res.json()["id"]
+    return res["id"]
 
 
 def extract_latest_artifact(project_name, job_name, dest_path, *, ref="master"):
@@ -51,6 +84,7 @@ def extract_latest_artifact(project_name, job_name, dest_path, *, ref="master"):
     Note: all the files in bin/ will have exec permission
     """
     http_response = make_artifact_download_request(project_name, job_name, ref=ref)
+    ui.info_2("Downloading", http_response.url)
     extract_artifact(http_response, dest_path)
 
 
@@ -84,27 +118,15 @@ def extract_artifact(http_response, dest_path):
 
 def find_opened_merge_request(project_id, source_branch):
     url = "/projects/%s/merge_requests" % project_id
-    response = make_request("GET", url)
-    response.raise_for_status()
-    previous_mrs = response.json()
+    previous_mrs = make_request("GET", url)
     for mr in previous_mrs:
         if mr["source_branch"] == source_branch:
             if mr["state"] == "opened":
                 return mr
 
 
-def project_name_form_url(url):
-    """
-    >>> project_name_form_url(git@example.com:foo/bar.git)
-    'foo/bar'
-    """
-    return "/".join(url.split("/")[-2:]).replace(".git", "")
-
-
-def create_merge_request(project_id, source_branch, *,
-                         target_branch="master", title=None):
-    if not title:
-        title = source_branch
+def create_merge_request(project_id, source_branch, *, title,
+                         target_branch="master"):
     ui.info_2("Creating merge request", ui.ellipsis, end="")
     url = "/projects/%i/merge_requests" % project_id
     data = {
@@ -113,68 +135,29 @@ def create_merge_request(project_id, source_branch, *,
         "title": title,
         "project_id": project_id,
     }
-    result = make_request("POST", url, data=data).json()
-    if "error" in result:
-        raise GitLabError(result["error"])
+    result = make_request("POST", url, data=data)
     ui.info("done", ui.check)
     return result
 
 
-def ensure_merge_request(project_id, source_branch, *,
-                         title=None, target_branch="master",
-                         assignee=None):
-    merge_request = find_opened_merge_request(project_id, source_branch)
-    if not merge_request:
-        merge_request = create_merge_request(project_id, source_branch,
-                                             target_branch=target_branch, title=title)
-    else:
-        ui.info_2("Found existing merge request !%s" % merge_request["iid"])
-    remove_source_branch_on_merge(merge_request)
-    if assignee:
-        assign_merge_request(merge_request, assignee)
-    return merge_request
-
-
-def remove_source_branch_on_merge(merge_request):
-    ui.info_2("Set source branch to be removed", ui.ellipsis, end="")
+def update_merge_request(merge_request, **kwargs):
     project_id = merge_request["target_project_id"]
-    merge_request_id = merge_request["id"]
-    url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_id)
-    data = {
-        "remove_source_branch": True
-    }
-    response = make_request("PUT", url, data=data)
-    response.raise_for_status()
-    ui.info("done", ui.check)
-
-
-def assign_merge_request(merge_request, assignee):
-    ui.info_2("Assigning merge request to", assignee["name"], ui.ellipsis, end="")
-    project_id = merge_request["target_project_id"]
-    merge_request_id = merge_request["id"]
-    url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_id)
-    data = {
-        "assignee_id": assignee["id"]
-    }
-    response = make_request("PUT", url, data=data)
-    response.raise_for_status()
-    ui.info("done", ui.check)
+    merge_request_iid = merge_request["iid"]
+    url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_iid)
+    return make_request("PUT", url, data=kwargs)
 
 
 def accept_merge_request(merge_request):
     project_id = merge_request["project_id"]
-    merge_request_id = merge_request["id"]
+    merge_request_iid = merge_request["iid"]
     ui.info_2("Merging when build succeeds", ui.ellipsis, end="")
-    url = "/projects/%s/merge_requests/%s/merge" % (project_id, merge_request_id)
+    url = "/projects/%s/merge_requests/%s/merge" % (project_id, merge_request_iid)
     data = {
-        "merge_when_build_succeeds": True,
+        "merge_when_pipeline_succeeds": True,
     }
-    response = make_request("PUT", url, data=data)
-    response.raise_for_status()
+    make_request("PUT", url, data=data)
     ui.info("done", ui.check)
 
 
 def get_active_users():
-    response = make_request("GET", "/users", params={"active": "true"})
-    response.raise_for_status()
-    return response.json()
+    return make_request("GET", "/users", params={"active": "true"})
