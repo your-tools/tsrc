@@ -6,13 +6,12 @@ import subprocess
 
 import path
 
-from tcommon import ui
-import tcommon
+from tsrc import ui
+import tsrc
 
 
-class GitError(tcommon.Error):
-    def __init__(self, *args):
-        super().__init__(*args)
+class GitError(tsrc.Error):
+    pass
 
 
 class GitCommandError(GitError):

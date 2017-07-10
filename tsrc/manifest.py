@@ -3,10 +3,10 @@ import os
 
 import ruamel.yaml
 
-import tcommon
+import tsrc
 
 
-class RepoNotFound(tcommon.Error):
+class RepoNotFound(tsrc.Error):
     def __init__(self, src):
         super().__init__("No repo found in '%s'" % src)
 

@@ -2,7 +2,7 @@ import io
 import operator
 from unittest import mock
 
-from tcommon import ui
+from tsrc import ui
 
 import pytest
 

@@ -1,7 +1,7 @@
 """ Entry point for tsrc status """
 from collections import namedtuple
 
-from tcommon import ui
+from tsrc import ui
 import tsrc.cli
 
 

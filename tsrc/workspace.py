@@ -6,8 +6,8 @@ Mostly used by tsrc/cli.py
 
 import stat
 
-from tcommon import ui
-import tcommon
+from tsrc import ui
+import tsrc
 import tsrc.git
 import tsrc.manifest
 
@@ -25,7 +25,7 @@ class Workspace():
         manifest_yml_path = self.manifest_clone_path.joinpath("manifest.yml")
         if not manifest_yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
-            raise tcommon.Error(message.format(manifest_yml_path))
+            raise tsrc.Error(message.format(manifest_yml_path))
         manifest = tsrc.manifest.Manifest()
         manifest.load(manifest_yml_path.text())
         return manifest
@@ -63,7 +63,7 @@ class Workspace():
         if not self.manifest_clone_path.exists():
             message = "Could not find manifest in {}. "
             message += "Did you run `tsrc init` ?"
-            raise tcommon.Error(message.format(self.manifest_clone_path))
+            raise tsrc.Error(message.format(self.manifest_clone_path))
         cmd = ("fetch", "--prune", "origin")
         tsrc.git.run_git(self.manifest_clone_path, *cmd)
         cmd = ("reset", "--hard", "@{u}")

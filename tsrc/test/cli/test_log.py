@@ -1,4 +1,4 @@
-from tcommon.test.conftest import messages
+from tsrc.test.conftest import messages
 
 import tsrc.cli
 

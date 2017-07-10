@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 import tsrc.cli
-from tcommon import ui
+from tsrc import ui
 
 
 def main(args):

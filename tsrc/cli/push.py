@@ -5,8 +5,8 @@ import unidecode
 
 import path
 
-from tcommon import ui
-import tcommon.gitlab
+from tsrc import ui
+import tsrc.gitlab
 import tsrc.git
 import tsrc.cli
 
@@ -22,8 +22,8 @@ def push(repo_path, branch, *, force=False):
 def get_project_id(workspace, repo_path):
     repo_src = repo_path.relpath(workspace.root_path)
     repo_url = workspace.get_url(repo_src)
-    project_name = tcommon.gitlab.project_name_form_url(repo_url)
-    project_id = tcommon.gitlab.get_project_id(project_name)
+    project_name = tsrc.gitlab.project_name_form_url(repo_url)
+    project_id = tsrc.gitlab.get_project_id(project_name)
     return project_id
 
 
@@ -37,18 +37,18 @@ def main(args):
     source_branch = current_branch
     target_branch = args.target_branch
     project_id = get_project_id(workspace, repo_path)
-    active_users = tcommon.gitlab.get_active_users()
+    active_users = tsrc.gitlab.get_active_users()
 
     assignee = None
     if args.assignee:
         assignee = get_assignee(active_users, args.assignee)
 
-    merge_request = tcommon.gitlab.ensure_merge_request(project_id, source_branch,
-                                                        target_branch=target_branch,
-                                                        title=args.mr_title,
-                                                        assignee=assignee)
+    merge_request = tsrc.gitlab.ensure_merge_request(project_id, source_branch,
+                                                     target_branch=target_branch,
+                                                     title=args.mr_title,
+                                                     assignee=assignee)
     if args.accept:
-        tcommon.gitlab.accept_merge_request(merge_request)
+        tsrc.gitlab.accept_merge_request(merge_request)
 
     ui.info(ui.green, "::",
             ui.reset, "See merge request at", merge_request["web_url"])
@@ -71,11 +71,11 @@ def get_assignee(users, pattern):
         message = ui.did_you_mean("No user found matching %s" % pattern,
                                   pattern, usernames)
 
-        raise tcommon.Error(message)
+        raise tsrc.Error(message)
     if len(matches) > 1:
         ambiguous_names = [x["name"] for x in matches]
-        raise tcommon.Error("Found several users matching %s: %s" %
-                            (pattern, ", ".join(ambiguous_names)))
+        raise tsrc.Error("Found several users matching %s: %s" %
+                         (pattern, ", ".join(ambiguous_names)))
 
     if len(matches) == 1:
         return matches[0]
@@ -94,7 +94,7 @@ def test_mr_creation():
     project_name = args.project_name
     branch = args.branch
 
-    active_users = tcommon.gitlab.get_active_users()
+    active_users = tsrc.gitlab.get_active_users()
     assignee = None
     if args.assignee:
         assignee = get_assignee(active_users, args.assignee)
@@ -102,9 +102,9 @@ def test_mr_creation():
     tsrc.git.run_git(working_path, "checkout", "-B", branch)
     tsrc.git.run_git(working_path, "commit", "-m", "test", "--allow-empty")
     tsrc.git.run_git(working_path, "push", "-u", "origin", "%s:%s" % (branch, branch))
-    project_id = tcommon.gitlab.get_project_id(project_name)
-    merge_request = tcommon.gitlab.ensure_merge_request(project_id, branch, assignee=assignee)
-    tcommon.gitlab.accept_merge_request(merge_request)
+    project_id = tsrc.gitlab.get_project_id(project_name)
+    merge_request = tsrc.gitlab.ensure_merge_request(project_id, branch, assignee=assignee)
+    tsrc.gitlab.accept_merge_request(merge_request)
     print(merge_request["web_url"])
 
 

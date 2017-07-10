@@ -4,7 +4,7 @@ import pytest
 
 import tsrc.cli.push
 import tsrc.git
-import tcommon.gitlab
+import tsrc.gitlab
 
 JOHN = {"name": "John", "id": 42}
 BART = {"name": "Bart", "id": 33}
@@ -26,7 +26,7 @@ def test_create_merge_request(foo_path, tsrc_cli):
     tsrc.git.run_git(foo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(foo_path, "commit", "--message", "new feature", "--allow-empty")
 
-    with mock.patch("tcommon.gitlab") as mock_gitlab:
+    with mock.patch("tsrc.gitlab") as mock_gitlab:
         mock_gitlab.project_name_form_url.return_value = "foo/bar"
         mock_gitlab.get_project_id.return_value = 42
         merge_request_stub = {"web_url": "http://gitlab/mr/42"}
@@ -56,7 +56,7 @@ def test_push_force(foo_path, tsrc_cli):
     tsrc.git.run_git(foo_path, "commit", "--message", "two", "--allow-empty")
     tsrc.git.run_git(foo_path, "push", "origin", "new-feature:new-feature")
     tsrc.git.run_git(foo_path, "reset", "--hard", "HEAD~1")
-    with mock.patch("tcommon.gitlab") as mock_gitlab:
+    with mock.patch("tsrc.gitlab") as mock_gitlab:
         tsrc_cli.run("push", "--force")
 
 
@@ -64,12 +64,12 @@ def test_select_user():
     users = [TIMOTHEE, THEO]
     assert tsrc.cli.push.get_assignee(users, 'tim') == TIMOTHEE
     assert tsrc.cli.push.get_assignee(users, 'theo') == THEO
-    with pytest.raises(tcommon.Error) as e:
+    with pytest.raises(tsrc.Error) as e:
         tsrc.cli.push.get_assignee(users, 't')
     print(e.value.message)
     assert "several" in e.value.message
     users = [JOHN, BART]
-    with pytest.raises(tcommon.Error) as e:
+    with pytest.raises(tsrc.Error) as e:
         tsrc.cli.push.get_assignee(users, 'jhon')
     print(e.value.message)
     assert "Did you mean" in e.value.message

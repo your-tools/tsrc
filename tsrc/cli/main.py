@@ -1,12 +1,15 @@
 """ Main tsrc entry point """
 
 import argparse
+import functools
 import importlib
 import sys
 import textwrap
 
-from tcommon import ui
-import tcommon.cli
+import colored_traceback
+
+import tsrc
+from tsrc import ui
 
 
 def fix_cmd_args_for_foreach(args, foreach_parser):
@@ -51,7 +54,33 @@ def workspace_subparser(subparser, name):
     return parser
 
 
-@tcommon.cli.main_wrapper
+def main_wrapper(main_func):
+    """ Wraps main() entry point to better deal with errors """
+    @functools.wraps(main_func)
+    def wrapped(args=None):
+        colored_traceback.add_hook()
+        try:
+            main_func(args=args)
+        except tsrc.Error as e:
+            # "expected" failure, display it and exit
+            ui.error(e)
+            sys.exit(1)
+        except SystemExit as e:
+            # `ui.fatal()` or `sys.exit()` has been called,
+            # assume message has already been displayed and
+            # exit accordingly
+            sys.exit(e.code)
+        except KeyboardInterrupt:
+            ui.warning("Interrupted by user, quitting")
+            sys.exit(1)
+        except Exception as e:
+            # This is a bug: raise so that colored_traceback prints
+            # an helpful backtrace
+            raise
+    return wrapped
+
+
+@main_wrapper
 def main(args=None):
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="subcommands",

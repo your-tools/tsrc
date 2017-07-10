@@ -4,7 +4,7 @@ import os
 
 import path
 
-import tcommon
+import tsrc
 import tsrc.workspace
 
 
@@ -25,7 +25,7 @@ def find_workspace_path():
 
         else:
             head, tail = os.path.split(head)
-    raise tcommon.Error("Could not find current workspace")
+    raise tsrc.Error("Could not find current workspace")
 
 
 def get_workspace(args):

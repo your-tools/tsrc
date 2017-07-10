@@ -4,7 +4,7 @@ import pytest
 
 import tsrc.cli
 
-from tcommon.test.conftest import *
+from tsrc.test.conftest import *
 
 
 def get_cmd_for_foreach_test(shell=False):

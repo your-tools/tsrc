@@ -9,14 +9,14 @@ import zipfile
 import path
 import requests
 
-import tcommon
-from tcommon import ui
+import tsrc
+from tsrc import ui
 
 GITLAB_URL = "http://10.100.0.1:8000"
 GITLAB_API_URL = GITLAB_URL + "/api/v3"
 
 
-class GitLabError(tcommon.Error):
+class GitLabError(tsrc.Error):
     def __init__(self, message):
         super().__init__(*message)
 

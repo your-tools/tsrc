@@ -20,7 +20,6 @@ import io
 import colorama
 import unidecode
 
-# Global variable to store tcommon.ui configuration
 
 CONFIG = {
     "verbose": os.environ.get("VERBOSE"),

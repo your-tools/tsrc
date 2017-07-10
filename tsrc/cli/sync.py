@@ -2,8 +2,8 @@
 
 import sys
 
-import tcommon
-from tcommon import ui
+import tsrc
+from tsrc import ui
 import tsrc.cli
 
 
@@ -35,7 +35,7 @@ def main(args):
             current_branch = tsrc.git.get_current_branch(full_path)
             tsrc.git.run_git(full_path, "fetch", "--tags", "--prune", "origin")
             tsrc.git.run_git(full_path, "merge", "--ff-only", "@{u}")
-        except tcommon.Error:
+        except tsrc.Error:
             errors.append(src)
         if current_branch and current_branch != expected_branch:
             on_bad_branch.append((src, current_branch))

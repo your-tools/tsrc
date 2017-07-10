@@ -3,7 +3,7 @@ import os
 
 import path
 
-from tcommon import ui
+from tsrc import ui
 import tsrc.workspace
 
 

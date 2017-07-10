@@ -2,7 +2,7 @@
 
 import sys
 
-from tcommon import ui
+from tsrc import ui
 import tsrc.cli
 import tsrc.git
 
