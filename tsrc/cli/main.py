@@ -86,6 +86,8 @@ def main(args=None):
     subparsers = parser.add_subparsers(title="subcommands",
                                        dest="command")
 
+    subparsers.add_parser("version")
+
     foreach_parser = workspace_subparser(subparsers, "foreach")
     foreach_parser.add_argument("cmd", nargs="*")
     foreach_parser.add_argument("-c", dest="shell", action="store_true")
