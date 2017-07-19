@@ -16,12 +16,14 @@ class Manifest():
     def __init__(self):
         self.repos = list()      # repos to clone
         self.copyfiles = list()  # files to copy
+        self.gitlab = dict()
 
     def load(self, contents):
-        self.repos = list()
         self.copyfiles = list()
-        parsed = ruamel.yaml.safe_load(contents) or list()
-        for repo in parsed:
+        parsed = ruamel.yaml.safe_load(contents) or dict()
+        self.gitlab = parsed.get("gitlab")
+        repos = parsed.get("repos") or list()
+        for repo in repos:
             repo_url = repo["url"]
             repo_src = repo["src"]
             self.repos.append((repo_src, repo_url))

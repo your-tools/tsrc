@@ -7,19 +7,21 @@ import pytest
 
 def test_load():
     contents = """
-# Manifest
-- src: foo
-  url: git@example.com:foo.git
+gitlab:
+  url: http://gitlab.example.com
+repos:
+  - src: foo
+    url: git@example.com:foo.git
 
-- src: master
-  url: git@example.com:master.git
-  copy:
-    - src: top.cmake
-      dest: CMakeLists.txt
-
+  - src: master
+    url: git@example.com:master.git
+    copy:
+      - src: top.cmake
+        dest: CMakeLists.txt
 """
     manifest = tsrc.manifest.Manifest()
     manifest.load(contents)
+    assert manifest.gitlab["url"] == "http://gitlab.example.com"
     assert manifest.repos == [
         ("foo", "git@example.com:foo.git"),
         ("master", "git@example.com:master.git")
@@ -31,12 +33,12 @@ def test_load():
 
 def test_find():
     contents = """
-# Manifest
-- src: foo
-  url: git@example.com:proj_one/foo
+repos:
+  - src: foo
+    url: git@example.com:proj_one/foo
 
-- src: bar
-  url: git@example.com:proj_two/bar
+  - src: bar
+    url: git@example.com:proj_two/bar
 """
     manifest = tsrc.manifest.Manifest()
     manifest.load(contents)

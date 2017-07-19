@@ -85,7 +85,7 @@ class GitServer():
     def add_repo(self, repo_path):
         repo_url = self._add_repo(repo_path)
         data = self.get_manifest_data()
-        data.append(
+        data["repos"].append(
             {
                 "url": repo_url,
                 "src": repo_path,
@@ -106,7 +106,14 @@ class GitServer():
                          "origin", "--set-upstream", current_branch)
 
     def get_manifest_data(self):
-        return ruamel.yaml.safe_load(self.manifest_file_path.text()) or list()
+        empty_manifest = {"repos": list()}
+        return ruamel.yaml.safe_load(self.manifest_file_path.text()) or empty_manifest
+
+    def configure_gitlab(self, *, url):
+        data = self.get_manifest_data()
+        data["gitlab"] = dict()
+        data["gitlab"]["url"] = url
+        self.push_manifest(data=data, message="Add gitlab URL")
 
     def push_file(self, repo_path, file_path, *,
                   contents=None, message=None):
@@ -141,6 +148,16 @@ class GitServer():
         tsrc.git.run_git(src_path, "push", "--no-verify",
                          "origin", "--set-upstream", new_branch)
 
+    def change_repo_url(self, repo_path, new_url):
+        manifest_data = self.get_manifest_data()
+        for repo in manifest_data["repos"]:
+            if repo["src"] == repo_path:
+                repo["url"] = new_url
+                break
+        else:
+            assert False, "repo '%s' not found in manifest" % repo_path
+        self.push_manifest(data=manifest_data, message="change foo url")
+
     def delete_branch(self, repo_path, branch):
         src_path = self.tmpdir.joinpath("src", repo_path)
         tsrc.git.run_git(src_path, "push", "origin", "--delete", branch)
@@ -152,7 +169,7 @@ class GitServer():
         manifest_data = self.get_manifest_data()
         copy_dict = ({"src": src_cpy, "dest": dest})
         found = False
-        for repo in manifest_data:
+        for repo in manifest_data["repos"]:
             if repo["src"] == src_repo:
                 found = True
                 if "copy" in repo:

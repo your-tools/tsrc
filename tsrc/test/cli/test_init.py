@@ -46,10 +46,8 @@ def test_init_maint_branch(tsrc_cli, git_server, workspace_path):
 def test_change_remote(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
-    manifest_data = git_server.get_manifest_data()
-    new_url = "git@example.com:foo"
-    manifest_data[0]["url"] = new_url
-    git_server.push_manifest(data=manifest_data, message="change foo url")
+    new_url = "git@example.com/foo"
+    git_server.change_repo_url("foo", new_url)
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path.joinpath("foo")
     _, actual_url = tsrc.git.run_git(foo_path, "remote", "get-url", "origin", raises=False)
