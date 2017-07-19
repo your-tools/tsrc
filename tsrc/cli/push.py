@@ -1,5 +1,6 @@
 """ Entry point for tsrc push """
 
+import netrc
 import unidecode
 
 from tsrc import ui
@@ -9,6 +10,12 @@ import tsrc.cli
 
 
 WIP_PREFIX = "WIP: "
+
+
+def get_token():
+    netrc_parser = netrc.netrc()
+    unused_login, unused_account, password = netrc_parser.authenticators("gitlab")
+    return password
 
 
 def get_project_name(repo_path):
@@ -54,18 +61,6 @@ def get_assignee(users, pattern):
         return matches[0]
 
 
-def ensure_merge_request(project_id, source_branch, target_branch):
-    merge_request = tsrc.gitlab.find_opened_merge_request(project_id, source_branch)
-    if merge_request:
-        ui.info_2("Found existing merge request: !%s" % merge_request["iid"])
-        return merge_request
-    else:
-        res = tsrc.gitlab.create_merge_request(project_id, source_branch,
-                                               title=source_branch,
-                                               target_branch=target_branch)
-        return res
-
-
 def wipify(title):
     if not title.startswith(WIP_PREFIX):
         return WIP_PREFIX + title
@@ -76,63 +71,97 @@ def unwipify(title):
         return title[len(WIP_PREFIX):]
 
 
-def handle_title(args, merge_request):
-    # If set from command line: use it
-    if args.mr_title:
-        return args.mr_title
-    else:
-        # Change the title if we need to
-        title = merge_request["title"]
-        if args.ready:
-            return unwipify(title)
-        if args.wip:
-            return wipify(title)
+class PushAction():
+    def __init__(self, args, gl_helper=None):
+        self.args = args
+        self.gl_helper = gl_helper
+        self.source_branch = None
+        self.target_branch = None
+        self.project_id = None
+        self.project_name = None
+        self.repo_path = None
+        self.source_branch = None
+        self.target_branch = None
 
+    def main(self):
+        self.prepare()
+        self.push()
+        self.handle_merge_request()
 
-def handle_merge_request(args, repo_path, current_branch):
-    source_branch = current_branch
-    target_branch = args.target_branch
-    project_name = get_project_name(repo_path)
-    project_id = tsrc.gitlab.get_project_id(project_name)
+    def prepare(self):
+        if not self.gl_helper:
+            workspace = tsrc.cli.get_workspace(self.args)
+            gitlab_url = workspace.get_gitlab_url()
+            token = get_token()
+            self.gl_helper = tsrc.gitlab.GitlabHelper(gitlab_url, token)
 
-    active_users = tsrc.gitlab.get_active_users()
-    assignee = None
-    if args.assignee:
-        assignee = get_assignee(active_users, args.assignee)
+        self.repo_path = tsrc.git.get_repo_root()
+        self.project_name = get_project_name(self.repo_path)
+        self.project_id = self.gl_helper.get_project_id(self.project_name)
 
-    merge_request = ensure_merge_request(project_id, source_branch=source_branch,
-                                         target_branch=args.target_branch)
+        current_branch = tsrc.git.get_current_branch(self.repo_path)
+        self.source_branch = current_branch
+        self.target_branch = self.args.target_branch
 
-    title = handle_title(args, merge_request)
-    params = {
-        "title": title,
-        "target_branch": target_branch,
-        "remove_source_branch": True,
-    }
-    if assignee:
-        params["assignee_id"] = assignee["id"]
+    def push(self):
+        ui.info_2("Running git push")
+        cmd = ["push", "-u", "origin", "%s:%s" % (self.source_branch, self.source_branch)]
+        if self.args.force:
+            cmd.append("--force")
+        tsrc.git.run_git(self.repo_path, *cmd)
 
-    tsrc.gitlab.update_merge_request(merge_request, **params)
+    def handle_merge_request(self):
+        active_users = self.gl_helper.get_active_users()
+        assignee = None
+        if self.args.assignee:
+            assignee = get_assignee(active_users, self.args.assignee)
+            ui.info_2("Assigning to", assignee["name"])
 
-    if args.accept:
-        tsrc.gitlab.accept_merge_request(merge_request)
+        merge_request = self.ensure_merge_request()
 
-    ui.info(ui.green, "::",
-            ui.reset, "See merge request at", merge_request["web_url"])
+        title = self.handle_title(merge_request)
 
+        params = {
+            "title": title,
+            "target_branch": self.target_branch,
+            "remove_source_branch": True,
+        }
+        if assignee:
+            params["assignee_id"] = assignee["id"]
 
-def push(args, repo_path, branch):
-    ui.info_2("Running git push")
-    cmd = ["push", "-u", "origin", "%s:%s" % (branch, branch)]
-    if args.force:
-        cmd.append("--force")
-    tsrc.git.run_git(repo_path, *cmd)
+        self.gl_helper.update_merge_request(merge_request, **params)
+
+        if self.args.accept:
+            self.gl_helper.accept_merge_request(merge_request)
+
+        ui.info(ui.green, "::",
+                ui.reset, "See merge request at", merge_request["web_url"])
+
+    def handle_title(self, merge_request):
+        # If set from command line: use it
+        if self.args.mr_title:
+            return self.args.mr_title
+        else:
+            # Change the title if we need to
+            title = merge_request["title"]
+            if self.args.ready:
+                return unwipify(title)
+            if self.args.wip:
+                return wipify(title)
+
+    def ensure_merge_request(self):
+        merge_request = self.gl_helper.find_opened_merge_request(self.project_id,
+                                                                 self.source_branch)
+        if merge_request:
+            ui.info_2("Found existing merge request: !%s" % merge_request["iid"])
+            return merge_request
+        else:
+            res = self.gl_helper.create_merge_request(self.project_id, self.source_branch,
+                                                      title=self.source_branch,
+                                                      target_branch=self.target_branch)
+            return res
 
 
 def main(args):
-    repo_path = tsrc.git.get_repo_root()
-
-    current_branch = tsrc.git.get_current_branch(repo_path)
-
-    push(args, repo_path, current_branch)
-    handle_merge_request(args, repo_path, current_branch)
+    push_action = PushAction(args)
+    push_action.main()

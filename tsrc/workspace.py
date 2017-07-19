@@ -30,6 +30,16 @@ class Workspace():
         manifest.load(manifest_yml_path.text())
         return manifest
 
+    def get_gitlab_url(self):
+        manifest = self.load_manifest()
+        gitlab_config = manifest.gitlab
+        if not gitlab_config:
+            raise tsrc.Error("No gitlab configuration found in manifest")
+        res = gitlab_config.get("url")
+        if not res:
+            raise tsrc.Error("Missing 'url' in gitlab configuration")
+        return res
+
     def init_manifest(self, manifest_url, *, branch="master", tag=None):
         if self.manifest_clone_path.exists():
             ui.warning("Re-initializing worktree")
