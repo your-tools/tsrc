@@ -76,44 +76,6 @@ def get_project_id(project_name):
     return res["id"]
 
 
-def extract_latest_artifact(project_name, job_name, dest_path, *, ref="master"):
-    """ Get the last successful  artifact from the given project
-    and extract it.
-
-    It's always a .zip archive named 'artifact'
-    Note: all the files in bin/ will have exec permission
-    """
-    http_response = make_artifact_download_request(project_name, job_name, ref=ref)
-    ui.info_2("Downloading", http_response.url)
-    extract_artifact(http_response, dest_path)
-
-
-def make_artifact_download_request(project_name, job_name, ref="master"):
-    ui.info_1("Looking for latest artifact for", project_name, "on", ref)
-    project_id = get_project_id(project_name)
-    url = "/projects/%i/jobs/artifacts/%s/download" % (project_id, ref)
-    return make_request("GET", url, params={"job": job_name}, stream=True)
-
-
-def extract_artifact(http_response, dest_path):
-    output = dest_path.joinpath("artifact.zip")
-    with output.open("wb") as fp:
-        shutil.copyfileobj(http_response.raw, fp)
-    archive = zipfile.ZipFile(output)
-    for member in archive.infolist():
-        if member.filename.endswith("/"):
-            continue
-        member_path = path.Path(member.filename)
-        dirname = member_path.dirname()
-        basename = member_path.basename()
-        dest_path.joinpath(dirname).makedirs_p()
-        dest = dest_path.joinpath(dirname, basename)
-        data = archive.read(member)
-        ui.info_2("x", dest)
-        with dest.open("wb") as fp:
-            fp.write(data)
-        if dirname.name == "bin":
-            os.chmod(dest, 0o10755)
 
 
 def find_opened_merge_request(project_id, source_branch):
