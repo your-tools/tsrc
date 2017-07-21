@@ -1,0 +1,3 @@
+[run]
+source = tsrc
+omit = tsrc/test/*,setup.py
