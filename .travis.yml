@@ -9,4 +9,4 @@ install:
 
 script:
   - ci/lint.sh
-  - pytest
+  - pytest --cov . --cov-report term
