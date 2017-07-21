@@ -64,7 +64,10 @@ class GitLabHelper():
 
     def get_project_id(self, project_name):
         encoded_project_name = urllib.parse.quote(project_name, safe=list())
-        res = self.make_request("GET", "/projects/%s" % encoded_project_name)
+        try:
+            res = self.make_request("GET", "/projects/%s" % encoded_project_name)
+        except GitLabError:
+            raise GitLabError("Could not find", project_name) from None
         return res["id"]
 
     def find_opened_merge_request(self, project_id, source_branch):
