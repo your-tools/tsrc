@@ -1,6 +1,7 @@
 """ Entry point for tsrc push """
 
 import netrc
+import re
 import unidecode
 
 from tsrc import ui
@@ -31,7 +32,9 @@ def project_name_from_url(url):
     >>> project_name_from_url(git@example.com:foo/bar.git)
     'foo/bar'
     """
-    return "/".join(url.split("/")[-2:]).replace(".git", "")
+    exploded = re.split("[:/]", url)
+    res = "/".join(exploded[-2:])
+    return res.replace(".git", "")
 
 
 def get_assignee(users, pattern):
