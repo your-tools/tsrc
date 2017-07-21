@@ -8,7 +8,8 @@ from tsrc import ui
 import tsrc.git
 
 
-def main(unused_args):
+# pylint: disable=unused-argument
+def main(args):
     tsrc_distribution = pkg_resources.get_distribution("tsrc")
     # pylint: disable=no-member
     version = tsrc_distribution.version
