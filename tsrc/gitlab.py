@@ -46,7 +46,7 @@ def _handle_stream_errors(response):
         raise GitLabError("Incorrect status code:", response.status_code)
 
 
-class GitlabHelper():
+class GitLabHelper():
     def __init__(self, gitlab_url, token):
         self.gitlab_api_url = gitlab_url + "/api/" + GITLAB_API_VERSION
         self.token = token
