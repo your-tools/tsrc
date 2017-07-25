@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+
+install:
+  - pip install .
+  - pip install -r dev-requirements.txt
+
+script:
+  - ci/lint.sh
+  - pytest --cov . --cov-report term

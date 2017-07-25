@@ -1,0 +1,4 @@
+gitlab:
+  http: http://gitlab.local
+  ssh: git@gitlab.local
+  project: foo

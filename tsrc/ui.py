@@ -264,6 +264,11 @@ def info_3(*tokens, **kwargs):
     info(bold, blue, "*", reset, *tokens, **kwargs)
 
 
+def dot(*, last=False):
+    end = "\n" if last else ""
+    info(".", end=end, flush=True)
+
+
 def info_count(i, n, *rest, **kwargs):
     """ Same as info, but displays a nice counter
     color will be reset
