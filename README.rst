@@ -6,7 +6,7 @@ Manage multiple git repos.
 Tutorial
 ---------
 
-* Install ``tsrc`` with ``pip install tsrc```
+* Install ``tsrc`` with ``pip install tsrc``
 
 * Create a *manifest* repository. (``git@example.org/manifest``)
 
@@ -15,14 +15,15 @@ Tutorial
 .. code-block:: yaml
 
 
-    - src: foo
-      url: git@example.com/foo.git
+    repos:
+      - src: foo
+        url: git@example.com/foo.git
 
-    - src: bar
-      url: git@example.com/bar.git
-      copy:
-        - src: bar.txt
-          dest: top.txt
+      - src: bar
+        url: git@example.com/bar.git
+        copy:
+          - src: bar.txt
+            dest: top.txt
 
 
 * Clone the repositories with:
