@@ -46,7 +46,7 @@ def push_args():
 
 @pytest.fixture
 def gitlab_mock():
-    gl_mock = mock.create_autospec(tsrc.gitlab.GitlabHelper, instance=True)
+    gl_mock = mock.create_autospec(tsrc.gitlab.GitLabHelper, instance=True)
     gl_mock.get_active_users.return_value = [JOHN, BART, TIMOTHEE, THEO]
     gl_mock.get_project_id = lambda x: PROJECT_IDS[x]
     return gl_mock

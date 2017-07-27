@@ -53,7 +53,7 @@ Pros:
 * Uses mostly 'porcelain' commands from git, instead of relying on plumbings
   internals
 * Nicer output
-* `Gitlab` support
+* `GitLab` support
 
 
 Missing features: (May be implemented in the future)

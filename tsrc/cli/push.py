@@ -93,7 +93,7 @@ class PushAction():
             workspace = tsrc.cli.get_workspace(self.args)
             gitlab_url = workspace.get_gitlab_url()
             token = get_token()
-            self.gl_helper = tsrc.gitlab.GitlabHelper(gitlab_url, token)
+            self.gl_helper = tsrc.gitlab.GitLabHelper(gitlab_url, token)
 
         self.repo_path = tsrc.git.get_repo_root()
         self.project_name = get_project_name(self.repo_path)
