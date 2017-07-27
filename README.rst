@@ -1,6 +1,9 @@
 tsrc
 ====
 
+.. image:: https://travis-ci.org/TankerApp/tsrc.svg?branch=master
+  :target: https://travis-ci.org/TankerApp/tsrc
+
 Manage multiple git repos.
 
 Tutorial
