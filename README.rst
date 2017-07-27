@@ -38,7 +38,7 @@ In this example:
 
 * ``foo`` will be cloned in ``<workspace>/foo``
 * ``bar`` will be cloned in ``<workspace>/bar``
-* The file ``bar.txt`` will be cloned from the ``bar`` repository at the
+* The file ``bar.txt`` will be copied from the ``bar`` repository to the
   top of the workspace, in ``<workspace>/top.txt``
 
 
