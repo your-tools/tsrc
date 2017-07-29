@@ -9,6 +9,10 @@ Manage multiple git repos.
 Tutorial
 ---------
 
+Getting started
++++++++++++++++
+
+
 * Install ``tsrc`` with ``pip install tsrc``
 
 * Create a *manifest* repository. (``git@example.org/manifest``)
@@ -45,22 +49,63 @@ In this example:
 * The file ``bar.txt`` will be copied from the ``bar`` repository to the
   top of the workspace, in ``<workspace>/top.txt``
 
+Managing Merge Requests
++++++++++++++++++++++++
+
+* Generate a token from GitLab
+
+* Add the *http* url to the manifest:
+
+.. code-block:: yaml
+
+    gitlab:
+      url: http://gitlab.local
+
+* Create a ``~/.netrc``` looking like:
+
+.. code-block:: text
+
+    machine gitlab login <login> password <token>
+
+* Make sure file is only readable by your user:
+
+.. code-block:: text
+
+    chmod 600 ~/.netrc
+
+
+
+* Start working on your branch
+
+* Create the pull request
+
+.. code-block:: console
+
+    $ tsrc push --assignee <an octive user>
+
+* When the review is done, tell GitLab to merge it once the CI passes
+
+.. code-block:: console
+
+    $ tsrc push --accept
+
 
 Differences with google repo
 -----------------------------
 
 Pros:
 
+* GitLab support
 * Nicer output
-* **GitLab** support
 * Uses mostly 'porcelain' commands from git, instead of relying on plumbings
   internals
 * Comprehensive test suite
 * Uses PEP8 coding style
 * Written in Python 3, not Python 2
 
-
 Missing features: (May be implemented in the future)
 
-* No ``-j`` option
-* No support for ``gerrit`` or ``github``
+* Cloning a specific branch, revision or tag
+* Cloning several repositories in parallel ``-j`` option
+* Cloning just one or several groups of repositories
+* Support for other hosting services such as ``gerrit`` or ``github``
