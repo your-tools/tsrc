@@ -46,12 +46,11 @@ def test_init_maint_branch(tsrc_cli, git_server, workspace_path):
 def test_change_remote(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
-    new_url = "git@example.com/foo"
-    git_server.change_repo_url("foo", new_url)
+    git_server.rename_repo("foo", "bar")
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path.joinpath("foo")
     _, actual_url = tsrc.git.run_git(foo_path, "remote", "get-url", "origin", raises=False)
-    assert actual_url == new_url
+    assert "bar.git" in actual_url
 
 
 def test_copy_files(tsrc_cli, git_server, workspace_path):

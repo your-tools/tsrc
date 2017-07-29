@@ -135,3 +135,7 @@ class Workspace():
         """ Return the url of the project in `src` """
         manifest = self.load_manifest()
         return manifest.get_url(src)
+
+    def get_clone_prefix(self):
+        manifest = self.load_manifest()
+        return manifest.clone_prefix
