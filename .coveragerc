@@ -1,3 +1,4 @@
 [run]
 source = tsrc
 omit = tsrc/test/*
+branch = True
