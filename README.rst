@@ -50,13 +50,13 @@ Differences with google repo
 
 Pros:
 
-* Written in Python3, not Python2
-* Uses PEP8 coding style
-* Comprehensive test suite
-* Uses mostly 'porcelain' commands from git, instead of relying on plumbings
-  internals
 * Nicer output
 * `GitLab` support
+* Uses mostly 'porcelain' commands from git, instead of relying on plumbings
+  internals
+* Comprehensive test suite
+* Uses PEP8 coding style
+* Written in Python 3, not Python 2
 
 
 Missing features: (May be implemented in the future)
