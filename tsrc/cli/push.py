@@ -20,7 +20,7 @@ def get_token():
 def get_project_name(*, url, prefix):
     if not url.startswith(prefix):
         message = "Could not get project name name.\n"
-        message += "(prefix: %s, url: %s) " % (prefix, url)
+        message += "(Expecting: '%s' to start with '%s') " % (prefix, url)
         raise tsrc.Error(message)
     res = url[len(prefix):]
     if res.endswith(".git"):
