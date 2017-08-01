@@ -1,5 +1,6 @@
 """ Entry point for tsrc push """
 
+import re
 import unidecode
 
 from tsrc import ui
@@ -27,10 +28,19 @@ def get_project_name(repo_path):
 
 def project_name_from_url(url):
     """
-    >>> project_name_from_url(git@example.com:foo/bar.git)
+    >>> project_name_from_url('git@example.com:foo/bar.git')
+    'foo/bar'
+    >>> project_name_from_url('ssh://git@example.com:8022/foo/bar.git')
     'foo/bar'
     """
-    return "/".join(url.split("/")[-2:]).replace(".git", "")
+    # split everthing that is separated by a colon or a slash
+    parts = re.split("[:/]", url)
+    # join the last two parts
+    res = "/".join(parts[-2:])
+    # remove last `.git`
+    if res.endswith(".git"):
+        res = res[:-4]
+    return res
 
 
 def get_assignee(users, pattern):
