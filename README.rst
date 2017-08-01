@@ -61,18 +61,13 @@ Managing Merge Requests
     gitlab:
       url: http://gitlab.local
 
-* Create a ``~/.netrc``` looking like:
+* Create a ``~/.config/tsrc.yml``` looking like:
 
 .. code-block:: text
 
-    machine gitlab login <login> password <token>
-
-* Make sure file is only readable by your user:
-
-.. code-block:: text
-
-    chmod 600 ~/.netrc
-
+    auth:
+      gitlab:
+        token: <YOUR TOKEN>
 
 
 * Start working on your branch
