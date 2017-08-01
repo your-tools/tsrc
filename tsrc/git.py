@@ -81,6 +81,14 @@ def get_current_ref(working_path):
     return output
 
 
+def get_origin_url(working_path):
+    cmd = ("remote", "get-url", "origin")
+    status, output = run_git(working_path, *cmd, raises=False)
+    if status != 0:
+        raise GitCommandError(working_path, cmd, output=output)
+    return output
+
+
 def get_repo_root():
     working_path = path.Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")

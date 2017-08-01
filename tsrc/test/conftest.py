@@ -50,6 +50,7 @@ class GitServer():
         self.tmpdir = tmpdir
         self.manifest_repo = None
         self.manifest_url = None
+        self.clone_prefix = None
         self.init_manifest()
 
     @property
@@ -65,6 +66,11 @@ class GitServer():
                          "Add an empty manifest")
         tsrc.git.run_git(self.manifest_repo,
                          "push", "origin", "master")
+        data = dict()
+        self.clone_prefix = str(self.tmpdir.joinpath("srv")) + "/"
+        data["clone_prefix"] = self.clone_prefix
+        data["repos"] = list()
+        self.push_manifest(data=data, message="init manifest")
 
     def _add_repo(self, repo_path):
         bare_path = self.tmpdir.joinpath("srv", repo_path + ".git")
@@ -87,7 +93,7 @@ class GitServer():
         data = self.get_manifest_data()
         data["repos"].append(
             {
-                "url": repo_url,
+                "name": repo_path,
                 "src": repo_path,
             }
         )
@@ -106,8 +112,7 @@ class GitServer():
                          "origin", "--set-upstream", current_branch)
 
     def get_manifest_data(self):
-        empty_manifest = {"repos": list()}
-        return ruamel.yaml.safe_load(self.manifest_file_path.text()) or empty_manifest
+        return ruamel.yaml.safe_load(self.manifest_file_path.text())
 
     def configure_gitlab(self, *, url):
         data = self.get_manifest_data()
@@ -148,15 +153,16 @@ class GitServer():
         tsrc.git.run_git(src_path, "push", "--no-verify",
                          "origin", "--set-upstream", new_branch)
 
-    def change_repo_url(self, repo_path, new_url):
+    def rename_repo(self, old_name, new_name):
         manifest_data = self.get_manifest_data()
         for repo in manifest_data["repos"]:
-            if repo["src"] == repo_path:
-                repo["url"] = new_url
+            if repo["name"] == old_name:
+                repo["name"] = new_name
                 break
         else:
             assert False, "repo '%s' not found in manifest" % repo_path
-        self.push_manifest(data=manifest_data, message="change foo url")
+        message = "rename %s -> %s" % (old_name, new_name)
+        self.push_manifest(data=manifest_data, message=message)
 
     def delete_branch(self, repo_path, branch):
         src_path = self.tmpdir.joinpath("src", repo_path)

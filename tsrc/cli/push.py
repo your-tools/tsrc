@@ -1,9 +1,9 @@
 """ Entry point for tsrc push """
 
-import netrc
 import unidecode
 
 from tsrc import ui
+import tsrc.config
 import tsrc.gitlab
 import tsrc.git
 import tsrc.cli
@@ -13,25 +13,18 @@ WIP_PREFIX = "WIP: "
 
 
 def get_token():
-    netrc_parser = netrc.netrc()
-    unused_login, unused_account, password = netrc_parser.authenticators("gitlab")
-    return password
+    config = tsrc.config.read()
+    return config["auth"]["gitlab"]["token"]
 
 
-def get_project_name(repo_path):
-    rc, out = tsrc.git.run_git(repo_path, "remote", "get-url", "origin", raises=False)
-    if rc != 0:
-        ui.fatal("Could not get url of 'origin' remote:", out)
-    repo_url = out
-    return project_name_from_url(repo_url)
-
-
-def project_name_from_url(url):
-    """
-    >>> project_name_from_url(git@example.com:foo/bar.git)
-    'foo/bar'
-    """
-    return "/".join(url.split("/")[-2:]).replace(".git", "")
+def get_project_name(*, url, prefix):
+    if not url.startswith(prefix):
+        message = "Could not get project name name.\n"
+        message += "(Expecting: '%s' to start with '%s') " % (prefix, url)
+        raise tsrc.Error(message)
+    res = url[len(prefix):]
+    if res.endswith(".git"):
+        return res[:-4]
 
 
 def get_assignee(users, pattern):
@@ -89,14 +82,17 @@ class PushAction():
         self.handle_merge_request()
 
     def prepare(self):
+        workspace = tsrc.cli.get_workspace(self.args)
+        gitlab_url = workspace.get_gitlab_url()
+        clone_prefix = workspace.get_clone_prefix()
+
         if not self.gl_helper:
-            workspace = tsrc.cli.get_workspace(self.args)
-            gitlab_url = workspace.get_gitlab_url()
             token = get_token()
             self.gl_helper = tsrc.gitlab.GitLabHelper(gitlab_url, token)
 
         self.repo_path = tsrc.git.get_repo_root()
-        self.project_name = get_project_name(self.repo_path)
+        project_url = tsrc.git.get_origin_url(self.repo_path)
+        self.project_name = get_project_name(url=project_url, prefix=clone_prefix)
         self.project_id = self.gl_helper.get_project_id(self.project_name)
 
         current_branch = tsrc.git.get_current_branch(self.repo_path)

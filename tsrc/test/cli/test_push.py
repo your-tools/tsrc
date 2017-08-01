@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 
 import tsrc.cli.push
+from tsrc.cli.push import get_project_name
 import tsrc.git
 import tsrc.gitlab
 
@@ -41,6 +42,7 @@ def push_args():
     args.force = False
     args.ready = None
     args.wip = None
+    args.workspace_path = None
     return args
 
 
@@ -50,6 +52,11 @@ def gitlab_mock():
     gl_mock.get_active_users.return_value = [JOHN, BART, TIMOTHEE, THEO]
     gl_mock.get_project_id = lambda x: PROJECT_IDS[x]
     return gl_mock
+
+
+def test_get_project_name():
+    clone_prefix = 'git@example.com:'
+    assert get_project_name(url='git@example.com:foo/bar.git', prefix=clone_prefix) == "foo/bar"
 
 
 def test_creating_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):

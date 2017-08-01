@@ -19,6 +19,7 @@ setup(name="tsrc",
         "requests",
         "ruamel.yaml",
         "unidecode",
+        "xdg",
       ],
       entry_points={
         "console_scripts": [

@@ -44,6 +44,14 @@ def test_can_configure_gitlab(tmp_path, git_server):
     assert manifest.gitlab["url"] == test_url
 
 
+def test_change_repo_name(workspace_path, git_server):
+    git_server.add_repo("proj1/foo")
+    git_server.rename_repo("proj1/foo", "proj2/foo")
+    manifest = read_remote_manifest(workspace_path, git_server)
+    name, url = manifest.repos[0]
+    assert url.endswith("proj2/foo.git")
+
+
 def test_git_server_add_repo_updates_manifest(workspace_path, git_server):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
