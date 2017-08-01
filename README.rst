@@ -6,8 +6,17 @@ tsrc
 
 Manage multiple git repos.
 
+Demo
+----
+
+`tsrc demo on asciinema.org <https://asciinema.org/a/131625>`_
+
 Tutorial
 ---------
+
+Getting started
++++++++++++++++
+
 
 * Install ``tsrc`` with ``pip install tsrc``
 
@@ -24,9 +33,6 @@ Tutorial
 
       - src: bar
         url: git@example.com/bar.git
-        copy:
-          - src: bar.txt
-            dest: top.txt
 
 
 * Clone the repositories with:
@@ -39,10 +45,43 @@ Tutorial
 
 In this example:
 
-* ``foo`` will be cloned in ``<workspace>/foo``
-* ``bar`` will be cloned in ``<workspace>/bar``
-* The file ``bar.txt`` will be copied from the ``bar`` repository to the
-  top of the workspace, in ``<workspace>/top.txt``
+* ``foo`` will be cloned in ``<workspace>/foo`` using ``git@example.com:foo.git`` origin url.
+* Similarly, ``bar`` will be cloned in ``<workspace>/bar`` using ``git@example.com/bar.git``
+
+Managing Merge Requests
++++++++++++++++++++++++
+
+* Generate a token from GitLab
+
+* Add the *http* url to the manifest:
+
+.. code-block:: yaml
+
+    gitlab:
+      url: http://gitlab.local
+
+* Create a ``~/.config/tsrc.yml`` looking like:
+
+.. code-block:: text
+
+    auth:
+      gitlab:
+        token: <YOUR TOKEN>
+
+
+* Start working on your branch
+
+* Create the pull request
+
+.. code-block:: console
+
+    $ tsrc push --assignee <an octive user>
+
+* When the review is done, tell GitLab to merge it once the CI passes
+
+.. code-block:: console
+
+    $ tsrc push --accept
 
 
 Differences with google repo
@@ -50,16 +89,17 @@ Differences with google repo
 
 Pros:
 
+* **GitLab** support
 * Nicer output
-* `GitLab` support
 * Uses mostly 'porcelain' commands from git, instead of relying on plumbings
   internals
 * Comprehensive test suite
 * Uses PEP8 coding style
 * Written in Python 3, not Python 2
 
-
 Missing features: (May be implemented in the future)
 
-* No ``-j`` option
-* No support for ``gerrit``
+* Cloning a specific branch, revision or tag
+* Cloning several repositories in parallel
+* Cloning just one or several groups of repositories
+* Support for other hosting services such as ``gerrit`` or ``github``

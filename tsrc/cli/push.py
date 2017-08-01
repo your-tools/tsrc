@@ -1,9 +1,10 @@
 """ Entry point for tsrc push """
 
-import netrc
+import re
 import unidecode
 
 from tsrc import ui
+import tsrc.config
 import tsrc.gitlab
 import tsrc.git
 import tsrc.cli
@@ -13,9 +14,8 @@ WIP_PREFIX = "WIP: "
 
 
 def get_token():
-    netrc_parser = netrc.netrc()
-    unused_login, unused_account, password = netrc_parser.authenticators("gitlab")
-    return password
+    config = tsrc.config.read()
+    return config["auth"]["gitlab"]["token"]
 
 
 def get_project_name(repo_path):
@@ -28,10 +28,19 @@ def get_project_name(repo_path):
 
 def project_name_from_url(url):
     """
-    >>> project_name_from_url(git@example.com:foo/bar.git)
+    >>> project_name_from_url('git@example.com:foo/bar.git')
+    'foo/bar'
+    >>> project_name_from_url('ssh://git@example.com:8022/foo/bar.git')
     'foo/bar'
     """
-    return "/".join(url.split("/")[-2:]).replace(".git", "")
+    # split everthing that is separated by a colon or a slash
+    parts = re.split("[:/]", url)
+    # join the last two parts
+    res = "/".join(parts[-2:])
+    # remove last `.git`
+    if res.endswith(".git"):
+        res = res[:-4]
+    return res
 
 
 def get_assignee(users, pattern):
