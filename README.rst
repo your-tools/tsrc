@@ -24,9 +24,7 @@ Getting started
 
 * Create a *manifest* repository. (``git@example.org/manifest``)
 
-* Push a file named ``manifest.yml`` looking like:
-
-.. code-block:: yaml
+* Push a file named ``manifest.yml`` looking like::
 
 
     repos:
@@ -37,9 +35,8 @@ Getting started
         url: git@example.com/bar.git
 
 
-* Clone the repositories with:
+* Clone the repositories with::
 
-.. code-block:: console
 
     $ mkdir workspace
     $ cd workspace
@@ -55,16 +52,12 @@ Managing Merge Requests
 
 * Generate a token from GitLab
 
-* Add the *http* url to the manifest:
-
-.. code-block:: yaml
+* Add the *http* url to the manifest::
 
     gitlab:
       url: http://gitlab.local
 
-* Create a ``~/.config/tsrc.yml`` looking like:
-
-.. code-block:: text
+* Create a ``~/.config/tsrc.yml`` looking like::
 
     auth:
       gitlab:
@@ -73,15 +66,11 @@ Managing Merge Requests
 
 * Start working on your branch
 
-* Create the pull request
-
-.. code-block:: console
+* Create the pull request::
 
     $ tsrc push --assignee <an octive user>
 
-* When the review is done, tell GitLab to merge it once the CI passes
-
-.. code-block:: console
+* When the review is done, tell GitLab to merge it once the CI passes::
 
     $ tsrc push --accept
 
