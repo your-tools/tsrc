@@ -3,6 +3,8 @@ tsrc
 
 .. image:: https://travis-ci.org/TankerApp/tsrc.svg?branch=master
   :target: https://travis-ci.org/TankerApp/tsrc
+.. image:: http://img.shields.io/pypi/v/tsrc.png
+  :target: https://pypi.python.org/pypi/tsrc
 
 Manage multiple git repos.
 
