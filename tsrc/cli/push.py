@@ -1,9 +1,9 @@
 """ Entry point for tsrc push """
 
-import netrc
 import unidecode
 
 from tsrc import ui
+import tsrc.config
 import tsrc.gitlab
 import tsrc.git
 import tsrc.cli
@@ -13,9 +13,8 @@ WIP_PREFIX = "WIP: "
 
 
 def get_token():
-    netrc_parser = netrc.netrc()
-    unused_login, unused_account, password = netrc_parser.authenticators("gitlab")
-    return password
+    config = tsrc.config.read()
+    return config["auth"]["gitlab"]["token"]
 
 
 def get_project_name(*, url, prefix):
