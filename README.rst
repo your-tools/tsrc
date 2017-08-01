@@ -6,6 +6,11 @@ tsrc
 
 Manage multiple git repos.
 
+Demo
+----
+
+`tsrc demo on asciinema.org <https://asciinema.org/a/131625>`_
+
 Tutorial
 ---------
 
