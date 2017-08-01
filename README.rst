@@ -44,7 +44,7 @@ Getting started
 
 In this example:
 
-* ``foo`` will be cloned in ``<workspace>/foo`` using ``git@example.co:proj1/foo.git`` origin url.
+* ``foo`` will be cloned in ``<workspace>/foo`` using ``git@example.com:proj1/foo.git`` origin url.
 * Similarly, ``bar`` will be cloned in ``<workspace>/bar`` using ``git@example.com:proj2/bar.git``
 * The file ``bar.txt`` will be copied from the ``bar`` repository to the
   top of the workspace, in ``<workspace>/top.txt``
@@ -61,7 +61,7 @@ Managing Merge Requests
     gitlab:
       url: http://gitlab.local
 
-* Create a ``~/.config/tsrc.yml``` looking like:
+* Create a ``~/.config/tsrc.yml`` looking like:
 
 .. code-block:: text
 
