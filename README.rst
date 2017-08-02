@@ -13,6 +13,18 @@ Demo
 
 `tsrc demo on asciinema.org <https://asciinema.org/a/131625>`_
 
+Screenshots
+-----------
+
+* ``tsrc sync``
+
+.. image:: https://dmerej.info/blog/pics/tsrc-sync.png
+
+* ``tsrc log``
+
+.. image:: https://dmerej.info/blog/pics/tsrc-log.png
+
+
 Tutorial
 ---------
 
