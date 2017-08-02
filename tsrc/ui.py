@@ -18,6 +18,7 @@ import traceback
 import io
 
 import colorama
+import tabulate
 import unidecode
 
 
@@ -191,6 +192,19 @@ def _process_tokens(tokens, *, end="\n", sep=" ", color=True):
     return res
 
 
+def write_and_flush(fileobj, to_write):
+    try:
+        fileobj.write(to_write)
+    except UnicodeEncodeError:
+        # Maybe the file descritor does not support the full Unicode
+        # set, like stdout on Windows.
+        # Use the unidecode library
+        # to make sure we only have ascii, while still keeping
+        # as much info as we can
+        fileobj.write(unidecode.unidecode(to_write))
+    fileobj.flush()
+
+
 def message(*tokens, **kwargs):
     """ Helper method for error, warning, info, debug
 
@@ -212,16 +226,7 @@ def message(*tokens, **kwargs):
     if kwargs.get("update_title") and with_color:
         update_title(without_color, fileobj)
     to_write = with_color if config_color(fileobj) else without_color
-    try:
-        fileobj.write(to_write)
-    except UnicodeEncodeError:
-        # Maybe the file descritor does not support the full Unicode
-        # set, like stdout on Windows.
-        # Use the unidecode library
-        # to make sure we only have ascii, while still keeping
-        # as much info as we can
-        fileobj.write(unidecode.unidecode(to_write))
-    fileobj.flush()
+    write_and_flush(fileobj, to_write)
 
 
 def fatal(*tokens, **kwargs):
@@ -297,6 +302,29 @@ def info_progress(prefix, value, max_value):
         percent = float(value) / max_value * 100
         sys.stdout.write(prefix + ": %.0f%%\r" % percent)
         sys.stdout.flush()
+
+
+def info_table(data, *, headers=None, fileobj=None):
+    if not fileobj:
+        fileobj = sys.stdout
+    colored_data = list()
+    plain_data = list()
+    for row in data:
+        colored_row = list()
+        plain_row = list()
+        for item in row:
+            colored_str, plain_str = process_tokens(item, end="")
+            colored_row.append(colored_str)
+            plain_row.append(plain_str)
+        colored_data.append(colored_row)
+        plain_data.append(plain_row)
+    if config_color(fileobj):
+        data_for_tabulate = colored_data
+    else:
+        data_for_tabulate = plain_data
+
+    res = tabulate.tabulate(data_for_tabulate, headers=headers)
+    write_and_flush(fileobj, res)
 
 
 def debug(*tokens, **kwargs):
@@ -472,3 +500,10 @@ if __name__ == "__main__":
     info_progress("Done", 20, 20)
     info("\n", check, "done")
     info(cross, "something failed")
+
+    headers=["project", "actual", "expected"]
+    data = [
+        [(bold, "foo"), (red, "master"), (green, "next")],
+        [(bold, "bar"), (red, "next"), (green, "master")],
+    ]
+    info_table(data, headers=headers)
