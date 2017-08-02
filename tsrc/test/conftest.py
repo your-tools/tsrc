@@ -156,7 +156,8 @@ class GitServer():
                 break
         else:
             assert False, "repo '%s' not found in manifest" % repo_path
-        self.push_manifest(data=manifest_data, message="change foo url")
+        message = "change %s url" % repo_path
+        self.push_manifest(data=manifest_data, message=message)
 
     def delete_branch(self, repo_path, branch):
         src_path = self.tmpdir.joinpath("src", repo_path)
