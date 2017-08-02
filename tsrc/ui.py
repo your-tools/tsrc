@@ -54,6 +54,8 @@ class _Color:
             self.code += ';%dm' % modifier
         else:
             self.code += 'm'
+    def __repr__(self):
+        return repr(self.code)
 
 
 reset     = _Color(0)
