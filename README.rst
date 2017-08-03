@@ -32,8 +32,9 @@ Tutorial
 Getting started
 +++++++++++++++
 
+* Make sure you are using **Python3.5** or higher.
 
-* Install ``tsrc`` with ``pip install tsrc``
+* Install ``tsrc`` with ``pip3`` as usual.
 
 * Create a *manifest* repository. (``git@example.org/manifest``)
 
