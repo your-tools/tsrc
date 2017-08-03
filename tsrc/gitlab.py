@@ -1,6 +1,5 @@
 """ Tiny wrapper for gitlab REST API """
 
-import json
 import urllib.parse
 
 import requests
@@ -35,7 +34,7 @@ def _handle_json_errors(response):
     json_details = dict()
     try:
         json_details = response.json()
-    except json.JSONDecodeError:
+    except ValueError:
         json_details["error"] = ("Expecting json result, got %s" % response.text)
 
     status_code = response.status_code

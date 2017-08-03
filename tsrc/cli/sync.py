@@ -10,7 +10,7 @@ import tsrc.cli
 def display_bad_branches(on_bad_branch):
     if not on_bad_branch:
         return
-    pad = max((len(x[0]) for x in on_bad_branch), default=0)
+    pad = max((len(x[0]) for x in on_bad_branch))
     ui.warning("Some projects are not on the correct branch")
     for (project, branch) in on_bad_branch:
         ui.info("*", ui.bold, project.ljust(pad + 1), ui.blue, branch)
