@@ -8,7 +8,9 @@ python:
 install:
   - pip install .
   - pip install -r dev-requirements.txt
+  - pip install -r doc-requirements.txt
 
 script:
   - ci/lint.sh
   - pytest --cov . --cov-report term
+  - mkdocs build

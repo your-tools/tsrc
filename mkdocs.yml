@@ -1,0 +1,29 @@
+site_name: Tanker documentation
+theme: readthedocs
+strict: true
+
+markdown_extensions:
+  - markdown.extensions.admonition #for !!! notice
+  - toc:
+      permalink: True
+      separator: "_"
+
+pages:
+- Home: index.md
+
+- Getting started:
+  - Installation: guide/installation.md
+  - Basic usage: guide/basics.md
+  - Handling GitLab merge requests: guide/merge_requests.md
+
+- Changelog: changelog.md
+
+- FAQ: faq.md
+
+- Reference:
+  - Comand line reference: ref/cli.md
+  - Configuration file formats: ref/formats.md
+
+- Contributing:
+  - Reporting bugs: contrib/bugs.md
+  - Adding new features: contrib/features.md
