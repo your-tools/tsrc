@@ -301,7 +301,6 @@ def debug(*tokens, **kwargs):
     """ Print a debug message """
     if not CONFIG["verbose"] or CONFIG["record"]:
         return
-    tokens = [blue, "[DEBUG]:"] + list(tokens)
     message(*tokens, **kwargs)
 
 
