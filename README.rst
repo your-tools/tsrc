@@ -9,6 +9,11 @@ tsrc
 
 Manage multiple git repos.
 
+License
+-------
+
+BSD
+
 Demo
 ----
 
