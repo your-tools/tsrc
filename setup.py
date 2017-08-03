@@ -1,7 +1,7 @@
 import sys
 from setuptools import setup, find_packages
 
-if sys.version_info.major < 2:
+if sys.version_info.major < 3:
     sys.exit("Error: Please upgrade to Python3")
 
 
@@ -11,7 +11,7 @@ def get_long_description():
 
 
 setup(name="tsrc",
-      version="0.1.1",
+      version="0.1.3",
       description="Manage multiple repositories",
       long_description=get_long_description(),
       url="https://github.com/TankerApp/tsrc",
@@ -27,6 +27,10 @@ setup(name="tsrc",
         "ruamel.yaml",
         "unidecode",
         "xdg",
+      ],
+      classifiers=[
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
       ],
       entry_points={
         "console_scripts": [
