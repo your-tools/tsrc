@@ -1,6 +1,6 @@
 import io
 import operator
-from unittest import mock
+import mock
 
 from tsrc import ui
 

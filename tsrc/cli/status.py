@@ -12,8 +12,11 @@ def collect_statuses(workspace, repos):
     errors = list()
     result = list()
 
+    if not repos:
+        return errors, result
+
     num_repos = len(repos)
-    max_len = max((len(x[0]) for x in repos), default=0)
+    max_len = max((len(x[0]) for x in repos))
     for i, src, full_path in workspace.enumerate_repos():
         ui.info_count(i, num_repos,
                       "Checking", src.ljust(max_len + 1), end="\r")
@@ -32,7 +35,9 @@ def collect_statuses(workspace, repos):
 
 
 def display_statuses(statuses, errors):
-    max_src = max((len(x[0]) for x in statuses), default=0)
+    if not statuses:
+        return
+    max_src = max((len(x[0]) for x in statuses))
     for status in statuses:
         message = (ui.green, "*", ui.reset, ui.bold, status.src.ljust(max_src),
                    ui.reset, ui.green, status.branch)
