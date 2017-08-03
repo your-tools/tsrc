@@ -98,8 +98,8 @@ and a nicer output.
 On a less subjective level:
 
 * Good support for Windows (no need for cygwin or anything like that)
-
-* tsrc tries hard to never do any destructive operation or unexpected
+* **GitLab** support (automate working with merge requests)
+* Lastly, tsrc tries hard to never do any destructive operation or unexpected
   actions.
 
   For instance, ``tsrc`` never puts you in a "detached HEAD" state,
@@ -108,7 +108,6 @@ On a less subjective level:
   This is achieved by using mostly 'porcelain' commands from git, instead of
   relying on plumbings internals.
 
-* **GitLab** support (automate working with merge requests)
 
 Also (and this matters a lot if you think about contribution):
 
