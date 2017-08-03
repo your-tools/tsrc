@@ -1,5 +1,6 @@
 site_name: Tanker documentation
 theme: readthedocs
+theme_dir: custom_theme
 strict: true
 
 markdown_extensions:
@@ -7,6 +8,8 @@ markdown_extensions:
   - toc:
       permalink: True
       separator: "_"
+
+
 
 pages:
 - Home: index.md
