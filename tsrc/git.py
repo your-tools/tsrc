@@ -45,6 +45,8 @@ def run_git(working_path, *cmd, raises=True):
         options["stdout"] = subprocess.PIPE
         options["stderr"] = subprocess.STDOUT
 
+    if raises:
+        ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
     process = subprocess.Popen(git_cmd, cwd=working_path, **options)
 
     if raises:
