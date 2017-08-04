@@ -2,7 +2,7 @@
 
 ## Why not Python2 support?
 
-We believe Python2 is an inferior language than Python3, and use many
+We believe Python2 is an inferior language than Python3, and we use many
 Python3 features to make the code more readable and robust.
 
 Plus [Python2.7 supports ends in 3 years](
@@ -12,7 +12,7 @@ https://www.python.org/dev/peps/pep-0373/#id2).
 
 Python3.3 is already quite old (2012).
 
-There are no currently no plans to support earlier versions.
+There are currently no plans to support earlier versions.
 
 ## Why not repo?
 
