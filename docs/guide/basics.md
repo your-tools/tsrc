@@ -1,18 +1,5 @@
 # Basic tsrc usage
 
-## Checking tsrc installation
-
-Just run:
-
-```console
-$ tsrc version
-```
-
-You should see:
-
-```console
-$ tsrc verion x.y.z
-```
 
 ## Cloning a set of repositories
 

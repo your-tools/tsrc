@@ -15,3 +15,38 @@ We use it at [tanker.io](https://tanker.io) because:
 
 In addition, `tsrc` has some support for interaction with `GitLab` and makes
 handling merge requests from the command line possible.
+
+# Installing tsrc
+
+`tsrc` is compatible with **Python 3.3** or higher.
+
+It is available on [pypi](https://pypi.org/project/tsrc/) and can be
+installed with [pip](https://pip.pypa.io/en/stable/):
+
+## Linux
+
+```console
+$ pip3 install tsrc --user
+# Make sure ~/.local/bin is in your PATH
+```
+
+## macOS
+
+```console
+$ pip3 install tsrc --user
+# Make sure ~/Library/Python/3.x/bin is in your PATH
+```
+
+## Windows
+
+Install latest Python3 from [python.org/downloads](https://www.python.org/downloads/windows/),
+open cmd.exe and run:
+
+```console
+$ pip3 install tsrc
+```
+
+# Next steps
+
+If `tsrc` is installed properly (check by running `tsrc version`), feel free to
+proceed to [basic usage](guide/basics.md).
