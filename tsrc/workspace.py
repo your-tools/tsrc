@@ -90,27 +90,28 @@ class Workspace():
 
         """
         to_clone = list()
-        for (src, url) in manifest.repos:
-            repo_path = self.joinpath(src)
+        for repo in manifest.repos:
+            repo_path = self.joinpath(repo.src)
             if not repo_path.exists():
-                to_clone.append((src, url))
+                to_clone.append(repo)
         num_repos = len(to_clone)
-        for i, (src, url) in enumerate(to_clone):
-            repo_path = self.joinpath(src)
+        for i, repo in enumerate(to_clone):
+            repo_path = self.joinpath(repo.src)
             parent, name = repo_path.splitpath()
             parent.makedirs_p()
-            ui.info_count(i, num_repos, "Cloning", ui.bold, src)
-            tsrc.git.run_git(parent, "clone", url, "--branch", "master", name)
+            ui.info_count(i, num_repos, "Cloning", ui.bold, repo.src,
+                          ui.reset, ui.green, "(on %s)" % repo.branch)
+            tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
 
     def set_remotes(self):
         ui.info_1("Setting remote URLs")
         manifest = self.load_manifest()
-        for src, url in manifest.repos:
-            full_path = self.joinpath(src)
+        for repo in manifest.repos:
+            full_path = self.joinpath(repo.src)
             _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
-            if old_url != url:
-                ui.info_2(src, old_url, "->", url)
-                tsrc.git.run_git(full_path, "remote", "set-url", "origin", url)
+            if old_url != repo.url:
+                ui.info_2(repo.src, old_url, "->", repo.url)
+                tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
 
     def copy_files(self, manifest):
         for src, dest in manifest.copyfiles:
@@ -125,11 +126,11 @@ class Workspace():
             dest_path.chmod(0o10444)
 
     def enumerate_repos(self):
-        """ Yield (index, src, full_path) for all the repos """
+        """ Yield (index, repo, full_path) for all the repos """
         manifest = self.load_manifest()
-        for i, (src, _) in enumerate(manifest.repos):
-            full_path = self.joinpath(src)
-            yield (i, src, full_path)
+        for i, repo in enumerate(manifest.repos):
+            full_path = self.joinpath(repo.src)
+            yield (i, repo, full_path)
 
     def get_url(self, src):
         """ Return the url of the project in `src` """

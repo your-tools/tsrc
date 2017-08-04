@@ -10,7 +10,7 @@ import tsrc.git
 def main(args):
     workspace = tsrc.cli.get_workspace(args)
     all_ok = True
-    for unused_index, src, full_path in workspace.enumerate_repos():
+    for unused_index, repo, full_path in workspace.enumerate_repos():
         colors = ["green", "reset", "yellow", "reset", "bold blue", "reset"]
         log_format = "%m {}%h{} - {}%d{} %s {}<%an>{}"
         log_format = log_format.format(*("%C({})".format(x) for x in colors))
@@ -22,8 +22,8 @@ def main(args):
         if rc != 0:
             all_ok = False
         if out:
-            ui.info(ui.bold, src)
-            ui.info(ui.bold, "-" * len(src))
+            ui.info(ui.bold, repo.src)
+            ui.info(ui.bold, "-" * len(repo.src))
             ui.info(out)
     if not all_ok:
         sys.exit(1)

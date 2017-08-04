@@ -19,6 +19,7 @@ setup(name="tsrc",
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
+        "attrs",
         "colored_traceback",
         "colorama",
         "path.py",

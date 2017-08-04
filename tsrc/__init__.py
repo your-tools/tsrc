@@ -1,6 +1,10 @@
 """ Common tools """
 
 
+from .repo import Repo
+assert Repo  # silence pyflakes
+
+
 class Error(Exception):
     """ Base class for our own errors
 

@@ -50,8 +50,8 @@ def test_git_server_add_repo_updates_manifest(workspace_path, git_server):
     manifest = read_remote_manifest(workspace_path, git_server)
     repos = manifest.repos
     assert len(repos) == 2
-    for _, url in repos:
-        rc, out = tsrc.git.run_git(workspace_path, "ls-remote", url,
+    for repo in repos:
+        rc, out = tsrc.git.run_git(workspace_path, "ls-remote", repo.url,
                                    raises=False)
         assert rc == 0
         assert "refs/heads/master" in out
