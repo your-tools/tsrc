@@ -5,6 +5,8 @@ strict: true
 
 markdown_extensions:
   - markdown.extensions.admonition #for !!! notice
+  - markdown.extensions.def_list
+
   - toc:
       permalink: True
       separator: "_"
