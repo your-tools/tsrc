@@ -44,7 +44,6 @@ Also (and this matters a lot if you think about contribution):
 Here are a few features present in repo that are missing from `tsrc`
 (but may be implemented in the future)
 
-* Cloning a specific branch (but see [PR #7](https://github.com/TankerApp/tsrc/pull/7))
 * Cloning a revision or tag
 * Cloning several repositories in parallel
 * Cloning just one or several groups of repositories
