@@ -49,6 +49,15 @@ def gitlab_mock():
     gl_mock = mock.create_autospec(tsrc.gitlab.GitLabHelper, instance=True)
     gl_mock.get_active_users.return_value = [JOHN, BART, TIMOTHEE, THEO]
     gl_mock.get_project_id = lambda x: PROJECT_IDS[x]
+    # Define a few helpers methods to make tests read nicer:
+    new_defs = {
+        "assert_mr_created": gl_mock.create_merge_request.assert_called_with,
+        "assert_mr_not_created": gl_mock.create_merge_request.assert_not_called,
+        "assert_mr_updated": gl_mock.update_merge_request.assert_called_with,
+        "assert_mr_accepted": gl_mock.accept_merge_request.assert_called_with,
+    }
+    for name, func in new_defs.items():
+        setattr(gl_mock, name, func)
     return gl_mock
 
 
@@ -67,14 +76,18 @@ def test_creating_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
 
     push_action.main()
 
-    gitlab_mock.create_merge_request.assert_called_with("42", "new-feature",
-                                                        target_branch="next",
-                                                        title="new-feature")
-    gitlab_mock.update_merge_request.assert_called_with(MR_STUB,
-                                                        assignee_id=JOHN["id"],
-                                                        remove_source_branch=True,
-                                                        target_branch="next",
-                                                        title="Best feature ever")
+    gitlab_mock.assert_mr_created(
+        "42", "new-feature",
+        target_branch="next",
+        title="new-feature"
+    )
+    gitlab_mock.assert_mr_updated(
+        MR_STUB,
+        assignee_id=JOHN["id"],
+        remove_source_branch=True,
+        target_branch="next",
+        title="Best feature ever"
+    )
 
 
 def test_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
@@ -88,11 +101,13 @@ def test_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
     push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
     push_action.main()
 
-    gitlab_mock.create_merge_request.assert_not_called()
-    gitlab_mock.update_merge_request.assert_called_with(MR_STUB,
-                                                        remove_source_branch=True,
-                                                        target_branch="next",
-                                                        title="Best feature ever")
+    gitlab_mock.assert_mr_not_created()
+    gitlab_mock.assert_mr_updated(
+        MR_STUB,
+        remove_source_branch=True,
+        target_branch="next",
+        title="Best feature ever"
+    )
 
 
 def test_accept_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
@@ -105,7 +120,7 @@ def test_accept_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
     push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
     push_action.main()
 
-    gitlab_mock.accept_merge_request.assert_called_with(MR_STUB)
+    gitlab_mock.assert_mr_accepted(MR_STUB)
 
 
 def test_unwipify_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
@@ -120,11 +135,13 @@ def test_unwipify_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_a
     push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
     push_action.main()
 
-    gitlab_mock.create_merge_request.assert_not_called()
-    gitlab_mock.update_merge_request.assert_called_with(existing_mr,
-                                                        remove_source_branch=True,
-                                                        target_branch="master",
-                                                        title="nice title")
+    gitlab_mock.assert_mr_not_created()
+    gitlab_mock.assert_mr_updated(
+        existing_mr,
+        remove_source_branch=True,
+        target_branch="master",
+        title="nice title"
+    )
 
 
 def test_select_user():
