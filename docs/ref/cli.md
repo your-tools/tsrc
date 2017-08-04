@@ -28,7 +28,7 @@ tsrc init MANIFEST_URL</dt>
 :   Initializes a new workspace.
 
     MANIFEST_URL should be a git URL containing a valid
-    manifest.ym` file.
+    `manifest.yml` file.
 
 
 tsrc foreach -- command --opt1 arg1
