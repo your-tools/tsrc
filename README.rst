@@ -26,6 +26,12 @@ Screenshots
 .. image:: https://dmerej.info/blog/pics/tsrc-log.png
 
 
+Documentation
+--------------
+
+See https://tankerapp.github.io/tsrc/
+
+
 Tutorial
 ---------
 
@@ -89,37 +95,7 @@ Managing Merge Requests
     $ tsrc push --accept
 
 
-Differences with google repo
------------------------------
+Wy not Google repo?
+-------------------
 
-We used repo for a while, but found that tsrc had both a better command line API
-and a nicer output.
-
-On a less subjective level:
-
-* Good support for Windows (no need for cygwin or anything like that)
-* **GitLab** support (automate working with merge requests)
-* Lastly, tsrc tries hard to never do any destructive operation or unexpected
-  actions.
-
-  For instance, ``tsrc`` never puts you in a "detached HEAD" state,
-  nor does automatic rebases. It also never touches dirty repos.
-
-  This is achieved by using mostly 'porcelain' commands from git, instead of
-  relying on plumbings internals.
-
-
-Also (and this matters a lot if you think about contribution):
-
-* Comprehensive test suite
-* Uses PEP8 coding style
-* Written in Python 3, not Python 2
-
-Here are a few features present in repo that are missing from ``tsrc``
-(but may be implemented in the future)
-
-* Cloning a specific branch (but see PR #7)
-* Cloning a revision or tag
-* Cloning several repositories in parallel
-* Cloning just one or several groups of repositories
-* Support for other hosting services such as ``gerrit`` or ``github``
+See the `FAQ <https://tankerapp.github.io/tsrc/faq/#why_not_repo>`_
