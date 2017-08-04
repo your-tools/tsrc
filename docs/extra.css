@@ -1,0 +1,4 @@
+.rst-content dl:not(.docutils) dt{
+  border-top: none;
+  background: none;
+}
