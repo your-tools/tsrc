@@ -100,7 +100,7 @@ Managing Merge Requests
     $ tsrc push --accept
 
 
-Wy not Google repo?
+Why not Google repo?
 -------------------
 
 See the `FAQ <https://tankerapp.github.io/tsrc/faq/#why_not_repo>`_
