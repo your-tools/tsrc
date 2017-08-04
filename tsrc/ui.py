@@ -324,6 +324,7 @@ def info_table(data, *, headers=None, fileobj=None):
         data_for_tabulate = plain_data
 
     res = tabulate.tabulate(data_for_tabulate, headers=headers)
+    res += "\n"
     write_and_flush(fileobj, res)
 
 
