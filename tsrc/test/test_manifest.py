@@ -1,6 +1,7 @@
 import os.path
 
 import tsrc.manifest
+from tsrc.repo import Repo
 
 import pytest
 
@@ -12,6 +13,7 @@ gitlab:
 repos:
   - src: foo
     url: git@example.com:foo.git
+    branch: next
 
   - src: master
     url: git@example.com:master.git
@@ -23,8 +25,8 @@ repos:
     manifest.load(contents)
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
     assert manifest.repos == [
-        ("foo", "git@example.com:foo.git"),
-        ("master", "git@example.com:master.git")
+        tsrc.Repo(src="foo", url="git@example.com:foo.git", branch="next"),
+        tsrc.Repo(src="master", url="git@example.com:master.git", branch="master")
     ]
     assert manifest.copyfiles == [
         (os.path.join("master", "top.cmake"), "CMakeLists.txt")

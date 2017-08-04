@@ -55,7 +55,7 @@ def test_new_repo_added_to_manifest(tsrc_cli, git_server, workspace_path):
     assert workspace_path.joinpath("spam/eggs").exists()
 
 
-def test_switching_branches(tsrc_cli, git_server, workspace_path):
+def test_switching_manifest_branches(tsrc_cli, git_server, workspace_path):
     # Init with manifest_url on master
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
@@ -116,3 +116,16 @@ def test_copies_are_readonly(tsrc_cli, git_server, workspace_path):
 
     foo_txt = workspace_path.joinpath("top.txt")
     assert not os.access(foo_txt, os.W_OK)
+
+
+def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
+    git_server.add_repo("foo")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    git_server.change_repo_branch("foo", "next")
+    git_server.push_file("foo", "next.txt")
+    git_server.set_branch("foo", "next")
+
+    tsrc_cli.run("sync")
+    assert messages.find("not on the correct branch")

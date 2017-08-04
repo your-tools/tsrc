@@ -1,6 +1,7 @@
 import io
 import operator
 import mock
+import string
 
 from tsrc import ui
 
@@ -28,7 +29,7 @@ def smart_tty():
 @pytest.fixture
 def dumb_tty():
     res = io.StringIO()
-    res.isatty = lambda: True
+    res.isatty = lambda: False
     return res
 
 
@@ -90,3 +91,20 @@ def test_ask_choice_empty_input():
         m.side_effect = [""]
         res = ui.ask_choice("Select a animal", ["cat", "dog", "cow"])
         assert res is None
+
+
+def test_tabulate(smart_tty, dumb_tty):
+    headers = ["project", "actual", "expected"]
+    data = [
+        [(ui.bold, "foo"), (ui.red, "master"), (ui.green, "next")],
+        [(ui.bold, "bar"), (ui.red, "next"), (ui.green, "master")],
+    ]
+    ui.info_table(data, headers=headers, fileobj=smart_tty)
+    with_color = smart_tty.getvalue()
+    # Not sure what to assert here.
+    # On the other hand, if info_table() is broken we'll see it :P
+    print(with_color)
+
+    ui.info_table(data, headers=headers, fileobj=dumb_tty)
+    without_color = dumb_tty.getvalue()
+    assert all(c in string.printable for c in without_color)

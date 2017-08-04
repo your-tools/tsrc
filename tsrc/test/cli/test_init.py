@@ -28,7 +28,7 @@ def test_init_twice(tsrc_cli, git_server):
     tsrc_cli.run("init", manifest_url)
 
 
-def test_init_maint_branch(tsrc_cli, git_server, workspace_path):
+def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path):
     manifest_repo = git_server.manifest_repo
     tsrc.git.run_git(manifest_repo, "checkout", "-b", "maint")
     # add_repo will be made on the 'maint' branch, which means
@@ -64,3 +64,16 @@ def test_copy_files(tsrc_cli, git_server, workspace_path):
     tsrc_cli.run("init", manifest_url)
 
     assert workspace_path.joinpath("CMakeLists.txt").text() == top_cmake_contents
+
+
+def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+    git_server.change_repo_branch("foo", "next")
+    git_server.push_file("foo", "next.txt")
+    git_server.set_branch("foo", "next")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    foo_path = workspace_path.joinpath("foo")
+    assert tsrc.git.get_current_branch(foo_path) == "next"

@@ -23,18 +23,20 @@ class Manifest():
         parsed = ruamel.yaml.safe_load(contents) or dict()
         self.gitlab = parsed.get("gitlab")
         repos = parsed.get("repos") or list()
-        for repo in repos:
-            repo_url = repo["url"]
-            repo_src = repo["src"]
-            self.repos.append((repo_src, repo_url))
-            if "copy" in repo:
-                to_cp = repo["copy"]
+        for repo_config in repos:
+            repo_url = repo_config["url"]
+            repo_src = repo_config["src"]
+            repo_branch = repo_config.get("branch", "master")
+            repo = tsrc.Repo(url=repo_url, src=repo_src, branch=repo_branch)
+            self.repos.append(repo)
+            if "copy" in repo_config:
+                to_cp = repo_config["copy"]
                 for item in to_cp:
                     src = os.path.join(repo_src, item["src"])
                     self.copyfiles.append((src, item["dest"]))
 
     def get_url(self, src):
-        for (repo_src, repo_url) in self.repos:
-            if repo_src == src:
-                return repo_url
+        for repo in self.repos:
+            if repo.src == src:
+                return repo.url
         raise RepoNotFound(src)
