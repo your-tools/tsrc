@@ -1,10 +1,10 @@
-# Command line reference
+# Command line usage
 
 ## Important note
 
 We use the [argparse](https://docs.python.org/3/library/argparse.html) library to
 parse command line arguments, so the `--help` messages are always up-to-date,
-probably more so that this documentation :)
+probably more so than this documentation :)
 
 ## General
 

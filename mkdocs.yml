@@ -24,7 +24,7 @@ pages:
 
 
 - Reference:
-  - Comand line reference: ref/cli.md
+  - Comand line usage: ref/cli.md
   - Configuration file formats: ref/formats.md
 
 - Contributing: contrib.md
