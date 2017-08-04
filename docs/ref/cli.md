@@ -52,7 +52,7 @@ tsrc log --from FROM [--to TO]
 tsrc push [--assignee ASSIGNEE]
 :   You should run this from a repository with the correct branch checked out.
 
-    (The command will fail if you run this while on the `master` branch our in
+    (The command will fail if you run this while on the `master` branch or in
     "detached HEAD" mode)
 
     `ASSIGNEE` is optional and should match the name of an active GitLab user.
