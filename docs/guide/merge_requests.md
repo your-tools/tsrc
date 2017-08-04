@@ -1,5 +1,7 @@
 # Handling GitLab merge requests
 
+## Configuration
+
 The first step is to log in to GitLab and get your personal access token.
 
 Then, write a file in `~/.config/tsrc.yml` containing the token:
@@ -25,4 +27,21 @@ gitlab:
 
 repos:
  - ...
+```
+
+## Creating and accepting merge requests
+
+Here's how you can create and assign a merge request
+
+```bash
+# start working on your branch
+$ tsrc push [--assignee ASSIGNEE]
+```
+
+
+When the review is done, you can accept it and let GitLab merge the branch once
+the CI pipeline passes with the following command:
+
+```bash
+$ tsrc push --accept
 ```

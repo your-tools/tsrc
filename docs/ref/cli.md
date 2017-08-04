@@ -55,7 +55,13 @@ tsrc push [--assignee ASSIGNEE]
     (The command will fail if you run this while on the `master` branch our in
     "detached HEAD" mode)
 
-    `ASSIGNEE` is optional and should match the name of an active GitLab user
+    `ASSIGNEE` is optional and should match the name of an active GitLab user.
+
+    The merge request will get created if no other opened merge request with the same
+    branch exists. Otherwise, the existing merge request will be updated.
+
+tsrc push [--ready|--wip]
+:   Toggle the *WIP* ("Work In Progress") prefix for the merge request.
 
 tsrc push --accept
 :   Tell GitLab to merge the merge request after the CI has passed.
