@@ -29,25 +29,21 @@ def test_init_twice(tsrc_cli, git_server):
 
 
 def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path):
-    manifest_repo = git_server.manifest_repo
-    tsrc.git.run_git(manifest_repo, "checkout", "-b", "maint")
-    # add_repo will be made on the 'maint' branch, which means
-    # we should get no repo at all when trying to init with 'master'
-    # branch
+    git_server.add_repo("bar")
+    # foo repo will only exist on the 'devel' branch of the manifest:
+    git_server.change_manifest_branch("devel")
     git_server.add_repo("foo")
-    tsrc.git.run_git(manifest_repo, "push", "origin", "--no-verify",
-                     "maint:maint")
 
-    tsrc_cli.run("init", "--branch", "maint", git_server.manifest_url)
+    tsrc_cli.run("init", "--branch", "devel", git_server.manifest_url)
 
     assert workspace_path.joinpath("foo").exists()
 
 
-def test_change_remote(tsrc_cli, git_server, workspace_path):
+def test_change_repo_url(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
     new_url = "git@example.com/foo"
-    git_server.set_repo_url("foo", new_url)
+    git_server.manifest.set_repo_url("foo", new_url)
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path.joinpath("foo")
     _, actual_url = tsrc.git.run_git(foo_path, "remote", "get-url", "origin", raises=False)
@@ -59,7 +55,7 @@ def test_copy_files(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("master")
     top_cmake_contents = "# Top CMakeLists.txt"
     git_server.push_file("master", "top.cmake", contents=top_cmake_contents)
-    git_server.add_file_copy("master/top.cmake", "CMakeLists.txt")
+    git_server.manifest.add_file_copy("master/top.cmake", "CMakeLists.txt")
 
     tsrc_cli.run("init", manifest_url)
 
@@ -70,7 +66,7 @@ def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     git_server.change_repo_branch("foo", "next")
     git_server.push_file("foo", "next.txt")
-    git_server.set_repo_branch("foo", "next")
+    git_server.manifest.set_repo_branch("foo", "next")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)

@@ -32,14 +32,14 @@ def test_git_server_add_repo_can_clone(workspace_path, git_server):
 
 def test_git_server_can_add_copies(workspace_path, git_server):
     git_server.add_repo("foo")
-    git_server.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.add_file_copy("foo/foo.txt", "top.txt")
     manifest = read_remote_manifest(workspace_path, git_server)
     assert manifest.copyfiles == [("foo/foo.txt", "top.txt")]
 
 
 def test_can_configure_gitlab(tmp_path, git_server):
     test_url = "http://gitlab.example.org"
-    git_server.configure_gitlab(url=test_url)
+    git_server.manifest.configure_gitlab(url=test_url)
     manifest = read_remote_manifest(tmp_path, git_server)
     assert manifest.gitlab["url"] == test_url
 

@@ -23,7 +23,7 @@ PROJECT_IDS = {
 @pytest.fixture
 def foo_path(monkeypatch, git_server, tsrc_cli, workspace_path):
     """ Path to a freshly cloned repository """
-    git_server.configure_gitlab(url=GITLAB_URL)
+    git_server.manifest.configure_gitlab(url=GITLAB_URL)
     git_server.add_repo("foo/bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)

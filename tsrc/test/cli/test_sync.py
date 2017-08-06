@@ -57,12 +57,10 @@ def test_switching_manifest_branches(tsrc_cli, git_server, workspace_path):
     # Init with manifest_url on master
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
+
     # Create a new repo, bar, but only on the 'devel'
     # branch of the manifest
-    manifest_repo = git_server.manifest_repo
-    tsrc.git.run_git(manifest_repo, "checkout", "-b", "devel")
-    tsrc.git.run_git(manifest_repo, "push", "origin", "--no-verify",
-                     "devel:devel")
+    git_server.change_manifest_branch("devel")
     git_server.add_repo("bar")
     bar_path = workspace_path.joinpath("bar")
 
@@ -95,7 +93,7 @@ def test_copies_are_up_to_date(tsrc_cli, git_server, workspace_path):
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
-    git_server.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.add_file_copy("foo/foo.txt", "top.txt")
     tsrc_cli.run("init", manifest_url)
     git_server.push_file("foo", "foo.txt", contents="v2")
 
@@ -108,7 +106,7 @@ def test_copies_are_readonly(tsrc_cli, git_server, workspace_path):
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
-    git_server.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.add_file_copy("foo/foo.txt", "top.txt")
 
     tsrc_cli.run("init", manifest_url)
 
@@ -123,7 +121,7 @@ def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
 
     git_server.change_repo_branch("foo", "next")
     git_server.push_file("foo", "next.txt")
-    git_server.set_repo_branch("foo", "next")
+    git_server.manifest.set_repo_branch("foo", "next")
 
     tsrc_cli.run("sync")
     assert messages.find("not on the correct branch")

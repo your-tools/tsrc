@@ -4,79 +4,116 @@ import pytest
 import tsrc.git
 
 
+class ManifestHandler():
+    def __init__(self, path):
+        self.path = path
+        self.data = {"repos": list()}
+
+    @property
+    def yaml_path(self):
+        return self.path.joinpath("manifest.yml")
+
+    def init(self):
+        to_write = ruamel.yaml.dump(self.data)
+        self.yaml_path.write_text(to_write)
+        tsrc.git.run_git(self.path, "add", "manifest.yml")
+        tsrc.git.run_git(self.path, "commit", "--message", "Add an empty manifest")
+        tsrc.git.run_git(self.path, "push", "origin", "master")
+
+    def add_repo(self, src, url):
+        self.data["repos"].append({"url": str(url), "src": src})
+        self.push(message="add %s" % src)
+
+    def configure_gitlab(self, *, url):
+        self.data["gitlab"] = dict()
+        self.data["gitlab"]["url"] = url
+        self.push("Add gitlab URL: %s" % url)
+
+    def set_repo_url(self, src, url):
+        for repo in self.data["repos"]:
+            if repo["src"] == src:
+                repo["url"] = url
+                break
+        else:
+            assert False, "repo '%s' not found in manifest" % src
+        message = "Change %s url to %s" % (src, url)
+        self.push(message)
+
+    def set_repo_branch(self, src, branch):
+        for repo in self.data["repos"]:
+            if repo["src"] == src:
+                repo["branch"] = branch
+                break
+        else:
+            assert False, "repo '%s' not found in manifest" % src
+        self.push("%s on branch %s" % (src, branch))
+
+    def add_file_copy(self, src, dest):
+        if "/" not in src:
+            assert False, "src should look like <repo>/<path>, got '%s'" % src
+        src_repo, src_cpy = src.split("/", maxsplit=1)
+        copy_dict = ({"src": src_cpy, "dest": dest})
+        found = False
+        for repo in self.data["repos"]:
+            if repo["src"] == src_repo:
+                found = True
+                if "copy" in repo:
+                    repo["copy"].append(copy_dict)
+                else:
+                    repo["copy"] = [copy_dict]
+        if not found:
+            assert False, "repo '%s' not found in manifest" % src_repo
+        self.push("Add copy: %s -> %s" % (src, dest))
+
+    def push(self, message):
+        to_write = ruamel.yaml.dump(self.data)
+        self.yaml_path.write_text(to_write)
+        tsrc.git.run_git(self.path, "add", "manifest.yml")
+        tsrc.git.run_git(self.path, "commit", "--message", message)
+        current_branch = tsrc.git.get_current_branch(self.path)
+        tsrc.git.run_git(self.path, "push", "origin", "--set-upstream", current_branch)
+
+
 class GitServer():
     def __init__(self, tmpdir):
         self.tmpdir = tmpdir
-        self.manifest_repo = None
-        self.manifest_url = None
-        self.init_manifest()
+        self.bare_path = tmpdir.joinpath("srv")
+        self.src_path = tmpdir.joinpath("src")
+        self.add_repo("manifest", add_to_manifest=False)
+        self.manifest = ManifestHandler(self.get_path("manifest"))
+        self.manifest.init()
+        self.manifest_url = self.get_url("manifest")
 
-    @property
-    def manifest_file_path(self):
-        return self.manifest_repo.joinpath("manifest.yml")
+    def get_path(self, name):
+        return self.src_path.joinpath(name)
 
-    def init_manifest(self):
-        self.manifest_url = self._add_repo("manifest")
-        self.manifest_repo = self.tmpdir.joinpath("src", "manifest")
-        self.manifest_file_path.write_text("# Manifest")
-        tsrc.git.run_git(self.manifest_repo, "add", "manifest.yml")
-        tsrc.git.run_git(self.manifest_repo, "commit", "--message",
-                         "Add an empty manifest")
-        tsrc.git.run_git(self.manifest_repo,
-                         "push", "origin", "master")
+    def get_url(self, name):
+        return "file://" + self.bare_path.joinpath(name)
 
-    def _add_repo(self, repo_path):
-        bare_path = self.tmpdir.joinpath("srv", repo_path + ".git")
+    def _create_repo(self, name):
+        bare_path = self.bare_path.joinpath(name)
         bare_path.makedirs_p()
         tsrc.git.run_git(bare_path, "init", "--bare")
-        src_path = self.tmpdir.joinpath("src", repo_path)
+        src_path = self.get_path(name)
         src_path.makedirs_p()
         tsrc.git.run_git(src_path, "init")
-        tsrc.git.run_git(src_path, "remote", "add", "origin",
-                         bare_path)
+        tsrc.git.run_git(src_path, "remote", "add", "origin", bare_path)
         src_path.joinpath("README").touch()
         tsrc.git.run_git(src_path, "add", "README")
         tsrc.git.run_git(src_path, "commit", "--message", "Initial commit")
-        tsrc.git.run_git(src_path,
-                         "push", "origin", "master")
+        tsrc.git.run_git(src_path, "push", "origin", "master")
         return str(bare_path)
 
-    def add_repo(self, repo_path):
-        repo_url = self._add_repo(repo_path)
-        data = self.get_manifest_data()
-        data["repos"].append(
-            {
-                "url": repo_url,
-                "src": repo_path,
-            }
-        )
-        self.push_manifest(data=data, message="add %s" % repo_path)
-        return repo_url
+    def add_repo(self, name, add_to_manifest=True):
+        self._create_repo(name)
+        url = self.get_url(name)
+        if add_to_manifest:
+            self.manifest.add_repo(name, url)
+        return url
 
-    def push_manifest(self, *, data, message):
-        self.manifest_file_path.write_text(ruamel.yaml.dump(data))
-        tsrc.git.run_git(self.manifest_repo,
-                         "add", "manifest.yml")
-        tsrc.git.run_git(self.manifest_repo,
-                         "commit", "--message", message)
-        current_branch = tsrc.git.get_current_branch(self.manifest_repo)
-        tsrc.git.run_git(self.manifest_repo,
-                         "push",
-                         "origin", "--set-upstream", current_branch)
-
-    def get_manifest_data(self):
-        empty_manifest = {"repos": list()}
-        return ruamel.yaml.safe_load(self.manifest_file_path.text()) or empty_manifest
-
-    def configure_gitlab(self, *, url):
-        data = self.get_manifest_data()
-        data["gitlab"] = dict()
-        data["gitlab"]["url"] = url
-        self.push_manifest(data=data, message="Add gitlab URL")
-
-    def push_file(self, repo_path, file_path, *,
+    def push_file(self, name, file_path, *,
                   contents=None, message=None):
-        src_path = self.tmpdir.joinpath("src", repo_path)
+        src_path = self.get_path(name)
         full_path = src_path.joinpath(file_path)
         full_path.parent.makedirs_p()
         full_path.touch()
@@ -90,75 +127,37 @@ class GitServer():
         tsrc.git.run_git(src_path, "push", "origin", "--set-upstream",
                          current_branch)
 
-    def tag(self, repo_path, tag_name):
-        src_path = self.tmpdir.joinpath("src", repo_path)
+    def tag(self, name, tag_name):
+        src_path = self.get_path(name)
         tsrc.git.run_git(src_path, "tag", tag_name)
         tsrc.git.run_git(src_path, "push", "--no-verify", "origin", tag_name)
 
-    def get_tags(self, repo_path):
-        git_path = self.tmpdir.joinpath("srv", repo_path + ".git")
-        rc, out = tsrc.git.run_git(git_path, "tag", raises=False)
+    def get_tags(self, name):
+        src_path = self.get_path(name)
+        rc, out = tsrc.git.run_git(src_path, "tag", raises=False)
         return out
 
-    def get_branches(self, repo_path):
-        git_path = self.tmpdir.joinpath("srv", repo_path + ".git")
-        rc, out = tsrc.git.run_git(git_path, "branch", "--list", raises=False)
+    def get_branches(self, name):
+        src_path = self.get_path(name)
+        rc, out = tsrc.git.run_git(src_path, "branch", "--list", raises=False)
         return [x[2:].strip() for x in out.splitlines()]
 
     def change_manifest_branch(self, new_branch):
-        tsrc.git.run_git(self.manifest_repo, "checkout",
-                         "-B", new_branch)
-        tsrc.git.run_git(self.manifest_repo, "push", "--no-verify",
-                         "origin", "--set-upstream", new_branch)
+        manifest_path = self.get_path("manifest")
+        tsrc.git.run_git(manifest_path,
+                         "checkout", "-B", new_branch)
+        tsrc.git.run_git(manifest_path,
+                         "push", "--no-verify", "origin", "--set-upstream", new_branch)
 
-    def change_repo_branch(self, repo_path, new_branch):
-        src_path = self.tmpdir.joinpath("src", repo_path)
+    def change_repo_branch(self, name, new_branch):
+        src_path = self.get_path(name)
         tsrc.git.run_git(src_path, "checkout", "-B", new_branch)
         tsrc.git.run_git(src_path, "push", "--no-verify",
                          "origin", "--set-upstream", new_branch)
 
-    def delete_branch(self, repo_path, branch):
-        src_path = self.tmpdir.joinpath("src", repo_path)
+    def delete_branch(self, name, branch):
+        src_path = self.get_path(name)
         tsrc.git.run_git(src_path, "push", "origin", "--delete", branch)
-
-    def set_repo_url(self, repo_path, url):
-        manifest_data = self.get_manifest_data()
-        for repo in manifest_data["repos"]:
-            if repo["src"] == repo_path:
-                repo["url"] = url
-                break
-        else:
-            assert False, "repo '%s' not found in manifest" % repo_path
-        message = "change %s url" % repo_path
-        self.push_manifest(data=manifest_data, message=message)
-
-    def set_repo_branch(self, repo_path, branch):
-        manifest_data = self.get_manifest_data()
-        for repo in manifest_data["repos"]:
-            if repo["src"] == repo_path:
-                repo["branch"] = branch
-                break
-        else:
-            assert False, "repo '%s' not found in manifest" % repo_path
-        self.push_manifest(data=manifest_data, message="change foo url")
-
-    def add_file_copy(self, src, dest):
-        if "/" not in src:
-            assert False, "src should look like <repo>/<path>, got '%s'" % src
-        src_repo, src_cpy = src.split("/", maxsplit=1)
-        manifest_data = self.get_manifest_data()
-        copy_dict = ({"src": src_cpy, "dest": dest})
-        found = False
-        for repo in manifest_data["repos"]:
-            if repo["src"] == src_repo:
-                found = True
-                if "copy" in repo:
-                    repo["copy"].append(copy_dict)
-                else:
-                    repo["copy"] = [copy_dict]
-        if not found:
-            assert False, "repo '%s' not found in manifest" % src_repo
-        self.push_manifest(data=manifest_data, message="Add copy: %s -> %s" % (src, dest))
 
 
 @pytest.fixture
