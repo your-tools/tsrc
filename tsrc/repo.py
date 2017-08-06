@@ -9,3 +9,4 @@ class Repo():
     src = attr.ib()
     url = attr.ib()
     branch = attr.ib(default="master")
+    fixed_ref = attr.ib(default=None)

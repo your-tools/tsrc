@@ -24,16 +24,19 @@ class Manifest():
         self.gitlab = parsed.get("gitlab")
         repos = parsed.get("repos") or list()
         for repo_config in repos:
-            repo_url = repo_config["url"]
-            repo_src = repo_config["src"]
-            repo_branch = repo_config.get("branch", "master")
-            repo = tsrc.Repo(url=repo_url, src=repo_src, branch=repo_branch)
+            url = repo_config["url"]
+            src = repo_config["src"]
+            branch = repo_config.get("branch", "master")
+            fixed_ref = repo_config.get("fixed_ref")
+            repo = tsrc.Repo(url=url, src=src, branch=branch,
+                             fixed_ref=fixed_ref)
             self.repos.append(repo)
             if "copy" in repo_config:
                 to_cp = repo_config["copy"]
                 for item in to_cp:
-                    src = os.path.join(repo_src, item["src"])
-                    self.copyfiles.append((src, item["dest"]))
+                    src_copy = os.path.join(src, item["src"])
+                    dest_copy = item["dest"]
+                    self.copyfiles.append((src_copy, dest_copy))
 
     def get_url(self, src):
         for repo in self.repos:
