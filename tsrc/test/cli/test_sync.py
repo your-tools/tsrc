@@ -123,7 +123,7 @@ def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
 
     git_server.change_repo_branch("foo", "next")
     git_server.push_file("foo", "next.txt")
-    git_server.set_branch("foo", "next")
+    git_server.set_repo_branch("foo", "next")
 
     tsrc_cli.run("sync")
     assert messages.find("not on the correct branch")

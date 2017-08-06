@@ -47,7 +47,7 @@ def test_change_remote(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
     new_url = "git@example.com/foo"
-    git_server.change_repo_url("foo", new_url)
+    git_server.set_repo_url("foo", new_url)
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path.joinpath("foo")
     _, actual_url = tsrc.git.run_git(foo_path, "remote", "get-url", "origin", raises=False)
@@ -70,7 +70,7 @@ def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     git_server.change_repo_branch("foo", "next")
     git_server.push_file("foo", "next.txt")
-    git_server.set_branch("foo", "next")
+    git_server.set_repo_branch("foo", "next")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
