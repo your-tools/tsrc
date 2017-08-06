@@ -73,3 +73,18 @@ def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
 
     foo_path = workspace_path.joinpath("foo")
     assert tsrc.git.get_current_branch(foo_path) == "next"
+
+
+def test_resets_to_fixed_ref(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v1.0")
+    git_server.push_file("foo", "2.txt", message="Working on v2")
+    git_server.manifest.set_repo_ref("foo", "v1.0")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    foo_path = workspace_path.joinpath("foo")
+    expected_ref = tsrc.git.run_git(foo_path, "rev-parse", "v1.0", raises=False)
+    actual_ref = tsrc.git.run_git(foo_path, "rev-parse", "HEAD", raises=False)
+    assert expected_ref == actual_ref

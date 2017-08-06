@@ -47,6 +47,9 @@ class ManifestHandler():
     def set_repo_branch(self, src, branch):
         self.configue_repo(src, "branch", branch)
 
+    def set_repo_ref(self, src, ref):
+        self.configue_repo(src, "fixed_ref", ref)
+
     def add_file_copy(self, src, source_copy, dest_copy):
         copy_dict = ({"src": source_copy, "dest": dest_copy})
         repo = self.get_repo(src)
