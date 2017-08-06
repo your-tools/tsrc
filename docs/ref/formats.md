@@ -20,22 +20,26 @@ Each repository is also a dictionary, containing:
 
 * `src` (required): relative path of the repository in the workspace
 * `url` (required): URL to use when cloning the repository (usually using ssh)
+* `branch` (optional): The branch to use when cloning the repository (defaults
+  to `master`)
 
 In addition, the dictionary can contain a list of files to copy:
 
 * `copyfiles`: a list of dictionary with `src` and `dest` keys, like so:
 
 ```
-repo:
+repos:
   src: foo
   url: gitlab:proj1/foo
+  branch: develop
   copyfiles:
     - src: foo.txt
       dest: top.txt
 ```
 
-In this case, after `proj1/foo` has been cloned in `<workspace>/foo`, `foo.txt`
-will be copied from `proj1/foo/foo.txt` to `<workspace>/top.txt`.
+In this case, after `proj1/foo` has been cloned in `<workspace>/foo`,
+(using `develop` branch), `foo.txt` will be copied from `proj1/foo/foo.txt` to
+`<workspace>/top.txt`.
 
 ## tsrc.yml format
 
