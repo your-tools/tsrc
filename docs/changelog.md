@@ -1,9 +1,9 @@
 # Changelog
 
-##
+## Next release
 
 * Support for specifying custom branches in the manifest
-* Support for specifying fixed refs (tags or commit) in the manifest.
+* Support for specifying fixed refs (tags or hashes) in the manifest
 
 New syntax is:
 

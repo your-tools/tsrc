@@ -22,7 +22,7 @@ Each repository is also a dictionary, containing:
 * `url` (required): URL to use when cloning the repository (usually using ssh)
 * `branch` (optional): The branch to use when cloning the repository (defaults
   to `master`)
-* `ref` (optional): Can be a tag like `v0.1` or a commit like `0ab12ef`.
+* `ref` (optional): Can be a tag like `v0.1` or a hash like `0ab12ef`.
    If `ref` is set:
 
     *  When running `tsrc init`: Project will be cloned with the given branch, and then reset to
