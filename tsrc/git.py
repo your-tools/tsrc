@@ -45,8 +45,7 @@ def run_git(working_path, *cmd, raises=True):
         options["stdout"] = subprocess.PIPE
         options["stderr"] = subprocess.STDOUT
 
-    if raises:
-        ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
+    ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
     process = subprocess.Popen(git_cmd, cwd=working_path, **options)
 
     if raises:
@@ -62,6 +61,7 @@ def run_git(working_path, *cmd, raises=True):
     else:
         if out.endswith('\n'):
             out = out.strip('\n')
+        ui.debug(ui.lightgray, "[%i]" % returncode, ui.reset, out)
         return returncode, out
 
 
@@ -111,3 +111,16 @@ def find_ref(repo, candidate_refs):
 def reset(repo, ref):
     ui.info_2("Resetting", repo, "to", ref)
     run_git(repo, "reset", "--hard", ref)
+
+
+def get_status(working_path):
+    _, out = run_git(working_path, "status", "--porcelain", raises=False)
+    file_states = set()
+    for line in out.splitlines():
+        if line.startswith("??"):
+            return "untracked files"
+        if line.startswith(" M"):
+            return "modified files"
+        if line.startswith("A "):
+            return "non-committed files"
+    return "clean"
