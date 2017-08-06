@@ -115,7 +115,6 @@ def reset(repo, ref):
 
 def get_status(working_path):
     _, out = run_git(working_path, "status", "--porcelain", raises=False)
-    file_states = set()
     for line in out.splitlines():
         if line.startswith("??"):
             return "untracked files"

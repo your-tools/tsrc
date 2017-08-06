@@ -84,7 +84,7 @@ def test_sync_not_on_master(tsrc_cli, git_server, workspace_path, messages):
     # push so that sync still works
     tsrc.git.run_git(foo_path, "push", "-u", "origin", "devel", "--no-verify")
 
-    tsrc_cli.run("sync")
+    tsrc_cli.run("sync", expect_fail=True)
 
     assert messages.find("not on the correct branch")
 
@@ -123,5 +123,57 @@ def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
     git_server.push_file("foo", "next.txt")
     git_server.manifest.set_repo_branch("foo", "next")
 
-    tsrc_cli.run("sync")
+    tsrc_cli.run("sync", expect_fail=True)
     assert messages.find("not on the correct branch")
+
+
+def test_fixed_ref_are_not_updated(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v0.1")
+    git_server.manifest.set_repo_ref("foo", "v0.1")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    git_server.push_file("foo", "new.txt")
+
+    tsrc_cli.run("sync")
+
+    foo_path = workspace_path.joinpath("foo")
+    assert not foo_path.joinpath("new.txt").exists()
+
+
+def test_fixed_ref_are_updated_when_clean(tsrc_cli, git_server, workspace_path):
+
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v0.1")
+    git_server.manifest.set_repo_ref("foo", "v0.1")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    git_server.push_file("foo", "new.txt")
+    git_server.tag("foo", "v0.2")
+    git_server.manifest.set_repo_ref("foo", "v0.2")
+
+    tsrc_cli.run("sync")
+
+    foo_path = workspace_path.joinpath("foo")
+    assert foo_path.joinpath("new.txt").exists()
+
+
+def test_fixed_ref_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
+
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v0.1")
+    git_server.manifest.set_repo_ref("foo", "v0.1")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+    workspace_path.joinpath("foo", "untracked.txt").write_text("")
+
+    git_server.push_file("foo", "new.txt")
+    git_server.tag("foo", "v0.2")
+    git_server.manifest.set_repo_ref("foo", "v0.2")
+
+    tsrc_cli.run("sync", expect_fail=True)
+
+    foo_path = workspace_path.joinpath("foo")
+    assert not foo_path.joinpath("new.txt").exists()
