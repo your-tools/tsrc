@@ -29,41 +29,32 @@ class ManifestHandler():
         self.data["gitlab"]["url"] = url
         self.push("Add gitlab URL: %s" % url)
 
-    def set_repo_url(self, src, url):
+    def get_repo(self, src):
         for repo in self.data["repos"]:
             if repo["src"] == src:
-                repo["url"] = url
-                break
-        else:
-            assert False, "repo '%s' not found in manifest" % src
-        message = "Change %s url to %s" % (src, url)
+                return repo
+        assert False, "repo '%s' not found in manifest" % src
+
+    def configue_repo(self, src, key, value):
+        repo = self.get_repo(src)
+        repo[key] = value
+        message = "Change %s %s: %s" % (src, key, value)
         self.push(message)
 
-    def set_repo_branch(self, src, branch):
-        for repo in self.data["repos"]:
-            if repo["src"] == src:
-                repo["branch"] = branch
-                break
-        else:
-            assert False, "repo '%s' not found in manifest" % src
-        self.push("%s on branch %s" % (src, branch))
+    def set_repo_url(self, src, url):
+        self.configue_repo(src, "url", url)
 
-    def add_file_copy(self, src, dest):
-        if "/" not in src:
-            assert False, "src should look like <repo>/<path>, got '%s'" % src
-        src_repo, src_cpy = src.split("/", maxsplit=1)
-        copy_dict = ({"src": src_cpy, "dest": dest})
-        found = False
-        for repo in self.data["repos"]:
-            if repo["src"] == src_repo:
-                found = True
-                if "copy" in repo:
-                    repo["copy"].append(copy_dict)
-                else:
-                    repo["copy"] = [copy_dict]
-        if not found:
-            assert False, "repo '%s' not found in manifest" % src_repo
-        self.push("Add copy: %s -> %s" % (src, dest))
+    def set_repo_branch(self, src, branch):
+        self.configue_repo(src, "branch", branch)
+
+    def add_file_copy(self, src, source_copy, dest_copy):
+        copy_dict = ({"src": source_copy, "dest": dest_copy})
+        repo = self.get_repo(src)
+        if "copy" in repo:
+            copy_list = repo["copy"] + ppend(copy_dict)
+        else:
+            copy_list = [copy_dict]
+        self.configue_repo(src, "copy", copy_list)
 
     def push(self, message):
         to_write = ruamel.yaml.dump(self.data)

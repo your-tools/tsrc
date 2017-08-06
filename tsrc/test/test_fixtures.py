@@ -32,7 +32,7 @@ def test_git_server_add_repo_can_clone(workspace_path, git_server):
 
 def test_git_server_can_add_copies(workspace_path, git_server):
     git_server.add_repo("foo")
-    git_server.manifest.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.add_file_copy("foo", "foo.txt", "top.txt")
     manifest = read_remote_manifest(workspace_path, git_server)
     assert manifest.copyfiles == [("foo/foo.txt", "top.txt")]
 
