@@ -158,17 +158,25 @@ class PushAction():
             if self.args.wip:
                 return wipify(title)
 
+    def find_merge_request(self):
+        return self.gl_helper.find_opened_merge_request(
+            self.project_id, self.source_branch
+        )
+
+    def create_merge_request(self):
+        return self.gl_helper.create_merge_request(
+            self.project_id, self.source_branch,
+            title=self.source_branch,
+            target_branch=self.target_branch
+        )
+
     def ensure_merge_request(self):
-        merge_request = self.gl_helper.find_opened_merge_request(self.project_id,
-                                                                 self.source_branch)
+        merge_request = self.find_merge_request()
         if merge_request:
             ui.info_2("Found existing merge request: !%s" % merge_request["iid"])
             return merge_request
         else:
-            res = self.gl_helper.create_merge_request(self.project_id, self.source_branch,
-                                                      title=self.source_branch,
-                                                      target_branch=self.target_branch)
-            return res
+            return self.create_merge_request()
 
 
 def main(args):

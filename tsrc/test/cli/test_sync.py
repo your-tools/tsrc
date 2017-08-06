@@ -12,8 +12,7 @@ def test_sync_happy(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.push_file("foo/bar", "bar.txt",
-                         contents="this is bar")
+    git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
 
     tsrc_cli.run("sync")
 
@@ -26,8 +25,7 @@ def test_sync_with_errors(tsrc_cli, git_server, workspace_path, messages):
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.push_file("foo/bar", "bar.txt",
-                         contents="Bar is true")
+    git_server.push_file("foo/bar", "bar.txt", contents="Bar is true")
     bar_src = workspace_path.joinpath("foo/bar")
     bar_src.joinpath("bar.txt").write_text("Bar is false")
 
