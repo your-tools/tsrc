@@ -53,10 +53,10 @@ Here are a few features present in repo that are missing from `tsrc`
 
 All this projects are fine but did not match our needs:
 
-* [git-subrepo]() squashes commits, and we prefer having normal clones
-  everywhere
-* [mu-repo]() is nice and contains an interesting dependency management feature,
-  but currently we do not need this complexity.
+* [git-subrepo](https://github.com/ingydotnet/git-subrepo) squashes commits, and
+  we prefer having normal clones everywhere
+* [mu-repo](https://fabioz.github.io/mu-repo/) is nice and contains an
+  interesting dependency management feature, but currently we do not need this complexity.
 
 In any case, now that the whole team is using `tsrc` all the time, it's likely
 we'll keep using `tsrc` in the future.
