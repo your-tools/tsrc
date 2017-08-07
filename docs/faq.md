@@ -8,12 +8,6 @@ Python3 features to make the code more readable and robust.
 Plus [Python2.7 supports ends in 3 years](
 https://www.python.org/dev/peps/pep-0373/#id2).
 
-## Support for older Python3 versions ?
-
-Python3.3 is already quite old (2012).
-
-There are currently no plans to support earlier versions.
-
 ## Why not repo?
 
 We used [repo](https://android.googlesource.com/tools/repo/) for a while, but
