@@ -1,8 +1,25 @@
 # Changelog
 
-## Next release
+##
 
 * Support for specifying custom branches in the manifest
+* Support for specifying fixed refs (tags or commit) in the manifest.
+
+New syntax is:
+
+```yaml
+repos:
+  - src: foo
+    url: git@gitlab.com:proj/foo
+    branch: next
+
+  - src: bar
+    url: git@gitlab.com:proj/bar
+    branch: master
+    ref: v0.1
+```
+
+Note that `branch` is still required.
 
 ## v0.1.4 (2017-08-04)
 

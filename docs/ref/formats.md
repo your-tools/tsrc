@@ -22,10 +22,16 @@ Each repository is also a dictionary, containing:
 * `url` (required): URL to use when cloning the repository (usually using ssh)
 * `branch` (optional): The branch to use when cloning the repository (defaults
   to `master`)
+* `ref` (optional): Can be a tag like `v0.1` or a commit like `0ab12ef`.
+   If `ref` is set:
 
-In addition, the dictionary can contain a list of files to copy:
+    *  When running `tsrc init`: Project will be cloned with the given branch, and then reset to
+        the given ref.
+    *  When running `tsrc sync`: If the project is clean, project will be reset
+        to the given ref, else a warning message will be printed.
 
-* `copyfiles`: a list of dictionary with `src` and `dest` keys, like so:
+* `copyfiles`: (optional): A list of dictionaries with `src` and `dest` keys, like so:
+
 
 ```
 repos:
