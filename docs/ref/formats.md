@@ -1,4 +1,4 @@
-# Configuration file formats
+# Configuration files formats
 
 Unless otherwise noted, all configuration files use [YAML](http://www.yaml.org/)
 syntax

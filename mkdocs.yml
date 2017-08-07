@@ -12,8 +12,6 @@ markdown_extensions:
       permalink: True
       separator: "_"
 
-
-
 pages:
 - Home: index.md
 
@@ -22,10 +20,9 @@ pages:
   - Handling GitLab merge requests: guide/merge_requests.md
 
 
-
 - Reference:
   - Comand line usage: ref/cli.md
-  - Configuration file formats: ref/formats.md
+  - Configuration files formats: ref/formats.md
 
 - Contributing: contrib.md
 
