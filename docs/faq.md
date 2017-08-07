@@ -38,7 +38,6 @@ Also (and this matters a lot if you think about contribution):
 Here are a few features present in repo that are missing from `tsrc`
 (but may be implemented in the future)
 
-* Cloning a revision or tag
 * Cloning several repositories in parallel
 * Cloning just one or several groups of repositories
 * Support for other hosting services such as `gerrit` or `github`
