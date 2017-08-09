@@ -1,6 +1,6 @@
 # Changelog
 
-## Next release
+## v0.2.0 (2017-08-09)
 
 * Support for specifying custom branches in the manifest
 * Support for specifying fixed refs (tags or hashes) in the manifest
