@@ -21,6 +21,7 @@ repos:
     copy:
       - src: top.cmake
         dest: CMakeLists.txt
+      - src: .clang-format
 """
     manifest = tsrc.manifest.Manifest()
     manifest.load(contents)
@@ -40,7 +41,8 @@ repos:
         ),
     ]
     assert manifest.copyfiles == [
-        (os.path.join("master", "top.cmake"), "CMakeLists.txt")
+        (os.path.join("master", "top.cmake"), "CMakeLists.txt"),
+        (os.path.join("master", ".clang-format"), ".clang-format"),
     ]
 
 

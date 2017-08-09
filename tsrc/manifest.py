@@ -1,4 +1,5 @@
 """ manifests for tsrc """
+
 import os
 
 import ruamel.yaml
@@ -31,12 +32,18 @@ class Manifest():
             repo = tsrc.Repo(url=url, src=src, branch=branch,
                              fixed_ref=fixed_ref)
             self.repos.append(repo)
-            if "copy" in repo_config:
-                to_cp = repo_config["copy"]
-                for item in to_cp:
-                    src_copy = os.path.join(src, item["src"])
-                    dest_copy = item["dest"]
-                    self.copyfiles.append((src_copy, dest_copy))
+
+            self._handle_copies(repo_config)
+
+    def _handle_copies(self, repo_config):
+        if "copy" not in repo_config:
+            return
+        to_cp = repo_config["copy"]
+        for item in to_cp:
+            src_copy = item["src"]
+            dest_copy = item.get("dest", src_copy)
+            src_copy = os.path.join(repo_config["src"], src_copy)
+            self.copyfiles.append((src_copy, dest_copy))
 
     def get_url(self, src):
         for repo in self.repos:
