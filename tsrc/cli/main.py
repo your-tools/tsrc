@@ -14,11 +14,9 @@ from tsrc import ui
 
 def fix_cmd_args_for_foreach(args, foreach_parser):
     """ We want to support both:
-
-        tsrc foreach -c 'shell command'
-
+      $ tsrc foreach -c 'shell command'
      and
-        tsrc foreach -- some-cmd --some-opts
+      $ tsrc foreach -- some-cmd --some-opts
 
     Due to argparse limitations, args.cmd will always be
     a list, but we nee a *string* when using 'shell=True'
@@ -85,8 +83,7 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", help="Show debug messages",
                         action="store_true")
-    subparsers = parser.add_subparsers(title="subcommands",
-                                       dest="command")
+    subparsers = parser.add_subparsers(title="subcommands", dest="command")
 
     subparsers.add_parser("version")
 

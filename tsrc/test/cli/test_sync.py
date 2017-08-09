@@ -12,8 +12,7 @@ def test_sync_happy(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.push_file("foo/bar", "bar.txt",
-                         contents="this is bar")
+    git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
 
     tsrc_cli.run("sync")
 
@@ -26,8 +25,7 @@ def test_sync_with_errors(tsrc_cli, git_server, workspace_path, messages):
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.push_file("foo/bar", "bar.txt",
-                         contents="Bar is true")
+    git_server.push_file("foo/bar", "bar.txt", contents="Bar is true")
     bar_src = workspace_path.joinpath("foo/bar")
     bar_src.joinpath("bar.txt").write_text("Bar is false")
 
@@ -59,12 +57,10 @@ def test_switching_manifest_branches(tsrc_cli, git_server, workspace_path):
     # Init with manifest_url on master
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
+
     # Create a new repo, bar, but only on the 'devel'
     # branch of the manifest
-    manifest_repo = git_server.manifest_repo
-    tsrc.git.run_git(manifest_repo, "checkout", "-b", "devel")
-    tsrc.git.run_git(manifest_repo, "push", "origin", "--no-verify",
-                     "devel:devel")
+    git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
     bar_path = workspace_path.joinpath("bar")
 
@@ -88,7 +84,7 @@ def test_sync_not_on_master(tsrc_cli, git_server, workspace_path, messages):
     # push so that sync still works
     tsrc.git.run_git(foo_path, "push", "-u", "origin", "devel", "--no-verify")
 
-    tsrc_cli.run("sync")
+    tsrc_cli.run("sync", expect_fail=True)
 
     assert messages.find("not on the correct branch")
 
@@ -97,7 +93,7 @@ def test_copies_are_up_to_date(tsrc_cli, git_server, workspace_path):
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
-    git_server.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.set_repo_file_copies("foo", [["foo.txt", "top.txt"]])
     tsrc_cli.run("init", manifest_url)
     git_server.push_file("foo", "foo.txt", contents="v2")
 
@@ -110,7 +106,7 @@ def test_copies_are_readonly(tsrc_cli, git_server, workspace_path):
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
-    git_server.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.set_repo_file_copies("foo", [["foo.txt", "top.txt"]])
 
     tsrc_cli.run("init", manifest_url)
 
@@ -125,7 +121,59 @@ def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
 
     git_server.change_repo_branch("foo", "next")
     git_server.push_file("foo", "next.txt")
-    git_server.set_branch("foo", "next")
+    git_server.manifest.set_repo_branch("foo", "next")
+
+    tsrc_cli.run("sync", expect_fail=True)
+    assert messages.find("not on the correct branch")
+
+
+def test_fixed_ref_are_not_updated(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v0.1")
+    git_server.manifest.set_repo_ref("foo", "v0.1")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    git_server.push_file("foo", "new.txt")
 
     tsrc_cli.run("sync")
-    assert messages.find("not on the correct branch")
+
+    foo_path = workspace_path.joinpath("foo")
+    assert not foo_path.joinpath("new.txt").exists()
+
+
+def test_fixed_ref_are_updated_when_clean(tsrc_cli, git_server, workspace_path):
+
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v0.1")
+    git_server.manifest.set_repo_ref("foo", "v0.1")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    git_server.push_file("foo", "new.txt")
+    git_server.tag("foo", "v0.2")
+    git_server.manifest.set_repo_ref("foo", "v0.2")
+
+    tsrc_cli.run("sync")
+
+    foo_path = workspace_path.joinpath("foo")
+    assert foo_path.joinpath("new.txt").exists()
+
+
+def test_fixed_ref_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
+
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v0.1")
+    git_server.manifest.set_repo_ref("foo", "v0.1")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+    workspace_path.joinpath("foo", "untracked.txt").write_text("")
+
+    git_server.push_file("foo", "new.txt")
+    git_server.tag("foo", "v0.2")
+    git_server.manifest.set_repo_ref("foo", "v0.2")
+
+    tsrc_cli.run("sync", expect_fail=True)
+
+    foo_path = workspace_path.joinpath("foo")
+    assert not foo_path.joinpath("new.txt").exists()

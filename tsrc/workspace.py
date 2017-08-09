@@ -102,6 +102,10 @@ class Workspace():
             ui.info_count(i, num_repos, "Cloning", ui.bold, repo.src,
                           ui.reset, ui.green, "(on %s)" % repo.branch)
             tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
+            ref = repo.fixed_ref
+            if ref:
+                ui.info_2("Resetting", repo.src, "to", ref)
+                tsrc.git.run_git(repo_path, "reset", "--hard", ref)
 
     def set_remotes(self):
         ui.info_1("Setting remote URLs")

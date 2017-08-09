@@ -1,9 +1,9 @@
 # Changelog
 
-##
+## Next release
 
 * Support for specifying custom branches in the manifest
-* Support for specifying fixed refs (tags or commit) in the manifest.
+* Support for specifying fixed refs (tags or hashes) in the manifest
 
 New syntax is:
 
@@ -20,6 +20,20 @@ repos:
 ```
 
 Note that `branch` is still required.
+
+* You can now skip the `dest` part of the `copy` section if `src` and `dest` are
+  equal:
+
+```yaml
+copy:
+  - src:foo
+
+# same thing as
+copy:
+ - src: foo
+   dest: foo
+```
+
 
 ## v0.1.4 (2017-08-04)
 

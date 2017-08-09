@@ -32,14 +32,14 @@ def test_git_server_add_repo_can_clone(workspace_path, git_server):
 
 def test_git_server_can_add_copies(workspace_path, git_server):
     git_server.add_repo("foo")
-    git_server.add_file_copy("foo/foo.txt", "top.txt")
+    git_server.manifest.set_repo_file_copies("foo", [["foo.txt", "top.txt"]])
     manifest = read_remote_manifest(workspace_path, git_server)
     assert manifest.copyfiles == [("foo/foo.txt", "top.txt")]
 
 
 def test_can_configure_gitlab(tmp_path, git_server):
     test_url = "http://gitlab.example.org"
-    git_server.configure_gitlab(url=test_url)
+    git_server.manifest.configure_gitlab(url=test_url)
     manifest = read_remote_manifest(tmp_path, git_server)
     assert manifest.gitlab["url"] == test_url
 
@@ -51,19 +51,18 @@ def test_git_server_add_repo_updates_manifest(workspace_path, git_server):
     repos = manifest.repos
     assert len(repos) == 2
     for repo in repos:
-        rc, out = tsrc.git.run_git(workspace_path, "ls-remote", repo.url,
-                                   raises=False)
+        rc, out = tsrc.git.run_git(workspace_path, "ls-remote", repo.url, raises=False)
         assert rc == 0
         assert "refs/heads/master" in out
 
 
 def test_git_server_change_manifest_branch(workspace_path, git_server):
     git_server.add_repo("foo")
-    git_server.change_manifest_branch("devel")
+    git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
 
-    tsrc.git.run_git(workspace_path, "clone", git_server.manifest_url,
-                     "--branch", "devel")
+    tsrc.git.run_git(workspace_path,
+                     "clone", git_server.manifest_url, "--branch", "devel")
     manifest_yml = workspace_path.joinpath("manifest", "manifest.yml")
     manifest = tsrc.manifest.Manifest()
     manifest.load(manifest_yml.text())

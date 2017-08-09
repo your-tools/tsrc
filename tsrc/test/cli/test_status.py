@@ -14,8 +14,8 @@ def test_status_happy(tsrc_cli, git_server, workspace_path, messages):
     git_server.push_file("spam/eggs", "CMakeLists.txt")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc.git.run_git(workspace_path.joinpath("spam", "eggs"), "checkout", "-b",
-                     "fish")
+    tsrc.git.run_git(workspace_path.joinpath("spam", "eggs"),
+                     "checkout", "-b", "fish")
 
     tsrc_cli.run("status")
 

@@ -17,19 +17,32 @@ repos:
 
   - src: master
     url: git@example.com:master.git
+    fixed_ref: v0.1
     copy:
       - src: top.cmake
         dest: CMakeLists.txt
+      - src: .clang-format
 """
     manifest = tsrc.manifest.Manifest()
     manifest.load(contents)
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
     assert manifest.repos == [
-        tsrc.Repo(src="foo", url="git@example.com:foo.git", branch="next"),
-        tsrc.Repo(src="master", url="git@example.com:master.git", branch="master")
+        tsrc.Repo(
+            url="git@example.com:foo.git",
+            src="foo",
+            branch="next",
+            fixed_ref=None,
+        ),
+        tsrc.Repo(
+            url="git@example.com:master.git",
+            src="master",
+            branch="master",
+            fixed_ref="v0.1"
+        ),
     ]
     assert manifest.copyfiles == [
-        (os.path.join("master", "top.cmake"), "CMakeLists.txt")
+        (os.path.join("master", "top.cmake"), "CMakeLists.txt"),
+        (os.path.join("master", ".clang-format"), ".clang-format"),
     ]
 
 
