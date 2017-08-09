@@ -8,6 +8,7 @@ tsrc
   :target: https://pypi.org/project/tsrc/
 
 .. image:: https://img.shields.io/github/license/TankerApp/tsrc.svg
+  :target: https://github.com/TankerApp/tsrc/blob/master/LICENSE
 
 Manage multiple git repos.
 
