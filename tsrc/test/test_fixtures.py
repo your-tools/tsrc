@@ -58,7 +58,7 @@ def test_git_server_add_repo_updates_manifest(workspace_path, git_server):
 
 def test_git_server_change_manifest_branch(workspace_path, git_server):
     git_server.add_repo("foo")
-    git_server.change_manifest_branch("devel")
+    git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
 
     tsrc.git.run_git(workspace_path,

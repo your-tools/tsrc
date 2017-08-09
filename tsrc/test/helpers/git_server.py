@@ -67,6 +67,10 @@ class ManifestHandler():
         current_branch = tsrc.git.get_current_branch(self.path)
         tsrc.git.run_git(self.path, "push", "origin", "--set-upstream", current_branch)
 
+    def change_branch(self, branch):
+        tsrc.git.run_git(self.path, "checkout", "-B", branch)
+        tsrc.git.run_git(self.path, "push", "--no-verify", "origin", "--set-upstream", branch)
+
 
 class GitServer():
     def __init__(self, tmpdir):
@@ -135,13 +139,6 @@ class GitServer():
         src_path = self.get_path(name)
         rc, out = tsrc.git.run_git(src_path, "branch", "--list", raises=False)
         return [x[2:].strip() for x in out.splitlines()]
-
-    def change_manifest_branch(self, new_branch):
-        manifest_path = self.get_path("manifest")
-        tsrc.git.run_git(manifest_path,
-                         "checkout", "-B", new_branch)
-        tsrc.git.run_git(manifest_path,
-                         "push", "--no-verify", "origin", "--set-upstream", new_branch)
 
     def change_repo_branch(self, name, new_branch):
         src_path = self.get_path(name)

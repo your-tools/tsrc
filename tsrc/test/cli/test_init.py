@@ -31,7 +31,7 @@ def test_init_twice(tsrc_cli, git_server):
 def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("bar")
     # foo repo will only exist on the 'devel' branch of the manifest:
-    git_server.change_manifest_branch("devel")
+    git_server.manifest.change_branch("devel")
     git_server.add_repo("foo")
 
     tsrc_cli.run("init", "--branch", "devel", git_server.manifest_url)

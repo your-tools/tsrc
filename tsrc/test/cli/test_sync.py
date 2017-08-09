@@ -60,7 +60,7 @@ def test_switching_manifest_branches(tsrc_cli, git_server, workspace_path):
 
     # Create a new repo, bar, but only on the 'devel'
     # branch of the manifest
-    git_server.change_manifest_branch("devel")
+    git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
     bar_path = workspace_path.joinpath("bar")
 
