@@ -7,12 +7,9 @@ tsrc
 .. image:: https://img.shields.io/pypi/v/tsrc.svg
   :target: https://pypi.org/project/tsrc/
 
+.. image:: https://img.shields.io/github/license/TankerApp/tsrc.svg
+
 Manage multiple git repos.
-
-License
--------
-
-BSD
 
 Demo
 ----
