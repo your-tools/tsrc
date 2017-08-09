@@ -55,7 +55,7 @@ def test_copy_files(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("master")
     top_cmake_contents = "# Top CMakeLists.txt"
     git_server.push_file("master", "top.cmake", contents=top_cmake_contents)
-    git_server.manifest.add_file_copy("master", "top.cmake", "CMakeLists.txt")
+    git_server.manifest.set_repo_file_copies("master", [["top.cmake", "CMakeLists.txt"]])
 
     tsrc_cli.run("init", manifest_url)
 

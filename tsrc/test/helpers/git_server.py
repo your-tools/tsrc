@@ -50,14 +50,11 @@ class ManifestHandler():
     def set_repo_ref(self, src, ref):
         self.configue_repo(src, "fixed_ref", ref)
 
-    def add_file_copy(self, src, source_copy, dest_copy):
-        copy_dict = ({"src": source_copy, "dest": dest_copy})
-        repo = self.get_repo(src)
-        if "copy" in repo:
-            copy_list = repo["copy"] + ppend(copy_dict)
-        else:
-            copy_list = [copy_dict]
-        self.configue_repo(src, "copy", copy_list)
+    def set_repo_file_copies(self, src, copies):
+        copy_dicts = list()
+        for copy_src, copy_dest in copies:
+            copy_dicts.append({"src": copy_src, "dest": copy_dest})
+        self.configue_repo(src, "copy", copy_dicts)
 
     def push(self, message):
         to_write = ruamel.yaml.dump(self.data)
