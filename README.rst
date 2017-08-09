@@ -1,10 +1,10 @@
 tsrc
 ====
 
-.. image:: https://travis-ci.org/TankerApp/tsrc.svg?branch=master
+.. image:: https://img.shields.io/travis/TankerApp/tsrc.svg?branch=master
   :target: https://travis-ci.org/TankerApp/tsrc
 
-.. image:: https://badge.fury.io/py/tsrc.png
+.. image:: https://img.shields.io/pypi/v/tsrc.svg
   :target: https://pypi.org/project/tsrc/
 
 Manage multiple git repos.
