@@ -1,5 +1,5 @@
-tsrc
-====
+tsrc: manage multiple repos / GitLab automation
+===============================================
 
 .. image:: https://img.shields.io/travis/TankerApp/tsrc.svg?branch=master
   :target: https://travis-ci.org/TankerApp/tsrc
@@ -9,8 +9,6 @@ tsrc
 
 .. image:: https://img.shields.io/github/license/TankerApp/tsrc.svg
   :target: https://github.com/TankerApp/tsrc/blob/master/LICENSE
-
-Manage multiple git repos.
 
 Demo
 ----
