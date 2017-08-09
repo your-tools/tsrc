@@ -49,7 +49,7 @@ def gitlab_mock():
     gl_mock = mock.create_autospec(tsrc.gitlab.GitLabHelper, instance=True)
     gl_mock.get_active_users.return_value = [JOHN, BART, TIMOTHEE, THEO]
     gl_mock.get_project_id = lambda x: PROJECT_IDS[x]
-    # Define a few helpers methods to make tests read nicer:
+    # Define a few helper methods to make tests nicer to read:
     new_defs = {
         "assert_mr_created": gl_mock.create_merge_request.assert_called_with,
         "assert_mr_not_created": gl_mock.create_merge_request.assert_not_called,
