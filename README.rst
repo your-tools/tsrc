@@ -101,6 +101,6 @@ Managing Merge Requests
 
 
 Why not Google repo?
--------------------
+--------------------
 
 See the `FAQ <https://tankerapp.github.io/tsrc/faq/#why_not_repo>`_
