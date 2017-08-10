@@ -2,14 +2,14 @@
 pycodestyle==2.3.1
 astroid==1.5.3
 pylint==1.7.2
-pyflakes==1.5.0
+pyflakes==1.6.0
 mccabe==0.6.1
 
 # tests
 apipkg==1.4
-coverage==4.2
+coverage==4.4.1
 execnet==1.4.1
 mock==2.0.0
-py==1.4.31
-pytest==3.0.4
+py==1.4.34
+pytest==3.2.1
 pytest-cov==2.5.1
