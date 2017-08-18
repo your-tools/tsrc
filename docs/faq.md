@@ -54,6 +54,34 @@ All this projects are fine but did not match our needs:
 In any case, now that the whole team is using `tsrc` all the time, it's likely
 we'll keep using `tsrc` in the future.
 
+## Why not git submodule?
+
+It's all about workflow.
+
+With `git-submodule`, you have a 'parent' repository and you freeze the state of
+the 'children' repositories to a specific commit.
+
+It's useful when you want to re-build a library you've forked when you build
+your main project, or when you have a library or build tools you want to
+factorize across repositories: this means that each 'parent' repository can
+have its children on any commit they want.
+
+With `tsrc`, all repositories are equal, and what you do instead is to make sure
+all the branches (or tags) are consistent across repositories.
+
+For instance, if you have `foo` and `bar`, you are going to make sure the
+'master' branch of `foo` is always compatible to the 'master' branch of `bar`.
+
+Or if you want to go back to the state of the '0.42' release, you will run:
+`tsrc foreach -- git reset --hard v0.42`.
+
+Note that since `tsrc 0.2` you can also freeze the commits of some of the
+repositories.
+
+Last but not least, with `tsrc` you do everything with `tsrc init` and `tsrc
+sync`, which is a simpler command line API than `git submodule`.
+
+
 ## Why not using libgit2 or similar?
 
 `pygit2` now has pre-built wheels for Windows, but not for macOS and Linux.
