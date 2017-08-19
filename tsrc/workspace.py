@@ -8,6 +8,7 @@ import stat
 
 from tsrc import ui
 import tsrc
+import tsrc.executor
 import tsrc.git
 import tsrc.manifest
 
@@ -96,18 +97,8 @@ class Workspace():
             repo_path = self.joinpath(repo.src)
             if not repo_path.exists():
                 to_clone.append(repo)
-        num_repos = len(to_clone)
-        for i, repo in enumerate(to_clone):
-            repo_path = self.joinpath(repo.src)
-            parent, name = repo_path.splitpath()
-            parent.makedirs_p()
-            ui.info_count(i, num_repos, "Cloning", ui.bold, repo.src,
-                          ui.reset, ui.green, "(on %s)" % repo.branch)
-            tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
-            ref = repo.fixed_ref
-            if ref:
-                ui.info_2("Resetting", repo.src, "to", ref)
-                tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+        cloner = Cloner(self)
+        tsrc.executor.run_sequence(to_clone, cloner)
 
     def set_remotes(self):
         ui.info_1("Setting remote URLs")
@@ -139,3 +130,26 @@ class Workspace():
     def get_url(self, src):
         """ Return the url of the project in `src` """
         return self.manifest.get_url(src)
+
+
+# pylint: disable=too-few-public-methods
+class Cloner(tsrc.executor.Actor):
+    def __init__(self, workspace):
+        self.workspace = workspace
+
+    def process(self, repo):
+        ui.info(repo.src)
+        repo_path = self.workspace.joinpath(repo.src)
+        parent, name = repo_path.splitpath()
+        parent.makedirs_p()
+        try:
+            tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
+        except tsrc.Error:
+            raise tsrc.Error("Cloning failed")
+        ref = repo.fixed_ref
+        if ref:
+            ui.info_2("Resetting", repo.src, "to", ref)
+            try:
+                tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+            except tsrc.Error:
+                raise tsrc.Error("Resetting to", ref, "failed")
