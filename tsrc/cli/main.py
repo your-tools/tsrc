@@ -61,7 +61,8 @@ def main_wrapper(main_func):
             main_func(args=args)
         except tsrc.Error as e:
             # "expected" failure, display it and exit
-            ui.error(e)
+            if e.message:
+                ui.error(e)
             sys.exit(1)
         except SystemExit as e:
             # `ui.fatal()` or `sys.exit()` has been called,
