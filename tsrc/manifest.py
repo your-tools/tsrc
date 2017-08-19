@@ -2,14 +2,35 @@
 
 import os
 
-import ruamel.yaml
+import schema
 
 import tsrc
+import tsrc.config
 
 
 class RepoNotFound(tsrc.Error):
     def __init__(self, src):
         super().__init__("No repo found in '%s'" % src)
+
+
+def load(manifest_path):
+    gitlab_schema = {"url": str}
+    copy_schema = {"src": str, schema.Optional("dest"): str}
+    repo_schema = {
+        "src": str,
+        "url": str,
+        schema.Optional("branch"): str,
+        schema.Optional("copy"): [copy_schema],
+        schema.Optional("fixed_ref"): str,
+    }
+    manifest_schema = schema.Schema({
+        schema.Optional("gitlab"): gitlab_schema,
+        "repos": [repo_schema]
+    })
+    parsed = tsrc.config.parse_config_file(manifest_path, manifest_schema)
+    res = Manifest()
+    res.load(parsed)
+    return res
 
 
 class Manifest():
@@ -18,11 +39,10 @@ class Manifest():
         self.copyfiles = list()  # files to copy
         self.gitlab = dict()
 
-    def load(self, contents):
+    def load(self, data):
         self.copyfiles = list()
-        parsed = ruamel.yaml.safe_load(contents) or dict()
-        self.gitlab = parsed.get("gitlab")
-        repos = parsed.get("repos") or list()
+        self.gitlab = data.get("gitlab")
+        repos = data.get("repos") or list()
         for repo_config in repos:
             url = repo_config["url"]
             src = repo_config["src"]

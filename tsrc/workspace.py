@@ -32,17 +32,14 @@ class Workspace():
         if not manifest_yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(manifest_yml_path))
-        self.manifest = tsrc.manifest.Manifest()
-        self.manifest.load(manifest_yml_path.text())
+        self.manifest = tsrc.manifest.load(manifest_yml_path)
 
     def get_gitlab_url(self):
+        assert self.manifest, "manifest is empty. Did you call load_manifest()?"
         gitlab_config = self.manifest.gitlab
         if not gitlab_config:
             raise tsrc.Error("No gitlab configuration found in manifest")
-        res = gitlab_config.get("url")
-        if not res:
-            raise tsrc.Error("Missing 'url' in gitlab configuration")
-        return res
+        return gitlab_config["url"]
 
     def init_manifest(self, manifest_url, *, branch="master", tag=None):
         if self.manifest_clone_path.exists():

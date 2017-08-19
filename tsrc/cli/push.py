@@ -14,7 +14,7 @@ WIP_PREFIX = "WIP: "
 
 
 def get_token():
-    config = tsrc.config.read()
+    config = tsrc.config.parse_tsrc_config()
     return config["auth"]["gitlab"]["token"]
 
 

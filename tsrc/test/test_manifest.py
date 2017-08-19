@@ -1,5 +1,7 @@
 import os.path
 
+import ruamel.yaml
+
 import tsrc.manifest
 from tsrc.repo import Repo
 
@@ -24,7 +26,8 @@ repos:
       - src: .clang-format
 """
     manifest = tsrc.manifest.Manifest()
-    manifest.load(contents)
+    parsed = ruamel.yaml.safe_load(contents)
+    manifest.load(parsed)
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
     assert manifest.repos == [
         tsrc.Repo(
@@ -56,9 +59,27 @@ repos:
     url: git@example.com:proj_two/bar
 """
     manifest = tsrc.manifest.Manifest()
-    manifest.load(contents)
+    parsed = ruamel.yaml.safe_load(contents)
+    manifest.load(parsed)
     assert manifest.get_url("foo") == "git@example.com:proj_one/foo"
     assert manifest.get_url("bar") == "git@example.com:proj_two/bar"
     with pytest.raises(tsrc.manifest.RepoNotFound) as e:
         manifest.get_url("no/such")
         assert "no/such" in e.value.message
+
+
+def test_validates(tmp_path):
+    contents = """
+repos:
+  - src: bar
+    url: baz
+    copy:
+      - src: foo
+        dest: bar
+gitlab:
+  url: foo
+"""
+    manifest_path = tmp_path.joinpath("manifest.yml")
+    manifest_path.write_text(contents)
+    res = tsrc.manifest.load(manifest_path)
+    assert res
