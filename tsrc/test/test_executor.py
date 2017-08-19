@@ -14,6 +14,12 @@ class FakeActor(tsrc.executor.Actor):
     def __init__(self):
         pass
 
+    def description(self):
+        print("Frobnicating all items")
+
+    def display_item(self, item):
+        return item
+
     def process(self, item):
         ui.info("frobnicate", item)
         if item == "bar":

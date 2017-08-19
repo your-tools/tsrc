@@ -137,6 +137,12 @@ class Cloner(tsrc.executor.Actor):
     def __init__(self, workspace):
         self.workspace = workspace
 
+    def description(self):
+        return "Cloning missing repos"
+
+    def display_item(self, repo):
+        return repo.src
+
     def process(self, repo):
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)
