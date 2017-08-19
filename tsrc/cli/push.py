@@ -100,6 +100,7 @@ class PushAction():
     def prepare(self):
         if not self.gl_helper:
             workspace = tsrc.cli.get_workspace(self.args)
+            workspace.load_manifest()
             gitlab_url = workspace.get_gitlab_url()
             token = get_token()
             self.gl_helper = tsrc.gitlab.GitLabHelper(gitlab_url, token)
