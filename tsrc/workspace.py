@@ -101,25 +101,12 @@ class Workspace():
         tsrc.executor.run_sequence(to_clone, cloner)
 
     def set_remotes(self):
-        ui.info_1("Setting remote URLs")
-        for repo in self.get_repos():
-            full_path = self.joinpath(repo.src)
-            _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
-            if old_url != repo.url:
-                ui.info_2(repo.src, old_url, "->", repo.url)
-                tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
+        remote_setter = RemoteSetter(self)
+        tsrc.executor.run_sequence(self.get_repos(), remote_setter)
 
     def copy_files(self):
-        for src, dest in self.manifest.copyfiles:
-            src_path = self.joinpath(src)
-            dest_path = self.joinpath(dest)
-            ui.info_2("Copying", src, "->", dest)
-            if dest_path.exists():
-                # Re-set the write permissions on the file:
-                dest_path.chmod(stat.S_IWRITE)
-            src_path.copy(dest_path)
-            # Make sure perms are read only for everyone
-            dest_path.chmod(0o10444)
+        file_copier = FileCopier(self)
+        tsrc.executor.run_sequence(self.manifest.copyfiles, file_copier)
 
     def enumerate_repos(self):
         """ Yield (index, repo, full_path) for all the repos """
@@ -159,3 +146,51 @@ class Cloner(tsrc.executor.Actor):
                 tsrc.git.run_git(repo_path, "reset", "--hard", ref)
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
+
+
+class FileCopier(tsrc.executor.Actor):
+    def __init__(self, workspace):
+        self.workspace = workspace
+
+    def description(self):
+        return "Copying files"
+
+    def display_item(self, item):
+        src, dest = item
+        return "%s -> %s" % (src, dest)
+
+    def process(self, item):
+        src, dest = item
+        ui.info(src, "->", dest)
+        try:
+            src_path = self.workspace.joinpath(src)
+            dest_path = self.workspace.joinpath(dest)
+            if dest_path.exists():
+                # Re-set the write permissions on the file:
+                dest_path.chmod(stat.S_IWRITE)
+            src_path.copy(dest_path)
+            # Make sure perms are read only for everyone
+            dest_path.chmod(0o10444)
+        except Exception as e:
+            raise tsrc.Error(str(e))
+
+
+class RemoteSetter(tsrc.executor.Actor):
+    def __init__(self, workspace):
+        self.workspace = workspace
+
+    def description(self):
+        return "Setting remote URLs"
+
+    def display_item(self, repo):
+        return repo.src
+
+    def process(self, repo):
+        full_path = self.workspace.joinpath(repo.src)
+        try:
+            _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
+            if old_url != repo.url:
+                ui.info_2(repo.src, old_url, "->", repo.url)
+                tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
+        except Exception:
+            raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url)
