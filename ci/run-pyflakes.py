@@ -9,6 +9,8 @@ def ignore(p):
         return True
     if 'test' in parts:
         return True
+    if parts[-1] == "__init__.py":
+        return True
     return False
 
 
