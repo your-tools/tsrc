@@ -14,9 +14,10 @@ class Status:
     dirty = attr.ib()
 
 
-def collect_statuses(workspace, repos):
+def collect_statuses(workspace):
     errors = list()
     result = list()
+    repos = workspace.get_repos()
 
     if not repos:
         return errors, result
@@ -61,7 +62,6 @@ def display_statuses(statuses, errors):
 
 def main(args):
     workspace = tsrc.cli.get_workspace(args)
-    manifest = workspace.load_manifest()
-    repos = manifest.repos
-    statuses, errors = collect_statuses(workspace, repos)
+    workspace.load_manifest()
+    statuses, errors = collect_statuses(workspace)
     display_statuses(statuses, errors)

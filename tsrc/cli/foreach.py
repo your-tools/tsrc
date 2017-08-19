@@ -9,6 +9,7 @@ from tsrc import ui
 
 def main(args):
     workspace = tsrc.cli.get_workspace(args)
+    workspace.load_manifest()
     errors = list()
     for _, repo, full_path in workspace.enumerate_repos():
         ui.info_2("Running", "`%s`" % args.cmd_as_str, "on",

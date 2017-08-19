@@ -10,7 +10,6 @@ import tsrc.cli
 class RepoSyncer:
     def __init__(self, workspace):
         self.workspace = workspace
-        self.manifest = None
         self.bad_branches = list()
         self.errors = list()
 
@@ -22,11 +21,12 @@ class RepoSyncer:
         return (not self.errors) and (not self.bad_branches)
 
     def clone_missing(self):
-        self.manifest = self.workspace.update_manifest()
-        self.workspace.clone_missing(self.manifest)
+        self.workspace.update_manifest()
+        self.workspace.load_manifest()
+        self.workspace.clone_missing()
 
     def sync_repos(self):
-        num_repos = len(self.manifest.repos)
+        num_repos = len(self.workspace.get_repos())
         for i, repo, full_path in self.workspace.enumerate_repos():
             ui.info_count(i, num_repos, "Sync", ui.bold, repo.src)
             self.sync_repo(repo, full_path)
@@ -61,7 +61,7 @@ class RepoSyncer:
             self.errors.append((repo.src, "updating ref failed"))
 
     def copy_files(self):
-        self.workspace.copy_files(self.manifest)
+        self.workspace.copy_files()
 
     def display_errors(self):
         if self.errors:

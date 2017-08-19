@@ -17,6 +17,11 @@ class Workspace():
         self.root_path = root_path
         hidden_path = self.joinpath(".tsrc")
         self.manifest_clone_path = hidden_path.joinpath("manifest")
+        self.manifest = None
+
+    def get_repos(self):
+        assert self.manifest, "manifest is empty. Did you call load_manifest()?"
+        return self.manifest.repos
 
     def joinpath(self, *parts):
         return self.root_path.joinpath(*parts)
@@ -26,13 +31,11 @@ class Workspace():
         if not manifest_yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(manifest_yml_path))
-        manifest = tsrc.manifest.Manifest()
-        manifest.load(manifest_yml_path.text())
-        return manifest
+        self.manifest = tsrc.manifest.Manifest()
+        self.manifest.load(manifest_yml_path.text())
 
     def get_gitlab_url(self):
-        manifest = self.load_manifest()
-        gitlab_config = manifest.gitlab
+        gitlab_config = self.manifest.gitlab
         if not gitlab_config:
             raise tsrc.Error("No gitlab configuration found in manifest")
         res = gitlab_config.get("url")
@@ -66,7 +69,7 @@ class Workspace():
                 tsrc.git.run_git(self.manifest_clone_path, "reset",
                                  "--hard", tag)
 
-        return self.load_manifest()
+        self.load_manifest()
 
     def update_manifest(self):
         ui.info_2("Updating manifest")
@@ -78,19 +81,18 @@ class Workspace():
         tsrc.git.run_git(self.manifest_clone_path, *cmd)
         cmd = ("reset", "--hard", "@{u}")
         tsrc.git.run_git(self.manifest_clone_path, *cmd)
-        return self.load_manifest()
 
     def manifest_branch(self):
         return tsrc.git.get_current_branch(self.manifest_clone_path)
 
-    def clone_missing(self, manifest):
+    def clone_missing(self):
         """ Clone missing repos.
 
         Called at the beginning of `tsrc init` and `tsrc sync`
 
         """
         to_clone = list()
-        for repo in manifest.repos:
+        for repo in self.get_repos():
             repo_path = self.joinpath(repo.src)
             if not repo_path.exists():
                 to_clone.append(repo)
@@ -109,16 +111,15 @@ class Workspace():
 
     def set_remotes(self):
         ui.info_1("Setting remote URLs")
-        manifest = self.load_manifest()
-        for repo in manifest.repos:
+        for repo in self.get_repos():
             full_path = self.joinpath(repo.src)
             _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
             if old_url != repo.url:
                 ui.info_2(repo.src, old_url, "->", repo.url)
                 tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
 
-    def copy_files(self, manifest):
-        for src, dest in manifest.copyfiles:
+    def copy_files(self):
+        for src, dest in self.manifest.copyfiles:
             src_path = self.joinpath(src)
             dest_path = self.joinpath(dest)
             ui.info_2("Copying", src, "->", dest)
@@ -131,12 +132,10 @@ class Workspace():
 
     def enumerate_repos(self):
         """ Yield (index, repo, full_path) for all the repos """
-        manifest = self.load_manifest()
-        for i, repo in enumerate(manifest.repos):
+        for i, repo in enumerate(self.get_repos()):
             full_path = self.joinpath(repo.src)
             yield (i, repo, full_path)
 
     def get_url(self, src):
         """ Return the url of the project in `src` """
-        manifest = self.load_manifest()
-        return manifest.get_url(src)
+        return self.manifest.get_url(src)

@@ -9,6 +9,7 @@ import tsrc.git
 
 def main(args):
     workspace = tsrc.cli.get_workspace(args)
+    workspace.load_manifest()
     all_ok = True
     for unused_index, repo, full_path in workspace.enumerate_repos():
         colors = ["green", "reset", "yellow", "reset", "bold blue", "reset"]
