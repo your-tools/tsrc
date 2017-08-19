@@ -119,7 +119,6 @@ class Workspace():
         return self.manifest.get_url(src)
 
 
-# pylint: disable=too-few-public-methods
 class Cloner(tsrc.executor.Actor):
     def __init__(self, workspace):
         self.workspace = workspace

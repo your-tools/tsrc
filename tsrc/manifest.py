@@ -12,7 +12,6 @@ class RepoNotFound(tsrc.Error):
         super().__init__("No repo found in '%s'" % src)
 
 
-# pylint: disable=too-few-public-methods
 class Manifest():
     def __init__(self):
         self.repos = list()      # repos to clone
