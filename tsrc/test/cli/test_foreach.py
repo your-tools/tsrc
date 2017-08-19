@@ -44,7 +44,7 @@ def test_foreach_with_errors(tsrc_cli, git_server, messages):
     cmd = get_cmd_for_foreach_test(shell=False)
     cmd.append("foo")
     tsrc_cli.run("foreach", *cmd, expect_fail=True)
-    assert messages.find("foreach failed")
+    assert messages.find("Running `.*` .* failed")
     assert messages.find("\* spam")
 
 
@@ -58,8 +58,7 @@ def test_foreach_happy(tsrc_cli, git_server, messages):
     cmd = get_cmd_for_foreach_test(shell=False)
     cmd.append("doc")
     tsrc_cli.run("foreach", *cmd)
-    assert messages.find("Running `%s` on foo" % " ".join(cmd))
-    assert messages.find("Running `%s` on spam" % " ".join(cmd))
+    assert messages.find("`%s`" % " ".join(cmd))
 
 
 def test_foreach_shell(tsrc_cli, git_server, messages):
@@ -72,4 +71,4 @@ def test_foreach_shell(tsrc_cli, git_server, messages):
     cmd = get_cmd_for_foreach_test(shell=True)
     cmd.append("doc")
     tsrc_cli.run("foreach", "-c", " ".join(cmd))
-    assert messages.find("Running `%s` on foo" % " ".join(cmd))
+    assert messages.find("`%s`" % " ".join(cmd))
