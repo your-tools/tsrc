@@ -31,7 +31,7 @@ def test_sync_with_errors(tsrc_cli, git_server, workspace_path, messages):
 
     tsrc_cli.run("sync", expect_fail=True)
 
-    assert messages.find("Sync failed")
+    assert messages.find("Synchronize workspace failed")
     assert messages.find("\* foo/bar")
 
 

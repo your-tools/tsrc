@@ -108,6 +108,13 @@ class Workspace():
         file_copier = FileCopier(self)
         tsrc.executor.run_sequence(self.manifest.copyfiles, file_copier)
 
+    def sync(self):
+        syncer = Syncer(self)
+        try:
+            tsrc.executor.run_sequence(self.manifest.repos, syncer)
+        finally:
+            syncer.display_bad_branches()
+
     def enumerate_repos(self):
         """ Yield (index, repo, full_path) for all the repos """
         for i, repo in enumerate(self.get_repos()):
@@ -196,3 +203,77 @@ class RemoteSetter(tsrc.executor.Actor):
                 tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
         except Exception:
             raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url)
+
+
+class BadBranches(tsrc.Error):
+    pass
+
+
+class Syncer(tsrc.executor.Actor):
+    def __init__(self, workspace):
+        self.workspace = workspace
+        self.bad_branches = list()
+
+    def description(self):
+        return "Synchronize workspace"
+
+    def display_item(self, repo):
+        return repo.src
+
+    def process(self, repo):
+        ui.info(repo.src)
+        repo_path = self.workspace.joinpath(repo.src)
+        self.check_branch(repo, repo_path)
+        self.fetch(repo_path)
+
+        if repo.fixed_ref:
+            self.sync_repo_to_ref(repo_path, repo.fixed_ref)
+        else:
+            self.sync_repo_to_branch(repo_path)
+
+    def check_branch(self, repo, repo_path):
+        current_branch = None
+        try:
+            current_branch = tsrc.git.get_current_branch(repo_path)
+        except tsrc.Error:
+            raise tsrc.Error("Not on any branch")
+
+        if current_branch and current_branch != repo.branch:
+            self.bad_branches.append((repo.src, current_branch, repo.branch))
+
+    @staticmethod
+    def fetch(repo_path):
+        try:
+            tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", "origin")
+        except tsrc.Error:
+            raise tsrc.Error("fetch failed")
+
+    @staticmethod
+    def sync_repo_to_ref(repo_path, ref):
+        ui.info_2("Resetting to", ref)
+        status = tsrc.git.get_status(repo_path)
+        if status != "clean":
+            raise tsrc.Error("%s, skipping" % status)
+        try:
+            tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+        except tsrc.Error:
+            raise tsrc.Error("updating ref failed")
+
+    @staticmethod
+    def sync_repo_to_branch(repo_path):
+        try:
+            tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{u}")
+        except tsrc.Error:
+            raise tsrc.Error("updating branch failed")
+
+    def display_bad_branches(self):
+        if not self.bad_branches:
+            return
+        ui.error("Some projects were not on the correct branch")
+        headers = ("project", "actual", "expected")
+        data = [
+            ((ui.bold, name), (ui.red, actual), (ui.green, expected)) for
+            (name, actual, expected) in self.bad_branches
+        ]
+        ui.info_table(data, headers=headers)
+        raise BadBranches()
