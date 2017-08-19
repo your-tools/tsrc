@@ -179,6 +179,9 @@ class RemoteSetter(tsrc.executor.Actor):
     def __init__(self, workspace):
         self.workspace = workspace
 
+    def quiet(self):
+        return True
+
     def description(self):
         return "Setting remote URLs"
 

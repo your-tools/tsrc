@@ -10,12 +10,15 @@ class ExecutorFailed(tsrc.Error):
     pass
 
 
-# pylint: disable=too-few-public-methods
 class Actor(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def description(self) -> str:
         pass
+
+    # pylint: disable=no-self-use
+    def quiet(self):
+        return False
 
     @abc.abstractmethod
     def display_item(self, _) -> str:
@@ -39,7 +42,8 @@ class SequentialExecutor():
         self.errors = list()
         num_items = len(items)
         for i, item in enumerate(items):
-            ui.info_count(i, num_items, end="")
+            if not self.actor.quiet():
+                ui.info_count(i, num_items, end="")
             self.process_one(item)
 
         if self.errors:
