@@ -62,20 +62,11 @@ def main_wrapper(main_func):
         except tsrc.Error as e:
             # "expected" failure, display it and exit
             if e.message:
-                ui.error(e)
+                ui.error(e.message)
             sys.exit(1)
-        except SystemExit as e:
-            # `ui.fatal()` or `sys.exit()` has been called,
-            # assume message has already been displayed and
-            # exit accordingly
-            sys.exit(e.code)
         except KeyboardInterrupt:
             ui.warning("Interrupted by user, quitting")
             sys.exit(1)
-        except Exception as e:
-            # This is a bug: raise so that colored_traceback prints
-            # an helpful backtrace
-            raise
     return wrapped
 
 
