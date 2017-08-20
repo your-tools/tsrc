@@ -12,8 +12,9 @@ GITLAB_API_VERSION = "v4"
 
 
 class GitLabError(tsrc.Error):
-    def __init__(self, status_code, message):
+    def __init__(self, url, status_code, message):
         super().__init__(message)
+        self.url = url
         self.status_code = status_code
         self.message = message
 
@@ -38,18 +39,19 @@ def _handle_json_errors(response):
         json_details["error"] = ("Expecting json result, got %s" % response.text)
 
     status_code = response.status_code
+    url = response.url
     if 400 <= status_code < 500:
         for key in ["error", "message"]:
             if key in json_details:
-                raise GitLabError(status_code, json_details[key])
-        raise GitLabError(status_code, json_details)
+                raise GitLabError(url, status_code, json_details[key])
+        raise GitLabError(url, status_code, json_details)
     if status_code >= 500:
-        raise GitLabError(status_code, response.text)
+        raise GitLabError(url, status_code, response.text)
 
 
 def _handle_stream_errors(response):
     if response.status_code >= 400:
-        raise GitLabError("Incorrect status code:", response.status_code)
+        raise GitLabError(response.url, "Incorrect status code:", response.status_code)
 
 
 class GitLabHelper():
@@ -70,12 +72,13 @@ class GitLabHelper():
 
     def get_project_id(self, project_name):
         encoded_project_name = urllib.parse.quote(project_name, safe=list())
+        url = "/projects/%s" % encoded_project_name
         try:
-            res = self.make_request("GET", "/projects/%s" % encoded_project_name)
+            res = self.make_request("GET", url)
             return res["id"]
         except GitLabError as e:
             if e.status_code == 404:
-                raise GitLabError(404, "Project not found: %s" % project_name) from None
+                raise GitLabError(url, 404, "Project not found: %s" % project_name) from None
             else:
                 raise
 
