@@ -51,9 +51,9 @@ def display_statuses(statuses, errors):
         if status.dirty:
             message = message + (ui.reset, ui.brown, "(dirty)")
         ui.info(*message)
-    ui.info()
 
     if errors:
+        ui.info()
         ui.error("Errors when getting branch")
         for src, error in errors:
             ui.info("*", ui.bold, src, ui.reset, error.output)
