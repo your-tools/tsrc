@@ -10,7 +10,7 @@ class Kaboom(tsrc.Error):
         return "Kaboom!"
 
 
-class FakeActor(tsrc.executor.Actor):
+class FakeTask(tsrc.executor.Task):
     def __init__(self):
         pass
 
@@ -29,16 +29,16 @@ class FakeActor(tsrc.executor.Actor):
 
 
 def test_doing_nothing():
-    actor = FakeActor()
-    tsrc.executor.run_sequence(list(), actor)
+    task = FakeTask()
+    tsrc.executor.run_sequence(list(), task)
 
 
 def test_happy():
-    actor = FakeActor()
-    tsrc.executor.run_sequence(["foo", "spam"], actor)
+    task = FakeTask()
+    tsrc.executor.run_sequence(["foo", "spam"], task)
 
 
 def test_collect_errors():
-    actor = FakeActor()
+    task = FakeTask()
     with pytest.raises(tsrc.executor.ExecutorFailed):
-        tsrc.executor.run_sequence(["foo", "bar"], actor)
+        tsrc.executor.run_sequence(["foo", "bar"], task)

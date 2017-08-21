@@ -123,7 +123,7 @@ class Workspace():
         return self.manifest.get_url(src)
 
 
-class Cloner(tsrc.executor.Actor):
+class Cloner(tsrc.executor.Task):
     def __init__(self, workspace):
         self.workspace = workspace
 
@@ -151,7 +151,7 @@ class Cloner(tsrc.executor.Actor):
                 raise tsrc.Error("Resetting to", ref, "failed")
 
 
-class FileCopier(tsrc.executor.Actor):
+class FileCopier(tsrc.executor.Task):
     def __init__(self, workspace):
         self.workspace = workspace
 
@@ -178,7 +178,7 @@ class FileCopier(tsrc.executor.Actor):
             raise tsrc.Error(str(e))
 
 
-class RemoteSetter(tsrc.executor.Actor):
+class RemoteSetter(tsrc.executor.Task):
     def __init__(self, workspace):
         self.workspace = workspace
 
@@ -206,7 +206,7 @@ class BadBranches(tsrc.Error):
     pass
 
 
-class Syncer(tsrc.executor.Actor):
+class Syncer(tsrc.executor.Task):
     def __init__(self, workspace):
         self.workspace = workspace
         self.bad_branches = list()

@@ -11,7 +11,7 @@ class CommandFailed(tsrc.Error):
     pass
 
 
-class CmdRunner(tsrc.executor.Actor):
+class CmdRunner(tsrc.executor.Task):
     def __init__(self, workspace, cmd, cmd_as_str, shell=False):
         self.workspace = workspace
         self.cmd = cmd
