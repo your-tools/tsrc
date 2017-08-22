@@ -1,4 +1,4 @@
-""" Helpers to run thing on multiple repos and collect errors """
+""" Helpers to run things on multiple repos and collect errors """
 
 import abc
 
