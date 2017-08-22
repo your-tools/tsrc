@@ -18,9 +18,7 @@ def test_tsrc_cli_bad_args(tsrc_cli):
 def read_remote_manifest(workspace_path, git_server):
     tsrc.git.run_git(workspace_path, "clone", git_server.manifest_url)
     manifest_yml = workspace_path.joinpath("manifest", "manifest.yml")
-    assert manifest_yml.exists()
-    manifest = tsrc.manifest.Manifest()
-    manifest.load(manifest_yml.text())
+    manifest = tsrc.manifest.load(manifest_yml)
     return manifest
 
 
@@ -64,8 +62,7 @@ def test_git_server_change_manifest_branch(workspace_path, git_server):
     tsrc.git.run_git(workspace_path,
                      "clone", git_server.manifest_url, "--branch", "devel")
     manifest_yml = workspace_path.joinpath("manifest", "manifest.yml")
-    manifest = tsrc.manifest.Manifest()
-    manifest.load(manifest_yml.text())
+    manifest = tsrc.manifest.load(manifest_yml)
 
     assert len(manifest.repos) == 2
 

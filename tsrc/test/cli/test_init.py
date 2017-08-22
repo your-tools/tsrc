@@ -75,6 +75,14 @@ def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
     assert tsrc.git.get_current_branch(foo_path) == "next"
 
 
+def test_empty_repo(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo", empty=True)
+    git_server.add_repo("bar")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, expect_fail=True)
+
+
 def test_resets_to_fixed_ref(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     git_server.tag("foo", "v1.0")

@@ -1,25 +1,43 @@
 """ Entry point for tsrc foreach """
 
 import subprocess
-import sys
 
-import tsrc.cli
 from tsrc import ui
+import tsrc.cli
+import tsrc.workspace
+
+
+class CommandFailed(tsrc.Error):
+    pass
+
+
+class CmdRunner(tsrc.executor.Task):
+    def __init__(self, workspace, cmd, cmd_as_str, shell=False):
+        self.workspace = workspace
+        self.cmd = cmd
+        self.cmd_as_str = cmd_as_str
+        self.shell = shell
+
+    def display_item(self, repo):
+        return repo.src
+
+    def description(self):
+        return "Running `%s` on every repo" % self.cmd_as_str
+
+    def process(self, repo):
+        ui.info(repo.src, "\n",
+                ui.lightgray, "$ ",
+                ui.reset, ui.bold, self.cmd_as_str,
+                sep="")
+        full_path = self.workspace.joinpath(repo.src)
+        rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)
+        if rc != 0:
+            raise CommandFailed()
 
 
 def main(args):
     workspace = tsrc.cli.get_workspace(args)
-    errors = list()
-    for _, repo, full_path in workspace.enumerate_repos():
-        ui.info_2("Running", "`%s`" % args.cmd_as_str, "on",
-                  ui.bold, repo.src)
-        returncode = subprocess.call(args.cmd, cwd=full_path, shell=args.shell)
-        if returncode != 0:
-            errors.append(repo.src)
-    if errors:
-        ui.info(ui.cross, ui.red, "foreach failed")
-        for error in errors:
-            ui.info("*", ui.bold, error)
-        sys.exit(1)
-    else:
-        ui.info(ui.check, "All done")
+    workspace.load_manifest()
+    cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)
+    tsrc.executor.run_sequence(workspace.manifest.repos, cmd_runner)
+    ui.info("OK", ui.check)

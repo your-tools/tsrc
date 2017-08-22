@@ -85,7 +85,7 @@ class GitServer():
     def get_url(self, name):
         return "file://" + self.bare_path.joinpath(name)
 
-    def _create_repo(self, name):
+    def _create_repo(self, name, empty=False):
         bare_path = self.bare_path.joinpath(name)
         bare_path.makedirs_p()
         tsrc.git.run_git(bare_path, "init", "--bare")
@@ -96,11 +96,12 @@ class GitServer():
         src_path.joinpath("README").touch()
         tsrc.git.run_git(src_path, "add", "README")
         tsrc.git.run_git(src_path, "commit", "--message", "Initial commit")
-        tsrc.git.run_git(src_path, "push", "origin", "master")
+        if not empty:
+            tsrc.git.run_git(src_path, "push", "origin", "master")
         return str(bare_path)
 
-    def add_repo(self, name, add_to_manifest=True):
-        self._create_repo(name)
+    def add_repo(self, name, add_to_manifest=True, empty=False):
+        self._create_repo(name, empty=empty)
         url = self.get_url(name)
         if add_to_manifest:
             self.manifest.add_repo(name, url)
