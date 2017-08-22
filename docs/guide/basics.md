@@ -29,6 +29,7 @@ $ tsrc init git@gitlab.local:acme/manifest.git
 
 In this example:
 
+* A clone of the manifest repository will be created in a hidden `.tsrc/manifest` folder.
 * `foo` will be cloned in `<work>/foo` using `git@gitlab.com/acme/foo.git` origin url.
 * Similarly, `bar` will be cloned in `<work>/bar` using `git@gitlab.com:acme/bar.git`
 
@@ -46,3 +47,9 @@ Note that `tsrc sync` only updates the repositories if the changes are trivial:
 * If the branch has diverged, `tsrc` will do nothing. It's up to you to use
   `rebase` or `merge`
 * Ditto if there is no remote tracking branch
+
+
+!!! note
+    Like `git`, tsrc will walk up the folders hierarchy looking for a `.tsrc`
+    folder, which means you can run tsrc commands anywhere in your workspace, not
+    just at the top.
