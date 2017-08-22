@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.2 (2017-08-22)
+
+Bug fix release.
+
+* `tsrc init`: Fix crash when a repository is empty (#17). Reported by @nicolasbrechet
+* `tsrc push`: Fix rude message when credentials are missing (#20). Reported by @cgestes
+
+## v0.2.1 (2017-08-10)
+
+Packaging fixes.
+
+
 ## v0.2.0 (2017-08-09)
 
 * Support for specifying custom branches in the manifest
