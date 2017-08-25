@@ -7,7 +7,7 @@ import tsrc.cli
 from tsrc.test.conftest import *
 
 
-def test_status_happy(tsrc_cli, git_server, workspace_path, messages):
+def test_status_happy(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "CMakeLists.txt")
@@ -19,11 +19,11 @@ def test_status_happy(tsrc_cli, git_server, workspace_path, messages):
 
     tsrc_cli.run("status")
 
-    assert messages.find("\* foo/bar   master")
-    assert messages.find("\* spam/eggs fish")
+    assert message_recorder.find("\* foo/bar   master")
+    assert message_recorder.find("\* spam/eggs fish")
 
 
-def test_status_dirty(tsrc_cli, git_server, workspace_path, messages):
+def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo/bar")
     git_server.push_file("foo/bar", "CMakeLists.txt")
     manifest_url = git_server.manifest_url
@@ -32,10 +32,10 @@ def test_status_dirty(tsrc_cli, git_server, workspace_path, messages):
 
     tsrc_cli.run("status")
 
-    assert messages.find("\* foo/bar master \(dirty\)")
+    assert message_recorder.find("\* foo/bar master \(dirty\)")
 
 
-def test_status_error(tsrc_cli, git_server, workspace_path, messages):
+def test_status_error(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "CMakeLists.txt")
@@ -46,5 +46,5 @@ def test_status_error(tsrc_cli, git_server, workspace_path, messages):
 
     tsrc_cli.run("status")
 
-    assert messages.find("\* foo/bar master")
-    assert messages.find("Errors when getting branch")
+    assert message_recorder.find("\* foo/bar master")
+    assert message_recorder.find("Errors when getting branch")

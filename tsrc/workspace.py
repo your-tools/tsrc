@@ -6,7 +6,7 @@ Mostly used by tsrc/cli.py
 
 import stat
 
-from tsrc import ui
+import ui
 import tsrc
 import tsrc.executor
 import tsrc.git

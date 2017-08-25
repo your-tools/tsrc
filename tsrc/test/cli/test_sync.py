@@ -20,7 +20,7 @@ def test_sync_happy(tsrc_cli, git_server, workspace_path):
     assert bar_txt_path.text() == "this is bar"
 
 
-def test_sync_with_errors(tsrc_cli, git_server, workspace_path, messages):
+def test_sync_with_errors(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
@@ -31,8 +31,8 @@ def test_sync_with_errors(tsrc_cli, git_server, workspace_path, messages):
 
     tsrc_cli.run("sync", expect_fail=True)
 
-    assert messages.find("Synchronize workspace failed")
-    assert messages.find("\* foo/bar")
+    assert message_recorder.find("Synchronize workspace failed")
+    assert message_recorder.find("\* foo/bar")
 
 
 def test_sync_finds_root(tsrc_cli, git_server, workspace_path, monkeypatch):
@@ -74,7 +74,7 @@ def test_switching_manifest_branches(tsrc_cli, git_server, workspace_path):
     assert bar_path.exists()
 
 
-def test_sync_not_on_master(tsrc_cli, git_server, workspace_path, messages):
+def test_sync_not_on_master(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo")
     git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
@@ -86,7 +86,7 @@ def test_sync_not_on_master(tsrc_cli, git_server, workspace_path, messages):
 
     tsrc_cli.run("sync", expect_fail=True)
 
-    assert messages.find("not on the correct branch")
+    assert message_recorder.find("not on the correct branch")
 
 
 def test_copies_are_up_to_date(tsrc_cli, git_server, workspace_path):
@@ -114,7 +114,7 @@ def test_copies_are_readonly(tsrc_cli, git_server, workspace_path):
     assert not os.access(foo_txt, os.W_OK)
 
 
-def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
+def test_changing_branch(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
@@ -124,7 +124,7 @@ def test_changing_branch(tsrc_cli, git_server, workspace_path, messages):
     git_server.manifest.set_repo_branch("foo", "next")
 
     tsrc_cli.run("sync", expect_fail=True)
-    assert messages.find("not on the correct branch")
+    assert message_recorder.find("not on the correct branch")
 
 
 def test_fixed_ref_are_not_updated(tsrc_cli, git_server, workspace_path):

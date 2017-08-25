@@ -2,7 +2,7 @@
 
 import subprocess
 
-from tsrc import ui
+import ui
 import tsrc.cli
 import tsrc.workspace
 

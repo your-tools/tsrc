@@ -6,7 +6,7 @@ import subprocess
 
 import path
 
-from tsrc import ui
+import ui
 import tsrc
 
 

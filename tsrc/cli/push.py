@@ -3,7 +3,7 @@
 import re
 import unidecode
 
-from tsrc import ui
+import ui
 import tsrc.config
 import tsrc.gitlab
 import tsrc.git

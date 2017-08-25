@@ -9,7 +9,7 @@ import textwrap
 import colored_traceback
 
 import tsrc
-from tsrc import ui
+import ui
 
 
 def fix_cmd_args_for_foreach(args, foreach_parser):
