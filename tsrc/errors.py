@@ -1,4 +1,4 @@
-""" Custom excetpions """
+""" Custom exceptions """
 
 
 DOC_URL = "https://tankerapp.github.io/tsrc/ref/formats/"
