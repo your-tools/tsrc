@@ -73,8 +73,13 @@ def main_wrapper(main_func):
 @main_wrapper
 def main(args=None):
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--verbose", help="Show debug messages",
                         action="store_true")
+    parser.add_argument("-q", "--quiet", help="Only display warnings and errors",
+                        action="store_true")
+    parser.add_argument("--color", choices=["auto", "always", "never"])
+
     subparsers = parser.add_subparsers(title="subcommands", dest="command")
 
     subparsers.add_parser("version")
@@ -115,8 +120,9 @@ def main(args=None):
     workspace_subparser(subparsers, "sync")
 
     args = parser.parse_args(args=args)
-    if args.verbose:
-        ui.CONFIG["verbose"] = True
+    ui.setup(verbose=args.verbose, quiet=args.quiet, color=args.color)
+    ui.setup(timestamp=True)
+
     command = args.command
     if not command:
         parser.print_help()

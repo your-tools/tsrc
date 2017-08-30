@@ -21,10 +21,21 @@ $ tsrc --verbose sync
 $ tsrc init MANIFEST_URL
 ```
 
+## Global options
+
+--verbose
+:   show verbose messages
+
+-q.--quiet
+:   hide everything except errors and warnings
+
+--color [always|never|auto]
+:    control using color for messages (default 'auto', on if stdout is a terminal)
+
 ## Usage
 
 
-tsrc init MANIFEST_URL</dt>
+tsrc init MANIFEST_URL
 :   Initializes a new workspace.
 
     MANIFEST_URL should be a git URL containing a valid
