@@ -5,7 +5,7 @@
 We believe Python2 is an inferior language than Python3, and we use many
 Python3 features to make the code more readable and robust.
 
-Plus [Python2.7 supports ends in 3 years](
+Plus [Python2.7 supports ends in 2020](
 https://www.python.org/dev/peps/pep-0373/#id2).
 
 ## Why not repo?
