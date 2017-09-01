@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3 (2017-09-01)
+
+* Split user interface functionality into its own project: [python-cli-ui](https://github.com/TankerApp/python-cli-ui).
+
+* Add `--quiet` and `--color` global options.
+
 ## v0.2.2 (2017-08-22)
 
 Bug fix release.
