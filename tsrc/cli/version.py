@@ -4,7 +4,7 @@ import pkg_resources
 
 import path
 
-from tsrc import ui
+import ui
 import tsrc.git
 
 

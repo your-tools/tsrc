@@ -5,9 +5,8 @@ import urllib.parse
 import requests
 
 import tsrc
-from tsrc import ui
+import ui
 
-GITLAB_URL = "http://10.100.0.1:8000"
 GITLAB_API_VERSION = "v4"
 
 

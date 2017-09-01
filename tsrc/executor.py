@@ -2,7 +2,7 @@
 
 import abc
 
-from tsrc import ui
+import ui
 import tsrc
 
 

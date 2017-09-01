@@ -1,4 +1,4 @@
-from tsrc import ui
+import ui
 import tsrc
 import tsrc.executor
 

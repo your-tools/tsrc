@@ -7,13 +7,14 @@ import path
 import pytest
 import ruamel.yaml
 
-from tsrc import ui
+import ui
 import tsrc.cli.main
 import tsrc.git
 import tsrc.workspace
 
+from ui.tests.conftest import message_recorder
 from .helpers.git_server import git_server
-from .helpers.cli import messages, tsrc_cli
+from .helpers.cli import tsrc_cli
 
 
 @pytest.fixture()

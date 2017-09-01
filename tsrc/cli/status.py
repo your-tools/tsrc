@@ -2,7 +2,7 @@
 
 import attr
 
-from tsrc import ui
+import ui
 import tsrc.cli
 
 

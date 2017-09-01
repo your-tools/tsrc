@@ -34,7 +34,7 @@ def test_foreach_no_args(tsrc_cli, git_server):
     tsrc_cli.run("foreach", expect_fail=True)
 
 
-def test_foreach_with_errors(tsrc_cli, git_server, messages):
+def test_foreach_with_errors(tsrc_cli, git_server, message_recorder):
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "foo/bar.txt",
@@ -44,11 +44,11 @@ def test_foreach_with_errors(tsrc_cli, git_server, messages):
     cmd = get_cmd_for_foreach_test(shell=False)
     cmd.append("foo")
     tsrc_cli.run("foreach", *cmd, expect_fail=True)
-    assert messages.find("Running `.*` .* failed")
-    assert messages.find("\* spam")
+    assert message_recorder.find("Running `.*` .* failed")
+    assert message_recorder.find("\* spam")
 
 
-def test_foreach_happy(tsrc_cli, git_server, messages):
+def test_foreach_happy(tsrc_cli, git_server, message_recorder):
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "doc/index.html")
@@ -58,10 +58,10 @@ def test_foreach_happy(tsrc_cli, git_server, messages):
     cmd = get_cmd_for_foreach_test(shell=False)
     cmd.append("doc")
     tsrc_cli.run("foreach", *cmd)
-    assert messages.find("`%s`" % " ".join(cmd))
+    assert message_recorder.find("`%s`" % " ".join(cmd))
 
 
-def test_foreach_shell(tsrc_cli, git_server, messages):
+def test_foreach_shell(tsrc_cli, git_server, message_recorder):
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "doc/index.html")
@@ -71,4 +71,4 @@ def test_foreach_shell(tsrc_cli, git_server, messages):
     cmd = get_cmd_for_foreach_test(shell=True)
     cmd.append("doc")
     tsrc_cli.run("foreach", "-c", " ".join(cmd))
-    assert messages.find("`%s`" % " ".join(cmd))
+    assert message_recorder.find("`%s`" % " ".join(cmd))
