@@ -121,7 +121,6 @@ def main(args=None):
 
     args = parser.parse_args(args=args)
     ui.setup(verbose=args.verbose, quiet=args.quiet, color=args.color)
-    ui.setup(timestamp=True)
 
     command = args.command
     if not command:
