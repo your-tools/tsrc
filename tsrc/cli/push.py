@@ -3,8 +3,8 @@
 import re
 
 import ui
-import unidecode
 
+import tsrc
 import tsrc.config
 import tsrc.gitlab
 import tsrc.git
@@ -12,6 +12,12 @@ import tsrc.cli
 
 
 WIP_PREFIX = "WIP: "
+
+
+class NoUserMatching(tsrc.Error):
+    def __init__(self, query):
+        self.query = query
+        super().__init__("No user found matching: %s" % self.query)
 
 
 def get_token():
@@ -44,31 +50,8 @@ def project_name_from_url(url):
     return res
 
 
-def get_assignee(users, pattern):
-    def sanitize(string):
-        string = unidecode.unidecode(string)
-        string = string.lower()
-        return string
-    # Sanitize both the list of names and the input
-    usernames = [x["name"] for x in users]
-    sanitized_names = [sanitize(x) for x in usernames]
-    sanitized_pattern = sanitize(pattern)
-    matches = list()
-    for user, sanitized_name in zip(users, sanitized_names):
-        if sanitized_pattern in sanitized_name:
-            matches.append(user)
-    if not matches:
-        message = ui.did_you_mean("No user found matching %s" % pattern,
-                                  pattern, usernames)
-
-        raise tsrc.Error(message)
-    if len(matches) > 1:
-        ambiguous_names = [x["name"] for x in matches]
-        raise tsrc.Error("Found several users matching %s: %s" %
-                         (pattern, ", ".join(ambiguous_names)))
-
-    if len(matches) == 1:
-        return matches[0]
+def select_assignee(choices):
+    return ui.ask_choice("Select an assignee", choices, func_desc=lambda x: x["name"])
 
 
 def wipify(title):
@@ -121,11 +104,37 @@ class PushAction():
             cmd.append("--force")
         tsrc.git.run_git(self.repo_path, *cmd)
 
+    def handle_assignee(self):
+        if not self.args.assignee:
+            return None
+        return self.find_assigne(self.args.assignee)
+
+    def get_review_candidates(self, query):
+        group_name = self.project_name.split("/")[0]
+        project_members = self.gl_helper.get_project_members(self.project_id, query=query)
+        group_members = self.gl_helper.get_group_members(group_name, query=query)
+        # Concatenate and de-duplicate results:
+        candidates = project_members + group_members
+        res = list()
+        seen = set()
+        for user in candidates:
+            user_name = user["name"]
+            if user_name not in seen:
+                seen.add(user_name)
+                res.append(user)
+        return res
+
+    def find_assigne(self, query):
+        candidates = self.get_review_candidates(query=query)
+        if not candidates:
+            raise NoUserMatching(query)
+        if len(candidates) == 1:
+            return candidates[0]
+        return select_assignee(candidates)
+
     def handle_merge_request(self):
-        active_users = self.gl_helper.get_active_users()
-        assignee = None
-        if self.args.assignee:
-            assignee = get_assignee(active_users, self.args.assignee)
+        assignee = self.handle_assignee()
+        if assignee:
             ui.info_2("Assigning to", assignee["name"])
 
         merge_request = self.ensure_merge_request()

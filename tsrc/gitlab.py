@@ -139,3 +139,11 @@ class GitLabHelper():
             raise TooManyUsers()
         else:
             return response.json()
+
+    def get_group_members(self, group, query=None):
+        return self.make_request("GET", "/groups/%s/members" % group,
+                                 params={"query": query})
+
+    def get_project_members(self, project_id, query=None):
+        return self.make_request("GET", "/projects/%s/members" % project_id,
+                                 params={"query": query})
