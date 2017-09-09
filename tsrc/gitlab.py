@@ -25,6 +25,10 @@ class GitLabAPIError(GitLabError):
         return "%s - %s" % (self.status_code, self.message)
 
 
+class TooManyUsers(GitLabError):
+    pass
+
+
 def handle_errors(response, stream=False):
     if stream:
         _handle_stream_errors(response)
@@ -129,4 +133,9 @@ class GitLabHelper():
         ui.info("done", ui.check)
 
     def get_active_users(self):
-        return self.make_request("GET", "/users", params={"active": "true"})
+        response = self.get_response("GET", "/users", params={"active": "true", "per_page": 100})
+        total = int(response.headers["X-TOTAL"])
+        if total > 100:
+            raise TooManyUsers()
+        else:
+            return response.json()
