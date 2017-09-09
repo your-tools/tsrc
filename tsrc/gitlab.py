@@ -63,15 +63,19 @@ class GitLabHelper():
         self.token = token
 
     def make_request(self, verb, url, *, data=None, params=None, stream=False):
-        full_url = self.gitlab_api_url + url
-        response = requests.request(verb, full_url,
-                                    headers={"PRIVATE-TOKEN": self.token},
-                                    data=data, params=params, stream=stream)
+        response = self.get_response(verb, url, data=data, params=params, stream=stream)
         handle_errors(response, stream=stream)
         if stream:
             return response
         else:
             return response.json()
+
+    def get_response(self, verb, url, *, data=None, params=None, stream=False):
+        full_url = self.gitlab_api_url + url
+        response = requests.request(verb, full_url,
+                                    headers={"PRIVATE-TOKEN": self.token},
+                                    data=data, params=params, stream=stream)
+        return response
 
     def get_project_id(self, project_name):
         encoded_project_name = urllib.parse.quote(project_name, safe=list())
