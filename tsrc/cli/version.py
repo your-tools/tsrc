@@ -3,8 +3,8 @@
 import pkg_resources
 
 import path
-
 import ui
+
 import tsrc.git
 
 

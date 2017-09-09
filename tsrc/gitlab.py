@@ -3,9 +3,9 @@
 import urllib.parse
 
 import requests
+import ui
 
 import tsrc
-import ui
 
 GITLAB_API_VERSION = "v4"
 

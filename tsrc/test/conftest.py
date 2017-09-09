@@ -6,8 +6,8 @@ import re
 import path
 import pytest
 import ruamel.yaml
-
 import ui
+
 import tsrc.cli.main
 import tsrc.git
 import tsrc.workspace

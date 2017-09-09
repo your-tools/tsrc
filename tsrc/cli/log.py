@@ -3,6 +3,7 @@
 import sys
 
 import ui
+
 import tsrc.cli
 import tsrc.git
 

@@ -1,9 +1,10 @@
 """ Entry point for tsrc push """
 
 import re
-import unidecode
 
 import ui
+import unidecode
+
 import tsrc.config
 import tsrc.gitlab
 import tsrc.git

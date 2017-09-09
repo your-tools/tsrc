@@ -7,6 +7,7 @@ Mostly used by tsrc/cli.py
 import stat
 
 import ui
+
 import tsrc
 import tsrc.executor
 import tsrc.git
