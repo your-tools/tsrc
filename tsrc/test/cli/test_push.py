@@ -8,10 +8,10 @@ import tsrc.git
 import tsrc.gitlab
 
 GITLAB_URL = "http://gitlab.example.com"
-TIMOTHEE = {"name": "Timothee", "id": 1}
-THEO = {"name": "Théo Delrieu", "id": 2}
-JOHN = {"name": "John", "id": 3}
-BART = {"name": "Bart", "id": 4}
+TIMOTHEE = {"name": "timothee", "id": 1}
+THEO = {"name": "theo", "id": 2}
+JOHN = {"name": "john", "id": 3}
+BART = {"name": "bart", "id": 4}
 
 MR_STUB = {"id": "3978", "iid": "42", "web_url": "http://mr/42", "title": "Boring title"}
 
@@ -46,8 +46,18 @@ def push_args():
 
 @pytest.fixture
 def gitlab_mock():
+    all_users = [JOHN, BART, TIMOTHEE, THEO]
+
+    def get_project_members(project_id, query):
+        assert project_id in PROJECT_IDS.values()
+        return [user for user in all_users if query in user["name"]]
+
+    def get_group_members(group_name, query):
+        return [user for user in all_users if query in user["name"]]
+
     gl_mock = mock.create_autospec(tsrc.gitlab.GitLabHelper, instance=True)
-    gl_mock.get_active_users.return_value = [JOHN, BART, TIMOTHEE, THEO]
+    gl_mock.get_project_members = get_project_members
+    gl_mock.get_group_members = get_group_members
     gl_mock.get_project_id = lambda x: PROJECT_IDS[x]
     # Define a few helper methods to make tests nicer to read:
     new_defs = {
@@ -142,16 +152,3 @@ def test_unwipify_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_a
         target_branch="master",
         title="nice title"
     )
-
-
-def test_select_user():
-    users = [TIMOTHEE, THEO]
-    assert tsrc.cli.push.get_assignee(users, "tim") == TIMOTHEE
-    assert tsrc.cli.push.get_assignee(users, "theo") == THEO
-    with pytest.raises(tsrc.Error) as e:
-        tsrc.cli.push.get_assignee(users, "t")
-    assert "several" in e.value.message
-    users = [JOHN, BART]
-    with pytest.raises(tsrc.Error) as e:
-        tsrc.cli.push.get_assignee(users, "jhon")
-    assert "Did you mean" in e.value.message

@@ -1,8 +1,8 @@
+import pytest
 import ui
+
 import tsrc
 import tsrc.executor
-
-import pytest
 
 
 class Kaboom(tsrc.Error):

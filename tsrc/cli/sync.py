@@ -1,7 +1,7 @@
 """ Entry point for tsrc sync """
 
-
 import ui
+
 import tsrc.cli
 
 

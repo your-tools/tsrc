@@ -1,8 +1,8 @@
 """ Entry point for tsrc status """
 
 import attr
-
 import ui
+
 import tsrc.cli
 
 
