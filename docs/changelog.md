@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.4 (2017-07-13)
+
+* `tsrc push --assignee`: fix when there are more than 50 GitLab users (#25). Reported by @arnaudgelas
+
 ## v0.2.3 (2017-09-01)
 
 * Split user interface functionality into its own project: [python-cli-ui](https://github.com/TankerApp/python-cli-ui).
