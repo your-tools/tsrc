@@ -1,5 +1,9 @@
 # Changelog
 
+# Upcoming releases
+
+* Add support for groups (#30)
+
 ## v0.2.4 (2017-07-13)
 
 * `tsrc push --assignee`: fix when there are more than 50 GitLab users (#25). Reported by @arnaudgelas
