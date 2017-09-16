@@ -37,16 +37,7 @@ class LocalManifest:
 
     @property
     def active_groups(self):
-        assert self.manifest, "manifest is empty. Did you call load()?"
-
-        manifest_schema = schema.Schema({
-            "branch": str,
-            "url": str,
-            schema.Optional("tag"): str,
-            schema.Optional("groups"): [str],
-        })
-
-        config = tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
+        config = self.load_config()
         return config.get("groups")
 
     def get_repos(self):
@@ -95,9 +86,18 @@ class LocalManifest:
         with self.cfg_path.open("w") as fp:
             ruamel.yaml.dump(config, fp)
 
+    def load_config(self):
+        manifest_schema = schema.Schema({
+            "branch": str,
+            "url": str,
+            schema.Optional("tag"): str,
+            schema.Optional("groups"): [str],
+        })
+
+        return tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
+
     def _ensure_git_state(self, url, branch="master", tag=None):
         if self.clone_path.exists():
-            ui.warning("Re-initializing worktree")
             tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", url)
 
             tsrc.git.run_git(self.clone_path, "fetch")
