@@ -6,20 +6,32 @@ import ruamel
 import tsrc.cli
 
 
+def repo_exists(workspace_path, repo):
+    return workspace_path.joinpath(repo).exists()
+
+
+def assert_cloned(workspace_path, repo):
+    assert repo_exists(workspace_path, repo)
+
+
+def assert_not_cloned(workspace_path, repo):
+    assert not repo_exists(workspace_path, repo)
+
+
 def test_init(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    assert workspace_path.joinpath("foo", "bar").exists()
-    assert workspace_path.joinpath("spam", "eggs").exists()
+    assert_cloned(workspace_path, "foo/bar")
+    assert_cloned(workspace_path, "spam/eggs")
 
 
 def test_init_with_args(tsrc_cli, git_server, monkeypatch, tmp_path):
     git_server.add_repo("foo")
     work2_path = tmp_path.joinpath("work2").mkdir()
     tsrc_cli.run("init", "--workspace", work2_path, git_server.manifest_url)
-    assert work2_path.joinpath("foo").isdir()
+    assert_cloned(work2_path, "foo")
 
 
 def test_init_twice(tsrc_cli, git_server):
@@ -36,7 +48,7 @@ def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path):
 
     tsrc_cli.run("init", "--branch", "devel", git_server.manifest_url)
 
-    assert workspace_path.joinpath("foo").exists()
+    assert_cloned(workspace_path, "foo")
 
 
 def test_change_repo_url(tsrc_cli, git_server, workspace_path):
@@ -45,6 +57,7 @@ def test_change_repo_url(tsrc_cli, git_server, workspace_path):
     new_url = "git@example.com/foo"
     git_server.manifest.set_repo_url("foo", new_url)
     tsrc_cli.run("init", git_server.manifest_url)
+    assert_cloned(workspace_path, "foo")
     foo_path = workspace_path.joinpath("foo")
     _, actual_url = tsrc.git.run_git(foo_path, "remote", "get-url", "origin", raises=False)
     assert actual_url == new_url
@@ -105,8 +118,8 @@ def test_use_default_group(tsrc_cli, git_server, workspace_path):
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    assert workspace_path.joinpath("a").exists()
-    assert not workspace_path.joinpath("c").exists()
+    assert_cloned(workspace_path, "a")
+    assert_not_cloned(workspace_path, "c")
 
 
 def test_use_specific_group(tsrc_cli, git_server, workspace_path):
@@ -117,6 +130,6 @@ def test_use_specific_group(tsrc_cli, git_server, workspace_path):
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
 
-    assert workspace_path.joinpath("bar").exists()
-    assert workspace_path.joinpath("eggs").exists()
-    assert not workspace_path.joinpath("other").exists()
+    assert_cloned(workspace_path, "bar")
+    assert_cloned(workspace_path, "eggs")
+    assert_not_cloned(workspace_path, "other")
