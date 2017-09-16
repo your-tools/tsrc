@@ -42,10 +42,10 @@ class Manifest():
     def get_repos(self):
         return self._repos
 
-    def load(self, data):
+    def load(self, config):
         self.copyfiles = list()
-        self.gitlab = data.get("gitlab")
-        repos = data.get("repos") or list()
+        self.gitlab = config.get("gitlab")
+        repos = config.get("repos") or list()
         for repo_config in repos:
             url = repo_config["url"]
             src = repo_config["src"]
