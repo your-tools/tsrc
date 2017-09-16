@@ -68,7 +68,11 @@ class Manifest():
             self.copyfiles.append((src_copy, dest_copy))
 
     def get_url(self, src):
+        repo = self.get_repo(src)
+        return repo.url
+
+    def get_repo(self, src):
         for repo in self._repos:
             if repo.src == src:
-                return repo.url
+                return repo
         raise RepoNotFound(src)
