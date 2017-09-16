@@ -109,7 +109,7 @@ class Workspace():
     def sync(self):
         syncer = Syncer(self)
         try:
-            tsrc.executor.run_sequence(self.manifest.get_repos(), syncer)
+            tsrc.executor.run_sequence(self.get_repos(), syncer)
         finally:
             syncer.display_bad_branches()
 
