@@ -40,5 +40,5 @@ def main(args):
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
     cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)
-    tsrc.executor.run_sequence(workspace.manifest.repos, cmd_runner)
+    tsrc.executor.run_sequence(workspace.manifest.get_repos(), cmd_runner)
     ui.info("OK", ui.check)

@@ -46,7 +46,7 @@ def test_git_server_add_repo_updates_manifest(workspace_path, git_server):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest = read_remote_manifest(workspace_path, git_server)
-    repos = manifest.repos
+    repos = manifest.get_repos()
     assert len(repos) == 2
     for repo in repos:
         rc, out = tsrc.git.run_git(workspace_path, "ls-remote", repo.url, raises=False)
@@ -64,7 +64,7 @@ def test_git_server_change_manifest_branch(workspace_path, git_server):
     manifest_yml = workspace_path.joinpath("manifest", "manifest.yml")
     manifest = tsrc.manifest.load(manifest_yml)
 
-    assert len(manifest.repos) == 2
+    assert len(manifest.get_repos()) == 2
 
 
 def test_git_server_change_repo_branch(workspace_path, git_server):

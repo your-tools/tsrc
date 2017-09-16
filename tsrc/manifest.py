@@ -35,9 +35,12 @@ def load(manifest_path):
 
 class Manifest():
     def __init__(self):
-        self.repos = list()      # repos to clone
-        self.copyfiles = list()  # files to copy
+        self._repos = list()
+        self.copyfiles = list()
         self.gitlab = dict()
+
+    def get_repos(self):
+        return self._repos
 
     def load(self, data):
         self.copyfiles = list()
@@ -50,7 +53,7 @@ class Manifest():
             fixed_ref = repo_config.get("fixed_ref")
             repo = tsrc.Repo(url=url, src=src, branch=branch,
                              fixed_ref=fixed_ref)
-            self.repos.append(repo)
+            self._repos.append(repo)
 
             self._handle_copies(repo_config)
 
@@ -65,7 +68,7 @@ class Manifest():
             self.copyfiles.append((src_copy, dest_copy))
 
     def get_url(self, src):
-        for repo in self.repos:
+        for repo in self._repos:
             if repo.src == src:
                 return repo.url
         raise RepoNotFound(src)

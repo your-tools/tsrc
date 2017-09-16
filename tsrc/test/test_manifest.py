@@ -29,7 +29,7 @@ repos:
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
-    assert manifest.repos == [
+    assert manifest.get_repos() == [
         tsrc.Repo(
             url="git@example.com:foo.git",
             src="foo",

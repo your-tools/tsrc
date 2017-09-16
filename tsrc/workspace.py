@@ -23,7 +23,7 @@ class Workspace():
 
     def get_repos(self):
         assert self.manifest, "manifest is empty. Did you call load_manifest()?"
-        return self.manifest.repos
+        return self.manifest.get_repos()
 
     def joinpath(self, *parts):
         return self.root_path.joinpath(*parts)
@@ -109,7 +109,7 @@ class Workspace():
     def sync(self):
         syncer = Syncer(self)
         try:
-            tsrc.executor.run_sequence(self.manifest.repos, syncer)
+            tsrc.executor.run_sequence(self.manifest.get_repos(), syncer)
         finally:
             syncer.display_bad_branches()
 
