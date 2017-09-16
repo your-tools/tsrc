@@ -96,3 +96,27 @@ def test_resets_to_fixed_ref(tsrc_cli, git_server, workspace_path):
     expected_ref = tsrc.git.run_git(foo_path, "rev-parse", "v1.0", raises=False)
     actual_ref = tsrc.git.run_git(foo_path, "rev-parse", "HEAD", raises=False)
     assert expected_ref == actual_ref
+
+
+def test_use_default_group(tsrc_cli, git_server, workspace_path):
+    git_server.add_group("default", ["a", "b"])
+    git_server.add_repo("c")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    assert workspace_path.joinpath("a").exists()
+    assert not workspace_path.joinpath("c").exists()
+
+
+def test_use_specific_group(tsrc_cli, git_server, workspace_path):
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_group("spam", ["eggs", "beacon"])
+    git_server.add_repo("other")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+
+    assert workspace_path.joinpath("bar").exists()
+    assert workspace_path.joinpath("eggs").exists()
+    assert not workspace_path.joinpath("other").exists()

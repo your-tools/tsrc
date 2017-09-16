@@ -6,6 +6,8 @@ Mostly used by tsrc/cli.py
 
 import stat
 
+import ruamel.yaml
+import schema
 import ui
 
 import tsrc
@@ -16,12 +18,13 @@ import tsrc.manifest
 
 class LocalManifest:
     """ Represent a manifest that has been cloned locally inside the
-    hidden <workspace>/.tsrc directory.
+    hidden <workspace>/.tsrc directory, along with its configuration
 
     """
     def __init__(self, workspace_path):
         hidden_path = workspace_path.joinpath(".tsrc")
         self.clone_path = hidden_path.joinpath("manifest")
+        self.cfg_path = hidden_path.joinpath("manifest.yml")
         self.manifest = None
 
     @property
@@ -34,7 +37,16 @@ class LocalManifest:
 
     def get_repos(self):
         assert self.manifest, "manifest is empty. Did you call load()?"
-        return self.manifest.get_repos()
+
+        manifest_schema = schema.Schema({
+            "branch": str,
+            "url": str,
+            schema.Optional("tag"): str,
+            schema.Optional("groups"): [str],
+        })
+
+        manifest_config = tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
+        return self.manifest.get_repos(groups=manifest_config.get("groups"))
 
     def load(self):
         yml_path = self.clone_path.joinpath("manifest.yml")
@@ -53,8 +65,9 @@ class LocalManifest:
     def get_url(self, src):
         return self.manifest.get_url(src)
 
-    def init(self, url, branch="master", tag=None):
+    def init(self, url, branch="master", tag=None, groups=None):
         self._ensure_git_state(url, branch=branch, tag=tag)
+        self.save_config(url, branch=branch, tag=tag, groups=groups)
 
     def update(self):
         ui.info_2("Updating manifest")
@@ -66,6 +79,17 @@ class LocalManifest:
         tsrc.git.run_git(self.clone_path, *cmd)
         cmd = ("reset", "--hard", "@{u}")
         tsrc.git.run_git(self.clone_path, *cmd)
+
+    def save_config(self, url, branch="master", tag=None, groups=None):
+        config = dict()
+        config["url"] = url
+        config["branch"] = branch
+        if tag:
+            config["tag"] = tag
+        if groups:
+            config["groups"] = groups
+        with self.cfg_path.open("w") as fp:
+            ruamel.yaml.dump(config, fp)
 
     def _ensure_git_state(self, url, branch="master", tag=None):
         if self.clone_path.exists():
@@ -109,8 +133,8 @@ class Workspace():
     def get_gitlab_url(self):
         return self.local_manifest.get_gitlab_url()
 
-    def init_manifest(self, manifest_url, *, branch="master", tag=None):
-        self.local_manifest.init(manifest_url, branch=branch, tag=tag)
+    def init_manifest(self, manifest_url, *, branch="master", tag=None, groups=None):
+        self.local_manifest.init(manifest_url, branch=branch, tag=tag, groups=groups)
 
     def update_manifest(self):
         self.local_manifest.update()
