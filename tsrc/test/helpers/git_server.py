@@ -83,7 +83,7 @@ class GitServer():
         return self.src_path.joinpath(name)
 
     def get_url(self, name):
-        return "file://" + self.bare_path.joinpath(name)
+        return str("file://" + self.bare_path.joinpath(name))
 
     def _create_repo(self, name, empty=False):
         bare_path = self.bare_path.joinpath(name)
