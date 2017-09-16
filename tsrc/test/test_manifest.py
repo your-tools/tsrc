@@ -83,3 +83,88 @@ gitlab:
     manifest_path.write_text(contents)
     res = tsrc.manifest.load(manifest_path)
     assert res
+
+
+class ReposGetter:
+    def __init__(self, tmp_path):
+        self.tmp_path = tmp_path
+        self.contents = None
+
+    def get_repos(self, groups=None, all_=None):
+        manifest_path = self.tmp_path.joinpath("manifest.yml")
+        manifest_path.write_text(self.contents)
+        manifest = tsrc.manifest.load(manifest_path)
+        return [repo.src for repo in manifest.get_repos(groups=groups, all_=all_)]
+
+
+@pytest.fixture
+def repos_getter(tmp_path):
+    return ReposGetter(tmp_path)
+
+
+def test_default_group(repos_getter):
+    contents = """
+repos:
+  - { src: one, url: one.com }
+  - { src: two, url: two.com }
+  - { src: three, url: three.com }
+
+groups:
+  default:
+    repos: [one, two]
+"""
+    repos_getter.contents = contents
+    assert repos_getter.get_repos(groups=None) == ["one", "two"]
+
+
+def test_specific_group(repos_getter):
+    contents = """
+repos:
+  - { src: any, url: any.com }
+  - { src: linux1, url: linux1.com }
+  - { src: linux2, url: linux2.com }
+
+groups:
+  default:
+    repos: [any]
+  linux:
+    repos: [linux1, linux2]
+"""
+    repos_getter.contents = contents
+    assert repos_getter.get_repos(groups=["default", "linux"]) == ["any", "linux1", "linux2"]
+
+
+def test_inclusion(repos_getter):
+    contents = """
+repos:
+  - { src: a, url: a.com }
+  - { src: b, url: b.com }
+  - { src: c, url: c.com }
+
+groups:
+  a_group:
+    repos: [a]
+  b_group:
+     repos: [b]
+     includes: [a_group]
+  c_group:
+      repos: [c]
+      includes: [b_group]
+"""
+    repos_getter.contents = contents
+    assert repos_getter.get_repos(groups=["c_group"]) == ["a", "b", "c"]
+
+
+def test_all_repos(repos_getter):
+    contents = """
+repos:
+  - { src: one, url: one.com }
+  - { src: two, url: two.com }
+
+groups:
+  default:
+    repos: [one]
+"""
+    repos_getter.contents = contents
+    assert repos_getter.get_repos(all_=False) == ["one"]
+    assert repos_getter.get_repos(all_=True) == ["one", "two"]
