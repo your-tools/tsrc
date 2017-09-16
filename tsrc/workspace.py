@@ -35,7 +35,8 @@ class LocalManifest:
     def copyfiles(self):
         return self.manifest.copyfiles
 
-    def get_repos(self):
+    @property
+    def active_groups(self):
         assert self.manifest, "manifest is empty. Did you call load()?"
 
         manifest_schema = schema.Schema({
@@ -45,8 +46,11 @@ class LocalManifest:
             schema.Optional("groups"): [str],
         })
 
-        manifest_config = tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
-        return self.manifest.get_repos(groups=manifest_config.get("groups"))
+        config = tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
+        return config.get("groups")
+
+    def get_repos(self):
+        return self.manifest.get_repos(groups=self.active_groups)
 
     def load(self):
         yml_path = self.clone_path.joinpath("manifest.yml")
@@ -141,6 +145,10 @@ class Workspace():
 
     def manifest_branch(self):
         return self.local_manifest.get_current_branch()
+
+    @property
+    def active_groups(self):
+        return self.local_manifest.active_groups
 
     def clone_missing(self):
         """ Clone missing repos.
