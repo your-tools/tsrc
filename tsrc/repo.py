@@ -4,7 +4,7 @@ import attr
 
 
 # pylint: disable=too-few-public-methods
-@attr.s
+@attr.s(frozen=True)
 class Repo():
     src = attr.ib()
     url = attr.ib()
