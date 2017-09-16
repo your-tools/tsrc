@@ -60,9 +60,13 @@ class LocalManifest:
     def get_url(self, src):
         return self.manifest.get_url(src)
 
-    def init(self, url, branch="master", tag=None, groups=None):
+    def configure(self, url=None, branch="master", tag=None, groups=None):
+        if not self.cfg_path.exists() and not url:
+            raise tsrc.Error("manifest URL is required when creating a new workspace")
+        if self.cfg_path.exists() and not url:
+            url = self.load_config()["url"]
         self._ensure_git_state(url, branch=branch, tag=tag)
-        self.save_config(url, branch=branch, tag=tag, groups=groups)
+        self.save_config(url=url, branch=branch, tag=tag, groups=groups)
 
     def update(self):
         ui.info_2("Updating manifest")
@@ -137,8 +141,8 @@ class Workspace():
     def get_gitlab_url(self):
         return self.local_manifest.get_gitlab_url()
 
-    def init_manifest(self, manifest_url, *, branch="master", tag=None, groups=None):
-        self.local_manifest.init(manifest_url, branch=branch, tag=tag, groups=groups)
+    def configure_manifest(self, url=None, *, branch="master", tag=None, groups=None):
+        self.local_manifest.configure(url=url, branch=branch, tag=tag, groups=groups)
 
     def update_manifest(self):
         self.local_manifest.update()

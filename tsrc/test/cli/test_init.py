@@ -133,3 +133,15 @@ def test_use_specific_group(tsrc_cli, git_server, workspace_path):
     assert_cloned(workspace_path, "bar")
     assert_cloned(workspace_path, "eggs")
     assert_not_cloned(workspace_path, "other")
+
+
+def test_change_branch(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("one")
+    git_server.manifest.change_branch("next")
+    git_server.add_repo("two")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+    assert_not_cloned(workspace_path, "two")
+
+    tsrc_cli.run("init", "--branch", "next")
+    assert_cloned(workspace_path, "two")
