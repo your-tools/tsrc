@@ -111,11 +111,19 @@ def main(args=None):
     push_parser.add_argument("--accept", action="store_true", default=False)
     push_parser.add_argument("-f", "--force", action="store_true", default=False)
     push_parser.add_argument("-t", "--target", dest="target_branch", default="master")
+    push_parser.add_argument("-a", "--assignee", dest="assignee")
+
     message_group = push_parser.add_mutually_exclusive_group()
     message_group.add_argument("-m", "--message", dest="mr_title")
     message_group.add_argument("--wip", action="store_true", help="Mark merge request as WIP")
     message_group.add_argument("--ready", action="store_true", help="Mark merge request as ready")
-    push_parser.add_argument("-a", "--assignee", dest="assignee")
+
+    approval_group = push_parser.add_mutually_exclusive_group()
+    approval_group.add_argument("--approve", action="store_true",
+                                help="Approve merge request (only for Gitlab EE)")
+    approval_group.add_argument("--unapprove", action="store_true",
+                                help="Unapprove merge request (only for Gitlab EE)")
+
     workspace_subparser(subparsers, "status")
     workspace_subparser(subparsers, "sync")
 

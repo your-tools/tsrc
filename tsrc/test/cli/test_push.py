@@ -40,6 +40,7 @@ def push_args():
     args.assignee = None
     args.force = False
     args.ready = None
+    args.approved = False
     args.wip = None
     return args
 
@@ -131,6 +132,31 @@ def test_accept_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
     push_action.main()
 
     gitlab_mock.assert_mr_accepted(MR_STUB)
+
+def test_approve_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
+    tsrc.git.run_git(foo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run_git(foo_path, "commit", "--message", "new feature", "--allow-empty")
+
+    gitlab_mock.find_opened_merge_request.return_value = MR_STUB
+
+    push_args.approved = True
+    push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
+    push_action.main()
+
+    gitlab_mock.assert_mr_updated(
+        MR_STUB,
+        approved=True
+    )
+
+    push_args.approved = False
+    push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
+    push_action.main()
+
+    gitlab_mock.assert_mr_updated(
+        MR_STUB,
+        approved=False
+    )
+
 
 
 def test_unwipify_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):

@@ -151,6 +151,11 @@ class PushAction():
 
         self.gl_helper.update_merge_request(merge_request, **params)
 
+        if self.args.approve:
+            self.gl_helper.set_merge_request_approval(merge_request, approved=True)
+        elif self.args.unapprove:
+            self.gl_helper.set_merge_request_approval(merge_request, approved=False)
+
         if self.args.accept:
             self.gl_helper.accept_merge_request(merge_request)
 
