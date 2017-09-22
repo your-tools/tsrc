@@ -59,7 +59,7 @@ repos:
   - src: bar
     url: git@gitlab.com:proj/bar
     branch: master
-    ref: v0.1
+    fixed_ref: v0.1
 ```
 
 Note that `branch` is still required.
