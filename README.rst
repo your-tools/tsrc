@@ -15,6 +15,11 @@ Demo
 
 `tsrc demo on asciinema.org <https://asciinema.org/a/131625>`_
 
+Documentation
+--------------
+
+See https://tankerapp.github.io/tsrc/
+
 Screenshots
 -----------
 
@@ -25,12 +30,6 @@ Screenshots
 * ``tsrc log``
 
 .. image:: https://dmerej.info/blog/pics/tsrc-log.png
-
-
-Documentation
---------------
-
-See https://tankerapp.github.io/tsrc/
 
 
 Tutorial
