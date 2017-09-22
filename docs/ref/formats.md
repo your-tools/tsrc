@@ -23,7 +23,7 @@ Each repository is also a dictionary, containing:
 * `branch` (optional): The branch to use when cloning the repository (defaults
   to `master`)
 * `fixed_ref` (optional): Can be a tag like `v0.1` or a hash like `0ab12ef`.
-   If `ref` is set:
+   If `fixed_ref` is set:
 
     *  When running `tsrc init`: Project will be cloned with the given branch, and then reset to
         the given ref.
