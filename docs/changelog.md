@@ -1,8 +1,25 @@
 # Changelog
 
-# Upcoming releases
+## v0.3.0
 
-* Add support for groups (#30)
+
+* *Breaking change*: Add support for groups (#30). Reported by @arnaudgelas
+
+### Upgrading from v0.2.4
+
+To upgrade from an older version of `tsrc`, you should re-run `tsrc init` with the correct url:
+
+```console
+# Check manifest URL:
+$ cd <workspace>/.tsrc/manifest
+$ git remote get-url origin
+# Note the url, for instance ssh://git@example.com:manifest.git
+$ cd <workspace>
+$ tsrc init <manifest-url>
+```
+
+This is required to create the `<workspace>/.tsrc/manifest.yml` file which is later used by `tsrc sync` and other commands.
+
 
 ## v0.2.4 (2017-07-13)
 
