@@ -35,11 +35,17 @@ $ tsrc init MANIFEST_URL
 ## Usage
 
 
-tsrc init MANIFEST_URL
+tsrc init MANIFEST_URL [--group GROUP]
 :   Initializes a new workspace.
 
     MANIFEST_URL should be a git URL containing a valid
     `manifest.yml` file.
+
+    The `-g,-group` can be used several times to specify which groups
+    to use when cloning repositories.
+
+    If you want to add or remove a group in your workspace, you can
+    re-run `tsrc init`
 
 
 tsrc foreach -- command --opt1 arg1

@@ -6,6 +6,8 @@ Mostly used by tsrc/cli.py
 
 import stat
 
+import ruamel.yaml
+import schema
 import ui
 
 import tsrc
@@ -14,75 +16,143 @@ import tsrc.git
 import tsrc.manifest
 
 
-class Workspace():
-    def __init__(self, root_path):
-        self.root_path = root_path
-        hidden_path = self.joinpath(".tsrc")
-        self.manifest_clone_path = hidden_path.joinpath("manifest")
+class LocalManifest:
+    """ Represent a manifest that has been cloned locally inside the
+    hidden <workspace>/.tsrc directory, along with its configuration
+
+    """
+    def __init__(self, workspace_path):
+        hidden_path = workspace_path.joinpath(".tsrc")
+        self.clone_path = hidden_path.joinpath("manifest")
+        self.cfg_path = hidden_path.joinpath("manifest.yml")
         self.manifest = None
 
+    @property
+    def branch(self):
+        return tsrc.git.get_current_branch(self.clone_path)
+
+    @property
+    def copyfiles(self):
+        return self.manifest.copyfiles
+
+    @property
+    def active_groups(self):
+        config = self.load_config()
+        return config.get("groups")
+
     def get_repos(self):
-        assert self.manifest, "manifest is empty. Did you call load_manifest()?"
-        return self.manifest.repos
+        return self.manifest.get_repos(groups=self.active_groups)
 
-    def joinpath(self, *parts):
-        return self.root_path.joinpath(*parts)
-
-    def load_manifest(self):
-        manifest_yml_path = self.manifest_clone_path.joinpath("manifest.yml")
-        if not manifest_yml_path.exists():
+    def load(self):
+        yml_path = self.clone_path.joinpath("manifest.yml")
+        if not yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
-            raise tsrc.Error(message.format(manifest_yml_path))
-        self.manifest = tsrc.manifest.load(manifest_yml_path)
+            raise tsrc.Error(message.format(yml_path))
+        self.manifest = tsrc.manifest.load(yml_path)
 
     def get_gitlab_url(self):
-        assert self.manifest, "manifest is empty. Did you call load_manifest()?"
+        assert self.manifest, "manifest is empty. Did you call load()?"
         gitlab_config = self.manifest.gitlab
         if not gitlab_config:
             raise tsrc.Error("No gitlab configuration found in manifest")
         return gitlab_config["url"]
 
-    def init_manifest(self, manifest_url, *, branch="master", tag=None):
-        if self.manifest_clone_path.exists():
-            ui.warning("Re-initializing worktree")
-            tsrc.git.run_git(self.manifest_clone_path,
-                             "remote", "set-url", "origin",
-                             manifest_url)
+    def get_url(self, src):
+        return self.manifest.get_url(src)
 
-            tsrc.git.run_git(self.manifest_clone_path, "fetch")
-            tsrc.git.run_git(self.manifest_clone_path, "checkout",
-                             "-B", branch)
-            tsrc.git.run_git(self.manifest_clone_path, "branch",
-                             branch, "--set-upstream-to", "origin/%s" % branch)
+    def configure(self, url=None, branch="master", tag=None, groups=None):
+        if not self.cfg_path.exists() and not url:
+            raise tsrc.Error("manifest URL is required when creating a new workspace")
+        if self.cfg_path.exists() and not url:
+            url = self.load_config()["url"]
+        self._ensure_git_state(url, branch=branch, tag=tag)
+        self.save_config(url=url, branch=branch, tag=tag, groups=groups)
+
+    def update(self):
+        ui.info_2("Updating manifest")
+        if not self.clone_path.exists():
+            message = "Could not find manifest in {}. "
+            message += "Did you run `tsrc init` ?"
+            raise tsrc.Error(message.format(self.clone_path))
+        cmd = ("fetch", "--prune", "origin")
+        tsrc.git.run_git(self.clone_path, *cmd)
+        cmd = ("reset", "--hard", "@{u}")
+        tsrc.git.run_git(self.clone_path, *cmd)
+
+    def save_config(self, url, branch="master", tag=None, groups=None):
+        config = dict()
+        config["url"] = url
+        config["branch"] = branch
+        if tag:
+            config["tag"] = tag
+        if groups:
+            config["groups"] = groups
+        with self.cfg_path.open("w") as fp:
+            ruamel.yaml.dump(config, fp)
+
+    def load_config(self):
+        manifest_schema = schema.Schema({
+            "branch": str,
+            "url": str,
+            schema.Optional("tag"): str,
+            schema.Optional("groups"): [str],
+        })
+
+        return tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
+
+    def _ensure_git_state(self, url, branch="master", tag=None):
+        if self.clone_path.exists():
+            tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", url)
+
+            tsrc.git.run_git(self.clone_path, "fetch")
+            tsrc.git.run_git(self.clone_path, "checkout", "-B", branch)
+            tsrc.git.run_git(self.clone_path, "branch", branch,
+                             "--set-upstream-to", "origin/%s" % branch)
             if tag:
                 ref = tag
             else:
                 ref = "origin/%s" % branch
-            tsrc.git.run_git(self.manifest_clone_path, "reset", "--hard", ref)
+            tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
         else:
-            parent, name = self.manifest_clone_path.splitpath()
+            parent, name = self.clone_path.splitpath()
             parent.makedirs_p()
-            tsrc.git.run_git(self.manifest_clone_path.parent, "clone",
-                             manifest_url, name, "--branch", branch)
+            tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", branch)
             if tag:
-                tsrc.git.run_git(self.manifest_clone_path, "reset",
-                                 "--hard", tag)
+                tsrc.git.run_git(self.clone_path, "reset", "--hard", tag)
 
-        self.load_manifest()
+    def get_current_branch(self):
+        return tsrc.git.get_current_branch(self.clone_path)
+
+
+class Workspace():
+    def __init__(self, root_path):
+        self.root_path = root_path
+        self.local_manifest = LocalManifest(root_path)
+
+    def joinpath(self, *parts):
+        return self.root_path.joinpath(*parts)
+
+    def get_repos(self):
+        return self.local_manifest.get_repos()
+
+    def load_manifest(self):
+        self.local_manifest.load()
+
+    def get_gitlab_url(self):
+        return self.local_manifest.get_gitlab_url()
+
+    def configure_manifest(self, url=None, *, branch="master", tag=None, groups=None):
+        self.local_manifest.configure(url=url, branch=branch, tag=tag, groups=groups)
 
     def update_manifest(self):
-        ui.info_2("Updating manifest")
-        if not self.manifest_clone_path.exists():
-            message = "Could not find manifest in {}. "
-            message += "Did you run `tsrc init` ?"
-            raise tsrc.Error(message.format(self.manifest_clone_path))
-        cmd = ("fetch", "--prune", "origin")
-        tsrc.git.run_git(self.manifest_clone_path, *cmd)
-        cmd = ("reset", "--hard", "@{u}")
-        tsrc.git.run_git(self.manifest_clone_path, *cmd)
+        self.local_manifest.update()
 
     def manifest_branch(self):
-        return tsrc.git.get_current_branch(self.manifest_clone_path)
+        return self.local_manifest.get_current_branch()
+
+    @property
+    def active_groups(self):
+        return self.local_manifest.active_groups
 
     def clone_missing(self):
         """ Clone missing repos.
@@ -104,12 +174,12 @@ class Workspace():
 
     def copy_files(self):
         file_copier = FileCopier(self)
-        tsrc.executor.run_sequence(self.manifest.copyfiles, file_copier)
+        tsrc.executor.run_sequence(self.local_manifest.copyfiles, file_copier)
 
     def sync(self):
         syncer = Syncer(self)
         try:
-            tsrc.executor.run_sequence(self.manifest.repos, syncer)
+            tsrc.executor.run_sequence(self.get_repos(), syncer)
         finally:
             syncer.display_bad_branches()
 
@@ -121,7 +191,7 @@ class Workspace():
 
     def get_url(self, src):
         """ Return the url of the project in `src` """
-        return self.manifest.get_url(src)
+        return self.local_manifest.get_url(src)
 
 
 class Cloner(tsrc.executor.Task):

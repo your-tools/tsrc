@@ -39,7 +39,6 @@ Here are a few features present in repo that are missing from `tsrc`
 (but may be implemented in the future)
 
 * Cloning several repositories in parallel
-* Cloning just one or several groups of repositories
 * Support for other hosting services such as `gerrit` or `github`
 
 ## Why not git-subrepo, mu-repo, or gr?

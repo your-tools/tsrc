@@ -177,3 +177,15 @@ def test_fixed_ref_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_pa
 
     foo_path = workspace_path.joinpath("foo")
     assert not foo_path.joinpath("new.txt").exists()
+
+
+def test_custom_group(tsrc_cli, git_server, message_recorder):
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_repo("other")
+
+    tsrc_cli.run("init", git_server.manifest_url, "--group", "foo")
+
+    message_recorder.reset()
+    tsrc_cli.run("sync")
+    assert message_recorder.find("bar")
+    assert not message_recorder.find("other")

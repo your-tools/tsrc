@@ -14,6 +14,8 @@ The manifest is always parsed as a dictionary .
 
 * `gitlab.url` (optional): HTTP URL of the GitLab instance
 
+* `groups` (optional): list of groups
+
 ### repos
 
 Each repository is also a dictionary, containing:
@@ -46,6 +48,50 @@ repos:
 In this case, after `proj1/foo` has been cloned in `<workspace>/foo`,
 (using `develop` branch), `foo.txt` will be copied from `proj1/foo/foo.txt` to
 `<workspace>/top.txt`.
+
+## groups
+
+The `groups` section lists the groups by name. They should contain a `repos` field
+containing a list of repositories (which should match the sources of the repositories
+defined in the `repos`  section.
+
+The groups can optionally include other groups, with a `includes` field which should be
+a list of existing group names.
+
+The group named `default`, if it exists, will be used to know which repositories to clone
+when using `tsrc init` and the `--group` command line argument is not used.
+
+Example:
+
+```yaml
+repos:
+  - src: a
+    url: ..
+  - src: b
+    url: ..
+  - src: bar
+    url: ..
+  - src: baz
+    url: ..
+
+groups:
+  default:
+    repos: [a, b]
+  foo:
+    repos: [bar, baz]
+    includes: [default]
+```
+
+```console
+$ tsrc init <manifest_url>
+# Clones a, b
+$ tsrc init <manifest_url> --group foo
+# Clones a, b, bar and baz
+```
+
+
+
+
 
 ## tsrc.yml format
 
