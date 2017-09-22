@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.0
+## v0.3.0 (2017-09-22)
 
 
 * *Breaking change*: Add support for groups (#30). Reported by @arnaudgelas
