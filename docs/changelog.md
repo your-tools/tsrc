@@ -3,7 +3,9 @@
 ## v0.3.0 (2017-09-22)
 
 
-* *Breaking change*: Add support for groups (#30). Reported by @arnaudgelas
+*Breaking change*: Add support for groups (#30). Reported by @arnaudgelas.
+
+See the [dedicated section about manifest format](ref/formats#groups) for details.
 
 ### Upgrading from v0.2.4
 
