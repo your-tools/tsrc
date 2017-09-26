@@ -11,6 +11,7 @@ import tsrc.cli
 class Status:
     src = attr.ib()
     branch = attr.ib()
+    position = attr.ib()
     dirty = attr.ib()
 
 
@@ -33,9 +34,9 @@ def collect_statuses(workspace):
             errors.append((repo.src, e))
             continue
 
-        dirty = tsrc.git.is_dirty(full_path)
+        position, dirty = tsrc.git.get_status(full_path)
 
-        result.append(Status(src=repo.src, branch=branch, dirty=dirty))
+        result.append(Status(src=repo.src, branch=branch, position=position, dirty=dirty))
 
     ui.info("")
     return result, errors
@@ -48,8 +49,10 @@ def display_statuses(statuses, errors):
     for status in statuses:
         message = (ui.green, "*", ui.reset, ui.bold, status.src.ljust(max_src),
                    ui.reset, ui.green, status.branch)
+        if status.position:
+            message += (ui.reset, ui.blue, status.position)
         if status.dirty:
-            message = message + (ui.reset, ui.brown, "(dirty)")
+            message += (ui.reset, ui.red, status.dirty)
         ui.info(*message)
 
     if errors:

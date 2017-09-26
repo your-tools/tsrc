@@ -113,13 +113,71 @@ def reset(repo, ref):
     run_git(repo, "reset", "--hard", ref)
 
 
-def get_status(working_path):
+def get_complete_status(working_path):
     _, out = run_git(working_path, "status", "--porcelain", raises=False)
+
+    untracked = 0
+    staged = 0
+    not_staged = 0
+    added = 0
+
     for line in out.splitlines():
         if line.startswith("??"):
-            return "untracked files"
+            untracked += 1
         if line.startswith(" M"):
-            return "modified files"
+            staged += 1
+        if line.startswith(" .M"):
+            not_staged += 1
         if line.startswith("A "):
-            return "non-committed files"
-    return "clean"
+            added += 1
+
+    return untracked, staged, not_staged, added
+
+
+def commit_string(symbol, number):
+    commit = '%s%s commit' % (symbol, number)
+    if number > 1:
+        commit += 's'
+    return commit
+
+
+def git_remote_status(working_path):
+    _, ahead_rev = run_git(working_path, "rev-list", "@{upstream}..HEAD", raises=False)
+    ahead = len(ahead_rev.splitlines())
+
+    _, behind_rev = run_git(working_path, "rev-list", "HEAD..@{upstream}", raises=False)
+    behind = len(behind_rev.splitlines())
+
+    ahead_symbol = "↑"
+    behind_symbol = "↓"
+
+    status = ''
+
+    if ahead > 0:
+        if behind == 0:
+            status = commit_string(ahead_symbol, ahead)
+        else:  # i.e. if behind > 0
+            status = commit_string(ahead_symbol, ahead)
+            status += ', '
+            status += commit_string(behind_symbol, behind)
+    else:  # if ahead == 0
+        if behind > 0:
+            status = commit_string(behind_symbol, behind)
+
+    return status
+
+
+def get_status(working_path):
+    untracked, staged, not_staged, added = get_complete_status(working_path)
+    remote_status = git_remote_status(working_path)
+
+    position = None
+    status = None
+
+    position = "%s" % (remote_status)
+
+    if (untracked == 0) and (staged == 0) and (not_staged == 0) and (added == 0):
+        return position, status
+
+    status = "dirty"
+    return position, status
