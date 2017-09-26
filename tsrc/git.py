@@ -26,6 +26,57 @@ class GitCommandError(GitError):
         super().__init__(message)
 
 
+# pylint: disable=too-many-instance-attributes
+class GitStatus:
+    def __init__(self, working_path):
+        self.working_path = working_path
+        self.untracked = 0
+        self.staged = 0
+        self.not_staged = 0
+        self.added = 0
+        self.ahead = 0
+        self.behind = 0
+        self.dirty = False
+        self.branch = None
+        self.sha1 = None
+
+    def update(self):
+        self.update_sha1()
+        self.update_branch()
+        self.update_remote_status()
+        self.update_worktree_status()
+
+    def update_sha1(self):
+        self.sha1 = get_sha1(self.working_path)
+
+    def update_branch(self):
+        self.branch = get_current_branch(self.working_path)
+
+    def update_remote_status(self):
+        _, ahead_rev = run_git(self.working_path, "rev-list", "@{upstream}..HEAD", raises=False)
+        self.ahead = len(ahead_rev.splitlines())
+
+        _, behind_rev = run_git(self.working_path, "rev-list", "HEAD..@{upstream}", raises=False)
+        self.behind = len(behind_rev.splitlines())
+
+    def update_worktree_status(self):
+        _, out = run_git(self.working_path, "status", "--porcelain", raises=False)
+
+        for line in out.splitlines():
+            if line.startswith("??"):
+                self.untracked += 1
+                self.dirty = True
+            if line.startswith(" M"):
+                self.staged += 1
+                self.dirty = True
+            if line.startswith(" .M"):
+                self.not_staged += 1
+                self.dirty = True
+            if line.startswith("A "):
+                self.added += 1
+                self.dirty = True
+
+
 class WorktreeNotFound(GitError):
     def __init__(self, working_path):
         super().__init__("'{}' is not inside a git repository".format(working_path))
@@ -65,21 +116,19 @@ def run_git(working_path, *cmd, raises=True):
         return returncode, out
 
 
+def get_sha1(working_path):
+    cmd = ("rev-parse", "HEAD")
+    status, output = run_git(working_path, *cmd, raises=False)
+    if status != 0:
+        raise GitCommandError(working_path, cmd, output=output)
+    return output
+
+
 def get_current_branch(working_path):
     cmd = ("rev-parse", "--abbrev-ref", "HEAD")
     status, output = run_git(working_path, *cmd, raises=False)
     if status != 0:
         raise GitCommandError(working_path, cmd, output=output)
-
-    return output
-
-
-def get_current_ref(working_path):
-    cmd = ("rev-parse", "HEAD")
-    status, output = run_git(working_path, *cmd, raises=False)
-    if status != 0:
-        raise GitCommandError(working_path, cmd, output=output)
-
     return output
 
 
@@ -90,11 +139,6 @@ def get_repo_root():
     if status != 0:
         raise WorktreeNotFound(working_path)
     return path.Path(output)
-
-
-def is_dirty(working_path):
-    status, _ = run_git(working_path, "diff-index", "--quiet", "HEAD", raises=False)
-    return status != 0
 
 
 def find_ref(repo, candidate_refs):
@@ -114,12 +158,6 @@ def reset(repo, ref):
 
 
 def get_status(working_path):
-    _, out = run_git(working_path, "status", "--porcelain", raises=False)
-    for line in out.splitlines():
-        if line.startswith("??"):
-            return "untracked files"
-        if line.startswith(" M"):
-            return "modified files"
-        if line.startswith("A "):
-            return "non-committed files"
-    return "clean"
+    status = GitStatus(working_path)
+    status.update()
+    return status
