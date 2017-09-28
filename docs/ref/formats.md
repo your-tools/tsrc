@@ -32,7 +32,7 @@ Each repository is also a dictionary, containing:
     *  When running `tsrc sync`: If the project is clean, project will be reset
         to the given ref, else a warning message will be printed.
 
-* `copyfiles`: (optional): A list of dictionaries with `src` and `dest` keys, like so:
+* `copy`: (optional): A list of dictionaries with `src` and `dest` keys, like so:
 
 
 ```
@@ -40,7 +40,7 @@ repos:
   src: foo
   url: gitlab:proj1/foo
   branch: develop
-  copyfiles:
+  copy:
     - src: foo.txt
       dest: top.txt
 ```
