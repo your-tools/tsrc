@@ -47,7 +47,7 @@ repos:
 
 In this case, after `proj1/foo` has been cloned in `<workspace>/foo`,
 (using `develop` branch), `foo.txt` will be copied from `proj1/foo/foo.txt` to
-`<workspace>/top.txt`.
+`<workspace>/top.txt`. Note that `copy` only works with files, not directories.
 
 ## groups
 
