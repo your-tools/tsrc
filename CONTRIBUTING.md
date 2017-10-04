@@ -64,6 +64,22 @@ if len(errors) == 0:
     ...
 ```
 
+* Do not use `+` to build strings. Use `format()`, `%` instead, or
+  "f-strings" if you only want the code to work with Python >= 3.6:
+
+```python
+# Yes
+message = "Welcome, {}!".format(name)
+message = "Welcome, %s!" % name
+message = f"Welcome {name}!"
+
+# No
+message = "Welcome, " + name + "!"
+
+# Okayish
+with_ext = name + ".txt"
+```
+
 * Use `textwrap.dedent()` to build nice-looking multi-lines strings:
 
 ```python
