@@ -120,6 +120,10 @@ def main(args=None):
     workspace_subparser(subparsers, "status")
     workspace_subparser(subparsers, "sync")
 
+    review_parser = workspace_subparser(subparsers, "review")
+    review_parser.add_argument(
+        "-t", "--target", dest="target_branch", default="master")
+
     args = parser.parse_args(args=args)
     ui.setup(verbose=args.verbose, quiet=args.quiet, color=args.color)
 
