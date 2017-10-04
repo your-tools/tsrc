@@ -121,6 +121,14 @@ class GitLabHelper():
         url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_iid)
         return self.make_request("PUT", url, data=kwargs)
 
+    def set_merge_request_approval(self, merge_request, approved):
+        project_id = merge_request["project_id"]
+        merge_request_iid = merge_request["iid"]
+        approval = "approve" if approved else "unapprove"
+        url = "/projects/%s/merge_requests/%s/%s" % (project_id, merge_request_iid, approval)
+        self.make_request("POST", url)
+        ui.info("done", ui.check)
+
     def accept_merge_request(self, merge_request):
         project_id = merge_request["project_id"]
         merge_request_iid = merge_request["iid"]
