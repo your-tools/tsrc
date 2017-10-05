@@ -63,6 +63,7 @@ def _handle_stream_errors(response):
 
 class GitLabHelper():
     def __init__(self, gitlab_url, token):
+        self.gitlab_url = gitlab_url
         self.gitlab_api_url = gitlab_url + "/api/" + GITLAB_API_VERSION
         self.token = token
 
@@ -115,6 +116,12 @@ class GitLabHelper():
         ui.info("done", ui.check)
         return result
 
+    def get_merge_request_url(self, merge_request):
+        project_id = merge_request["target_project_id"]
+        merge_request_iid = merge_request["iid"]
+        return self.gitlab_url + "/projects/%s/merge_requests/%s" % (
+            project_id, merge_request_iid)
+
     def update_merge_request(self, merge_request, **kwargs):
         project_id = merge_request["target_project_id"]
         merge_request_iid = merge_request["iid"]
@@ -147,3 +154,10 @@ class GitLabHelper():
     def get_project_members(self, project_id, query=None):
         return self.make_request("GET", "/projects/%s/members" % project_id,
                                  params={"query": query})
+
+    def get_project_pipelines(self, project_id, ref):
+        return self.make_request("GET", "/projects/%s/pipelines" % project_id,
+                                 params={"ref": ref})
+
+    def get_pipeline_jobs(self, project_id, pipeline_id):
+        return self.make_request("GET", "/projects/%s/pipelines/%s/jobs" % (project_id, pipeline_id))
