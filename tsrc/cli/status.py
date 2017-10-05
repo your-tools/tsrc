@@ -1,70 +1,57 @@
 """ Entry point for tsrc status """
 
-import attr
 import ui
 
 import tsrc.cli
 
 
-# pylint: disable=too-few-public-methods
-@attr.s
-class Status:
-    src = attr.ib()
-    branch = attr.ib()
-    position = attr.ib()
-    dirty = attr.ib()
+def describe_branch(git_status):
+    if git_status.branch:
+        return (ui.green, git_status.branch)
+    elif git_status.sha1:
+        return (ui.red, git_status.sha1)
 
 
-def collect_statuses(workspace):
-    errors = list()
-    result = list()
-    repos = workspace.get_repos()
-
-    if not repos:
-        return errors, result
-
-    num_repos = len(repos)
-    max_len = max((len(x.src) for x in repos))
-    for i, repo, full_path in workspace.enumerate_repos():
-        ui.info_count(i, num_repos,
-                      "Checking", repo.src.ljust(max_len + 1), end="\r")
-        try:
-            branch = tsrc.git.get_current_branch(full_path)
-        except tsrc.git.GitError as e:
-            errors.append((repo.src, e))
-            continue
-
-        position, dirty = tsrc.git.get_status(full_path)
-
-        result.append(Status(src=repo.src, branch=branch, position=position, dirty=dirty))
-
-    ui.info("")
-    return result, errors
+def commit_string(number):
+    if number == 1:
+        return 'commit'
+    else:
+        return 'commits'
 
 
-def display_statuses(statuses, errors):
-    if not statuses:
-        return
-    max_src = max((len(x.src) for x in statuses))
-    for status in statuses:
-        message = (ui.green, "*", ui.reset, ui.bold, status.src.ljust(max_src),
-                   ui.reset, ui.green, status.branch)
-        if status.position:
-            message += (ui.reset, ui.blue, status.position)
-        if status.dirty:
-            message += (ui.reset, ui.red, status.dirty)
-        ui.info(*message)
+def describe_position(git_status):
+    res = []
+    if git_status.ahead != 0:
+        res += (ui.blue, "+ %s %s", ui.reset) % (git_status.ahead, commit_string(git_status.ahead))
+    if git_status.behind != 0:
+        res += (ui.blue, "- %s %s", ui.reset) % (git_status.ahead, commit_string(git_status.ahead))
+    return res
 
-    if errors:
-        ui.info()
-        ui.error("Errors when getting branch")
-        for src, error in errors:
-            ui.info("*", ui.bold, src, ui.reset, error.output)
-        ui.info()
+
+def describe_dirty(git_status):
+    res = []
+    if git_status.dirty:
+        res = (ui.red, "dirty")
+    return res
+
+
+def describe(git_status):
+    # Return a list of tokens suitable for ui.info()
+    res = []
+    res += describe_branch(git_status)
+    res += describe_position(git_status)
+    res += describe_dirty(git_status)
+    return res
+
+
+def display_statuses(workspace):
+    for repo in workspace.repos:
+        full_path = workspace.joinpath(repo.src)
+        status = tsrc.git.get_status(full_path)
+        ui.info(*describe(status))
 
 
 def main(args):
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
-    statuses, errors = collect_statuses(workspace)
-    display_statuses(statuses, errors)
+    display_statuses(workspace)
