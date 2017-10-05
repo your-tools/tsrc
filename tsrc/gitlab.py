@@ -29,8 +29,8 @@ class TooManyUsers(GitLabError):
     pass
 
 
-def handle_errors(response, stream=False):
-    if stream:
+def handle_errors(response, stream=False, json=True):
+    if stream or not json:
         _handle_stream_errors(response)
     else:
         _handle_json_errors(response)
@@ -67,11 +67,14 @@ class GitLabHelper():
         self.gitlab_api_url = gitlab_url + "/api/" + GITLAB_API_VERSION
         self.token = token
 
-    def make_request(self, verb, url, *, data=None, params=None, stream=False):
+    def make_request(self, verb, url, *, data=None, params=None, stream=False, json=True):
         response = self.get_response(verb, url, data=data, params=params, stream=stream)
         handle_errors(response, stream=stream)
         if stream:
             return response
+        elif not json:
+            response.encoding = 'utf-8'
+            return response.text
         else:
             return response.json()
 
@@ -146,6 +149,9 @@ class GitLabHelper():
             raise TooManyUsers()
         else:
             return response.json()
+
+    def get_job_trace(self, project_id, job_id):
+        return self.make_request("GET", "/projects/%s/jobs/%s/trace" % (project_id, job_id), json=False)
 
     def get_group_members(self, group, query=None):
         return self.make_request("GET", "/groups/%s/members" % group,
