@@ -11,7 +11,7 @@ def get_long_description():
 
 
 setup(name="tsrc",
-      version="0.3.0",
+      version="0.3.1",
       description="Manage multiple repositories",
       long_description=get_long_description(),
       url="https://github.com/TankerApp/tsrc",
