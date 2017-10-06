@@ -50,7 +50,10 @@ class GitStatus:
         self.sha1 = get_sha1(self.working_path, short=True)
 
     def update_branch(self):
-        self.branch = get_current_branch(self.working_path)
+        try:
+            self.branch = get_current_branch(self.working_path)
+        except GitError:
+            pass
 
     def update_remote_status(self):
         _, ahead_rev = run_git(self.working_path, "rev-list", "@{upstream}..HEAD", raises=False)
@@ -132,6 +135,8 @@ def get_current_branch(working_path):
     status, output = run_git(working_path, *cmd, raises=False)
     if status != 0:
         raise GitCommandError(working_path, cmd, output=output)
+    if output == "HEAD":
+        raise GitError("Not an any branch")
     return output
 
 
