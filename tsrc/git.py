@@ -116,8 +116,11 @@ def run_git(working_path, *cmd, raises=True):
         return returncode, out
 
 
-def get_sha1(working_path):
-    cmd = ("rev-parse", "HEAD")
+def get_sha1(working_path, short=False):
+    cmd = ["rev-parse"]
+    if short:
+        cmd.append("--short")
+    cmd.append("HEAD")
     status, output = run_git(working_path, *cmd, raises=False)
     if status != 0:
         raise GitCommandError(working_path, cmd, output=output)
