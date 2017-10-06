@@ -47,7 +47,7 @@ class GitStatus:
         self.update_worktree_status()
 
     def update_sha1(self):
-        self.sha1 = get_sha1(self.working_path)
+        self.sha1 = get_sha1(self.working_path, short=True)
 
     def update_branch(self):
         self.branch = get_current_branch(self.working_path)
