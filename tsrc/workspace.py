@@ -320,8 +320,8 @@ class Syncer(tsrc.executor.Task):
     def sync_repo_to_ref(repo_path, ref):
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
-        if status != "clean":
-            raise tsrc.Error("%s, skipping" % status)
+        if status.dirty:
+            raise tsrc.Error("%s dirty, skipping")
         try:
             tsrc.git.run_git(repo_path, "reset", "--hard", ref)
         except tsrc.Error:

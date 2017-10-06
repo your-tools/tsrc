@@ -35,16 +35,17 @@ def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder):
     assert message_recorder.find("\* foo/bar master \(dirty\)")
 
 
-def test_status_error(tsrc_cli, git_server, workspace_path, message_recorder):
+def test_status_not_on_any_branch(tsrc_cli, git_server, workspace_path, message_recorder):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "CMakeLists.txt")
     git_server.push_file("spam/eggs", "CMakeLists.txt")
     tsrc_cli.run("init", git_server.manifest_url)
     # corrupt the git
-    workspace_path.joinpath("spam", "eggs", ".git", "HEAD").remove()
+    eggs_path = workspace_path.joinpath("spam/eggs")
+    tsrc.git.run_git(eggs_path, "checkout", "HEAD~1")
 
     tsrc_cli.run("status")
 
-    assert message_recorder.find("\* foo/bar master")
-    assert message_recorder.find("Errors when getting branch")
+    assert message_recorder.find("\* foo/bar \s+ master")
+    assert message_recorder.find("\* spam/eggs [a-f0-9]{7}")
