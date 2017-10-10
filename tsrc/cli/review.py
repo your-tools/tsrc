@@ -25,7 +25,7 @@ def sort_jobs(jobs):
     return sorted(jobs, key=itemgetter('stage', 'name'))
 
 def sort_pipelines(pipelines):
-    return sorted(pipelines, key=itemgetter('id'))
+    return sorted(pipelines, key=itemgetter('id'), reverse=True)
 
 class ReviewAction(PushAction):
     def __init__(self, *args, **kwargs):
