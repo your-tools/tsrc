@@ -7,13 +7,15 @@ from .push import get_token, PushAction
 import ui
 
 def get_color_status(status):
-    color = ui.green
+    color = ui.lightgray
     if status == 'failed':
         color = ui.red
     if status == 'pending' or status == 'created':
-        color = ui.blue
+        color = ui.darkblue
     if status == 'skipped':
         color = ui.darkgray
+    if status == 'success':
+        color = ui.green
     return color
 
 def get_info_for_merge_status(merge_request):
