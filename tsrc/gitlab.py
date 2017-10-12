@@ -98,12 +98,19 @@ class GitLabHelper():
                 raise
 
     def find_opened_merge_request(self, project_id, source_branch):
-        url = "/projects/%s/merge_requests" % project_id
+        url = "/projects/%s/merge_requests?state=opened" % project_id
         previous_mrs = self.make_request("GET", url)
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
                 if mr["state"] == "opened":
                     return mr
+
+    def get_project_merge_request(self, project_id, mr_id):
+        mrs = self.make_request("GET", "/projects/%s/merge_requests" % (project_id))
+        for mr in mrs:
+            if str(mr['id']) == mr_id:
+                return mr
+
 
     def create_merge_request(self, project_id, source_branch, *, title,
                              target_branch="master"):
@@ -167,3 +174,6 @@ class GitLabHelper():
 
     def get_pipeline_jobs(self, project_id, pipeline_id):
         return self.make_request("GET", "/projects/%s/pipelines/%s/jobs" % (project_id, pipeline_id))
+
+    def get_project_merge_requests(self, project_id, state='opened'):
+        return self.make_request("GET", "/projects/%s/merge_requests?state=%s" % (project_id, state))

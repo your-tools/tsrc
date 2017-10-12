@@ -48,7 +48,7 @@ def fix_cmd_args_for_foreach(args, foreach_parser):
 
 def workspace_subparser(subparser, name):
     parser = subparser.add_parser(name)
-    parser.add_argument("-w", "--workspace", dest="workspace_path")
+    parser.add_argument("--workspace", dest="workspace_path")
     return parser
 
 
@@ -124,11 +124,17 @@ def main(args=None):
     review_parser.add_argument(
         "-t", "--target", dest="target_branch", default="master")
     review_parser.add_argument(
-        "--all_pipeline", dest="all_pipeline", action="store_true", default=False)
+        "--all-pipeline", dest="all_pipeline", action="store_true", default=False)
+    review_parser.add_argument("-w", "--watch", dest="watch", action="store_true", default=False)
+    review_parser.add_argument("--mr", dest='merge_request_id', default=None)
 
     review_subparsers = review_parser.add_subparsers(title='display job logs', dest='review_command')
     review_log_parser = review_subparsers.add_parser('log')
     review_log_parser.add_argument('job_id')
+    review_subparsers.add_parser('list')
+    review_status_parser = review_subparsers.add_parser('status')
+    review_status_parser.add_argument(
+        "--mr", dest='merge_request_id', default=None)
 
     args = parser.parse_args(args=args)
     ui.setup(verbose=args.verbose, quiet=args.quiet, color=args.color)
