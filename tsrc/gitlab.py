@@ -98,8 +98,8 @@ class GitLabHelper():
                 raise
 
     def find_opened_merge_request(self, project_id, source_branch):
-        url = "/projects/%s/merge_requests?state=opened" % project_id
-        previous_mrs = self.make_request("GET", url)
+        url = "/projects/%s/merge_requests" % project_id
+        previous_mrs = self.make_request("GET", url, params={"state": "opened"})
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
                 if mr["state"] == "opened":
@@ -125,12 +125,6 @@ class GitLabHelper():
         result = self.make_request("POST", url, data=data)
         ui.info("done", ui.check)
         return result
-
-    def get_merge_request_url(self, merge_request):
-        project_id = merge_request["target_project_id"]
-        merge_request_iid = merge_request["iid"]
-        return self.gitlab_url + "/projects/%s/merge_requests/%s" % (
-            project_id, merge_request_iid)
 
     def update_merge_request(self, merge_request, **kwargs):
         project_id = merge_request["target_project_id"]
@@ -176,4 +170,5 @@ class GitLabHelper():
         return self.make_request("GET", "/projects/%s/pipelines/%s/jobs" % (project_id, pipeline_id))
 
     def get_project_merge_requests(self, project_id, state='opened'):
-        return self.make_request("GET", "/projects/%s/merge_requests?state=%s" % (project_id, state))
+        return self.make_request("GET", "/projects/%s/merge_requests" % (project_id),
+                                 params={"state": "opened"})

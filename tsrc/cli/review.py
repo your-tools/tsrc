@@ -3,7 +3,7 @@
 from operator import itemgetter
 import time
 
-from .push import get_token, PushAction
+from tsrc.cli.push import get_token, PushAction
 
 import ui
 import arrow
@@ -12,7 +12,7 @@ def get_color_status(status):
     color = ui.lightgray
     if status == 'failed':
         color = ui.red
-    if status == 'pending' or status == 'created':
+    if status in ['pending', 'created']:
         color = ui.darkblue
     if status == 'skipped':
         color = ui.darkgray
@@ -44,25 +44,25 @@ class ReviewAction(PushAction):
     def display_merge_request(self, merge_request):
         merge_on_success = merge_request['merge_when_pipeline_succeeds']
         wip = merge_request['work_in_progress']
-        args = []
+        merge_on_success_params = []
         if merge_on_success:
-            args.append('merge on success')
-        argsWip = []
-        idColor = ui.blue
+            merge_on_success_params.append('merge on success')
+        id_color = ui.blue
         if wip:
-            idColor = ui.brown
-            argsWip.extend([ui.yellow, 'WIP', ui.reset])
-        ui.info(idColor, '#%d' % merge_request['id'], merge_request['title'], ui.reset, merge_request['state'], *args)
+            id_color = ui.brown
+        ui.info(id_color, '#%d' %
+                merge_request['id'], merge_request['title'], ui.reset, merge_request['state'])
 
-        ui.info('Last updated :', ui.white, arrow.get(merge_request['updated_at']).humanize())
-        ui.info('Merge status :', *get_info_for_merge_status(merge_request))
-        ui.info('Source branch:', ui.purple, merge_request['source_branch'])
+        ui.info('  Last updated :', ui.white, arrow.get(merge_request['updated_at']).humanize())
+        ui.info('  Merge status :', *get_info_for_merge_status(merge_request),
+                ' - ', *merge_on_success_params)
+        ui.info('  Source branch:', ui.purple, merge_request['source_branch'])
         if merge_request['target_branch'] != 'master':
-            ui.info('Target branch:', ui.yellow, merge_request['target_branch'])
-        ui.info('Author       :', merge_request['author']['name'])
+            ui.info('  Target branch:', ui.yellow, merge_request['target_branch'])
+        ui.info('  Author       :', merge_request['author']['name'])
         if merge_request['assignee']:
-            ui.info('Assignee     :', merge_request['assignee']['name'])
-        ui.info_2(merge_request['web_url'])
+            ui.info('  Assignee     :', merge_request['assignee']['name'])
+        ui.info(' ', merge_request['web_url'])
 
     def display_pipeline(self, pipeline):
         status = pipeline['status']
@@ -80,18 +80,18 @@ class ReviewAction(PushAction):
         jobs = self.gl_helper.get_pipeline_jobs(
             self.project_id, pipeline['id'])
         sorted_jobs = sort_jobs(jobs)
-        for i, j in enumerate(sorted_jobs, start=1):
-            self.display_job(j, i)
+        for i, job in enumerate(sorted_jobs, start=1):
+            self.display_job(job, i)
         return sorted_jobs
 
     def ask_for_logs(self, sorted_jobs):
-        index = ui.ask_string("display logs? (other commands: accept, retry <id>)")
+        index = ui.ask_string("display logs?")
         index = int(index)
         if index in range(1, len(sorted_jobs) + 1):
             self.log(sorted_jobs[index-1]['id'])
 
     def list_jobs(self):
-        if (self.args.merge_request_id):
+        if self.args.merge_request_id:
             merge_request = self.gl_helper.get_project_merge_request(self.project_id, self.args.merge_request_id)
         else:
             merge_request = self.find_merge_request()
@@ -130,7 +130,6 @@ class ReviewAction(PushAction):
     def list_reviews(self):
         mrs = sort_merge_requests(
             self.gl_helper.get_project_merge_requests(self.project_id))
-        print(mrs)
         for mr in mrs:
             self.display_merge_request(mr)
             ui.info('')
