@@ -8,7 +8,9 @@ import tsrc.cli
 
 
 def describe_branch(git_status):
-    if git_status.branch:
+    if git_status.tag:
+        return [ui.darkyellow, git_status.tag]
+    elif git_status.branch:
         return [ui.green, git_status.branch]
     elif git_status.sha1:
         return [ui.red, git_status.sha1]
