@@ -37,12 +37,14 @@ class GitStatus:
         self.ahead = 0
         self.behind = 0
         self.dirty = False
+        self.tag = None
         self.branch = None
         self.sha1 = None
 
     def update(self):
         self.update_sha1()
         self.update_branch()
+        self.update_tag()
         self.update_remote_status()
         self.update_worktree_status()
 
@@ -52,6 +54,12 @@ class GitStatus:
     def update_branch(self):
         try:
             self.branch = get_current_branch(self.working_path)
+        except GitError:
+            pass
+
+    def update_tag(self):
+        try:
+            self.tag = get_current_tag(self.working_path)
         except GitError:
             pass
 
@@ -137,6 +145,14 @@ def get_current_branch(working_path):
         raise GitCommandError(working_path, cmd, output=output)
     if output == "HEAD":
         raise GitError("Not an any branch")
+    return output
+
+
+def get_current_tag(working_path):
+    cmd = ("tag", "--points-at", "HEAD")
+    status, output = run_git(working_path, *cmd, raises=False)
+    if status != 0:
+        raise GitCommandError(working_path, cmd, output=output)
     return output
 
 
