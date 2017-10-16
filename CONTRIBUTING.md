@@ -26,6 +26,23 @@ See the [.travis.yml file](https://github.com/TankerApp/tsrc/blob/master/.travis
 to see what exactly what commands are run and the Python versions we
 support.
 
+# Checking your changes
+
+* Create a virtualenv
+* Activate it
+* Install development and documentation dependencies:
+
+```console
+$ pip install -r dev-requirements.txt
+$ pip install -r doc-requirements.txt
+```
+
+* Finally, run:
+
+```console
+$ python ci/ci.py
+```
+
 # Code Manifesto
 
 ## Basics
