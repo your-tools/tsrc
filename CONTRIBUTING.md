@@ -13,7 +13,7 @@ Doing so will ensure we can investigate your bug right away.
 
 # Adding new features
 
-You are free to open a pull request on Github for any feature you'd like.
+You are free to open a pull request on GitHub for any feature you'd like.
 
 Note that for your merge request to be accepted, we'll ask that
 
@@ -316,7 +316,7 @@ class AbstractFoo(metaclass=abc.ABCMeta):
 # No
 class AbstractFoo:
      def foo(self):
-        raise NotImplementedError()ython
+        raise NotImplementedError()
 
 ```
 
