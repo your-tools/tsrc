@@ -101,6 +101,7 @@ def main(args=None):
     init_parser.add_argument("manifest_url", nargs="?")
     init_parser.add_argument("-b", "--branch")
     init_parser.add_argument("-g", "--group", action="append", dest="groups")
+    init_parser.add_argument("-s", "--shallow", action="store_true", dest="shallow", default=False)
     init_parser.set_defaults(branch="master")
 
     log_parser = workspace_subparser(subparsers, "log")

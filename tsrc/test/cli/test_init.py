@@ -27,6 +27,17 @@ def test_init(tsrc_cli, git_server, workspace_path):
     assert_cloned(workspace_path, "spam/eggs")
 
 
+def test_init_with_shallow(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo/bar")
+    git_server.add_repo("spam/eggs")
+    git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", "--shallow",  manifest_url)
+    assert_cloned(workspace_path, "foo/bar")
+    assert_cloned(workspace_path, "spam/eggs")
+
+
 def test_init_with_args(tsrc_cli, git_server, monkeypatch, tmp_path):
     git_server.add_repo("foo")
     work2_path = tmp_path.joinpath("work2").mkdir()
