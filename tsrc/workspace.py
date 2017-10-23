@@ -116,9 +116,11 @@ class LocalManifest:
         else:
             parent, name = self.clone_path.splitpath()
             parent.makedirs_p()
-            tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", branch)
             if tag:
-                tsrc.git.run_git(self.clone_path, "reset", "--hard", tag)
+                ref = tag
+            else:
+                ref = branch
+            tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", ref)
 
     def get_current_branch(self):
         return tsrc.git.get_current_branch(self.clone_path)
