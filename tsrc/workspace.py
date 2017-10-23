@@ -211,11 +211,15 @@ class Cloner(tsrc.executor.Task):
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
+        if repo.tag:
+            ref = repo.tag
+        else:
+            ref = repo.branch
         try:
-            tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
+            tsrc.git.run_git(parent, "clone", repo.url, "--branch", ref, name)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
-        ref = repo.fixed_ref
+        ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
             try:
@@ -295,9 +299,15 @@ class Syncer(tsrc.executor.Task):
         repo_path = self.workspace.joinpath(repo.src)
         self.check_branch(repo, repo_path)
         self.fetch(repo_path)
+        ref = None
 
-        if repo.fixed_ref:
-            self.sync_repo_to_ref(repo_path, repo.fixed_ref)
+        if repo.tag:
+            ref = repo.tag
+        elif repo.sha1:
+            ref = repo.sha1
+
+        if ref:
+            self.sync_repo_to_ref(repo_path, ref)
         else:
             self.sync_repo_to_branch(repo_path)
 

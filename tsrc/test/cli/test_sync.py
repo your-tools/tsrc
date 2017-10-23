@@ -127,10 +127,10 @@ def test_changing_branch(tsrc_cli, git_server, workspace_path, message_recorder)
     assert message_recorder.find("not on the correct branch")
 
 
-def test_fixed_ref_are_not_updated(tsrc_cli, git_server, workspace_path):
+def test_tags_are_not_updated(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
-    git_server.manifest.set_repo_ref("foo", "v0.1")
+    git_server.manifest.set_repo_tag("foo", "v0.1")
 
     tsrc_cli.run("init", git_server.manifest_url)
 
@@ -142,11 +142,11 @@ def test_fixed_ref_are_not_updated(tsrc_cli, git_server, workspace_path):
     assert not foo_path.joinpath("new.txt").exists()
 
 
-def test_fixed_ref_are_updated_when_clean(tsrc_cli, git_server, workspace_path):
+def test_tags_are_updated_when_clean(tsrc_cli, git_server, workspace_path):
 
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
-    git_server.manifest.set_repo_ref("foo", "v0.1")
+    git_server.manifest.set_repo_tag("foo", "v0.1")
 
     tsrc_cli.run("init", git_server.manifest_url)
 
@@ -160,11 +160,11 @@ def test_fixed_ref_are_updated_when_clean(tsrc_cli, git_server, workspace_path):
     assert foo_path.joinpath("new.txt").exists()
 
 
-def test_fixed_ref_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
+def test_tags_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
 
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
-    git_server.manifest.set_repo_ref("foo", "v0.1")
+    git_server.manifest.set_repo_tag("foo", "v0.1")
 
     tsrc_cli.run("init", git_server.manifest_url)
     workspace_path.joinpath("foo", "untracked.txt").write_text("")
