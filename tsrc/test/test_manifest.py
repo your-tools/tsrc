@@ -17,8 +17,9 @@ repos:
     url: git@example.com:foo.git
     branch: next
 
-  - src bar
-    url: git@example.com:bar.git
+  - src: bar
+    url: git@example.com:foo.git
+    branch: master
     sha1: ad2b68539c78e749a372414165acdf2a1bb68203
 
   - src: master
@@ -42,11 +43,11 @@ repos:
             tag=None
         ),
         tsrc.Repo(
-            url="git@example.com:bar.git",
+            url="git@example.com:foo.git",
             src="bar",
-            branch=None,
+            branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
-            tag=None 
+            tag=None
         ),
         tsrc.Repo(
             url="git@example.com:master.git",

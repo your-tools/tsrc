@@ -152,7 +152,7 @@ def test_tags_are_updated_when_clean(tsrc_cli, git_server, workspace_path):
 
     git_server.push_file("foo", "new.txt")
     git_server.tag("foo", "v0.2")
-    git_server.manifest.set_repo_ref("foo", "v0.2")
+    git_server.manifest.set_repo_tag("foo", "v0.2")
 
     tsrc_cli.run("sync")
 
@@ -171,7 +171,7 @@ def test_tags_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
 
     git_server.push_file("foo", "new.txt")
     git_server.tag("foo", "v0.2")
-    git_server.manifest.set_repo_ref("foo", "v0.2")
+    git_server.manifest.set_repo_tag("foo", "v0.2")
 
     tsrc_cli.run("sync", expect_fail=True)
 

@@ -116,11 +116,16 @@ class LocalManifest:
         else:
             parent, name = self.clone_path.splitpath()
             parent.makedirs_p()
+            ref = None
             if tag:
                 ref = tag
-            else:
+            elif branch:
                 ref = branch
-            tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", ref)
+
+            if ref:
+                tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", ref)
+            else:
+                tsrc.git.run_git(self.clone_path.parent, "clone", url, name)
 
     def get_current_branch(self):
         return tsrc.git.get_current_branch(self.clone_path)
@@ -211,12 +216,17 @@ class Cloner(tsrc.executor.Task):
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
+        ref = None
         if repo.tag:
             ref = repo.tag
-        else:
+        elif repo.branch:
             ref = repo.branch
+
         try:
-            tsrc.git.run_git(parent, "clone", repo.url, "--branch", ref, name)
+            if ref:
+                tsrc.git.run_git(parent, "clone", repo.url, "--branch", ref, name)
+            else:
+                tsrc.git.run_git(parent, "clone", repo.url, name)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
         ref = repo.sha1
@@ -297,7 +307,6 @@ class Syncer(tsrc.executor.Task):
     def process(self, repo):
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)
-        self.check_branch(repo, repo_path)
         self.fetch(repo_path)
         ref = None
 
@@ -309,6 +318,7 @@ class Syncer(tsrc.executor.Task):
         if ref:
             self.sync_repo_to_ref(repo_path, ref)
         else:
+            self.check_branch(repo, repo_path)
             self.sync_repo_to_branch(repo_path)
 
     def check_branch(self, repo, repo_path):
