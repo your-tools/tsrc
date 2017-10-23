@@ -55,7 +55,7 @@ class Manifest():
         for repo_config in repos:
             url = repo_config["url"]
             src = repo_config["src"]
-            branch = repo_config.get("branch", "master")
+            branch = repo_config.get("branch")
             tag = repo_config.get("tag")
             sha1 = repo_config.get("sha1")
             repo = tsrc.Repo(url=url, src=src, branch=branch,

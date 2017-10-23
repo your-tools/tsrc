@@ -8,6 +8,6 @@ import attr
 class Repo():
     src = attr.ib()
     url = attr.ib()
-    branch = attr.ib(default="master")
+    branch = attr.ib(default=None)
     sha1 = attr.ib(default=None)
     tag = attr.ib(default=None)
