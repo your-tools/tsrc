@@ -116,9 +116,16 @@ class LocalManifest:
         else:
             parent, name = self.clone_path.splitpath()
             parent.makedirs_p()
-            tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", branch)
+            ref = None
             if tag:
-                tsrc.git.run_git(self.clone_path, "reset", "--hard", tag)
+                ref = tag
+            elif branch:
+                ref = branch
+
+            if ref:
+                tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", ref)
+            else:
+                tsrc.git.run_git(self.clone_path.parent, "clone", url, name)
 
     def get_current_branch(self):
         return tsrc.git.get_current_branch(self.clone_path)
@@ -209,11 +216,20 @@ class Cloner(tsrc.executor.Task):
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
+        ref = None
+        if repo.tag:
+            ref = repo.tag
+        elif repo.branch:
+            ref = repo.branch
+
         try:
-            tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
+            if ref:
+                tsrc.git.run_git(parent, "clone", repo.url, "--branch", ref, name)
+            else:
+                tsrc.git.run_git(parent, "clone", repo.url, name)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
-        ref = repo.fixed_ref
+        ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
             try:
@@ -291,12 +307,18 @@ class Syncer(tsrc.executor.Task):
     def process(self, repo):
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)
-        self.check_branch(repo, repo_path)
         self.fetch(repo_path)
+        ref = None
 
-        if repo.fixed_ref:
-            self.sync_repo_to_ref(repo_path, repo.fixed_ref)
+        if repo.tag:
+            ref = repo.tag
+        elif repo.sha1:
+            ref = repo.sha1
+
+        if ref:
+            self.sync_repo_to_ref(repo_path, ref)
         else:
+            self.check_branch(repo, repo_path)
             self.sync_repo_to_branch(repo_path)
 
     def check_branch(self, repo, repo_path):
