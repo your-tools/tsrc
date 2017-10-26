@@ -31,6 +31,7 @@ setup(name="tsrc",
         "tabulate",
         "unidecode",
         "xdg",
+        "arrow",
       ],
       classifiers=[
         "Programming Language :: Python :: 3.3",
