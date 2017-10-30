@@ -42,6 +42,7 @@ def main():
     failed_checks = [check for check in checks if not check.ok]
     if not failed_checks:
         ui.info(ui.green, "CI passed")
+        return
     for check in failed_checks:
         ui.error(check.name, "failed")
     sys.exit(1)
