@@ -44,6 +44,7 @@ def main():
         ui.info(ui.green, "CI passed")
     for check in failed_checks:
         ui.error(check.name, "failed")
+    sys.exit(1)
 
 
 if __name__ == "__main__":
