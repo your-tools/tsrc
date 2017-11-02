@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.2 (2017-11-02)
+
+* Improve `tsrc status` to handle tags. Patch by @arnaudgelas
+* Fix crash when running `tsrc version`
+
 ## v0.3.1 (2017-10-06)
 
 * Improve `tsrc status` output. Now also shows number of commits ahead and behind, and display a short SHA-1 when not on any branch. Initial patch by @arnaudgelas.
