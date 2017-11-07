@@ -38,7 +38,7 @@ Tutorial
 Getting started
 +++++++++++++++
 
-* Make sure you are using **Python3.3** or higher.
+* Make sure you are using **Python3.4** or higher.
 
 * Install ``tsrc`` with ``pip3`` as usual.
 
