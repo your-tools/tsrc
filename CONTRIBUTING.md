@@ -38,22 +38,24 @@ support.
 
 # Checking your changes
 
-* Create a virtualenv
-* Activate it
+* Install [pipenv](https://docs.pipenv.org/).
 * Install development and documentation dependencies:
 
 ```console
-$ pip install -r dev-requirements.txt
-$ pip install -r doc-requirements.txt
+$ pipenv install --dev
 ```
+
+* Run `setup.py develop` at least once:
+
+```
+$ pypenv run python setup.py develop
+```
+
+(you should re-run this command every time the `setup.py` file changes).
 
 * Finally, run:
 
+
 ```console
-$ python ci/ci.py
-```
-
-
-
-
+$ pipenv run python ci/ci.py
 ```

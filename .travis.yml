@@ -5,9 +5,10 @@ python:
   - "3.6"
 
 install:
-  - pip install .
-  - pip install -r dev-requirements.txt
-  - pip install -r doc-requirements.txt
+  - pip install pipenv
+  - pipenv install --dev
+  - pipenv run python setup.py develop
 
 script:
-  - python ci/ci.py
+  - pipenv check
+  - pipenv run python ci/ci.py
