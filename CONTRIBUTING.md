@@ -1,3 +1,11 @@
+# Development
+
+All the development happens on [github](https://github.com/TankerApp/tsrc)
+
+Outcome of discussions among maintainers and users of the software are tracked in the
+[wiki](https://github.com/TankerApp/tsrc/wiki)
+
+
 # Reporting bugs
 
 Feel free to use [github bug tracker](https://github.com/TankerApp/tsrc/issues) to open issues.
