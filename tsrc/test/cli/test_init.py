@@ -96,11 +96,11 @@ def test_empty_repo(tsrc_cli, git_server, workspace_path):
     tsrc_cli.run("init", manifest_url, expect_fail=True)
 
 
-def test_resets_to_fixed_ref(tsrc_cli, git_server, workspace_path):
+def test_resets_to_tag(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     git_server.tag("foo", "v1.0")
     git_server.push_file("foo", "2.txt", message="Working on v2")
-    git_server.manifest.set_repo_ref("foo", "v1.0")
+    git_server.manifest.set_repo_tag("foo", "v1.0")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)

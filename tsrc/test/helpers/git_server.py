@@ -56,8 +56,11 @@ class ManifestHandler():
     def set_repo_branch(self, src, branch):
         self.configue_repo(src, "branch", branch)
 
-    def set_repo_ref(self, src, ref):
-        self.configue_repo(src, "fixed_ref", ref)
+    def set_repo_sha1(self, src, ref):
+        self.configue_repo(src, "sha1", ref)
+
+    def set_repo_tag(self, src, tag):
+        self.configue_repo(src, "tag", tag)
 
     def set_repo_file_copies(self, src, copies):
         copy_dicts = list()

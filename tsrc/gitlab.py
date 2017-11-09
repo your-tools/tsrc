@@ -102,7 +102,7 @@ class GitLabHelper():
                     return mr
 
     def create_merge_request(self, project_id, source_branch, *, title,
-                             target_branch="master"):
+                             target_branch):
         ui.info_2("Creating merge request", ui.ellipsis, end="")
         url = "/projects/%i/merge_requests" % project_id
         data = {

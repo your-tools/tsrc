@@ -60,13 +60,13 @@ class LocalManifest:
     def get_url(self, src):
         return self.manifest.get_url(src)
 
-    def configure(self, url=None, branch="master", tag=None, groups=None):
+    def configure(self, url=None, branch=None, sha1=None, tag=None, groups=None):
         if not self.cfg_path.exists() and not url:
             raise tsrc.Error("manifest URL is required when creating a new workspace")
         if self.cfg_path.exists() and not url:
             url = self.load_config()["url"]
-        self._ensure_git_state(url, branch=branch, tag=tag)
-        self.save_config(url=url, branch=branch, tag=tag, groups=groups)
+        self._ensure_git_state(url, branch=branch, sha1=sha1, tag=tag)
+        self.save_config(url=url, branch=branch, sha1=sha1, tag=tag, groups=groups)
 
     def update(self):
         ui.info_2("Updating manifest")
@@ -79,10 +79,13 @@ class LocalManifest:
         cmd = ("reset", "--hard", "@{u}")
         tsrc.git.run_git(self.clone_path, *cmd)
 
-    def save_config(self, url, branch="master", tag=None, groups=None):
+    def save_config(self, url, branch=None, tag=None, sha1=None, groups=None):
         config = dict()
         config["url"] = url
-        config["branch"] = branch
+        if branch:
+            config["branch"] = branch
+        if sha1:
+            config["sha1"] = sha1
         if tag:
             config["tag"] = tag
         if groups:
@@ -92,33 +95,50 @@ class LocalManifest:
 
     def load_config(self):
         manifest_schema = schema.Schema({
-            "branch": str,
             "url": str,
+            schema.Optional("branch"): str,
+            schema.Optional("sha1"): str,
             schema.Optional("tag"): str,
             schema.Optional("groups"): [str],
         })
 
         return tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
 
-    def _ensure_git_state(self, url, branch="master", tag=None):
+    def _ensure_git_state(self, url, branch=None, sha1=None, tag=None):
         if self.clone_path.exists():
             tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", url)
-
             tsrc.git.run_git(self.clone_path, "fetch")
-            tsrc.git.run_git(self.clone_path, "checkout", "-B", branch)
-            tsrc.git.run_git(self.clone_path, "branch", branch,
-                             "--set-upstream-to", "origin/%s" % branch)
+
+            ref = None
+            if branch:
+                tsrc.git.run_git(self.clone_path, "checkout", "-B", branch)
+                tsrc.git.run_git(self.clone_path, "branch", branch,
+                                 "--set-upstream-to", "origin/%s" % branch)
+                ref = "origin/%s" % branch
+
             if tag:
                 ref = tag
+            elif sha1:
+                ref = sha1
+
+            if ref:
+                tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
             else:
-                ref = "origin/%s" % branch
-            tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
+                raise tsrc.Error("no branch, no sha1, no tag")
+
         else:
             parent, name = self.clone_path.splitpath()
             parent.makedirs_p()
-            tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", branch)
+            ref = None
             if tag:
-                tsrc.git.run_git(self.clone_path, "reset", "--hard", tag)
+                ref = tag
+            elif branch:
+                ref = branch
+
+            if ref:
+                tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", ref)
+            else:
+                tsrc.git.run_git(self.clone_path.parent, "clone", url, name)
 
     def get_current_branch(self):
         return tsrc.git.get_current_branch(self.clone_path)
@@ -141,8 +161,8 @@ class Workspace():
     def get_gitlab_url(self):
         return self.local_manifest.get_gitlab_url()
 
-    def configure_manifest(self, url=None, *, branch="master", tag=None, groups=None):
-        self.local_manifest.configure(url=url, branch=branch, tag=tag, groups=groups)
+    def configure_manifest(self, url=None, *, branch=None, sha1=None, tag=None, groups=None):
+        self.local_manifest.configure(url=url, branch=branch, sha1=sha1, tag=tag, groups=groups)
 
     def update_manifest(self):
         self.local_manifest.update()
@@ -209,11 +229,20 @@ class Cloner(tsrc.executor.Task):
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
+        ref = None
+        if repo.tag:
+            ref = repo.tag
+        elif repo.branch:
+            ref = repo.branch
+
         try:
-            tsrc.git.run_git(parent, "clone", repo.url, "--branch", repo.branch, name)
+            if ref:
+                tsrc.git.run_git(parent, "clone", repo.url, "--branch", ref, name)
+            else:
+                tsrc.git.run_git(parent, "clone", repo.url, name)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
-        ref = repo.fixed_ref
+        ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
             try:
@@ -291,13 +320,31 @@ class Syncer(tsrc.executor.Task):
     def process(self, repo):
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)
-        self.check_branch(repo, repo_path)
         self.fetch(repo_path)
+        ref = None
 
-        if repo.fixed_ref:
-            self.sync_repo_to_ref(repo_path, repo.fixed_ref)
+        ui.info("### %s %s %s" % (repo.branch, repo.sha1, repo.tag))
+
+        if repo.tag:
+            ref = repo.tag
+        elif repo.sha1:
+            ref = repo.sha1
+
+        if ref:
+            self.sync_repo_to_ref(repo_path, ref)
         else:
+            self.check_branch(repo, repo_path)
             self.sync_repo_to_branch(repo_path)
+
+    def get_default_branch(self, repo_path):
+        _, remote_branches = tsrc.git.run_git(repo_path, "branch", "--remotes", "--points-at", "refs/remotes/origin/HEAD", raises=False)
+        default_branch = None
+        for line in remote_branches.splitlines():
+            line = line.strip()
+            if line.startswith("origin/HEAD -> origin/"):
+                _, default_branch = line.split("origin/HEAD -> origin/")
+                break
+        return default_branch
 
     def check_branch(self, repo, repo_path):
         current_branch = None
@@ -306,8 +353,14 @@ class Syncer(tsrc.executor.Task):
         except tsrc.Error:
             raise tsrc.Error("Not on any branch")
 
-        if current_branch and current_branch != repo.branch:
-            self.bad_branches.append((repo.src, current_branch, repo.branch))
+        if repo.branch:
+            branch = repo.branch
+        else:
+            branch = self.get_default_branch(repo_path)
+
+        if branch:
+            if current_branch and current_branch != branch:
+                self.bad_branches.append((repo.src, current_branch, branch))
 
     @staticmethod
     def fetch(repo_path):
