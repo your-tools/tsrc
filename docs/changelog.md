@@ -14,7 +14,7 @@
 
 See the [dedicated section about manifest format](ref/formats.md#groups) for details.
 
-## Upgrading from v0.2.4
+**Upgrading from v0.2.4**:
 
 To upgrade from an older version of `tsrc`, you should re-run `tsrc init` with the correct url:
 
