@@ -14,7 +14,7 @@
 
 *Breaking change*: Add support for groups (#30). Reported by @arnaudgelas.
 
-See the [dedicated section about manifest format](ref/formats#groups) for details.
+See the [dedicated section about manifest format](ref/formats.md#groups) for details.
 
 ### Upgrading from v0.2.4
 
