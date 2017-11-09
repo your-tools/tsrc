@@ -1,6 +1,4 @@
-# Frequently asked questions
-
-## Why not Python2 support?
+# Why not Python2 support?
 
 We believe Python2 is an inferior language than Python3, and we use many
 Python3 features to make the code more readable and robust.
@@ -8,7 +6,7 @@ Python3 features to make the code more readable and robust.
 Plus [Python2.7 supports ends in 2020](
 https://www.python.org/dev/peps/pep-0373/#id2).
 
-## Why not repo?
+# Why not repo?
 
 We used [repo](https://android.googlesource.com/tools/repo/) for a while, but
 found that tsrc had both a better command line API and a nicer output.
@@ -41,7 +39,7 @@ Here are a few features present in repo that are missing from `tsrc`
 * Cloning several repositories in parallel
 * Support for other hosting services such as `gerrit` or `github`
 
-## Why not git-subrepo, mu-repo, or gr?
+# Why not git-subrepo, mu-repo, or gr?
 
 All this projects are fine but did not match our needs:
 
@@ -53,7 +51,7 @@ All this projects are fine but did not match our needs:
 In any case, now that the whole team is using `tsrc` all the time, it's likely
 we'll keep using `tsrc` in the future.
 
-## Why not git submodule?
+# Why not git submodule?
 
 It's all about workflow.
 
@@ -81,7 +79,7 @@ Last but not least, with `tsrc` you do everything with `tsrc init` and `tsrc
 sync`, which is a simpler command line API than `git submodule`.
 
 
-## Why not using libgit2 or similar?
+# Why not using libgit2 or similar?
 
 `pygit2` now has pre-built wheels for Windows, but not for macOS and Linux.
 
@@ -90,7 +88,7 @@ We prefer to _not_ require compiling `libgit2`.
 Also, we prefer calling git "porcelain" commands, both for readability of the
 source code and ease of debugging.
 
-## Why do you hide which git commands are run?
+# Why do you hide which git commands are run?
 
 
 It's mainly a matter of not cluttering the output.
@@ -104,13 +102,13 @@ That being said:
   `--verbose` flag, like so: `tsrc --verbose sync`
 
 
-## Why argparse?
+# Why argparse?
 
 See [docopt v argparse](https://dmerej.info/blog/post/docopt-v-argparse/), and
 [please don't use click](http://xion.io/post/programming/python-dont-use-click.html)
 
 
-## Why YAML?
+# Why YAML?
 
 It's nice to read and write, and we use the excellent [ruamel.yaml](
 https://yaml.readthedocs.io/en/latest/) which even has round-trip support.
