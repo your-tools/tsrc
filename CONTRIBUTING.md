@@ -23,7 +23,7 @@ Doing so will ensure we can investigate your bug right away.
 
 You are free to open a pull request on GitHub for any feature you'd like.
 
-Before opening a merge request, please read the [code manifesto](https://tankerapp.github.io/tsrc/code-manifesto)
+Before opening a merge request, please read the [code manifesto](https://tankerapp.github.io/tsrc/code-manifesto).
 
 Note that for your merge request to be accepted, we'll ask that:
 

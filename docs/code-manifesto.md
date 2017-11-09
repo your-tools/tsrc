@@ -1,13 +1,10 @@
-# Code Manifesto
-
-
-## Basics
+# Basics
 
 We use `pycodestyle` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
 In addition, every text file must be pushed using UNIX line endings. (On Windows, you are advised to set `core.autocrlf` to `true` in you git config file)
 
-## Pet peeves
+# Pet peeves
 
 * Prefer double quotes for string literals
 
@@ -102,7 +99,7 @@ else:
 a = "ok" if foo else "nope"
 ```
 
-## Doc strings and comments
+# Doc strings and comments
 
 First off, bad comments are worse that not comments.
 
@@ -112,7 +109,7 @@ Also note that you should use comments to explain **why**, never **what**. If th
 
 In conclusion, use comments and doc strings sparingly: that way, they will not rot and they will stay useful.
 
-## Collections
+# Collections
 
 
 * Use .extend() instead of += to concatenate lists:
@@ -187,7 +184,7 @@ for result in results:
    # do something with result
 ```
 
-## Functions
+# Functions
 
 Prefer using keyword-only parameters when possible:
 
@@ -222,7 +219,7 @@ def get(value, default=None):
   ...
 ```
 
-## Imports
+# Imports
 
 For any `foo.py` file, `import foo` must never fail, unless there is a necessary module that could not be found. Do not catch  `ImportError` unless it is necessary, for instance to deal with optional dependencies.
 
