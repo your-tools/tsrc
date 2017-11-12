@@ -88,7 +88,7 @@ Managing Merge Requests
 
 * Create the pull request::
 
-    $ tsrc push --assignee <an octive user>
+    $ tsrc push --assignee <an active user>
 
 * When the review is done, tell GitLab to merge it once the CI passes::
 
