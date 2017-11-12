@@ -54,14 +54,6 @@ $ python ci/ci.py
 ```
 
 
-* Use `if ... in ...` when you can:
 
-```python
-# Yes
-if value in ["option1", "option2"]:
-   ...
 
-# No
-if value == "option1" or value == "option2"
-  ...
 ```
