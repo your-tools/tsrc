@@ -18,7 +18,7 @@ handling merge requests from the command line possible.
 
 # Installing tsrc
 
-`tsrc` is compatible with **Python 3.3** or higher.
+`tsrc` is compatible with **Python 3.4** or higher.
 
 It is available on [pypi](https://pypi.org/project/tsrc/) and can be
 installed with [pip](https://pip.pypa.io/en/stable/):

@@ -1,0 +1,40 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+attrs = "*"
+colored-traceback = "*"
+colorama = "*"
+"path.py" = "*"
+python-cli-ui = "*"
+pyparsing = "*"
+requests = "*"
+"ruamel.yaml" = "*"
+schema = "*"
+tabulate = "*"
+unidecode = "*"
+xdg = "*"
+
+
+[dev-packages]
+
+pycodestyle = "*"
+astroid = "*"
+pylint = "*"
+pyflakes = "*"
+mccabe = "*"
+apipkg = "*"
+coverage = "*"
+execnet = "*"
+mock = "*"
+py = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+mkdocs = "*"
+backports-abc = "*"
