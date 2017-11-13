@@ -1,3 +1,9 @@
+# next version
+
+*Breaking change*: improve fixed reference handling (#57).
+
+See the [dedicated section about manifest format](ref/formats.md#repos) for details.
+
 # v0.3.2 (2017-11-02)
 
 * Improve `tsrc status` to handle tags. Patch by @arnaudgelas
