@@ -48,7 +48,7 @@ $ pipenv install --dev
 * Run `setup.py develop` at least once:
 
 ```
-$ pypenv run python setup.py develop
+$ pipenv run python setup.py develop
 ```
 
 (you should re-run this command every time the `setup.py` file changes).
