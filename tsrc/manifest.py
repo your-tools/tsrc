@@ -23,7 +23,8 @@ def load(manifest_path):
         "url": str,
         schema.Optional("branch"): str,
         schema.Optional("copy"): [copy_schema],
-        schema.Optional("fixed_ref"): str,
+        schema.Optional("sha1"): str,
+        schema.Optional("tag"): str,
     }
     group_schema = {
         "repos": [str],
@@ -55,9 +56,10 @@ class Manifest():
             url = repo_config["url"]
             src = repo_config["src"]
             branch = repo_config.get("branch", "master")
-            fixed_ref = repo_config.get("fixed_ref")
+            tag = repo_config.get("tag")
+            sha1 = repo_config.get("sha1")
             repo = tsrc.Repo(url=url, src=src, branch=branch,
-                             fixed_ref=fixed_ref)
+                             sha1=sha1, tag=tag)
             self._repos.append(repo)
 
             self._handle_copies(repo_config)

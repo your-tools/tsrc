@@ -17,9 +17,14 @@ repos:
     url: git@example.com:foo.git
     branch: next
 
+  - src: bar
+    url: git@example.com:foo.git
+    branch: master
+    sha1: ad2b68539c78e749a372414165acdf2a1bb68203
+
   - src: master
     url: git@example.com:master.git
-    fixed_ref: v0.1
+    tag: v0.1
     copy:
       - src: top.cmake
         dest: CMakeLists.txt
@@ -34,13 +39,22 @@ repos:
             url="git@example.com:foo.git",
             src="foo",
             branch="next",
-            fixed_ref=None,
+            sha1=None,
+            tag=None
+        ),
+        tsrc.Repo(
+            url="git@example.com:foo.git",
+            src="bar",
+            branch="master",
+            sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
+            tag=None
         ),
         tsrc.Repo(
             url="git@example.com:master.git",
             src="master",
             branch="master",
-            fixed_ref="v0.1"
+            sha1=None,
+            tag="v0.1",
         ),
     ]
     assert manifest.copyfiles == [
