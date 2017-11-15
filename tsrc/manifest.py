@@ -16,7 +16,7 @@ class RepoNotFound(tsrc.Error):
 
 
 def load(manifest_path):
-    gitlab_schema = {"url": str}
+    service_schema = {"url": str}
     copy_schema = {"src": str, schema.Optional("dest"): str}
     repo_schema = {
         "src": str,
@@ -31,7 +31,8 @@ def load(manifest_path):
     }
     manifest_schema = schema.Schema({
         "repos": [repo_schema],
-        schema.Optional("gitlab"): gitlab_schema,
+        schema.Optional("gitlab"): service_schema,
+        schema.Optional("github"): service_schema,
         schema.Optional("groups"): {str: group_schema},
     })
     parsed = tsrc.config.parse_config_file(manifest_path, manifest_schema)

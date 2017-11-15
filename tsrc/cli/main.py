@@ -109,14 +109,23 @@ def main(args=None):
     log_parser.set_defaults(to="HEAD")
 
     push_parser = workspace_subparser(subparsers, "push")
-    push_parser.add_argument("--accept", action="store_true", default=False)
     push_parser.add_argument("-f", "--force", action="store_true", default=False)
     push_parser.add_argument("-t", "--target", dest="target_branch", default="master")
-    message_group = push_parser.add_mutually_exclusive_group()
+
+    github_group = push_parser.add_argument_group("github options")
+    github_group.add_argument("--merge", help="Merge pull request", action="store_true")
+    github_group.add_argument("--title", help="Title of the pull request")
+
+    gitlab_group = push_parser.add_argument_group("gitlab options")
+    gitlab_group.add_argument("--accept")
+
+    message_group = gitlab_group.add_mutually_exclusive_group()
     message_group.add_argument("-m", "--message", dest="mr_title")
     message_group.add_argument("--wip", action="store_true", help="Mark merge request as WIP")
     message_group.add_argument("--ready", action="store_true", help="Mark merge request as ready")
-    push_parser.add_argument("-a", "--assignee", dest="assignee")
+
+    gitlab_group.add_argument("-a", "--assignee", dest="assignee")
+
     workspace_subparser(subparsers, "status")
     workspace_subparser(subparsers, "sync")
 
