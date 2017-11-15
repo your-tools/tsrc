@@ -19,6 +19,7 @@ schema = "*"
 tabulate = "*"
 unidecode = "*"
 xdg = "*"
+"github3-py" = "*"
 
 
 [dev-packages]
