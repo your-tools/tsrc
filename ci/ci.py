@@ -36,7 +36,11 @@ def init_checks():
 
 def main():
     ui.info_1("Starting CI")
-    checks = init_checks()
+    all_checks = init_checks()
+    check_list = sys.argv[1:]
+    checks = all_checks
+    if check_list:
+        checks = [c for c in checks if c.name in check_list]
     for check in checks:
         check.run()
     failed_checks = [check for check in checks if not check.ok]
