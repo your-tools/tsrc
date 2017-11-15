@@ -1,19 +1,19 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4e232271e85607915c997d1a68197353dc6b5d4b8dc9526f86a6bea9114d6996"
+            "sha256": "b1c3f5a9cee6bea2ee2b1762e2c6cbccf452dee4429dfa826770f82a88d23c74"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
-            "implementation_version": "3.6.3",
+            "implementation_version": "3.5.3",
             "os_name": "posix",
             "platform_machine": "x86_64",
             "platform_python_implementation": "CPython",
-            "platform_release": "4.13.11-1-ARCH",
+            "platform_release": "4.9.0-4-amd64",
             "platform_system": "Linux",
-            "platform_version": "#1 SMP PREEMPT Thu Nov 2 10:25:56 CET 2017",
-            "python_full_version": "3.6.3",
-            "python_version": "3.6",
+            "platform_version": "#1 SMP Debian 4.9.51-1 (2017-09-28)",
+            "python_full_version": "3.5.3",
+            "python_version": "3.5",
             "sys_platform": "linux"
         },
         "pipfile-spec": 6,
@@ -76,6 +76,10 @@
             ],
             "version": "==10.5"
         },
+        "pycp": {
+            "editable": true,
+            "git": "git@github.com:dmerejkowsky/pycp@04dc9ed70182e1e08586d65a3d2edf2c2cc1bc5b"
+        },
         "pygments": {
             "hashes": [
                 "sha256:78f3f434bcc5d6ee09020f92ba487f95ba50f1e3ef83ae96b9d5ffa1bab25c5d",
@@ -96,11 +100,8 @@
             "version": "==2.2.0"
         },
         "python-cli-ui": {
-            "hashes": [
-                "sha256:c3eff3f4e5e30f6ccd7696d665376a592471e8dc53302932c4113e437ef6d46c",
-                "sha256:ef39164ebe11ea1f3fd825c655ff667271bfa21354978c0f07f3bd24a483113b"
-            ],
-            "version": "==0.6.0"
+            "editable": true,
+            "git": "git@github.com:TankerApp/python-cli-ui@17935e4e466ea78531892d86b07f7805cc95092f"
         },
         "requests": {
             "hashes": [
@@ -143,6 +144,15 @@
                 "sha256:b9b4d2fc712c1e3b8f2970edf6d83fd8a329d0148de78bbe2755a79a96c190fa"
             ],
             "version": "==0.8.1"
+        },
+        "tbuild": {
+            "editable": true,
+            "git": "ssh://git@10.100.0.1:8022/Tanker/tbuild",
+            "ref": "254c7615ee871e8766ec87761209d771436857b4"
+        },
+        "tsrc": {
+            "editable": true,
+            "git": "git@github.com:TankerApp/tsrc@6fc45967bd91d655b8f4fe3dfe93c14f861f2c94"
         },
         "unidecode": {
             "hashes": [
@@ -344,10 +354,10 @@
         },
         "py": {
             "hashes": [
-                "sha256:2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
-                "sha256:0f2d585d22050e90c7d293b6451c83db097df77871974d90efd5a30dc12fcde3"
+                "sha256:1ccf86c56a62fcb66c9e4e4f5cc9b5c3f26ce5ff2dbe561b5e24474e7239de09",
+                "sha256:b3ec4564d622d7b0ef015bf48064b77906fb82d802be165951791df30b0345ca"
             ],
-            "version": "==1.4.34"
+            "version": "==1.5.0"
         },
         "pycodestyle": {
             "hashes": [
@@ -372,10 +382,10 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:81a25f36a97da3313e1125fce9e7bbbba565bc7fec3c5beb14c262ddab238ac1",
-                "sha256:27fa6617efc2869d3e969a3e75ec060375bfb28831ade8b5cdd68da3a741dc3c"
+                "sha256:241d7e7798d79192a123ceaf64c602b4d233eacf6d6e42ae27caa97f498b7dc6",
+                "sha256:6d5bd4f7113b444c55a3bbb5c738a3dd80d43563d063fc42dcb0aaefbdd78b81"
             ],
-            "version": "==3.2.3"
+            "version": "==3.2.5"
         },
         "pytest-cov": {
             "hashes": [
