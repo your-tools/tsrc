@@ -7,7 +7,11 @@ python:
 install:
   - pip install pipenv
   - pipenv install --dev
+# pipenv does not like dependencies starting with 'git'
+# See: https://github.com/kennethreitz/pipenv/issues/1030
+  - pipenv run pip install github3-py
   - pipenv run python setup.py develop
+
 
 script:
   - pipenv check
