@@ -1,0 +1,69 @@
+""" Entry point for tsrc push """
+
+import sys
+
+import github3.models
+import ui
+
+import tsrc
+import tsrc.config
+import tsrc.github
+import tsrc.cli.push
+
+
+class PushAction(tsrc.cli.push.PushAction):
+    def __init__(self, repository_info, args, github_api=None):
+        super().__init__(repository_info, args)
+        self.github_api = github_api
+        self.repository = None
+        self.pull_request = None
+
+    def setup_service(self):
+        if not self.github_api:
+            self.github_api = tsrc.github.login()
+        organization, name = self.project_name.split("/")
+        self.repository = self.github_api.repository(organization, name)
+
+    def post_push(self):
+        self.pull_request = self.ensure_pull_request()
+        ui.info(ui.green, "::",
+                ui.reset, "See pull request at", self.pull_request.html_url)
+
+        if self.args.merge:
+            self.merge_pull_request()
+
+    def find_opened_pull_request(self):
+        for pull_request in self.repository.iter_pulls():
+            if pull_request.head.ref == self.source_branch:
+                if pull_request.state == "open":
+                    return pull_request
+
+    def create_pull_request(self):
+        ui.info_2("Creating pull request", ui.ellipsis, end="")
+        title = self.args.title or self.source_branch
+        try:
+            pull_request = self.repository.create_pull(
+                title,
+                self.target_branch,
+                self.source_branch
+            )
+            ui.info("done", ui.check)
+        except github3.models.GitHubError as github_error:
+            ui.info()
+            ui.error(ui.red, "\nCould not create pull request")
+            for error in github_error.errors:
+                ui.info(ui.red, error["message"])
+            sys.exit(1)
+        return pull_request
+
+    def merge_pull_request(self):
+        ui.info_2("Merging #", self.pull_request.number)
+        self.pull_request.merge()
+
+    def ensure_pull_request(self):
+        pull_request = self.find_opened_pull_request()
+        if pull_request:
+            ui.info_2("Found existing pull request: #%s" % pull_request.number)
+            return pull_request
+        else:
+            return self.create_pull_request()

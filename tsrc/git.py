@@ -156,8 +156,9 @@ def get_current_tag(working_path):
     return output
 
 
-def get_repo_root():
-    working_path = path.Path(os.getcwd())
+def get_repo_root(working_path=None):
+    if not working_path:
+        working_path = path.Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")
     status, output = run_git(working_path, *cmd, raises=False)
     if status != 0:
