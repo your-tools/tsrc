@@ -3,9 +3,10 @@ import mock
 
 import pytest
 
-import tsrc.cli.push
 import tsrc.git
 import tsrc.gitlab
+from tsrc.cli.push import RepositoryInfo
+from tsrc.cli.push_gitlab import PushAction
 
 GITLAB_URL = "http://gitlab.example.com"
 TIMOTHEE = {"name": "timothee", "id": 1}
@@ -71,6 +72,13 @@ def gitlab_mock():
     return gl_mock
 
 
+def execute_push(foo_path, push_args, gitlab_mock):
+    repository_info = RepositoryInfo()
+    repository_info.read_working_path(foo_path)
+    push_action = PushAction(repository_info, push_args, gl_helper=gitlab_mock)
+    push_action.execute()
+
+
 def test_creating_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
     tsrc.git.run_git(foo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(foo_path, "commit", "--message", "new feature", "--allow-empty")
@@ -82,9 +90,7 @@ def test_creating_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
     push_args.target_branch = "next"
     push_args.mr_title = "Best feature ever"
 
-    push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
-
-    push_action.main()
+    execute_push(foo_path, push_args, gitlab_mock)
 
     gitlab_mock.assert_mr_created(
         "42", "new-feature",
@@ -108,8 +114,7 @@ def test_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
 
     push_args.target_branch = "next"
     push_args.mr_title = "Best feature ever"
-    push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
-    push_action.main()
+    execute_push(foo_path, push_args, gitlab_mock)
 
     gitlab_mock.assert_mr_not_created()
     gitlab_mock.assert_mr_updated(
@@ -127,8 +132,7 @@ def test_accept_merge_request(foo_path, tsrc_cli, gitlab_mock, push_args):
     gitlab_mock.find_opened_merge_request.return_value = MR_STUB
 
     push_args.accept = True
-    push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
-    push_action.main()
+    execute_push(foo_path, push_args, gitlab_mock)
 
     gitlab_mock.assert_mr_accepted(MR_STUB)
 
@@ -142,8 +146,7 @@ def test_unwipify_existing_merge_request(foo_path, tsrc_cli, gitlab_mock, push_a
     gitlab_mock.find_opened_merge_request.return_value = existing_mr
 
     push_args.ready = True
-    push_action = tsrc.cli.push.PushAction(push_args, gl_helper=gitlab_mock)
-    push_action.main()
+    execute_push(foo_path, push_args, gitlab_mock)
 
     gitlab_mock.assert_mr_not_created()
     gitlab_mock.assert_mr_updated(
