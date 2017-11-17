@@ -11,3 +11,4 @@ class Repo():
     branch = attr.ib(default="master")
     sha1 = attr.ib(default=None)
     tag = attr.ib(default=None)
+    shallow = attr.ib(default=None)

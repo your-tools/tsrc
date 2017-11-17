@@ -5,6 +5,8 @@ import pytest
 
 import tsrc.cli
 
+import ui
+
 
 class CLI():
     def __init__(self):

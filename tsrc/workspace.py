@@ -60,12 +60,12 @@ class LocalManifest:
     def get_url(self, src):
         return self.manifest.get_url(src)
 
-    def configure(self, url=None, branch="master", tag=None, groups=None):
+    def configure(self, url=None, branch="master", tag=None, shallow=None, groups=None):
         if not self.cfg_path.exists() and not url:
             raise tsrc.Error("manifest URL is required when creating a new workspace")
         if self.cfg_path.exists() and not url:
             url = self.load_config()["url"]
-        self._ensure_git_state(url, branch=branch, tag=tag)
+        self._ensure_git_state(url, branch=branch, tag=tag, shallow=shallow)
         self.save_config(url=url, branch=branch, tag=tag, groups=groups)
 
     def update(self):
@@ -100,7 +100,7 @@ class LocalManifest:
 
         return tsrc.config.parse_config_file(self.cfg_path, manifest_schema)
 
-    def _ensure_git_state(self, url, branch="master", tag=None):
+    def _ensure_git_state(self, url, branch="master", shallow=None, tag=None):
         if self.clone_path.exists():
             tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", url)
 
@@ -122,10 +122,13 @@ class LocalManifest:
             elif branch:
                 ref = branch
 
+            args = ("clone", url, name)
+
+            if shallow:
+                args += ("--depth", "1")
             if ref:
-                tsrc.git.run_git(self.clone_path.parent, "clone", url, name, "--branch", ref)
-            else:
-                tsrc.git.run_git(self.clone_path.parent, "clone", url, name)
+                args += ("--branch", ref)
+            tsrc.git.run_git(self.clone_path.parent, *args)
 
     def get_current_branch(self):
         return tsrc.git.get_current_branch(self.clone_path)
@@ -148,8 +151,9 @@ class Workspace():
     def get_gitlab_url(self):
         return self.local_manifest.get_gitlab_url()
 
-    def configure_manifest(self, url=None, *, branch="master", tag=None, groups=None):
-        self.local_manifest.configure(url=url, branch=branch, tag=tag, groups=groups)
+    def configure_manifest(self, url=None, *, branch="master", tag=None, shallow=None, groups=None):
+        self.local_manifest.configure(url=url, branch=branch, tag=tag,
+                                      shallow=shallow, groups=groups)
 
     def update_manifest(self):
         self.local_manifest.update()

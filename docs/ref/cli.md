@@ -44,6 +44,9 @@ tsrc init MANIFEST_URL [--group GROUP]
     The `-g,-group` can be used several times to specify which groups
     to use when cloning repositories.
 
+    The `-s,--shallow` can be used to make shallow clone of repositories i
+    when possible (i.e. for branches and tags).
+
     If you want to add or remove a group in your workspace, you can
     re-run `tsrc init`
 
