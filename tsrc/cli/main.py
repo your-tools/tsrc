@@ -117,7 +117,7 @@ def main(args=None):
     github_group.add_argument("--title", help="Title of the pull request")
 
     gitlab_group = push_parser.add_argument_group("gitlab options")
-    gitlab_group.add_argument("--accept")
+    gitlab_group.add_argument("--accept", action="store_true")
 
     message_group = gitlab_group.add_mutually_exclusive_group()
     message_group.add_argument("-m", "--message", dest="mr_title")
