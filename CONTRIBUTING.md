@@ -45,6 +45,12 @@ support.
 $ pipenv install --dev
 ```
 
+* Also install `github3-py` by hand (as a temporary workaround for a bug in `pipenv`):
+
+```console
+$ pipenv run pip install github3-py
+```
+
 * Run `setup.py develop` at least once:
 
 ```
