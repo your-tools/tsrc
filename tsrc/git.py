@@ -186,3 +186,8 @@ def get_status(working_path):
     status = GitStatus(working_path)
     status.update()
     return status
+
+
+def is_shallow(working_path):
+    root = get_repo_root(working_path)
+    return root.joinpath(".git/shallow").exists()

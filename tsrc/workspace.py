@@ -253,17 +253,19 @@ class Cloner(tsrc.executor.Task):
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
+        clone_args = ["clone", repo.url]
         ref = None
         if repo.tag:
             ref = repo.tag
         elif repo.branch:
             ref = repo.branch
-
+        if ref:
+            clone_args.extend(["--branch", ref])
+        if self.workspace.shallow:
+            clone_args.extend(["--depth", "1"])
+        clone_args.append(name)
         try:
-            if ref:
-                tsrc.git.run_git(parent, "clone", repo.url, "--branch", ref, name)
-            else:
-                tsrc.git.run_git(parent, "clone", repo.url, name)
+            tsrc.git.run_git(parent, *clone_args)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
         ref = repo.sha1
