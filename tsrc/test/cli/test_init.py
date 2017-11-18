@@ -169,5 +169,5 @@ def test_change_branch(tsrc_cli, git_server, workspace_path):
     tsrc_cli.run("init", git_server.manifest_url)
     assert_not_cloned(workspace_path, "two")
 
-    tsrc_cli.run("init", "--branch", "next")
+    tsrc_cli.run("init", git_server.manifest_url, "--branch", "next")
     assert_cloned(workspace_path, "two")

@@ -11,8 +11,8 @@ def main(args):
     workspace_path = args.workspace_path or os.getcwd()
     workspace = tsrc.workspace.Workspace(path.Path(workspace_path))
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
-    workspace.configure_manifest(url=args.manifest_url, branch=args.branch,
-                                 groups=args.groups, shallow=args.shallow)
+    manifest_options = tsrc.workspace.options_from_args(args)
+    workspace.configure_manifest(manifest_options)
     workspace.load_manifest()
     workspace.clone_missing()
     workspace.set_remotes()

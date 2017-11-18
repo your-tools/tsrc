@@ -108,7 +108,7 @@ def main(args=None):
     foreach_parser.formatter_class = argparse.RawDescriptionHelpFormatter
 
     init_parser = workspace_subparser(subparsers, "init")
-    init_parser.add_argument("manifest_url", nargs="?")
+    init_parser.add_argument("url", nargs="?")
     init_parser.add_argument("-b", "--branch")
     init_parser.add_argument("-g", "--group", action="append", dest="groups")
     init_parser.add_argument("-s", "--shallow", action="store_true", dest="shallow", default=False)
