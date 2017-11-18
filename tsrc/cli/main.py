@@ -3,6 +3,7 @@
 import argparse
 import functools
 import importlib
+import os
 import sys
 import textwrap
 
@@ -70,6 +71,15 @@ def main_wrapper(main_func):
     return wrapped
 
 
+def setup_ui(args):
+    verbose = None
+    if os.environ.get("VERBOSE"):
+        verbose = True
+    if args.verbose:
+        verbose = args.verbose
+    ui.setup(verbose=verbose, quiet=args.quiet, color=args.color)
+
+
 @main_wrapper
 def main(args=None):
     parser = argparse.ArgumentParser()
@@ -131,7 +141,7 @@ def main(args=None):
     workspace_subparser(subparsers, "sync")
 
     args = parser.parse_args(args=args)
-    ui.setup(verbose=args.verbose, quiet=args.quiet, color=args.color)
+    setup_ui(args)
 
     command = args.command
     if not command:
