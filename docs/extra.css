@@ -2,3 +2,15 @@
   border-top: none;
   background: none;
 }
+
+div#logo-container {
+  display: flex;
+  align-items: center
+}
+
+
+img#logo {
+  width: 100px;
+  margin-left: auto;
+  margin-right: auto;
+}
