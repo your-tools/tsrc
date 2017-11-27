@@ -18,7 +18,7 @@ def assert_not_cloned(workspace_path, repo):
     assert not repo_exists(workspace_path, repo)
 
 
-def test_init(tsrc_cli, git_server, workspace_path):
+def test_init_simple(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
@@ -158,5 +158,5 @@ def test_change_branch(tsrc_cli, git_server, workspace_path):
     tsrc_cli.run("init", git_server.manifest_url)
     assert_not_cloned(workspace_path, "two")
 
-    tsrc_cli.run("init", "--branch", "next")
+    tsrc_cli.run("init", git_server.manifest_url, "--branch", "next")
     assert_cloned(workspace_path, "two")

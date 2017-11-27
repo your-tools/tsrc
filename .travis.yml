@@ -9,6 +9,8 @@ install:
   - pipenv install --dev
 # pipenv does not like dependencies starting with 'git'
 # See: https://github.com/kennethreitz/pipenv/issues/1030
+# So let the CI fail when a new release is out :)
+  - pipenv run python ci/check-for-pipenv-release.py
   - pipenv run pip install github3-py
   - pipenv run python setup.py develop
 
