@@ -21,16 +21,29 @@ class PushAction(tsrc.cli.push.PushAction):
     def setup_service(self):
         if not self.github_api:
             self.github_api = tsrc.github.login()
-        organization, name = self.project_name.split("/")
-        self.repository = self.github_api.repository(organization, name)
+        owner, name = self.project_name.split("/")
+        self.repository = self.github_api.repository(owner, name)
 
     def post_push(self):
         self.pull_request = self.ensure_pull_request()
-        ui.info(ui.green, "::",
-                ui.reset, "See pull request at", self.pull_request.html_url)
+
+        if self.args.reviewers:
+            message = ["Requesting review from", ", ".join(self.args.reviewers)]
+            owner, name = self.project_name.split("/")
+            ui.info_2(*message)
+            tsrc.github.request_reviewers(
+                self.github_api, owner, name, self.pull_request.number,
+                self.args.reviewers)
+
+        if self.args.assignee:
+            ui.info_2("Assigning to", self.args.assignee)
+            self.assign_pull_request()
 
         if self.args.merge:
             self.merge_pull_request()
+
+        ui.info(ui.green, "::",
+                ui.reset, "See pull request at", self.pull_request.html_url)
 
     def find_opened_pull_request(self):
         for pull_request in self.repository.iter_pulls():
@@ -67,3 +80,11 @@ class PushAction(tsrc.cli.push.PushAction):
             return pull_request
         else:
             return self.create_pull_request()
+
+    def assign_pull_request(self):
+        issue = self.github_api.issue(
+            self.repository.owner,
+            self.repository.name,
+            self.pull_request.number
+        )
+        issue.assign(self.args.assignee)

@@ -13,6 +13,8 @@ from tsrc.test.helpers.push import repo_path, push_args
 @pytest.fixture
 def github_mock():
     github_mock = mock.create_autospec(github3.GitHub, instance=True)
+    mock_session = mock.Mock()
+    github_mock._session = mock_session
     return github_mock
 
 
@@ -24,21 +26,39 @@ def execute_push(repo_path, push_args, github_api):
 
 
 def test_create(repo_path, tsrc_cli, github_mock, push_args):
-    stub_repo = mock.Mock()
-    stub_repo.iter_pulls.return_value = list()
-    github_mock.repository.return_value = stub_repo
-    stub_pr = mock.Mock()
-    stub_repo.create_pull.return_value = stub_pr
-    stub_pr.html_url = "https://github.com/foo/bar/pull/42"
+    mock_repo = mock.Mock()
+    mock_repo.iter_pulls.return_value = list()
+    mock_repo.owner = "owner"
+    mock_repo.name = "project"
+    github_mock.repository.return_value = mock_repo
+    mock_pr = mock.Mock()
+    mock_repo.create_pull.return_value = mock_pr
+    mock_pr.html_url = "https://github.com/owner/project/pull/42"
+    mock_pr.number = 42
+    mock_issue = mock.Mock()
+    github_mock.issue.return_value = mock_issue
 
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
     push_args.title = "new feature"
+    push_args.assignee = "assignee1"
+    push_args.reviewers = ["reviewer1", "reviewer2"]
+
+    github_mock._session.post.return_value = mock.Mock(status_code=201)
+    github_mock._session.build_url.return_value = "request_url"
+
     execute_push(repo_path, push_args, github_mock)
 
-    github_mock.repository.assert_called_with("foo", "bar")
-    stub_repo.iter_pulls.assert_called_with()
-    stub_repo.create_pull.assert_called_with("new feature", "master", "new-feature")
+    github_mock.repository.assert_called_with("owner", "project")
+    github_mock._session.build_url.assert_called_with(
+        "repos", "owner", "project", "pulls", 42, "requested_reviewers")
+    github_mock._session.post.assert_called_with(
+        "request_url", json={"reviewers": ["reviewer1", "reviewer2"]})
+    mock_repo.iter_pulls.assert_called_with()
+    github_mock.issue.assert_called_with(
+        "owner", "project", 42)
+    mock_issue.assign.assert_called_with("assignee1")
+    mock_repo.create_pull.assert_called_with("new feature", "master", "new-feature")
 
 
 def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
@@ -70,14 +90,14 @@ def test_merge(repo_path, tsrc_cli, github_mock, push_args):
     opened_pr_wrong_branch.state = "closed"
     opened_pr_wrong_branch.head.ref = "new-feature"
 
-    stub_repo = mock.Mock()
-    stub_repo.iter_pulls.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
-    github_mock.repository.return_value = stub_repo
+    mock_repo = mock.Mock()
+    mock_repo.iter_pulls.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
+    github_mock.repository.return_value = mock_repo
 
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
     push_args.merge = True
     execute_push(repo_path, push_args, github_mock)
 
-    stub_repo.create_pull.assert_not_called()
+    mock_repo.create_pull.assert_not_called()
     opened_pr.merge.assert_called_with()

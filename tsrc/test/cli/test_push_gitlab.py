@@ -18,7 +18,7 @@ BART = {"name": "bart", "id": 4}
 MR_STUB = {"id": "3978", "iid": "42", "web_url": "http://mr/42", "title": "Boring title"}
 
 PROJECT_IDS = {
-    "foo/bar": "42"
+    "owner/project": "42"
 }
 
 
