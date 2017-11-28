@@ -33,12 +33,13 @@ def generate_token():
     note = "tsrc-" + str(uuid.uuid4())
     note_url = "https://supertanker.github.io/tsrc"
 
-    gh_api = github3.GitHub()
-    gh_api.login(username, password, two_factor_callback=lambda: ui.ask_string("2FA code: "))
+    def ask_2fa():
+        return ui.ask_string("2FA code: ")
 
-    user = gh_api.user()
-    auth = gh_api.authorize(user, password, scopes, note, note_url)
-    return auth.token
+    authorization = github3.authorize(username, password, scopes,
+                                      note=note, note_url=note_url,
+                                      two_factor_callback=ask_2fa)
+    return authorization.token
 
 
 def save_token(token):
