@@ -1,19 +1,19 @@
-# Environment
+### Environment
 
 * Output of `tsrc version`: ...
 * Output of `python --version`: ...
 * Operating system: ...
 
-# Command you ran
+### Command you ran
 
 ```console
 $ ...
 ```
 
-# Actual output
+### Actual output
 
 ```text
 ...
 ```
 
-# Expected result
+### Expected result
