@@ -42,7 +42,7 @@ This is required to create the `<workspace>/.tsrc/manifest.yml` file which is la
 
 # v0.2.3 (2017-09-01)
 
-* Split user interface functionality into its own project: [python-cli-ui](https://github.com/TankerApp/python-cli-ui).
+* Split user interface functionality into its own project: [python-cli-ui](https://github.com/SuperTanker/python-cli-ui).
 
 * Add `--quiet` and `--color` global options.
 

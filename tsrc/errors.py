@@ -1,7 +1,7 @@
 """ Custom exceptions """
 
 
-DOC_URL = "https://tankerapp.github.io/tsrc/ref/formats/"
+DOC_URL = "https://supertanker.github.io/tsrc/ref/formats/"
 
 
 class Error(Exception):
