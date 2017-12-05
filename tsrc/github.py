@@ -31,7 +31,7 @@ def generate_token():
     # Need a different note for each device, otherwise
     # gh_api.authorize() will fail
     note = "tsrc-" + str(uuid.uuid4())
-    note_url = "https://tankerapp.github.io/tsrc"
+    note_url = "https://supertanker.github.io/tsrc"
 
     gh_api = github3.GitHub()
     gh_api.login(username, password, two_factor_callback=lambda: ui.ask_string("2FA code: "))

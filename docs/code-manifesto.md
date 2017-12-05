@@ -340,6 +340,6 @@ with open(foo_path, "w") as fileobj:
 
 # Output messages to the user
 
-Do not use `print`, use [python-cli-ui functions](https://tankerapp.github.io/python-cli-ui/usage.html#api) instead. This makes it easier to distinguish between real messages and the throw-away `print`s you add for debugging.
+Do not use `print`, use [python-cli-ui functions](https://supertanker.github.io/python-cli-ui/usage.html#api) instead. This makes it easier to distinguish between real messages and the throw-away `print`s you add for debugging.
 
 Also, using "high-level" methods such as `ui.info_1()` or `ui.warning()` will make it easier to have a consistent user interface.

@@ -1,14 +1,14 @@
 tsrc: manage multiple repos / GitLab automation
 ===============================================
 
-.. image:: https://img.shields.io/travis/TankerApp/tsrc.svg?branch=master
-  :target: https://travis-ci.org/TankerApp/tsrc
+.. image:: https://img.shields.io/travis/SuperTanker/tsrc.svg?branch=master
+  :target: https://travis-ci.org/SuperTanker/tsrc
 
 .. image:: https://img.shields.io/pypi/v/tsrc.svg
   :target: https://pypi.org/project/tsrc/
 
-.. image:: https://img.shields.io/github/license/TankerApp/tsrc.svg
-  :target: https://github.com/TankerApp/tsrc/blob/master/LICENSE
+.. image:: https://img.shields.io/github/license/SuperTanker/tsrc.svg
+  :target: https://github.com/SuperTanker/tsrc/blob/master/LICENSE
 
 Demo
 ----
@@ -18,7 +18,7 @@ Demo
 Documentation
 --------------
 
-See https://tankerapp.github.io/tsrc/
+See https://supertanker.github.io/tsrc/
 
 Screenshots
 -----------
@@ -98,4 +98,4 @@ Managing Merge Requests
 Why not Google repo?
 --------------------
 
-See the `FAQ <https://tankerapp.github.io/tsrc/faq/#why_not_repo>`_
+See the `FAQ <https://supertanker.github.io/tsrc/faq/#why_not_repo>`_
