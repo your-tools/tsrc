@@ -11,6 +11,7 @@ def push_args():
     args.force = False
     args.merge = False
     args.mr_title = None
+    args.push_spec = None
     args.ready = False
     args.target_branch = "master"
     args.title = None

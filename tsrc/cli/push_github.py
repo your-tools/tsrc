@@ -34,18 +34,18 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def find_opened_pull_request(self):
         for pull_request in self.repository.iter_pulls():
-            if pull_request.head.ref == self.source_branch:
+            if pull_request.head.ref == self.remote_branch:
                 if pull_request.state == "open":
                     return pull_request
 
     def create_pull_request(self):
         ui.info_2("Creating pull request", ui.ellipsis, end="")
-        title = self.args.title or self.source_branch
+        title = self.args.title or self.remote_branch
         try:
             pull_request = self.repository.create_pull(
                 title,
                 self.target_branch,
-                self.source_branch
+                self.remote_branch
             )
             ui.info("done", ui.check)
         except github3.models.GitHubError as github_error:

@@ -122,6 +122,7 @@ def main(args=None):
     push_parser = workspace_subparser(subparsers, "push")
     push_parser.add_argument("-f", "--force", action="store_true", default=False)
     push_parser.add_argument("-t", "--target", dest="target_branch", default="master")
+    push_parser.add_argument("push_spec", nargs="?")
 
     github_group = push_parser.add_argument_group("github options")
     github_group.add_argument("--merge", help="Merge pull request", action="store_true")

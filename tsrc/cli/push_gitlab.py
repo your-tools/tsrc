@@ -121,13 +121,13 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def find_merge_request(self):
         return self.gl_helper.find_opened_merge_request(
-            self.project_id, self.source_branch
+            self.project_id, self.remote_branch
         )
 
     def create_merge_request(self):
         return self.gl_helper.create_merge_request(
-            self.project_id, self.source_branch,
-            title=self.source_branch,
+            self.project_id, self.remote_branch,
+            title=self.remote_branch,
             target_branch=self.target_branch
         )
 
