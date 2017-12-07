@@ -38,17 +38,11 @@ support.
 
 # Checking your changes
 
-* Install [pipenv](https://docs.pipenv.org/).
+* Install latest [pipenv](https://docs.pipenv.org/) version.
 * Install development and documentation dependencies:
 
 ```console
 $ pipenv install --dev
-```
-
-* Also install `github3-py` by hand (as a temporary workaround for a bug in `pipenv`):
-
-```console
-$ pipenv run pip install github3-py
 ```
 
 * Run `setup.py develop` at least once:
