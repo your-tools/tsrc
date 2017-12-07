@@ -188,6 +188,16 @@ def get_status(working_path):
     return status
 
 
+def get_tracking_ref(working_path):
+    rc, out = run_git(working_path,
+                      "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
+                      raises=False)
+    if rc == 0:
+        return out
+    else:
+        return None
+
+
 def is_shallow(working_path):
     root = get_repo_root(working_path)
     return root.joinpath(".git/shallow").exists()

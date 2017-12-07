@@ -49,6 +49,7 @@ class RepositoryInfo:
         self.path = None
         self.current_branch = None
         self.service = None
+        self.tracking_ref = None
         self.read_working_path(working_path=working_path)
 
     def read_working_path(self, working_path=None):
@@ -59,6 +60,7 @@ class RepositoryInfo:
             self.url = out
         if not self.url:
             return
+        self.tracking_ref = tsrc.git.get_tracking_ref(self.path)
         self.project_name = project_name_from_url(self.url)
         self.service = service_from_url(self.url)
 
@@ -66,16 +68,40 @@ class RepositoryInfo:
 class PushAction(metaclass=abc.ABCMeta):
     def __init__(self, repository_info, args):
         self.args = args
-        self.repo_path = None
-        self.source_branch = None
-        self.target_branch = None
-        self._read_repository_info(repository_info)
+        self.repository_info = repository_info
 
-    def _read_repository_info(self, repository_info):
-        self.repo_path = repository_info.path
-        self.project_name = repository_info.project_name
-        self.source_branch = repository_info.current_branch
-        self.target_branch = self.args.target_branch
+    @property
+    def repo_path(self):
+        return self.repository_info.path
+
+    @property
+    def tracking_ref(self):
+        return self.repository_info.tracking_ref
+
+    @property
+    def remote_name(self):
+        if not self.tracking_ref:
+            return None
+        return self.tracking_ref.split("/", maxsplit=1)[0]
+
+    @property
+    def current_branch(self):
+        return self.repository_info.current_branch
+
+    @property
+    def remote_branch(self):
+        if not self.tracking_ref:
+            return self.current_branch
+        else:
+            return self.tracking_ref.split("/", maxsplit=1)[1]
+
+    @property
+    def target_branch(self):
+        return self.args.target_branch
+
+    @property
+    def project_name(self):
+        return self.repository_info.project_name
 
     @abc.abstractmethod
     def setup_service(self):
@@ -87,7 +113,12 @@ class PushAction(metaclass=abc.ABCMeta):
 
     def push(self):
         ui.info_2("Running git push")
-        cmd = ["push", "-u", "origin", "%s:%s" % (self.source_branch, self.source_branch)]
+        remote_name = self.remote_name or "origin"
+        if self.args.push_spec:
+            push_spec = self.args.push_spec
+        else:
+            push_spec = "%s:%s" % (self.current_branch, self.remote_branch)
+        cmd = ["push", "-u", remote_name, push_spec]
         if self.args.force:
             cmd.append("--force")
         tsrc.git.run_git(self.repo_path, *cmd)

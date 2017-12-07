@@ -41,6 +41,18 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
     stub_repo.create_pull.assert_called_with("new feature", "master", "new-feature")
 
 
+def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
+    stub_repo = mock.Mock()
+    stub_repo.iter_pulls.return_value = list()
+    github_mock.repository.return_value = stub_repo
+    tsrc.git.run_git(repo_path, "checkout", "-b", "local")
+    tsrc.git.run_git(repo_path, "push", "-u", "origin", "local:remote")
+
+    push_args.title = "new feature"
+    execute_push(repo_path, push_args, github_mock)
+    stub_repo.create_pull.assert_called_with("new feature", "master", "remote")
+
+
 def test_merge(repo_path, tsrc_cli, github_mock, push_args):
     closed_pr = mock.Mock()
     closed_pr.number = 1
