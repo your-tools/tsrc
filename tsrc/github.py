@@ -45,7 +45,7 @@ def generate_token():
 def save_token(token):
     cfg_path = tsrc.config.get_tsrc_config_path()
     if cfg_path.exists():
-        config = tsrc.config.parse_tsrc_config()
+        config = tsrc.config.parse_tsrc_config(roundtrip=True)
     else:
         config = dict()
     if "auth" not in config:
