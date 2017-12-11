@@ -16,13 +16,25 @@ def test_shallow_clone_with_tag(tsrc_cli, git_server, workspace_path):
     tsrc_cli.run("init",  manifest_url)
     assert_shallow_clone(workspace_path, "foo")
 
+    git_server.push_file("foo", "v2.txt")
+    git_server.tag("foo", "v2.0")
+    git_server.manifest.set_repo_tag("foo", "v2.0")
+    tsrc_cli.run("sync")
+    assert_shallow_clone(workspace_path, "foo")
+
 
 def test_shallow_clone_with_branch(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
+    git_server.push_file("foo", "old.txt")
+    git_server.push_file("foo", "current.txt")
     git_server.manifest.set_shallow_repo("foo")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init",  manifest_url)
+    assert_shallow_clone(workspace_path, "foo")
+
+    git_server.push_file("foo", "new.txt")
+    tsrc_cli.run("sync")
     assert_shallow_clone(workspace_path, "foo")
 
 
