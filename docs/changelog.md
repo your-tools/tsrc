@@ -1,8 +1,71 @@
-# next version
+# v0.4.0
 
-*Breaking change*: improve fixed reference handling (#57).
+## Preliminary GitHub support
 
-See the [dedicated section about manifest format](ref/formats.md#repos) for details.
+No configuration required. Just make sure you are using `tsrc` from a repository which has a URL starting with
+`git@gitthub.com`.
+
+`tsrc` will prompt you once for your login and password and then store an API token.
+
+Afterwards, you'll be able to use `tsrc` push to:
+
+* Create a pull request (or update it if it already exists)
+* Assign people to the request (with the `-a/--assignee` option)
+* Request reviewers (with the `--reviewers` option)
+* Merge the pull request (with the `--merge` option)
+
+This change has no impact if you were already using `GitLab`.
+
+## Improve fixed reference handling
+
+**Breaking change**: Instead of using `fixed_ref` in the manifest, you should now use `tag` or `sha1`:
+
+*old*:
+```yaml
+repos:
+  - src: git@example.com/foo
+    fixed_ref: 42a70
+```
+
+*new*:
+```yaml
+repos:
+  - src: git@example.com/foo
+    tag: v0.1
+```
+
+See the [dedicated section about manifest format](ref/formats.md#repos) and the [#57 pull request discussion](https://github.com/SuperTanker/tsrc/pull) for the details.
+
+This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.
+
+## Support for shallow clones
+
+To save time and space, you can configure repositories to use shallow clones in the manifest:
+
+```yaml
+repos:
+  - src: git@example.com/foo
+    tag: v0.1
+    shallow: true
+
+repos:
+  - src: git@example.com/bar
+    shallow: true
+```
+
+
+Due to limitations in `git` itself, the `shallow` option cannot be used with a fixed SHA1.
+
+
+## Misc
+
+* Organization `TankerApp` was renamed to `SuperTanker`. New urls are:
+
+    * [github.com/SuperTanker/tsrc](https://github.com/SuperTanker/tsrc) for the git repository
+    * [supertanker.github.io/tsrc](https://supertanker.github.io/tsrc) for the documentation
+
+
+* We now use [pipenv](https://docs.pipenv.org/) for dependency handling.
 
 # v0.3.2 (2017-11-02)
 
