@@ -32,6 +32,8 @@ Each repository is also a dictionary, containing:
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
         to the given sha1, else a warning message will be printed.
+* `shallow` (optional, default to false): When running `tsrc init`, the project will be cloned with `git clone <url> --depth=1`, thus creating a "shallow" repository. This option cannot be used if `sha1` is set.
+
 * `copy`: (optional): A list of dictionaries with `src` and `dest` keys, like so:
 
 

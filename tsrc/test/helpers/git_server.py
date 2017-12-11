@@ -62,6 +62,9 @@ class ManifestHandler():
     def set_repo_tag(self, src, tag):
         self.configure_repo(src, "tag", tag)
 
+    def set_shallow_repo(self, src):
+        self.configure_repo(src, "shallow", True)
+
     def set_repo_file_copies(self, src, copies):
         copy_dicts = list()
         for copy_src, copy_dest in copies:
