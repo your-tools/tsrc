@@ -8,6 +8,7 @@ def push_args():
     args = types.SimpleNamespace()
     args.accept = False
     args.assignee = None
+    args.close = False
     args.force = False
     args.merge = False
     args.mr_title = None
