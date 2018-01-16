@@ -102,6 +102,21 @@ def test_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     )
 
 
+def test_close_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+
+    gitlab_mock.find_opened_merge_request.return_value = MR_STUB
+
+    push_args.close = True
+    execute_push(repo_path, push_args, gitlab_mock)
+
+    gitlab_mock.assert_mr_updated(
+        MR_STUB,
+        state_event="close"
+    )
+
+
 def test_accept_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")

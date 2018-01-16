@@ -83,11 +83,15 @@ class PushAction(tsrc.cli.push.PushAction):
         return select_assignee(candidates)
 
     def post_push(self):
+        merge_request = self.ensure_merge_request()
+        if self.args.close:
+            ui.info_2("Closing merge request #%s" % merge_request["iid"])
+            self.gl_helper.update_merge_request(merge_request, state_event="close")
+            return
+
         assignee = self.handle_assignee()
         if assignee:
             ui.info_2("Assigning to", assignee["name"])
-
-        merge_request = self.ensure_merge_request()
 
         title = self.handle_title(merge_request)
 
