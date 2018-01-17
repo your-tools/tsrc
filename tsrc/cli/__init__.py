@@ -19,9 +19,6 @@ def find_workspace_path():
         tsrc_path = os.path.join(head, ".tsrc")
         if os.path.isdir(tsrc_path):
             return path.Path(head)
-        tbuild_yml_path = os.path.join(head, "tbuild.yml")
-        if os.path.exists(tbuild_yml_path):
-            return path.Path(head)
 
         else:
             head, tail = os.path.split(head)
