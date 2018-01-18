@@ -44,29 +44,32 @@ class ManifestHandler():
                 return repo
         assert False, "repo '%s' not found in manifest" % src
 
-    def configue_repo(self, src, key, value):
+    def configure_repo(self, src, key, value):
         repo = self.get_repo(src)
         repo[key] = value
         message = "Change %s %s: %s" % (src, key, value)
         self.push(message)
 
     def set_repo_url(self, src, url):
-        self.configue_repo(src, "url", url)
+        self.configure_repo(src, "url", url)
 
     def set_repo_branch(self, src, branch):
-        self.configue_repo(src, "branch", branch)
+        self.configure_repo(src, "branch", branch)
 
     def set_repo_sha1(self, src, ref):
-        self.configue_repo(src, "sha1", ref)
+        self.configure_repo(src, "sha1", ref)
 
     def set_repo_tag(self, src, tag):
-        self.configue_repo(src, "tag", tag)
+        self.configure_repo(src, "tag", tag)
+
+    def set_shallow_repo(self, src):
+        self.configure_repo(src, "shallow", True)
 
     def set_repo_file_copies(self, src, copies):
         copy_dicts = list()
         for copy_src, copy_dest in copies:
             copy_dicts.append({"src": copy_src, "dest": copy_dest})
-        self.configue_repo(src, "copy", copy_dicts)
+        self.configure_repo(src, "copy", copy_dicts)
 
     def push(self, message):
         to_write = ruamel.yaml.dump(self.data)

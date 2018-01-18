@@ -31,7 +31,6 @@ class Options:
     url = attr.ib(default=None)
     branch = attr.ib(default="master")
     tag = attr.ib(default=None)
-    shallow = attr.ib(default=False)
     groups = attr.ib(default=list())
 
 
@@ -40,7 +39,6 @@ def options_from_dict(as_dict):
     res.url = as_dict["url"]
     res.branch = as_dict.get("branch", "master")
     res.tag = as_dict.get("tag")
-    res.shallow = as_dict.get("shallow", False)
     res.groups = as_dict.get("groups") or list()
     return res
 
@@ -69,10 +67,6 @@ class LocalManifest:
     @property
     def branch(self):
         return self.load_config().branch
-
-    @property
-    def shallow(self):
-        return self.load_config().shallow
 
     @property
     def copyfiles(self):
@@ -127,7 +121,6 @@ class LocalManifest:
             config["tag"] = options.tag
         if options.groups:
             config["groups"] = options.groups
-        config["shallow"] = options.shallow
         with self.cfg_path.open("w") as fp:
             ruamel.yaml.dump(config, fp)
 
@@ -194,10 +187,6 @@ class Workspace():
     def active_groups(self):
         return self.local_manifest.active_groups
 
-    @property
-    def shallow(self):
-        return self.local_manifest.shallow
-
     def clone_missing(self):
         """ Clone missing repos.
 
@@ -261,7 +250,7 @@ class Cloner(tsrc.executor.Task):
             ref = repo.branch
         if ref:
             clone_args.extend(["--branch", ref])
-        if self.workspace.shallow:
+        if repo.shallow:
             clone_args.extend(["--depth", "1"])
         clone_args.append(name)
         try:

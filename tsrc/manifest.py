@@ -15,6 +15,14 @@ class RepoNotFound(tsrc.Error):
         super().__init__("No repo found in '%s'" % src)
 
 
+def validate_shallow(manifest_path, parsed):
+    for repo in parsed["repos"]:
+        if repo.get("shallow") and repo.get("sha1"):
+            message = "Invalid configuration for %s:" % repo["src"]
+            message += " cannot have a shallow repository with a fixed sha1"
+            raise tsrc.InvalidConfig(manifest_path, message)
+
+
 def load(manifest_path):
     gitlab_schema = {"url": str}
     copy_schema = {"src": str, schema.Optional("dest"): str}
@@ -25,6 +33,7 @@ def load(manifest_path):
         schema.Optional("copy"): [copy_schema],
         schema.Optional("sha1"): str,
         schema.Optional("tag"): str,
+        schema.Optional("shallow"): bool,
     }
     group_schema = {
         "repos": [str],
@@ -36,6 +45,7 @@ def load(manifest_path):
         schema.Optional("groups"): {str: group_schema},
     })
     parsed = tsrc.config.parse_config_file(manifest_path, manifest_schema)
+    validate_shallow(manifest_path, parsed)
     res = Manifest()
     res.load(parsed)
     return res
@@ -58,8 +68,10 @@ class Manifest():
             branch = repo_config.get("branch", "master")
             tag = repo_config.get("tag")
             sha1 = repo_config.get("sha1")
+            shallow = repo_config.get("shallow")
             repo = tsrc.Repo(url=url, src=src, branch=branch,
-                             sha1=sha1, tag=tag)
+                             sha1=sha1, tag=tag,
+                             shallow=shallow)
             self._repos.append(repo)
 
             self._handle_copies(repo_config)

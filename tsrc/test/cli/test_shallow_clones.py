@@ -6,16 +6,45 @@ def assert_shallow_clone(workspace_path, repo):
     assert tsrc.git.is_shallow(repo_path)
 
 
-def test_shallow_clones(tsrc_cli, git_server, workspace_path):
-    git_server.add_repo("foo/bar")
-    git_server.add_repo("spam/eggs")
-    git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
+def test_shallow_clone_with_tag(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+    git_server.tag("foo", "v1.0")
+    git_server.manifest.set_repo_tag("foo", "v1.0")
+    git_server.manifest.set_shallow_repo("foo")
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", "--shallow",  manifest_url)
-    assert_shallow_clone(workspace_path, "foo/bar")
-    assert_shallow_clone(workspace_path, "spam/eggs")
+    tsrc_cli.run("init",  manifest_url)
+    assert_shallow_clone(workspace_path, "foo")
 
-    git_server.add_repo("foo/baz")
+    git_server.push_file("foo", "v2.txt")
+    git_server.tag("foo", "v2.0")
+    git_server.manifest.set_repo_tag("foo", "v2.0")
     tsrc_cli.run("sync")
-    assert_shallow_clone(workspace_path, "foo/baz")
+    assert_shallow_clone(workspace_path, "foo")
+
+
+def test_shallow_clone_with_branch(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+    git_server.push_file("foo", "old.txt")
+    git_server.push_file("foo", "current.txt")
+    git_server.manifest.set_shallow_repo("foo")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init",  manifest_url)
+    assert_shallow_clone(workspace_path, "foo")
+
+    git_server.push_file("foo", "new.txt")
+    tsrc_cli.run("sync")
+    assert_shallow_clone(workspace_path, "foo")
+
+
+def test_shallow_with_sha1(tsrc_cli, git_server, workspace_path, message_recorder):
+    git_server.add_repo("foo")
+    initial_sha1 = git_server.get_sha1("foo")
+    git_server.push_file("foo", "one.c")
+    git_server.manifest.set_repo_sha1("foo", initial_sha1)
+    git_server.manifest.set_shallow_repo("foo")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, expect_fail=True)
+    assert message_recorder.find("shallow repository with a fixed sha1")
