@@ -5,6 +5,7 @@ Mostly used by tsrc/cli.py
 """
 
 import stat
+import textwrap
 
 import attr
 import ruamel.yaml
@@ -248,8 +249,18 @@ class Cloner(tsrc.executor.Task):
     def display_item(self, repo):
         return repo.src
 
-    def process(self, repo):
-        ui.info(repo.src)
+    def check_shallow_with_sha1(self, repo):
+        if not repo.sha1:
+            return
+        if self.workspace.shallow:
+            message = textwrap.dedent(
+                "Cannot use --shallow with a fixed sha1 ({repo.sha1})\n"
+                "Consider using a tag instead"
+            )
+            message = message.format(repo=repo)
+            ui.fatal(message)
+
+    def clone_repo(self, repo):
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
@@ -268,6 +279,9 @@ class Cloner(tsrc.executor.Task):
             tsrc.git.run_git(parent, *clone_args)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
+
+    def reset_repo(self, repo):
+        repo_path = self.workspace.joinpath(repo.src)
         ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
@@ -275,6 +289,12 @@ class Cloner(tsrc.executor.Task):
                 tsrc.git.run_git(repo_path, "reset", "--hard", ref)
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
+
+    def process(self, repo):
+        ui.info(repo.src)
+        self.check_shallow_with_sha1(repo)
+        self.clone_repo(repo)
+        self.reset_repo(repo)
 
 
 class FileCopier(tsrc.executor.Task):

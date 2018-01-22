@@ -19,3 +19,14 @@ def test_shallow_clones(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo/baz")
     tsrc_cli.run("sync")
     assert_shallow_clone(workspace_path, "foo/baz")
+
+
+def test_shallow_with_fix_ref(tsrc_cli, git_server, workspace_path, message_recorder):
+    git_server.add_repo("foo")
+    initial_sha1 = git_server.get_sha1("foo")
+    git_server.push_file("foo", "one.c")
+    git_server.manifest.set_repo_sha1("foo", initial_sha1)
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", "--shallow", manifest_url, expect_fail=True)
+    assert message_recorder.find("Cannot use --shallow with a fixed sha1")
