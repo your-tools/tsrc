@@ -1,4 +1,5 @@
 import multiprocessing
+import os
 import subprocess
 import sys
 
@@ -25,11 +26,15 @@ def init_checks():
 
     nprocs = multiprocessing.cpu_count()
 
+    pytest_args = ["pytest", "--cov", ".", "--cov-report", "term", "-n", str(nprocs)]
+    if os.environ.get("CI"):
+        pytest_args.extend(["-p", "no:sugar"])
+
     append_check("pycodestyle", "pycodestyle", ".")
     append_check("pyflakes",    sys.executable, "ci/run-pyflakes.py")
     append_check("mccabe",      sys.executable, "ci/run-mccabe.py", "10")
     append_check("pylint",      "pylint", "tsrc", "--score", "no")
-    append_check("pytest",      "pytest", "--cov", ".", "--cov-report", "term", "-n", str(nprocs))
+    append_check("pytest",      *pytest_args)
     append_check("docs",        "mkdocs", "build")
     return res
 
