@@ -1,12 +1,16 @@
-""" Entry point for tsrc sync """
+""" tsrc sync """
 
+import click
 import ui
 
-import tsrc.cli
+from tsrc.cli import workspace_cli
 
 
-def main(args):
-    workspace = tsrc.cli.get_workspace(args)
+@click.command("sync")
+@workspace_cli
+def main(ctx):
+    """ Synchronize workspace """
+    workspace = ctx.obj["workspace"]
     workspace.update_manifest()
     workspace.load_manifest()
     active_groups = workspace.active_groups

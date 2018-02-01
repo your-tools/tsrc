@@ -1,4 +1,4 @@
-""" Entry point for tsrc push """
+""" Implement `tsrc push` for GitHub repositories """
 
 import sys
 

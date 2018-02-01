@@ -1,11 +1,13 @@
-""" Entry point for tsrc foreach """
+""" tsrc foreach """
 
 import subprocess
 
+import click
 import ui
 
 import tsrc.cli
 import tsrc.workspace
+from tsrc.cli import workspace_cli
 
 
 class CommandFailed(tsrc.Error):
@@ -36,9 +38,25 @@ class CmdRunner(tsrc.executor.Task):
             raise CommandFailed()
 
 
-def main(args):
-    workspace = tsrc.cli.get_workspace(args)
+@click.command("foreach")
+@click.option("-c", "--shell", is_flag=True)
+@click.argument("cmd", metavar="<cmd>", nargs=-1, required=True)
+@workspace_cli
+def main(ctx, *, cmd, shell):
+    """ Run the same command on several repositories
+
+    Use -- to separate options for your command and tsrc options:
+
+        $ tsrc --verbose foreach -- ls --all
+
+    And use -c to start a shell:
+
+        $ tsrc foreach -c 'cd src && ls'
+
+    """
+    workspace = ctx.obj["workspace"]
     workspace.load_manifest()
-    cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)
+    cmd_as_str = " ".join(cmd)
+    cmd_runner = CmdRunner(workspace, cmd, cmd_as_str, shell=shell)
     tsrc.executor.run_sequence(workspace.get_repos(), cmd_runner)
     ui.info("OK", ui.check)

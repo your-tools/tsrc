@@ -1,11 +1,5 @@
 import os
 
-import pytest
-
-import tsrc.cli
-
-from tsrc.test.conftest import *
-
 
 def get_cmd_for_foreach_test(shell=False):
     """ We need a cmd that:
@@ -26,12 +20,6 @@ def get_cmd_for_foreach_test(shell=False):
         else:
             cmd = ["ls"]
     return cmd
-
-
-def test_foreach_no_args(tsrc_cli, git_server):
-    git_server.add_repo("foo")
-    tsrc_cli.run("init", git_server.manifest_url)
-    tsrc_cli.run("foreach", expect_fail=True)
 
 
 def test_foreach_with_errors(tsrc_cli, git_server, message_recorder):

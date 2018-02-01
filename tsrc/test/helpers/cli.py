@@ -1,31 +1,28 @@
-import os
-import re
-import path
 import pytest
 
-import tsrc.cli
-
-import ui
+from tsrc.cli.main import main as tsrc_main
+from click.testing import CliRunner
 
 
 class CLI():
-    def __init__(self):
-        self.workspace_path = path.Path(os.getcwd())
+    def __init__(self, workspace_path):
+        self.runner = CliRunner()
+        self.workspace_path = workspace_path
 
     def run(self, *args, expect_fail=False):
-        try:
-            tsrc.cli.main.main(args=args)
-            rc = 0
-        except SystemExit as e:
-            rc = e.code
-        if expect_fail and rc == 0:
-            assert False, "should have failed"
-        if rc != 0 and not expect_fail:
-            raise SystemExit(rc)
+        print("tsrc", *args)
+        result = self.runner.invoke(tsrc_main, args)
+        print(result.output)
+        exception = result.exception
+        if expect_fail:
+            assert exception
+        else:
+            if exception:
+                raise exception
 
 
 @pytest.fixture
 def tsrc_cli(workspace_path, monkeypatch):
     monkeypatch.chdir(workspace_path)
-    res = CLI()
+    res = CLI(workspace_path)
     return res
