@@ -61,6 +61,14 @@ def _handle_stream_errors(response):
         raise GitLabAPIError(response.url, "Incorrect status code:", response.status_code)
 
 
+def extract_next_page_number(response):
+    header = response.headers['x-next-page']
+    if header:
+        return int(header)
+    else:
+        return None
+
+
 class GitLabHelper():
     def __init__(self, gitlab_url, token):
         self.gitlab_api_url = gitlab_url + "/api/" + GITLAB_API_VERSION
@@ -73,6 +81,18 @@ class GitLabHelper():
             return response
         else:
             return response.json()
+
+    def make_paginated_get_request(self, url, *, params=None):
+        results = list()
+        params = params.copy()
+        next_page = 1
+        while next_page:
+            params["page"] = next_page
+            response = self.get_response("GET", url, params=params)
+            handle_errors(response)
+            results.extend(response.json())
+            next_page = extract_next_page_number(response)
+        return results
 
     def get_response(self, verb, url, *, data=None, params=None, stream=False):
         full_url = self.gitlab_api_url + url
@@ -97,9 +117,9 @@ class GitLabHelper():
         url = "/projects/%s/merge_requests" % project_id
         params = {
             "state": "opened",
-            "per_page": "100"
+            "per_page": "100"  # Maximum number of items allowed in pagination
         }
-        previous_mrs = self.make_request("GET", url, params=params)
+        previous_mrs = self.make_paginated_get_request(url, params=params)
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
                 return mr
