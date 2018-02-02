@@ -32,36 +32,36 @@ Each repository is also a dictionary, containing:
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
         to the given sha1, else a warning message will be printed.
-* `copy`: (optional): A list of dictionaries with `src` and `dest` keys, like so:
+* `copy` (optional): A list of dictionaries with `src` and `dest` keys, like so:
 
+        repos:
+          - src: foo
+            url: gitlab:proj1/foo
+            branch: next
 
-```
-repos:
-  - src: foo
-    url: gitlab:proj1/foo
-    branch: next
+          - src: bar
+            url: gitlab:proj1/bar
+            branch: master
+            sha1: ad2b68539c78e749a372414165acdf2a1bb68203
 
-  - src: bar
-    url: gitlab:proj1/bar
-    branch: master
-    sha1: ad2b68539c78e749a372414165acdf2a1bb68203
+          - src: app
+            url: gitlab:proj1/app
+            tag: v0.1
+            copy:
+              - src: top.cmake
+                dest: CMakeLists.txt
+              - src: .clang-format
 
-  - src: app
-    url: gitlab:proj1/app
-    tag: v0.1
-    copy:
-      - src: top.cmake
-        dest: CMakeLists.txt
-      - src: .clang-format
-```
+    In this example:
 
-In this case, after `proj1/foo` has been cloned in `<workspace>/foo`,
-(using `next` branch). Then `proj1/bar` has been cloned in `<workspace>/bar`
-and reset to `ad2b68539c78e749a372414165acdf2a1bb68203`. Finally `proj1/app`
-has been cloned in `<workspace>/app` at on the tag `v0.1`, `top.cmake` will be
-copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt` and
-`proj1/app/.clang-format` to `<workspace>/.clang-format`.
-Note that `copy` only works with files, not directories.
+    * First, `proj1/foo` will be cloned into `<workspace>/foo` using the `next` branch.
+    * Then, `proj1/bar` will be cloned into `<workspace>/bar` using the `master` branch, and reset to `ad2b68539c78e749a372414165acdf2a1bb68203`.
+    * Finally:
+        * `proj1/app` will be cloned into `<workspace>/app` using the `v0.1` tag,
+        * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`, and
+        * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`.
+
+    Note that `copy` only works with files, not directories.
 
 ## groups
 
