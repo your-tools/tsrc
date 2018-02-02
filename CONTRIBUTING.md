@@ -55,7 +55,19 @@ $ pipenv run python setup.py develop
 
 * Finally, run:
 
-
 ```console
 $ pipenv run python ci/ci.py
 ```
+
+
+# Adding documentation
+
+* Follow the steps from the [Checking your changes](#checking_your_changes) section to setup your python environment
+* Launch the development server locally:
+
+```bash
+$ pipenv run mkdocs serve
+```
+
+* Edit the markdown files from the `docs/` folder and review the changes in your browser
+* Finally, submit your changes by opening a pull request on GitHub
