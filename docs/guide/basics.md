@@ -31,7 +31,7 @@ In this example:
 
 * A clone of the manifest repository will be created in a hidden `.tsrc/manifest` folder.
 * `foo` will be cloned in `<work>/foo` using `git@gitlab.com/acme/foo.git` origin url.
-* Similarly, `bar` will be cloned in `<work>/bar` using `git@gitlab.com:acme/bar.git`
+* Similarly, `bar` will be cloned in `<work>/bar` using `git@gitlab.com:acme/bar.git`.
 
 
 ## Making sure all the repositories are up to date
@@ -45,8 +45,8 @@ You can update all the repositories by using `tsrc sync`.
 Note that `tsrc sync` only updates the repositories if the changes are trivial:
 
 * If the branch has diverged, `tsrc` will do nothing. It's up to you to use
-  `rebase` or `merge`
-* Ditto if there is no remote tracking branch
+  `rebase` or `merge`.
+* Ditto if there is no remote tracking branch.
 
 
 !!! note

@@ -64,8 +64,8 @@ Note that due to limitations in `git` itself, the `shallow` option cannot be use
 
 # v0.3.2 (2017-11-02)
 
-* Improve `tsrc status` to handle tags. Patch by @arnaudgelas
-* Fix crash when running `tsrc version`
+* Improve `tsrc status` to handle tags. Patch by @arnaudgelas.
+* Fix crash when running `tsrc version`.
 
 # v0.3.1 (2017-10-06)
 

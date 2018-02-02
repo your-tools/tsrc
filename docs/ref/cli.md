@@ -26,7 +26,7 @@ $ tsrc init MANIFEST_URL
 --verbose
 :   show verbose messages
 
--q.--quiet
+-q, --quiet
 :   hide everything except errors and warnings
 
 --color [always|never|auto]
@@ -47,7 +47,7 @@ tsrc init MANIFEST_URL [--group GROUP]
     The `-s,--shallow` can be used to make shallow clone of all repositories.
 
     If you want to add or remove a group in your workspace, you can
-    re-run `tsrc init`
+    re-run `tsrc init`.
 
 
 tsrc foreach -- command --opt1 arg1
@@ -55,15 +55,15 @@ tsrc foreach -- command --opt1 arg1
     at the end.
 
     Note the `--` token to separate options for `command` from options for
-    `tsrc`
+    `tsrc`.
 
 tsrc foreach -c 'command --opt1 arg1'
-:   Ditto, but uses a shell. (`/bin/sh` on Linux or macOS, `cmd.exe` on Windows)
+:   Ditto, but uses a shell (`/bin/sh` on Linux or macOS, `cmd.exe` on Windows).
 
 
 tsrc log --from FROM [--to TO]
 :   Display a summary of all changes since `FROM` (should be a tag),
-    to `TO` (defaulting to `master`)
+    to `TO` (defaulting to `master`).
 
     Note that if no changes are found, the repository will not be displayed at
     all.
@@ -72,7 +72,7 @@ tsrc push [--assignee ASSIGNEE]
 :   You should run this from a repository with the correct branch checked out.
 
     (The command will fail if you run this while on the `master` branch or in
-    "detached HEAD" mode)
+    "detached HEAD" mode.)
 
     `ASSIGNEE` is optional and should match the name of an active GitLab user.
 
@@ -80,14 +80,14 @@ tsrc push [--assignee ASSIGNEE]
     branch exists. Otherwise, the existing merge request will be updated.
 
 tsrc push [--ready|--wip]
-:   Toggle the *WIP* ("Work In Progress") prefix for the merge request.
+:   Toggle the `WIP: ` ("Work In Progress") prefix for the merge request.
 
 tsrc push --accept
 :   Tell GitLab to merge the merge request after the CI has passed.
 
-    Note that the source branch will get automatically removed. (Which should
+    Note that the source branch will get automatically removed. (It should
     not matter since all the information about the source branch will
-    be found in the merge commit)
+    be found in the merge commit.)
 
 
 tsrc status

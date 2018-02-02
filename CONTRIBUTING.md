@@ -1,13 +1,13 @@
 # Development
 
-All the development happens on [github](https://github.com/SuperTanker/tsrc).
+All the development happens on [GitHub](https://github.com/SuperTanker/tsrc).
 
 Outcome of discussions among maintainers and users of the software are tracked in the [wiki](https://github.com/SuperTanker/tsrc/wiki).
 
 
 # Reporting bugs and suggesting new features
 
-Feel free to use [github bug tracker](https://github.com/SuperTanker/tsrc/issues) to open issues.
+Feel free to use the [GitHub's bug tracker](https://github.com/SuperTanker/tsrc/issues) to open issues.
 
 If you are reporting a bug, please provide the following information:
 

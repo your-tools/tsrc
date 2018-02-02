@@ -44,7 +44,7 @@ Here are a few features present in repo that are missing from `tsrc`
 All this projects are fine but did not match our needs:
 
 * [git-subrepo](https://github.com/ingydotnet/git-subrepo) squashes commits, and
-  we prefer having normal clones everywhere
+  we prefer having normal clones everywhere.
 * [mu-repo](https://fabioz.github.io/mu-repo/) is nice and contains an
   interesting dependency management feature, but currently we do not need this complexity.
 
@@ -105,7 +105,7 @@ That being said:
 # Why argparse?
 
 See [docopt v argparse](https://dmerej.info/blog/post/docopt-v-argparse/), and
-[please don't use click](http://xion.io/post/programming/python-dont-use-click.html)
+[please don't use click](http://xion.io/post/programming/python-dont-use-click.html).
 
 
 # Why YAML?
