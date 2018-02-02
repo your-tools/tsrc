@@ -95,11 +95,14 @@ class GitLabHelper():
 
     def find_opened_merge_request(self, project_id, source_branch):
         url = "/projects/%s/merge_requests" % project_id
-        previous_mrs = self.make_request("GET", url)
+        params = {
+            "state": "opened",
+            "per_page": "100"
+        }
+        previous_mrs = self.make_request("GET", url, params=params)
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
-                if mr["state"] == "opened":
-                    return mr
+                return mr
 
     def create_merge_request(self, project_id, source_branch, *, title,
                              target_branch="master"):
