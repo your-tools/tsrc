@@ -15,9 +15,7 @@ auth:
 !!! note
     The full config file format is described in the [reference](../ref/formats.md).
 
-The second step is to tell `tsrc` about the HTTP url of your GitLab instance.
-
-This is used to call the [GitLab HTTP API](https://docs.gitlab.com/ce/api/) (currently using version *4*)
+The second step is to tell `tsrc` about the HTTP url of your GitLab instance, which is needed to call the [GitLab HTTP API](https://docs.gitlab.com/ce/api/) (currently using version *4*).
 
 This is done in the *manifest* file:
 
@@ -31,7 +29,7 @@ repos:
 
 ## Creating and accepting merge requests
 
-Here's how you can create and assign a merge request
+Here's how you can create and assign a merge request:
 
 ```bash
 # start working on your branch

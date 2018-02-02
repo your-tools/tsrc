@@ -2,11 +2,11 @@
 
 We use `pycodestyle` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
-In addition, every text file must be pushed using UNIX line endings. (On Windows, you are advised to set `core.autocrlf` to `true` in you git config file)
+In addition, every text file must be pushed using UNIX line endings. (On Windows, you are advised to set `core.autocrlf` to `true` in your git config file.)
 
 # Pet peeves
 
-* Prefer double quotes for string literals
+* Prefer double quotes for string literals:
 
 ```python
 # Yes
@@ -113,7 +113,7 @@ if value == "option1" or value == "option2"
 
 # Doc strings and comments
 
-First off, bad comments are worse that not comments.
+First off, bad comments are worse that no comments.
 
 However by default, `pylint` mandates that all public functions and methods (those that do not start with underscore) have a doc string. This is useful when you write a library, but for the code in `tsrc` this is useless and so we disable this rule in our `pylintrc`.
 
@@ -176,7 +176,7 @@ my_list = map(foo, other_list)
 even_nums = [x for x in nums if is_even(x)]
 
 # No
-even_numes = filter(is_even, nums)
+even_nums = filter(is_even, nums)
 ```
 
 * Use iterable syntax instead of building an explicit list:
@@ -223,7 +223,7 @@ This can cause problems if someone ever changes the `foo` function and adds a ne
 def foo(bar, eggs=False, spam=Tue):
     ...
 ```
-After such a change, the line `foo(42, False)` which used to call `foo` with `spam=False` now calls `foo` with `bar=False` and `spam=True`, leading to all kind of interesting bugs.
+After such a change, the line `foo(42, False)` which used to call `foo` with `spam=False` now calls `foo` with `bar=False` and `spam=True`, leading to all kinds of interesting bugs.
 
 Exception to this rule: when the keyword is obvious and will not change:
 ```python
@@ -336,10 +336,10 @@ with open(foo_path, "w") as fileobj:
 # Error handling
 
 * All exceptions raised from within `tsrc` should derive from `tsrc.Error`.
-* When using external code (from the standard library or a third-party library), you should catch the exceptions and optionally re-raise them
+* When using external code (from the standard library or a third-party library), you should catch the exceptions and optionally re-raise them.
 
 # Output messages to the user
 
-Do not use `print`, use [python-cli-ui functions](https://supertanker.github.io/python-cli-ui/usage.html#api) instead. This makes it easier to distinguish between real messages and the throw-away `print`s you add for debugging.
+Do not use `print`, use [python-cli-ui functions](https://supertanker.github.io/python-cli-ui/usage.html#api) instead. This makes it easier to distinguish between real messages and the throw-away `print` statements you add for debugging.
 
 Also, using "high-level" methods such as `ui.info_1()` or `ui.warning()` will make it easier to have a consistent user interface.

@@ -1,16 +1,16 @@
 # Configuration files formats
 
 Unless otherwise noted, all configuration files use [YAML](http://www.yaml.org/)
-syntax
+syntax.
 
 ## Manifest format
 
-The manifest is always parsed as a dictionary .
+The manifest is always parsed as a dictionary.
 
 ### Top fields
 
 
-* `repos` (required): list of repos to clone
+* `repos` (required): list of repositories to clone
 
 * `gitlab.url` (optional): HTTP URL of the GitLab instance
 
@@ -65,9 +65,8 @@ Each repository is also a dictionary, containing:
 
 ## groups
 
-The `groups` section lists the groups by name. They should contain a `repos` field
-containing a list of repositories (which should match the sources of the repositories
-defined in the `repos`  section.
+The `groups` section lists the groups by name. Each group should have a `repos` field
+containing a list of repositories (only repositories defined in the `repos` section are allowed).
 
 The groups can optionally include other groups, with a `includes` field which should be
 a list of existing group names.
