@@ -1,4 +1,9 @@
-# tsrc - managing multiple git repositories
+<div id="logo-container">
+ <img id="logo" alt="tsrc-logo" src="img/tsrc-logo.svg" />
+</div>
+
+# tsrc - managing multiple git repositories / review automation
+
 
 ## What it is
 
@@ -13,7 +18,7 @@ We use it at [tanker.io](https://tanker.io) because:
 * None on the many existing solutions did fully match our needs
   (see the [FAQ](faq.md) for more details)
 
-In addition, `tsrc` has some support for interaction with `GitLab` and makes
+In addition, `tsrc` has some support for interaction with `GitHub` and `GitLab` and makes
 handling merge requests from the command line possible.
 
 # Installing tsrc

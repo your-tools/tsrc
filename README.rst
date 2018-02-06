@@ -1,5 +1,15 @@
-tsrc: manage multiple repos / GitLab automation
-===============================================
+.. image:: tsrc-logo.svg
+  :target: https://pypi.org/project/tsrc/
+  :width: 100px
+  :align: center
+
+
+tsrc: manage multiple repos / review automation from the command line
+=====================================================================
+
+
+
+
 
 .. image:: https://img.shields.io/travis/SuperTanker/tsrc.svg?branch=master
   :target: https://travis-ci.org/SuperTanker/tsrc
@@ -10,10 +20,12 @@ tsrc: manage multiple repos / GitLab automation
 .. image:: https://img.shields.io/github/license/SuperTanker/tsrc.svg
   :target: https://github.com/SuperTanker/tsrc/blob/master/LICENSE
 
+
 Demo
 ----
 
 `tsrc demo on asciinema.org <https://asciinema.org/a/131625>`_
+
 
 Documentation
 --------------
