@@ -1,15 +1,23 @@
-""" Entry point for tsrc log """
-
+""" tsrc log """
 import sys
 
+import click
 import ui
 
-import tsrc.cli
 import tsrc.git
+from tsrc.cli import workspace_cli
 
 
-def main(args):
-    workspace = tsrc.cli.get_workspace(args)
+@click.command("log")
+@click.option("--from", metavar="<from>", required=True, is_flag=False)
+@click.option("--to", metavar="<to>", is_flag=False, default="HEAD")
+@workspace_cli
+def main(ctx, *unused_args, **kwargs):
+    """ Display changes between two git refs """
+    # Using **kwargs here because 'from' is a reserved keyword
+    from_ = kwargs["from"]
+    to = kwargs["to"]
+    workspace = ctx.obj["workspace"]
     workspace.load_manifest()
     all_ok = True
     for unused_index, repo, full_path in workspace.enumerate_repos():
@@ -19,7 +27,7 @@ def main(args):
         cmd = ["log",
                "--color=always",
                "--pretty=format:%s" % log_format,
-               "%s...%s" % (args.from_, args.to)]
+               "%s...%s" % (from_, to)]
         rc, out = tsrc.git.run_git(full_path, *cmd, raises=False)
         if rc != 0:
             all_ok = False

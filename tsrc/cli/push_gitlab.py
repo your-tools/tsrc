@@ -1,4 +1,4 @@
-""" Entry point for tsrc push """
+""" Implement `tsrc push` for GitLab repositories """
 
 
 import ui
@@ -46,7 +46,7 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def setup_service(self):
         if not self.gl_helper:
-            workspace = tsrc.cli.get_workspace(self.args)
+            workspace = tsrc.cli.get_workspace(self.args.workspace)
             workspace.load_manifest()
             gitlab_url = workspace.get_gitlab_url()
             token = get_token()

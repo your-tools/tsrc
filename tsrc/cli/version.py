@@ -1,10 +1,12 @@
-""" Entry point for tsrc version """
+""" tsrc version """
 
 import pkg_resources
 
+import click
 import path
 import ui
 
+import tsrc.cli
 import tsrc.git
 
 
@@ -23,8 +25,9 @@ def get_details(location):
     return res
 
 
-# pylint: disable=unused-argument
-def main(args):
+@click.command("version")
+def main():
+    """ Display tsrc version information """
     tsrc_distribution = pkg_resources.get_distribution("tsrc")
     # pylint: disable=no-member
     version = tsrc_distribution.version

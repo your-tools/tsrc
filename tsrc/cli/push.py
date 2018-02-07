@@ -1,11 +1,14 @@
-""" Common code for push to GitHub or GitLab """
+""" tsrc push """
 
 import abc
 import importlib
 import re
+import types
 
+import click
 import ui
 
+import tsrc.cli
 import tsrc.git
 
 
@@ -129,9 +132,24 @@ class PushAction(metaclass=abc.ABCMeta):
         self.post_push()
 
 
-def main(args):
+@click.command("push")
+@click.option("-w", "--workspace")
+@click.option("-f", "--force", is_flag=True)
+@click.option("-t", "--target", "target_branch", metavar="<target>", default="master")
+@click.option("-a", "--assignee", metavar="<assignee>")
+@click.option("--title", "mr_title", metavar="<title>", is_flag=False)
+@click.option("--accept", is_flag=True)
+@click.option("--merge", is_flag=True)
+@click.option("--close", is_flag=True)
+@click.option("--reviewer", "reviewers", metavar="<reviewer>", multiple=True)
+@click.option("--ready", is_flag=True)
+@click.option("--wip", is_flag=True)
+@click.argument("push_spec", metavar="[<push_spec>]", required=False)
+def main(**kwargs):
+    """ Push changes for review """
     repository_info = RepositoryInfo()
     service_name = repository_info.service
     module = importlib.import_module("tsrc.cli.push_%s" % service_name)
+    args = types.SimpleNamespace(**kwargs)
     push_action = module.PushAction(repository_info, args)
     push_action.execute()

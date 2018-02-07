@@ -1,10 +1,12 @@
-""" Entry point for tsrc status """
+""" tsrc status """
 
 import shutil
 
+import click
 import ui
 
-import tsrc.cli
+import tsrc.git
+from tsrc.cli import workspace_cli
 
 
 def describe_branch(git_status):
@@ -84,8 +86,11 @@ def display_statuses(statuses):
         ui.info(*message)
 
 
-def main(args):
-    workspace = tsrc.cli.get_workspace(args)
+@click.command("status")
+@workspace_cli
+def main(ctx):
+    """ Displays a summary of the workspace's status """
+    workspace = ctx.obj["workspace"]
     workspace.load_manifest()
     statuses = collect_statuses(workspace)
     display_statuses(statuses)
