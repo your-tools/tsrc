@@ -55,7 +55,11 @@ class RepositoryInfo:
     def read_working_path(self, working_path=None):
         self.path = tsrc.git.get_repo_root(working_path=working_path)
         self.current_branch = tsrc.git.get_current_branch(self.path)
-        rc, out = tsrc.git.run_git(self.path, "remote", "get-url", "origin", raises=False)
+        rc, out = tsrc.git.run_git(
+            self.path,
+            "remote", "get-url", "origin",
+            capture=True, raises=False
+        )
         if rc == 0:
             self.url = out
         if not self.url:

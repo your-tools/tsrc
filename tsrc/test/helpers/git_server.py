@@ -147,17 +147,17 @@ class GitServer():
 
     def get_tags(self, name):
         src_path = self.get_path(name)
-        rc, out = tsrc.git.run_git(src_path, "tag", raises=False)
+        rc, out = tsrc.git.run_git(src_path, "tag", capture=True)
         return out
 
     def get_branches(self, name):
         src_path = self.get_path(name)
-        rc, out = tsrc.git.run_git(src_path, "branch", "--list", raises=False)
+        rc, out = tsrc.git.run_git(src_path, "branch", "--list", capture=True)
         return [x[2:].strip() for x in out.splitlines()]
 
     def get_sha1(self, name):
         src_path = self.get_path(name)
-        rc, out = tsrc.git.run_git(src_path, "rev-parse", "HEAD", raises=False)
+        rc, out = tsrc.git.run_git(src_path, "rev-parse", "HEAD", capture=True)
         return out
 
     def change_repo_branch(self, name, new_branch):
