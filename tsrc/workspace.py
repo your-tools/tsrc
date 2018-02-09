@@ -4,6 +4,7 @@ Mostly used by tsrc/cli.py
 
 """
 
+import subprocess
 import stat
 import textwrap
 
@@ -340,12 +341,22 @@ class RemoteSetter(tsrc.executor.Task):
     def process(self, repo):
         full_path = self.workspace.joinpath(repo.src)
         try:
-            _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
-            if old_url != repo.url:
-                ui.info_2(repo.src, old_url, "->", repo.url)
+            process = subprocess.run(
+                ["git", "remote", "get-url", "origin"],
+                cwd=full_path,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            if process.returncode == 0:
+                old_url = process.stdout.decode().strip()
+                if old_url != repo.url:
+                    ui.info_2(repo.src, old_url, "->", repo.url)
                 tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
-        except Exception:
-            raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url)
+            else:
+                tsrc.git.run_git(full_path, "remote", "add", "origin", repo.url)
+
+        except Exception as error:
+            raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url, error)
 
 
 class BadBranches(tsrc.Error):
