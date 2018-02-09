@@ -338,14 +338,33 @@ class RemoteSetter(tsrc.executor.Task):
         return repo.src
 
     def process(self, repo):
-        full_path = self.workspace.joinpath(repo.src)
         try:
-            _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
-            if old_url != repo.url:
-                ui.info_2(repo.src, old_url, "->", repo.url)
-                tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
-        except Exception:
-            raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url)
+            self.try_process_repo(repo)
+        except Exception as error:
+            raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url, error)
+
+    def try_process_repo(self, repo):
+        full_path = self.workspace.joinpath(repo.src)
+        returncode, old_url = tsrc.git.run_git(
+            full_path,
+            "remote", "get-url", "origin",
+            raises=False,
+            capture=True,
+        )
+        if returncode == 0:
+            self.process_repo_remote_exists(repo, old_url=old_url)
+        else:
+            self.process_repo_add_remote(repo)
+
+    def process_repo_remote_exists(self, repo, *, old_url):
+        full_path = self.workspace.joinpath(repo.src)
+        if old_url != repo.url:
+            ui.info_2(repo.src, old_url, "->", repo.url)
+            tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
+
+    def process_repo_add_remote(self, repo):
+        full_path = self.workspace.joinpath(repo.src)
+        tsrc.git.run_git(full_path, "remote", "add", "origin", repo.url)
 
 
 class BadBranches(tsrc.Error):

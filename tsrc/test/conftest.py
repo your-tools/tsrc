@@ -1,12 +1,7 @@
 """ Fixtures for tsrc testing """
 
-import os
-import re
-
 import path
 import pytest
-import ruamel.yaml
-import ui
 
 import tsrc.cli.main
 import tsrc.git
@@ -15,6 +10,10 @@ import tsrc.workspace
 from ui.tests.conftest import message_recorder
 from .helpers.git_server import git_server
 from .helpers.cli import tsrc_cli
+from .helpers.push import push_args, repo_path
+
+# silence pyflakes 'unused import' warning
+tsrc_cli, git_server, message_recorder, push_args, repo_path
 
 
 @pytest.fixture()

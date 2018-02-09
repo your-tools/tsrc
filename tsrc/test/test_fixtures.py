@@ -1,7 +1,3 @@
-import mock
-
-import pytest
-
 import tsrc.git
 import tsrc.gitlab
 import tsrc.manifest
@@ -49,7 +45,7 @@ def test_git_server_add_repo_updates_manifest(workspace_path, git_server):
     repos = manifest.get_repos()
     assert len(repos) == 2
     for repo in repos:
-        rc, out = tsrc.git.run_git(workspace_path, "ls-remote", repo.url, raises=False)
+        rc, out = tsrc.git.run_git(workspace_path, "ls-remote", repo.url, capture=True)
         assert rc == 0
         assert "refs/heads/master" in out
 
@@ -79,6 +75,6 @@ def test_git_server_change_repo_branch(workspace_path, git_server):
 def test_git_server_tag(workspace_path, git_server):
     foo_url = git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
-    rc, out = tsrc.git.run_git(workspace_path, "ls-remote", foo_url, raises=False)
+    rc, out = tsrc.git.run_git(workspace_path, "ls-remote", foo_url, capture=True)
     assert rc == 0
     assert "refs/tags/v0.1" in out

@@ -20,7 +20,7 @@ def main(args):
                "--color=always",
                "--pretty=format:%s" % log_format,
                "%s...%s" % (args.from_, args.to)]
-        rc, out = tsrc.git.run_git(full_path, *cmd, raises=False)
+        rc, out = tsrc.git.run_git(full_path, *cmd, capture=True, raises=False)
         if rc != 0:
             all_ok = False
         if out:
