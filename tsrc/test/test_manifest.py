@@ -3,7 +3,6 @@ import os.path
 import ruamel.yaml
 
 import tsrc.manifest
-from tsrc.repo import Repo
 
 import pytest
 
