@@ -9,7 +9,7 @@ import textwrap
 from typing import Iterable, List, Tuple, Dict, Any
 
 import attr
-import path
+from path import Path
 import ruamel.yaml
 import schema
 import ui
@@ -63,7 +63,7 @@ class LocalManifest:
     hidden <workspace>/.tsrc directory, along with its configuration
 
     """
-    def __init__(self, workspace_path: path.Path) -> None:
+    def __init__(self, workspace_path: Path) -> None:
         hidden_path = workspace_path.joinpath(".tsrc")
         self.clone_path = hidden_path.joinpath("manifest")
         self.cfg_path = hidden_path.joinpath("manifest.yml")
@@ -171,11 +171,11 @@ class LocalManifest:
 
 
 class Workspace():
-    def __init__(self, root_path: path.Path) -> None:
+    def __init__(self, root_path: Path) -> None:
         self.root_path = root_path
         self.local_manifest = LocalManifest(root_path)
 
-    def joinpath(self, *parts: str) -> path.Path:
+    def joinpath(self, *parts: str) -> Path:
         return self.root_path.joinpath(*parts)
 
     def get_repos(self) -> List[tsrc.Repo]:
@@ -230,7 +230,7 @@ class Workspace():
         finally:
             syncer.display_bad_branches()
 
-    def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, path.Path]]:
+    def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
         """ Yield (index, repo, full_path) for all the repos """
         for i, repo in enumerate(self.get_repos()):
             full_path = self.joinpath(repo.src)
@@ -382,7 +382,7 @@ class Syncer(tsrc.executor.Task):
             self.check_branch(repo, repo_path)
             self.sync_repo_to_branch(repo_path)
 
-    def check_branch(self, repo: tsrc.Repo, repo_path: path.Path) -> None:
+    def check_branch(self, repo: tsrc.Repo, repo_path: Path) -> None:
         current_branch = None
         try:
             current_branch = tsrc.git.get_current_branch(repo_path)
@@ -393,14 +393,14 @@ class Syncer(tsrc.executor.Task):
             self.bad_branches.append((repo.src, current_branch, repo.branch))
 
     @staticmethod
-    def fetch(repo_path: path.Path) -> None:
+    def fetch(repo_path: Path) -> None:
         try:
             tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", "origin")
         except tsrc.Error:
             raise tsrc.Error("fetch failed")
 
     @staticmethod
-    def sync_repo_to_ref(repo_path: path.Path, ref: str) -> None:
+    def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
@@ -411,7 +411,7 @@ class Syncer(tsrc.executor.Task):
             raise tsrc.Error("updating ref failed")
 
     @staticmethod
-    def sync_repo_to_branch(repo_path: path.Path) -> None:
+    def sync_repo_to_branch(repo_path: Path) -> None:
         try:
             tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{u}")
         except tsrc.Error:

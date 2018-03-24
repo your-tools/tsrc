@@ -4,7 +4,7 @@ import operator
 import os
 from typing import Any, Dict, List
 
-import path
+from path import Path
 import schema
 
 import tsrc
@@ -94,7 +94,7 @@ class Manifest():
         raise RepoNotFound(src)
 
 
-def load(manifest_path: path.Path) -> Manifest:
+def load(manifest_path: Path) -> Manifest:
     gitlab_schema = {"url": str}
     copy_schema = {"src": str, schema.Optional("dest"): str}
     repo_schema = {

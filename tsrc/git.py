@@ -5,7 +5,7 @@ import os
 import subprocess
 from typing import Any, Dict, Iterable, Tuple, Union
 
-import path
+from path import Path
 import ui
 
 import tsrc
@@ -16,7 +16,7 @@ class GitError(tsrc.Error):
 
 
 class GitCommandError(GitError):
-    def __init__(self, working_path: path.Path, cmd: Iterable[str], *, output=None) -> None:
+    def __init__(self, working_path: Path, cmd: Iterable[str], *, output=None) -> None:
         self.cmd = cmd
         self.working_path = working_path
         self.output = output
@@ -29,7 +29,7 @@ class GitCommandError(GitError):
 
 # pylint: disable=too-many-instance-attributes
 class GitStatus:
-    def __init__(self, working_path: path.Path) -> None:
+    def __init__(self, working_path: Path) -> None:
         self.working_path = working_path
         self.untracked = 0
         self.staged = 0
@@ -90,11 +90,11 @@ class GitStatus:
 
 
 class WorktreeNotFound(GitError):
-    def __init__(self, working_path: path.Path) -> None:
+    def __init__(self, working_path: Path) -> None:
         super().__init__("'{}' is not inside a git repository".format(working_path))
 
 
-def run_git(working_path: path.Path, *cmd: str, raises=True) -> Union[Tuple[int, str], None]:
+def run_git(working_path: Path, *cmd: str, raises=True) -> Union[Tuple[int, str], None]:
     """ Run git `cmd` in given `working_path`
 
     If `raises` is True and git return code is non zero, raise
@@ -160,12 +160,12 @@ def get_current_tag(working_path):
 
 def get_repo_root(working_path=None):
     if not working_path:
-        working_path = path.Path(os.getcwd())
+        working_path = Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")
     status, output = run_git(working_path, *cmd, raises=False)
     if status != 0:
         raise WorktreeNotFound(working_path)
-    return path.Path(output)
+    return Path(output)
 
 
 def find_ref(repo, candidate_refs):

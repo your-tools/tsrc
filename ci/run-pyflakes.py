@@ -1,4 +1,4 @@
-import path
+from path import Path
 import subprocess
 import sys
 
@@ -13,7 +13,7 @@ def ignore(p):
 
 
 def collect_sources():
-    top_path = path.Path(".")
+    top_path = Path(".")
     for py_path in top_path.walkfiles("*.py"):
         py_path = py_path.normpath()  # get rid of the leading '.'
         if not ignore(py_path):

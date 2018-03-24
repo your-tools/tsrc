@@ -1,6 +1,6 @@
 """ Custom exceptions """
 
-import path
+from path import Path
 
 DOC_URL = "https://supertanker.github.io/tsrc/ref/formats/"
 
@@ -18,7 +18,7 @@ class Error(Exception):
 
 
 class InvalidConfig(Error):
-    def __init__(self, config_path: path.Path, details: str) -> None:
+    def __init__(self, config_path: Path, details: str) -> None:
         self.config_path = config_path
         self.details = details
         super().__init__(self.detailed_message)

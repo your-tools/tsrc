@@ -1,6 +1,6 @@
 """ Fixtures for tsrc testing """
 
-import path
+from path import Path
 import pytest
 
 import tsrc.cli.main
@@ -18,8 +18,8 @@ message_recorder, git_server, tsrc_cli, repo_path, push_args
 
 @pytest.fixture()
 def tmp_path(tmpdir):
-    """ Convert py.path.Local() to path.Path() objects """
-    return path.Path(tmpdir.strpath)
+    """ Convert py.path.Local() to Path() objects """
+    return Path(tmpdir.strpath)
 
 
 @pytest.fixture

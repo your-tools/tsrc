@@ -1,5 +1,5 @@
 import os
-import path
+from path import Path
 import pytest
 
 import tsrc.cli
@@ -7,7 +7,7 @@ import tsrc.cli
 
 class CLI():
     def __init__(self) -> None:
-        self.workspace_path = path.Path(os.getcwd())
+        self.workspace_path = Path(os.getcwd())
 
     def run(self, *args: str, expect_fail=False) -> None:
         try:

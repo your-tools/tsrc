@@ -1,17 +1,17 @@
 import tsrc.cli
 
-import path
+from path import Path
 
 
-def repo_exists(workspace_path: path.Path, repo: str) -> bool:
+def repo_exists(workspace_path: Path, repo: str) -> bool:
     return workspace_path.joinpath(repo).exists()
 
 
-def assert_cloned(workspace_path: path.Path, repo: str) -> None:
+def assert_cloned(workspace_path: Path, repo: str) -> None:
     assert repo_exists(workspace_path, repo)
 
 
-def assert_not_cloned(workspace_path: path.Path, repo: str) -> None:
+def assert_not_cloned(workspace_path: Path, repo: str) -> None:
     assert not repo_exists(workspace_path, repo)
 
 

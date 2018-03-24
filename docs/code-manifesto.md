@@ -320,7 +320,7 @@ Note that `get_` methods are OK if they do more than simple computations (expens
 
 ```python
 # Yes
-work_path = path.Path("foo/work")
+work_path = Path("foo/work")
 work_path.mkdir_p()
 foo_path = work_path.joinpath("foo.txt")
 foo_path.write_text("this is bar")

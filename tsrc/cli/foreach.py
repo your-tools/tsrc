@@ -3,7 +3,7 @@
 from typing import List
 import subprocess
 
-import path
+from path import Path
 import ui
 
 import tsrc
@@ -16,7 +16,7 @@ class CommandFailed(tsrc.Error):
 
 
 class CmdRunner(tsrc.executor.Task):
-    def __init__(self, workspace: path.Path, cmd: List[str], cmd_as_str: str, shell=False) -> None:
+    def __init__(self, workspace: Path, cmd: List[str], cmd_as_str: str, shell=False) -> None:
         self.workspace = workspace
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
