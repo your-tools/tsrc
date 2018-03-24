@@ -1,7 +1,7 @@
 import tsrc.cli
 
 
-def test_status_happy(tsrc_cli, git_server, workspace_path, message_recorder):
+def test_status_happy(tsrc_cli, git_server, workspace_path, message_recorder) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "CMakeLists.txt")
@@ -19,7 +19,7 @@ def test_status_happy(tsrc_cli, git_server, workspace_path, message_recorder):
     assert message_recorder.find(r"\* spam/eggs fish")
 
 
-def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder):
+def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder) -> None:
     git_server.add_repo("foo/bar")
     git_server.push_file("foo/bar", "CMakeLists.txt")
     manifest_url = git_server.manifest_url
@@ -31,7 +31,7 @@ def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder):
     assert message_recorder.find(r"\* foo/bar master \(dirty\)")
 
 
-def test_status_not_on_any_branch(tsrc_cli, git_server, workspace_path, message_recorder):
+def test_status_not_on_any_branch(tsrc_cli, git_server, workspace_path, message_recorder) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "CMakeLists.txt")
@@ -47,7 +47,7 @@ def test_status_not_on_any_branch(tsrc_cli, git_server, workspace_path, message_
     assert message_recorder.find(r"\* spam/eggs [a-f0-9]{7}")
 
 
-def test_status_on_tag(tsrc_cli, git_server, workspace_path, message_recorder):
+def test_status_on_tag(tsrc_cli, git_server, workspace_path, message_recorder) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "CMakeLists.txt")

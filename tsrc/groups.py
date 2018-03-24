@@ -1,5 +1,6 @@
 """ Support for finding elements inside a list of groups """
 
+from typing import Any, Dict, Iterable, List, Optional, Set
 import tsrc
 
 
@@ -7,8 +8,16 @@ class GroupError(tsrc.Error):
     pass
 
 
+# pylint: disable=too-few-public-methods
+class Group:
+    def __init__(self, name: str, elements: Iterable[Any], includes: List[str] = None) -> None:
+        self.name = name
+        self.elements = elements
+        self.includes = includes or list()
+
+
 class GroupNotFound(GroupError):
-    def __init__(self, group_name, parent_group=None):
+    def __init__(self, group_name: str, parent_group: Group = None) -> None:
         self.group_name = group_name
         self.parent_group = parent_group
         if self.parent_group:
@@ -20,45 +29,39 @@ class GroupNotFound(GroupError):
 
 
 class UnknownElement(GroupError):
-    def __init__(self, group_name, element):
+    def __init__(self, group_name: str, element: Any) -> None:
         self.group_name = group_name
         self.element = element
         message = "%s: unknown element: %s" % (group_name, element)
         super().__init__(message)
 
 
-# pylint: disable=too-few-public-methods
-class Group:
-    def __init__(self, name, elements, includes=None):
-        self.name = name
-        self.elements = elements
-        self.includes = includes or list()
-
-
 class GroupList:
-    def __init__(self, *, elements):
-        self.groups = dict()
+    def __init__(self, *, elements: Iterable[Any]) -> None:
+        self.groups: Dict[str, Group] = dict()
         self.all_elements = elements
-        self._groups_seen = set()
+        self._groups_seen: Set[str] = set()
 
-    def add(self, name, elements, includes=None):
+    def add(self, name: str, elements: Iterable[Any], includes: List[str] = None) -> None:
         for element in elements:
             if element not in self.all_elements:
                 raise UnknownElement(name, element)
         self.groups[name] = Group(name, elements, includes=includes)
 
-    def get_group(self, name):
+    def get_group(self, name: str) -> Optional[Group]:
         return self.groups.get(name)
 
-    def get_elements(self, groups=None):
+    def get_elements(self, groups: List[str] = None) -> Iterable[Any]:
         self._groups_seen = set()
-        res = set()
+        res: Set[Any] = set()
         if not groups:
             return self.all_elements
         self._rec_get_elements(res, groups, parent_group=None)
         return res
 
-    def _rec_get_elements(self, res, group_names, *, parent_group):
+    def _rec_get_elements(self, res: Set[Any],
+                          group_names: List[str], *,
+                          parent_group: Optional[Group]) -> None:
         for group_name in group_names:
             if group_name in self._groups_seen:
                 return

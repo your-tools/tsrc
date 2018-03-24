@@ -14,14 +14,14 @@ def github_mock():
     return github_mock
 
 
-def execute_push(repo_path, push_args, github_api):
+def execute_push(repo_path, push_args, github_api) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
     push_action = PushAction(repository_info, push_args, github_api=github_api)
     push_action.execute()
 
 
-def test_create(repo_path, tsrc_cli, github_mock, push_args):
+def test_create(repo_path, tsrc_cli, github_mock, push_args) -> None:
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = list()
     mock_repo.owner = mock.Mock()
@@ -57,7 +57,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
         "request_url", data={"reviewers": ["reviewer1", "reviewer2"]})
 
 
-def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
+def test_push_custom_tracked_branch(repo_path, push_args, github_mock) -> None:
     stub_repo = mock.Mock()
     stub_repo.pull_requests.return_value = list()
     stub_repo.default_branch = "master"
@@ -70,7 +70,7 @@ def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
     stub_repo.create_pull.assert_called_with("new feature", "master", "remote")
 
 
-def test_update_target_and_title(repo_path, push_args, github_mock):
+def test_update_target_and_title(repo_path, push_args, github_mock) -> None:
     opened_pr = mock.Mock()
     opened_pr.number = 2
     opened_pr.state = "open"
@@ -122,7 +122,7 @@ def test_merge(repo_path, tsrc_cli, github_mock, push_args):
     opened_pr.merge.assert_called_with()
 
 
-def test_close(repo_path, tsrc_cli, github_mock, push_args):
+def test_close(repo_path, tsrc_cli, github_mock, push_args) -> None:
     opened_pr = mock.Mock()
     opened_pr.number = 2
     opened_pr.state = "open"
