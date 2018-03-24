@@ -3,14 +3,16 @@ import pytest
 
 import tsrc.git
 
+from path import Path
+
 
 class ManifestHandler():
-    def __init__(self, path):
+    def __init__(self, path: Path):
         self.path = path
         self.data = {"repos": list()}
 
     @property
-    def yaml_path(self):
+    def yaml_path(self) -> Path:
         return self.path.joinpath("manifest.yml")
 
     def init(self):

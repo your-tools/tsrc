@@ -1,7 +1,8 @@
 import os
+from typing import List
 
 
-def get_cmd_for_foreach_test(shell=False):
+def get_cmd_for_foreach_test(shell=False) -> List[str]:
     """ We need a cmd that:
      * can fail if not called with the correct 'shell'
        argument
@@ -22,13 +23,13 @@ def get_cmd_for_foreach_test(shell=False):
     return cmd
 
 
-def test_foreach_no_args(tsrc_cli, git_server):
+def test_foreach_no_args(tsrc_cli, git_server) -> None:
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
     tsrc_cli.run("foreach", expect_fail=True)
 
 
-def test_foreach_with_errors(tsrc_cli, git_server, message_recorder):
+def test_foreach_with_errors(tsrc_cli, git_server, message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "foo/bar.txt",
@@ -42,7 +43,7 @@ def test_foreach_with_errors(tsrc_cli, git_server, message_recorder):
     assert message_recorder.find("\* spam")
 
 
-def test_foreach_happy(tsrc_cli, git_server, message_recorder):
+def test_foreach_happy(tsrc_cli, git_server, message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "doc/index.html")
@@ -55,7 +56,7 @@ def test_foreach_happy(tsrc_cli, git_server, message_recorder):
     assert message_recorder.find("`%s`" % " ".join(cmd))
 
 
-def test_foreach_shell(tsrc_cli, git_server, message_recorder):
+def test_foreach_shell(tsrc_cli, git_server, message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "doc/index.html")

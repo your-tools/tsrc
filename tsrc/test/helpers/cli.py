@@ -6,12 +6,12 @@ import tsrc.cli
 
 
 class CLI():
-    def __init__(self):
+    def __init__(self) -> None:
         self.workspace_path = path.Path(os.getcwd())
 
-    def run(self, *args, expect_fail=False):
+    def run(self, *args: str, expect_fail=False) -> None:
         try:
-            tsrc.cli.main.main(args=args)
+            tsrc.cli.main.main(args=args)  # type: ignore
             rc = 0
         except SystemExit as e:
             rc = e.code
