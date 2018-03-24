@@ -3,6 +3,7 @@
 
 import os
 import subprocess
+from typing import Any, Dict, Iterable, Tuple, Union
 
 import path
 import ui
@@ -15,7 +16,7 @@ class GitError(tsrc.Error):
 
 
 class GitCommandError(GitError):
-    def __init__(self, working_path, cmd, *, output=None):
+    def __init__(self, working_path: path.Path, cmd: Iterable[str], *, output=None) -> None:
         self.cmd = cmd
         self.working_path = working_path
         self.output = output
@@ -28,7 +29,7 @@ class GitCommandError(GitError):
 
 # pylint: disable=too-many-instance-attributes
 class GitStatus:
-    def __init__(self, working_path):
+    def __init__(self, working_path: path.Path) -> None:
         self.working_path = working_path
         self.untracked = 0
         self.staged = 0
@@ -41,36 +42,36 @@ class GitStatus:
         self.branch = None
         self.sha1 = None
 
-    def update(self):
+    def update(self) -> None:
         self.update_sha1()
         self.update_branch()
         self.update_tag()
         self.update_remote_status()
         self.update_worktree_status()
 
-    def update_sha1(self):
+    def update_sha1(self) -> None:
         self.sha1 = get_sha1(self.working_path, short=True)
 
-    def update_branch(self):
+    def update_branch(self) -> None:
         try:
             self.branch = get_current_branch(self.working_path)
         except GitError:
             pass
 
-    def update_tag(self):
+    def update_tag(self) -> None:
         try:
             self.tag = get_current_tag(self.working_path)
         except GitError:
             pass
 
-    def update_remote_status(self):
+    def update_remote_status(self) -> None:
         _, ahead_rev = run_git(self.working_path, "rev-list", "@{upstream}..HEAD", raises=False)
         self.ahead = len(ahead_rev.splitlines())
 
         _, behind_rev = run_git(self.working_path, "rev-list", "HEAD..@{upstream}", raises=False)
         self.behind = len(behind_rev.splitlines())
 
-    def update_worktree_status(self):
+    def update_worktree_status(self) -> None:
         _, out = run_git(self.working_path, "status", "--porcelain", raises=False)
 
         for line in out.splitlines():
@@ -89,11 +90,11 @@ class GitStatus:
 
 
 class WorktreeNotFound(GitError):
-    def __init__(self, working_path):
+    def __init__(self, working_path: path.Path) -> None:
         super().__init__("'{}' is not inside a git repository".format(working_path))
 
 
-def run_git(working_path, *cmd, raises=True):
+def run_git(working_path: path.Path, *cmd: str, raises=True) -> Union[Tuple[int, str], None]:
     """ Run git `cmd` in given `working_path`
 
     If `raises` is True and git return code is non zero, raise
@@ -102,7 +103,7 @@ def run_git(working_path, *cmd, raises=True):
     """
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
-    options = dict()
+    options: Dict[str, Any] = dict()
     if not raises:
         options["stdout"] = subprocess.PIPE
         options["stderr"] = subprocess.STDOUT
@@ -120,6 +121,7 @@ def run_git(working_path, *cmd, raises=True):
     if raises:
         if returncode != 0:
             raise GitCommandError(working_path, cmd)
+        return None
     else:
         if out.endswith('\n'):
             out = out.strip('\n')

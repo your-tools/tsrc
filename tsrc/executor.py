@@ -1,6 +1,7 @@
 """ Helpers to run things on multiple repos and collect errors """
 
 import abc
+from typing import List, Tuple, Any
 
 import ui
 
@@ -18,7 +19,7 @@ class Task(metaclass=abc.ABCMeta):
         pass
 
     # pylint: disable=no-self-use
-    def quiet(self):
+    def quiet(self) -> bool:
         return False
 
     @abc.abstractmethod
@@ -26,18 +27,18 @@ class Task(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def process(self, _):
+    def process(self, _) -> None:
         pass
 
 
 class SequentialExecutor():
-    def __init__(self, task):
+    def __init__(self, task: Task) -> None:
         self.task = task
-        self.errors = list()
+        self.errors: List[Tuple[Any, tsrc.Error]] = list()
 
-    def process(self, items):
+    def process(self, items: List[Any]) -> None:
         if not items:
-            return True
+            return
         ui.info_1(self.task.description())
 
         self.errors = list()
@@ -50,7 +51,7 @@ class SequentialExecutor():
         if self.errors:
             self.handle_errors()
 
-    def handle_errors(self):
+    def handle_errors(self) -> None:
         ui.error(self.task.description(), "failed")
         for item, error in self.errors:
             item_desc = self.task.display_item(item)
@@ -60,13 +61,13 @@ class SequentialExecutor():
             ui.info(*message, sep="")
         raise ExecutorFailed()
 
-    def process_one(self, item):
+    def process_one(self, item) -> None:
         try:
             self.task.process(item)
         except tsrc.Error as error:
             self.errors.append((item, error))
 
 
-def run_sequence(items, task):
+def run_sequence(items: List[Any], task: Task) -> None:
     executor = SequentialExecutor(task)
     return executor.process(items)

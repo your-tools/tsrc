@@ -1,9 +1,12 @@
 """ Entry point for tsrc foreach """
 
+from typing import List
 import subprocess
 
+import path
 import ui
 
+import tsrc
 import tsrc.cli
 import tsrc.workspace
 
@@ -13,19 +16,19 @@ class CommandFailed(tsrc.Error):
 
 
 class CmdRunner(tsrc.executor.Task):
-    def __init__(self, workspace, cmd, cmd_as_str, shell=False):
+    def __init__(self, workspace: path.Path, cmd: List[str], cmd_as_str: str, shell=False) -> None:
         self.workspace = workspace
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
         self.shell = shell
 
-    def display_item(self, repo):
+    def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def description(self):
+    def description(self) -> str:
         return "Running `%s` on every repo" % self.cmd_as_str
 
-    def process(self, repo):
+    def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src, "\n",
                 ui.lightgray, "$ ",
                 ui.reset, ui.bold, self.cmd_as_str,

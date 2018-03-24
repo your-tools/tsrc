@@ -35,7 +35,7 @@ def test_invalid_syntax(tmp_path):
     with pytest.raises(tsrc.InvalidConfig) as e:
         dummy_schema = mock.Mock()
         tsrc.config.parse_config_file(foo_yml, dummy_schema)
-    assert e.value.path == foo_yml
+    assert e.value.config_path == foo_yml
     assert "flow sequence" in e.value.details
     assert "ligne 3, col 9" in e.value.details
 

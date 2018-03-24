@@ -1,5 +1,6 @@
 """ Custom exceptions """
 
+import path
 
 DOC_URL = "https://supertanker.github.io/tsrc/ref/formats/"
 
@@ -12,22 +13,22 @@ class Error(Exception):
         super().__init__(self, *args)
         self.message = " ".join(str(x) for x in args)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.message
 
 
 class InvalidConfig(Error):
-    def __init__(self, path, details):
-        self.path = path
+    def __init__(self, config_path: path.Path, details: str) -> None:
+        self.config_path = config_path
         self.details = details
         super().__init__(self.detailed_message)
 
     @property
-    def detailed_message(self):
-        res = "%s: %s" % (self.path, self.details)
+    def detailed_message(self) -> str:
+        res = "%s: %s" % (self.config_path, self.details)
         res += "\n"
         res += "See %s for details" % DOC_URL
         return res
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.detailed_message

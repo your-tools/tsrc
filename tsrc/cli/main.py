@@ -6,14 +6,17 @@ import importlib
 import os
 import sys
 import textwrap
+from typing import Any, Callable, List
 
 import colored_traceback
 import ui
 
 import tsrc
 
+Args = argparse.Namespace
 
-def fix_cmd_args_for_foreach(args, foreach_parser):
+
+def fix_cmd_args_for_foreach(args: Args, foreach_parser: Any) -> None:
     """ We want to support both:
       $ tsrc foreach -c 'shell command'
      and
@@ -47,19 +50,19 @@ def fix_cmd_args_for_foreach(args, foreach_parser):
     args.cmd_as_str = cmd_as_str
 
 
-def workspace_subparser(subparser, name):
+def workspace_subparser(subparser: Any, name: str) -> Any:
     parser = subparser.add_parser(name)
     parser.add_argument("-w", "--workspace", dest="workspace_path")
     return parser
 
 
-def main_wrapper(main_func):
+def main_wrapper(main_func: Callable[[List[str]], None]):
     """ Wraps main() entry point to better deal with errors """
     @functools.wraps(main_func)
     def wrapped(args=None):
         colored_traceback.add_hook()
         try:
-            main_func(args=args)
+            main_func(arg_list=args)
         except tsrc.Error as e:
             # "expected" failure, display it and exit
             if e.message:
@@ -71,7 +74,7 @@ def main_wrapper(main_func):
     return wrapped
 
 
-def setup_ui(args):
+def setup_ui(args: Args) -> None:
     verbose = None
     if os.environ.get("VERBOSE"):
         verbose = True
@@ -81,7 +84,7 @@ def setup_ui(args):
 
 
 @main_wrapper
-def main(args=None):
+def main(arg_list: List[str] = None):
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--verbose", help="Show debug messages",
@@ -143,14 +146,14 @@ def main(args=None):
     workspace_subparser(subparsers, "status")
     workspace_subparser(subparsers, "sync")
 
-    args = parser.parse_args(args=args)
+    args = parser.parse_args(args=arg_list)
     setup_ui(args)
 
     command = args.command
     if not command:
         parser.print_help()
         sys.exit(1)
-    module = importlib.import_module("tsrc.cli.%s" % command)
+    module: Any = importlib.import_module("tsrc.cli.%s" % command)
     if command == "foreach":
         fix_cmd_args_for_foreach(args, foreach_parser)
 

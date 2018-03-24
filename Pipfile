@@ -10,7 +10,7 @@ name = "pypi"
 attrs = "*"
 colored-traceback = "*"
 colorama = "*"
-github3-py = "*"
+"github3-py" = "*"
 "path.py" = "*"
 python-cli-ui = "*"
 pyparsing = "*"
@@ -23,6 +23,7 @@ xdg = "*"
 
 
 [dev-packages]
+
 apipkg = "*"
 astroid = "*"
 backports-abc = "*"
@@ -40,3 +41,4 @@ pytest-cov = "*"
 pytest-sugar = "*"
 pytest-xdist = "*"
 requests = "*"
+mypy = "*"

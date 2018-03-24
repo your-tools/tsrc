@@ -33,6 +33,7 @@ def init_checks():
     append_check("pycodestyle", "pycodestyle", ".")
     append_check("pyflakes",    sys.executable, "ci/run-pyflakes.py")
     append_check("mccabe",      sys.executable, "ci/run-mccabe.py", "10")
+    append_check("mypy",        "mypy", "tsrc", "--ignore-missing-imports")
     append_check("pylint",      "pylint", "tsrc", "--score", "no")
     append_check("pytest",      *pytest_args)
     append_check("docs",        "mkdocs", "build")
