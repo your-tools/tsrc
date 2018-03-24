@@ -1,4 +1,3 @@
-import types
 
 import github3
 import mock
@@ -7,7 +6,6 @@ import pytest
 import tsrc.git
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_github import PushAction
-from tsrc.test.helpers.push import repo_path, push_args
 
 
 @pytest.fixture

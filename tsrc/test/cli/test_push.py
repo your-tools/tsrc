@@ -1,9 +1,4 @@
-import types
-
 import tsrc.cli.push
-from tsrc.test.helpers.push import repo_path, push_args
-
-import pytest
 
 
 class DummyPush(tsrc.cli.push.PushAction):

@@ -1,4 +1,3 @@
-import types
 import mock
 
 import pytest
@@ -7,7 +6,7 @@ import tsrc.git
 import tsrc.gitlab
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_gitlab import PushAction
-from tsrc.test.helpers.push import repo_path, push_args
+
 
 GITLAB_URL = "http://gitlab.example.com"
 TIMOTHEE = {"name": "timothee", "id": 1}

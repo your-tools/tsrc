@@ -1,11 +1,5 @@
 import os
 
-import pytest
-
-import tsrc.cli
-
-from tsrc.test.conftest import *
-
 
 def get_cmd_for_foreach_test(shell=False):
     """ We need a cmd that:

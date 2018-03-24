@@ -1,10 +1,6 @@
 import os
 
-import pytest
-
 import tsrc.cli
-
-from tsrc.test.conftest import *
 
 
 def test_sync_happy(tsrc_cli, git_server, workspace_path):

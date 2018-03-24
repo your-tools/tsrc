@@ -1,8 +1,3 @@
-import os
-
-import pytest
-import ruamel
-
 import tsrc.cli
 
 
