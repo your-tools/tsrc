@@ -28,17 +28,17 @@ class FakeTask(tsrc.executor.Task):
         ui.info("ok !")
 
 
-def test_doing_nothing():
+def test_doing_nothing() -> None:
     task = FakeTask()
     tsrc.executor.run_sequence(list(), task)
 
 
-def test_happy():
+def test_happy() -> None:
     task = FakeTask()
     tsrc.executor.run_sequence(["foo", "spam"], task)
 
 
-def test_collect_errors():
+def test_collect_errors() -> None:
     task = FakeTask()
     with pytest.raises(tsrc.executor.ExecutorFailed):
         tsrc.executor.run_sequence(["foo", "bar"], task)
