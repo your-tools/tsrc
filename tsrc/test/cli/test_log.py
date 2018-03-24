@@ -1,8 +1,3 @@
-from tsrc.test.conftest import message_recorder
-
-import tsrc.cli
-
-
 def test_happy(tsrc_cli, git_server, message_recorder):
     git_server.add_repo("foo")
     git_server.add_repo("spam")

@@ -1,7 +1,3 @@
-import mock
-
-import pytest
-
 import tsrc.git
 import tsrc.gitlab
 import tsrc.manifest

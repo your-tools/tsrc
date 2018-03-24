@@ -1,11 +1,8 @@
 import os
-import re
 import path
 import pytest
 
 import tsrc.cli
-
-import ui
 
 
 class CLI():
