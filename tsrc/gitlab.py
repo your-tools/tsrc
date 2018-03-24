@@ -59,7 +59,7 @@ def _handle_json_errors(response: requests.models.Response):
         for key in ["error", "message"]:
             if key in json_details:
                 raise GitLabAPIError(url, status_code, json_details[key])
-        raise GitLabAPIError(url, status_code, json.dumps(json_details))
+        raise GitLabAPIError(url, status_code, json.dumps(json_details, indent=2))
     if status_code >= 500:
         raise GitLabAPIError(url, status_code, response.text)
 
