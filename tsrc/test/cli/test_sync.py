@@ -206,7 +206,7 @@ def test_tags_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
     assert not foo_path.joinpath("new.txt").exists()
 
 
-def test_tags_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
+def test_sha1s_are_skipped_when_not_clean(tsrc_cli, git_server, workspace_path):
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
