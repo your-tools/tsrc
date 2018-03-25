@@ -93,6 +93,8 @@ class WorktreeNotFound(GitError):
         super().__init__("'{}' is not inside a git repository".format(working_path))
 
 
+# we should split this function in two
+# pylint: disable=inconsistent-return-statements
 def run_git(working_path, *cmd, raises=True):
     """ Run git `cmd` in given `working_path`
 

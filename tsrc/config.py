@@ -26,11 +26,11 @@ def parse_config_file(file_path, config_schema, roundtrip=False):
         )
         message = "%s - YAML error: %s" % (context, yaml_error.context)
         raise tsrc.InvalidConfig(file_path, message)
-    if config_schema:
-        try:
-            return config_schema.validate(parsed)
-        except schema.SchemaError as schema_error:
-            raise tsrc.InvalidConfig(file_path, str(schema_error))
+    try:
+        config_schema.validate(parsed)
+    except schema.SchemaError as schema_error:
+        raise tsrc.InvalidConfig(file_path, str(schema_error))
+    return parsed
 
 
 def get_tsrc_config_path():

@@ -127,6 +127,7 @@ class GitLabHelper():
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
                 return mr
+        return None
 
     def create_merge_request(self, project_id, source_branch, *, title,
                              target_branch="master"):

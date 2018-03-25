@@ -29,13 +29,17 @@ def select_assignee(choices):
 
 
 def wipify(title):
-    if not title.startswith(WIP_PREFIX):
+    if title.startswith(WIP_PREFIX):
         return WIP_PREFIX + title
+    else:
+        return title
 
 
 def unwipify(title):
     if title.startswith(WIP_PREFIX):
         return title[len(WIP_PREFIX):]
+    else:
+        return title
 
 
 class PushAction(tsrc.cli.push.PushAction):
@@ -122,6 +126,7 @@ class PushAction(tsrc.cli.push.PushAction):
                 return unwipify(title)
             if self.args.wip:
                 return wipify(title)
+            return title
 
     def find_merge_request(self):
         return self.gl_helper.find_opened_merge_request(

@@ -14,6 +14,7 @@ def describe_branch(git_status):
         return [ui.green, git_status.branch]
     elif git_status.sha1:
         return [ui.red, git_status.sha1]
+    return list()
 
 
 def commit_string(number):
