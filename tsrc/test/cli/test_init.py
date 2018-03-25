@@ -155,3 +155,13 @@ def test_change_branch(tsrc_cli, git_server, workspace_path):
 
     tsrc_cli.run("init", git_server.manifest_url, "--branch", "next")
     assert_cloned(workspace_path, "two")
+
+
+def test_no_remote_named_origin(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+    foo_path = workspace_path.joinpath("foo")
+    tsrc.git.run_git(foo_path, "remote", "rename", "origin", "upstream")
+
+    tsrc_cli.run("init", git_server.manifest_url)
