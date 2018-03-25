@@ -2,7 +2,7 @@
 
 import pkg_resources
 
-import path
+from path import Path
 import ui
 
 import tsrc.git
@@ -29,6 +29,6 @@ def main(args):
     # pylint: disable=no-member
     version = tsrc_distribution.version
     message = "tsrc version %s" % version
-    location = path.Path(tsrc_distribution.location)
+    location = Path(tsrc_distribution.location)
     message += get_details(location)
     ui.info(message)

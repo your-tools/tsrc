@@ -1,5 +1,7 @@
 """ Tiny wrapper for gitlab REST API """
 
+import json
+from typing import Any, Dict, Iterable, List
 import urllib.parse
 
 import requests
@@ -9,37 +11,43 @@ import tsrc
 
 GITLAB_API_VERSION = "v4"
 
+# pylint: disable=invalid-name
+MRType = Any
+
 
 class GitLabError(tsrc.Error):
     pass
 
 
 class GitLabAPIError(GitLabError):
-    def __init__(self, url, status_code, message):
+    def __init__(self, url: str, status_code: int, message: str) -> None:
         super().__init__(message)
         self.url = url
         self.status_code = status_code
         self.message = message
 
-    def __str__(self):
-        return "%s - %s" % (self.status_code, self.message)
+    def __str__(self) -> str:
+        if self.message:
+            return "%s - %s" % (self.status_code, self.message)
+        else:
+            return "Bad status code: %s" % self.status_code
 
 
 class TooManyUsers(GitLabError):
     pass
 
 
-def handle_errors(response, stream=False):
+def handle_errors(response: requests.models.Response, stream=False) -> None:
     if stream:
         _handle_stream_errors(response)
     else:
         _handle_json_errors(response)
 
 
-def _handle_json_errors(response):
+def _handle_json_errors(response: requests.models.Response):
     # Make sure we always have a dict containing some
     # kind of error:
-    json_details = dict()
+    json_details: Dict[str, str] = dict()
     try:
         json_details = response.json()
     except ValueError:
@@ -51,17 +59,17 @@ def _handle_json_errors(response):
         for key in ["error", "message"]:
             if key in json_details:
                 raise GitLabAPIError(url, status_code, json_details[key])
-        raise GitLabAPIError(url, status_code, json_details)
+        raise GitLabAPIError(url, status_code, json.dumps(json_details, indent=2))
     if status_code >= 500:
         raise GitLabAPIError(url, status_code, response.text)
 
 
-def _handle_stream_errors(response):
+def _handle_stream_errors(response: requests.models.Response) -> None:
     if response.status_code >= 400:
-        raise GitLabAPIError(response.url, "Incorrect status code:", response.status_code)
+        raise GitLabAPIError(response.url, response.status_code, "")
 
 
-def extract_next_page_number(response):
+def extract_next_page_number(response: requests.models.Response) -> int:
     header = response.headers['x-next-page']
     if header:
         return int(header)
@@ -70,11 +78,14 @@ def extract_next_page_number(response):
 
 
 class GitLabHelper():
-    def __init__(self, gitlab_url, token):
+    def __init__(self, gitlab_url: str, token: str) -> None:
         self.gitlab_api_url = gitlab_url + "/api/" + GITLAB_API_VERSION
         self.token = token
 
-    def make_request(self, verb, url, *, data=None, params=None, stream=False):
+    def make_request(self, verb: str, url: str, *,
+                     data: Dict[str, Any] = None,
+                     params: Dict[str, Any] = None,
+                     stream=False) -> Any:
         response = self.get_response(verb, url, data=data, params=params, stream=stream)
         handle_errors(response, stream=stream)
         if stream:
@@ -82,8 +93,9 @@ class GitLabHelper():
         else:
             return response.json()
 
-    def make_paginated_get_request(self, url, *, params=None):
-        results = list()
+    def make_paginated_get_request(self, url: str, *,
+                                   params: Dict[str, Any] = None) -> Iterable[Any]:
+        results: List[Any] = list()
         params = params.copy()
         next_page = 1
         while next_page:
@@ -94,15 +106,18 @@ class GitLabHelper():
             next_page = extract_next_page_number(response)
         return results
 
-    def get_response(self, verb, url, *, data=None, params=None, stream=False):
+    def get_response(self, verb: str, url: str, *,
+                     data: Dict[str, Any] = None,
+                     params: Dict[str, Any] = None,
+                     stream=False) -> requests.models.Response:
         full_url = self.gitlab_api_url + url
         response = requests.request(verb, full_url,
                                     headers={"PRIVATE-TOKEN": self.token},
                                     data=data, params=params, stream=stream)
         return response
 
-    def get_project_id(self, project_name):
-        encoded_project_name = urllib.parse.quote(project_name, safe=list())
+    def get_project_id(self, project_name: str) -> int:
+        encoded_project_name = urllib.parse.quote(project_name, safe="")
         url = "/projects/%s" % encoded_project_name
         try:
             res = self.make_request("GET", url)
@@ -113,7 +128,7 @@ class GitLabHelper():
             else:
                 raise
 
-    def find_opened_merge_request(self, project_id, source_branch):
+    def find_opened_merge_request(self, project_id: int, source_branch: str) -> MRType:
         url = "/projects/%s/merge_requests" % project_id
         params = {
             "state": "opened",
@@ -124,8 +139,8 @@ class GitLabHelper():
             if mr["source_branch"] == source_branch:
                 return mr
 
-    def create_merge_request(self, project_id, source_branch, *, title,
-                             target_branch="master"):
+    def create_merge_request(self, project_id: int, source_branch: str, *, title: str,
+                             target_branch="master") -> MRType:
         ui.info_2("Creating merge request", ui.ellipsis, end="")
         url = "/projects/%i/merge_requests" % project_id
         data = {
@@ -138,13 +153,13 @@ class GitLabHelper():
         ui.info("done", ui.check)
         return result
 
-    def update_merge_request(self, merge_request, **kwargs):
+    def update_merge_request(self, merge_request: MRType, **kwargs) -> requests.models.Response:
         project_id = merge_request["target_project_id"]
         merge_request_iid = merge_request["iid"]
         url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_iid)
         return self.make_request("PUT", url, data=kwargs)
 
-    def accept_merge_request(self, merge_request):
+    def accept_merge_request(self, merge_request: MRType) -> None:
         project_id = merge_request["project_id"]
         merge_request_iid = merge_request["iid"]
         ui.info_2("Merging when build succeeds", ui.ellipsis, end="")
@@ -155,7 +170,7 @@ class GitLabHelper():
         self.make_request("PUT", url, data=data)
         ui.info("done", ui.check)
 
-    def get_active_users(self):
+    def get_active_users(self) -> List[str]:
         response = self.get_response("GET", "/users", params={"active": "true", "per_page": 100})
         total = int(response.headers["X-TOTAL"])
         if total > 100:
@@ -163,10 +178,10 @@ class GitLabHelper():
         else:
             return response.json()
 
-    def get_group_members(self, group, query=None):
+    def get_group_members(self, group: str, query=None) -> Any:
         return self.make_request("GET", "/groups/%s/members" % group,
                                  params={"query": query})
 
-    def get_project_members(self, project_id, query=None):
+    def get_project_members(self, project_id: int, query=None) -> Any:
         return self.make_request("GET", "/projects/%s/members" % project_id,
                                  params={"query": query})

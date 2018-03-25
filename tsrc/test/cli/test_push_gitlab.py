@@ -1,5 +1,5 @@
-import types
 import mock
+from typing import List
 
 import pytest
 
@@ -7,7 +7,7 @@ import tsrc.git
 import tsrc.gitlab
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_gitlab import PushAction
-from tsrc.test.helpers.push import repo_path, push_args
+
 
 GITLAB_URL = "http://gitlab.example.com"
 TIMOTHEE = {"name": "timothee", "id": 1}
@@ -26,11 +26,11 @@ PROJECT_IDS = {
 def gitlab_mock():
     all_users = [JOHN, BART, TIMOTHEE, THEO]
 
-    def get_project_members(project_id, query):
+    def get_project_members(project_id: str, query: str) -> List[str]:
         assert project_id in PROJECT_IDS.values()
         return [user for user in all_users if query in user["name"]]
 
-    def get_group_members(group_name, query):
+    def get_group_members(group_name: str, query: str) -> List[str]:
         return [user for user in all_users if query in user["name"]]
 
     gl_mock = mock.create_autospec(tsrc.gitlab.GitLabHelper, instance=True)
@@ -49,14 +49,14 @@ def gitlab_mock():
     return gl_mock
 
 
-def execute_push(repo_path, push_args, gitlab_mock):
+def execute_push(repo_path, push_args, gitlab_mock) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
     push_action = PushAction(repository_info, push_args, gl_helper=gitlab_mock)
     push_action.execute()
 
 
-def test_creating_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+def test_creating_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -83,7 +83,7 @@ def test_creating_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     )
 
 
-def test_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+def test_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -102,7 +102,7 @@ def test_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     )
 
 
-def test_close_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+def test_close_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -117,7 +117,7 @@ def test_close_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     )
 
 
-def test_accept_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+def test_accept_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -129,7 +129,7 @@ def test_accept_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     gitlab_mock.assert_mr_accepted(MR_STUB)
 
 
-def test_unwipify_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+def test_unwipify_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args) -> None:
     existing_mr = {
         "title": "WIP: nice title",
         "web_url": "http://example.com/42",

@@ -1,9 +1,4 @@
-from tsrc.test.conftest import message_recorder
-
-import tsrc.cli
-
-
-def test_happy(tsrc_cli, git_server, message_recorder):
+def test_happy(tsrc_cli, git_server, message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "bar.txt", message="boring bar")
@@ -24,7 +19,7 @@ def test_happy(tsrc_cli, git_server, message_recorder):
     assert not message_recorder.find("new foo!")
 
 
-def test_error(tsrc_cli, git_server):
+def test_error(tsrc_cli, git_server) -> None:
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)

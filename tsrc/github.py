@@ -1,6 +1,7 @@
 """ Helpers for github web API """
 
 
+from typing import List, Optional
 import getpass
 import uuid
 
@@ -11,17 +12,17 @@ import tsrc.config
 
 
 class GitHubAPIError(tsrc.Error):
-    def __init__(self, url, status_code, message):
+    def __init__(self, url: str, status_code: int, message: str) -> None:
         super().__init__(message)
         self.url = url
         self.status_code = status_code
         self.message = message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "%s - %s" % (self.status_code, self.message)
 
 
-def get_previous_token():
+def get_previous_token() -> Optional[str]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:
@@ -32,7 +33,7 @@ def get_previous_token():
     return github_auth.get("token")
 
 
-def generate_token():
+def generate_token() -> str:
     ui.info_1("Creating new GitHub token")
     username = ui.ask_string("Please enter you GitHub username")
     password = getpass.getpass("Password: ")
@@ -53,7 +54,7 @@ def generate_token():
     return authorization.token
 
 
-def save_token(token):
+def save_token(token: str) -> None:
     cfg_path = tsrc.config.get_tsrc_config_path()
     if cfg_path.exists():
         config = tsrc.config.parse_tsrc_config(roundtrip=True)
@@ -68,7 +69,7 @@ def save_token(token):
     tsrc.config.dump_tsrc_config(config)
 
 
-def ensure_token():
+def ensure_token() -> str:
     token = get_previous_token()
     if not token:
         token = generate_token()
@@ -76,7 +77,10 @@ def ensure_token():
     return token
 
 
-def request_reviewers(gh_api, owner, name, pr_number, reviewers):
+def request_reviewers(gh_api: github3.GitHub,
+                      owner: str, name: str,
+                      pr_number: int,
+                      reviewers: List[str]) -> None:
     # github3.py does not provide any way to request reviewers ...
     # using ._session seems safe because session.build_url() and session.post()
     # are not likely to go away.
@@ -90,7 +94,7 @@ def request_reviewers(gh_api, owner, name, pr_number, reviewers):
         raise GitHubAPIError(url, ret.status_code, ret.json().get("message"))
 
 
-def login():
+def login() -> github3.GitHub:
     token = ensure_token()
     gh_api = github3.GitHub()
     gh_api.login(token=token)

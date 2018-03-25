@@ -1,14 +1,15 @@
 """ Parse tsrc config files """
 
-import path
+from path import Path
 import ruamel.yaml
 import schema
+from typing import Any
 import xdg
 
 import tsrc
 
 
-def parse_config_file(file_path, config_schema, roundtrip=False):
+def parse_config_file(file_path: Path, config_schema: Any, roundtrip=False) -> Any:
     try:
         contents = file_path.text()
     except OSError as os_error:
@@ -33,19 +34,19 @@ def parse_config_file(file_path, config_schema, roundtrip=False):
             raise tsrc.InvalidConfig(file_path, str(schema_error))
 
 
-def get_tsrc_config_path():
-    config_path = path.Path(xdg.XDG_CONFIG_HOME)
+def get_tsrc_config_path() -> Path:
+    config_path = Path(xdg.XDG_CONFIG_HOME)
     config_path = config_path.joinpath("tsrc.yml")
     return config_path
 
 
-def dump_tsrc_config(config):
+def dump_tsrc_config(config: Any) -> None:
     dumped = ruamel.yaml.dump(config, Dumper=ruamel.yaml.RoundTripDumper)
     file_path = get_tsrc_config_path()
     file_path.write_text(dumped)
 
 
-def parse_tsrc_config(config_path=None, roundtrip=False):
+def parse_tsrc_config(config_path: Path = None, roundtrip=False) -> Any:
     auth_schema = {
         schema.Optional("gitlab"): {"token": str},
         schema.Optional("github"): {"token": str},

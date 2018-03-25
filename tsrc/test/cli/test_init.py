@@ -1,24 +1,21 @@
-import os
-
-import pytest
-import ruamel
-
 import tsrc.cli
 
+from path import Path
 
-def repo_exists(workspace_path, repo):
+
+def repo_exists(workspace_path: Path, repo: str) -> bool:
     return workspace_path.joinpath(repo).exists()
 
 
-def assert_cloned(workspace_path, repo):
+def assert_cloned(workspace_path: Path, repo: str) -> None:
     assert repo_exists(workspace_path, repo)
 
 
-def assert_not_cloned(workspace_path, repo):
+def assert_not_cloned(workspace_path: Path, repo: str) -> None:
     assert not repo_exists(workspace_path, repo)
 
 
-def test_init_simple(tsrc_cli, git_server, workspace_path):
+def test_init_simple(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
@@ -27,20 +24,20 @@ def test_init_simple(tsrc_cli, git_server, workspace_path):
     assert_cloned(workspace_path, "spam/eggs")
 
 
-def test_init_with_args(tsrc_cli, git_server, monkeypatch, tmp_path):
+def test_init_with_args(tsrc_cli, git_server, monkeypatch, tmp_path) -> None:
     git_server.add_repo("foo")
     work2_path = tmp_path.joinpath("work2").mkdir()
     tsrc_cli.run("init", "--workspace", work2_path, git_server.manifest_url)
     assert_cloned(work2_path, "foo")
 
 
-def test_init_twice(tsrc_cli, git_server):
+def test_init_twice(tsrc_cli, git_server) -> None:
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
     tsrc_cli.run("init", manifest_url)
 
 
-def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path):
+def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("bar")
     # foo repo will only exist on the 'devel' branch of the manifest:
     git_server.manifest.change_branch("devel")
@@ -51,7 +48,7 @@ def test_init_maint_manifest_branch(tsrc_cli, git_server, workspace_path):
     assert_cloned(workspace_path, "foo")
 
 
-def test_change_repo_url(tsrc_cli, git_server, workspace_path):
+def test_change_repo_url(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
     new_url = "git@example.com/foo"
@@ -63,7 +60,7 @@ def test_change_repo_url(tsrc_cli, git_server, workspace_path):
     assert actual_url == new_url
 
 
-def test_copy_files(tsrc_cli, git_server, workspace_path):
+def test_copy_files(tsrc_cli, git_server, workspace_path) -> None:
     manifest_url = git_server.manifest_url
     git_server.add_repo("master")
     top_cmake_contents = "# Top CMakeLists.txt"
@@ -75,7 +72,7 @@ def test_copy_files(tsrc_cli, git_server, workspace_path):
     assert workspace_path.joinpath("CMakeLists.txt").text() == top_cmake_contents
 
 
-def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
+def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("foo")
     git_server.change_repo_branch("foo", "next")
     git_server.push_file("foo", "next.txt")
@@ -88,7 +85,7 @@ def test_uses_correct_branch_for_repo(tsrc_cli, git_server, workspace_path):
     assert tsrc.git.get_current_branch(foo_path) == "next"
 
 
-def test_empty_repo(tsrc_cli, git_server, workspace_path):
+def test_empty_repo(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("foo", empty=True)
     git_server.add_repo("bar")
 
@@ -96,7 +93,7 @@ def test_empty_repo(tsrc_cli, git_server, workspace_path):
     tsrc_cli.run("init", manifest_url, expect_fail=True)
 
 
-def test_resets_to_tag(tsrc_cli, git_server, workspace_path):
+def test_resets_to_tag(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("foo")
     git_server.tag("foo", "v1.0")
     git_server.push_file("foo", "2.txt", message="Working on v2")
@@ -111,7 +108,7 @@ def test_resets_to_tag(tsrc_cli, git_server, workspace_path):
     assert expected_ref == actual_ref
 
 
-def test_resets_to_sha1(tsrc_cli, git_server, workspace_path):
+def test_resets_to_sha1(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -126,7 +123,7 @@ def test_resets_to_sha1(tsrc_cli, git_server, workspace_path):
     assert initial_sha1 == actual_ref
 
 
-def test_use_default_group(tsrc_cli, git_server, workspace_path):
+def test_use_default_group(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_group("default", ["a", "b"])
     git_server.add_repo("c")
 
@@ -137,7 +134,7 @@ def test_use_default_group(tsrc_cli, git_server, workspace_path):
     assert_not_cloned(workspace_path, "c")
 
 
-def test_use_specific_group(tsrc_cli, git_server, workspace_path):
+def test_use_specific_group(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
@@ -150,7 +147,7 @@ def test_use_specific_group(tsrc_cli, git_server, workspace_path):
     assert_not_cloned(workspace_path, "other")
 
 
-def test_change_branch(tsrc_cli, git_server, workspace_path):
+def test_change_branch(tsrc_cli, git_server, workspace_path) -> None:
     git_server.add_repo("one")
     git_server.manifest.change_branch("next")
     git_server.add_repo("two")

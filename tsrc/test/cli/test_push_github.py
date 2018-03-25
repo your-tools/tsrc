@@ -1,4 +1,3 @@
-import types
 
 import github3
 import mock
@@ -7,7 +6,6 @@ import pytest
 import tsrc.git
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_github import PushAction
-from tsrc.test.helpers.push import repo_path, push_args
 
 
 @pytest.fixture
@@ -18,14 +16,14 @@ def github_mock():
     return github_mock
 
 
-def execute_push(repo_path, push_args, github_api):
+def execute_push(repo_path, push_args, github_api) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
     push_action = PushAction(repository_info, push_args, github_api=github_api)
     push_action.execute()
 
 
-def test_create(repo_path, tsrc_cli, github_mock, push_args):
+def test_create(repo_path, tsrc_cli, github_mock, push_args) -> None:
     mock_repo = mock.Mock()
     mock_repo.iter_pulls.return_value = list()
     mock_repo.owner = "owner"
@@ -61,7 +59,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
     mock_repo.create_pull.assert_called_with("new feature", "master", "new-feature")
 
 
-def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
+def test_push_custom_tracked_branch(repo_path, push_args, github_mock) -> None:
     stub_repo = mock.Mock()
     stub_repo.iter_pulls.return_value = list()
     github_mock.repository.return_value = stub_repo
@@ -73,7 +71,7 @@ def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
     stub_repo.create_pull.assert_called_with("new feature", "master", "remote")
 
 
-def test_merge(repo_path, tsrc_cli, github_mock, push_args):
+def test_merge(repo_path, tsrc_cli, github_mock, push_args) -> None:
     closed_pr = mock.Mock()
     closed_pr.number = 1
     closed_pr.state = "closed"
