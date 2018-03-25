@@ -94,5 +94,5 @@ def login():
     token = ensure_token()
     gh_api = github3.GitHub()
     gh_api.login(token=token)
-    ui.info_2("Successfully logged in on GitHub with login", gh_api.user().login)
+    ui.info_2("Successfully logged in on GitHub")
     return gh_api

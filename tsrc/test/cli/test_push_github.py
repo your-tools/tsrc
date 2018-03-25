@@ -25,7 +25,7 @@ def execute_push(repo_path, push_args, github_api):
 
 def test_create(repo_path, tsrc_cli, github_mock, push_args):
     mock_repo = mock.Mock()
-    mock_repo.iter_pulls.return_value = list()
+    mock_repo.pull_requests.return_value = list()
     mock_repo.owner = "owner"
     mock_repo.name = "project"
     github_mock.repository.return_value = mock_repo
@@ -52,7 +52,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
         "repos", "owner", "project", "pulls", 42, "requested_reviewers")
     github_mock._session.post.assert_called_with(
         "request_url", json={"reviewers": ["reviewer1", "reviewer2"]})
-    mock_repo.iter_pulls.assert_called_with()
+    mock_repo.pull_requests.assert_called_with()
     github_mock.issue.assert_called_with(
         "owner", "project", 42)
     mock_issue.assign.assert_called_with("assignee1")
@@ -61,7 +61,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
 
 def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
     stub_repo = mock.Mock()
-    stub_repo.iter_pulls.return_value = list()
+    stub_repo.pull_requests.return_value = list()
     github_mock.repository.return_value = stub_repo
     tsrc.git.run_git(repo_path, "checkout", "-b", "local")
     tsrc.git.run_git(repo_path, "push", "-u", "origin", "local:remote")
@@ -89,7 +89,7 @@ def test_merge(repo_path, tsrc_cli, github_mock, push_args):
     opened_pr_wrong_branch.head.ref = "new-feature"
 
     mock_repo = mock.Mock()
-    mock_repo.iter_pulls.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
+    mock_repo.pull_requests.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
     github_mock.repository.return_value = mock_repo
 
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")

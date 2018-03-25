@@ -46,7 +46,7 @@ class PushAction(tsrc.cli.push.PushAction):
                 ui.reset, "See pull request at", self.pull_request.html_url)
 
     def find_opened_pull_request(self):
-        for pull_request in self.repository.iter_pulls():
+        for pull_request in self.repository.pull_requests():
             if pull_request.head.ref == self.remote_branch:
                 if pull_request.state == "open":
                     return pull_request
@@ -62,7 +62,7 @@ class PushAction(tsrc.cli.push.PushAction):
                 self.remote_branch
             )
             ui.info("done", ui.check)
-        except github3.models.GitHubError as github_error:
+        except github3.GitHubError as github_error:
             ui.info()
             ui.error(ui.red, "\nCould not create pull request")
             for error in github_error.errors:
