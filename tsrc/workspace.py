@@ -6,7 +6,7 @@ Mostly used by tsrc/cli.py
 
 import stat
 import textwrap
-from typing import Iterable, List, Tuple, Dict, Any
+from typing import Iterable, List, Tuple, Dict, Any, Optional
 
 import attr
 from path import Path
@@ -33,7 +33,7 @@ OPTIONS_SCHEMA = schema.Schema({
 class Options:
     url: str = attr.ib(default=None)
     branch: str = attr.ib(default="master")
-    tag: str = attr.ib(default=None)
+    tag: Optional[str] = attr.ib(default=None)
     shallow: bool = attr.ib(default=False)
     groups: List[str] = attr.ib(default=list())
 
@@ -67,7 +67,7 @@ class LocalManifest:
         hidden_path = workspace_path.joinpath(".tsrc")
         self.clone_path = hidden_path.joinpath("manifest")
         self.cfg_path = hidden_path.joinpath("manifest.yml")
-        self.manifest: tsrc.manifest.Manifest = None
+        self.manifest: Optional[tsrc.manifest.Manifest] = None
 
     @property
     def branch(self) -> str:
@@ -79,6 +79,7 @@ class LocalManifest:
 
     @property
     def copyfiles(self) -> List[Tuple[str, str]]:
+        assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.copyfiles
 
     @property
@@ -86,6 +87,7 @@ class LocalManifest:
         return self.load_config().groups
 
     def get_repos(self) -> List[tsrc.Repo]:
+        assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.get_repos(groups=self.active_groups)
 
     def load(self) -> None:
@@ -103,6 +105,7 @@ class LocalManifest:
         return gitlab_config["url"]
 
     def get_url(self, src: str) -> str:
+        assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.get_url(src)
 
     def configure(self, options: Options) -> None:
@@ -159,7 +162,7 @@ class LocalManifest:
     def _clone_manifest(self, options: Options) -> None:
         parent, name = self.clone_path.splitpath()
         parent.makedirs_p()
-        ref: str = None
+        ref: str = ""
         if options.tag:
             ref = options.tag
         elif options.branch:

@@ -1,7 +1,7 @@
 """ Helpers for github web API """
 
 
-from typing import List
+from typing import List, Optional
 import getpass
 import uuid
 
@@ -22,7 +22,7 @@ class GitHubAPIError(tsrc.Error):
         return "%s - %s" % (self.status_code, self.message)
 
 
-def get_previous_token() -> str:
+def get_previous_token() -> Optional[str]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:

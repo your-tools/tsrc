@@ -8,7 +8,6 @@ from path import Path
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]
-Url = str
 
 
 class ManifestHandler():
@@ -104,7 +103,7 @@ class GitServer():
     def get_url(self, name: str) -> str:
         return str("file://" + self.bare_path.joinpath(name))
 
-    def _create_repo(self, name: str, empty=False) -> Url:
+    def _create_repo(self, name: str, empty=False) -> str:
         bare_path = self.bare_path.joinpath(name)
         bare_path.makedirs_p()
         tsrc.git.run_git(bare_path, "init", "--bare")
@@ -119,7 +118,7 @@ class GitServer():
             tsrc.git.run_git(src_path, "push", "origin", "master")
         return str(bare_path)
 
-    def add_repo(self, name: str, add_to_manifest=True, empty=False) -> Url:
+    def add_repo(self, name: str, add_to_manifest=True, empty=False) -> str:
         self._create_repo(name, empty=empty)
         url = self.get_url(name)
         if add_to_manifest:
