@@ -252,7 +252,7 @@ if HAS_NICE_FEATURE:
 
 * Importing Python files should never cause side effects. It's OK to initialize global variables, but you should never call functions outside a `if __name__ == main() block`.
 
-* Always use fully-qualified imports and names:
+* Prefer using fully-qualified imports and names:
 
 ```python
 # Yes
@@ -264,7 +264,8 @@ from foo import bar
 my_bar = bar.Bar()
 ```
 
-Both styles have pros and cons, we just need to be consistent here.
+!!! note
+    We allow a few exceptions like `from path import Path` or importing classes directory in tests. Use your best judgement.
 
 # Classes
 
