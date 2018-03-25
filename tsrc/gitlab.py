@@ -1,5 +1,6 @@
 """ Tiny wrapper for gitlab REST API """
 
+import json
 import urllib.parse
 
 import requests
@@ -22,7 +23,10 @@ class GitLabAPIError(GitLabError):
         self.message = message
 
     def __str__(self):
-        return "%s - %s" % (self.status_code, self.message)
+        if self.message:
+            return "%s - %s" % (self.status_code, self.message)
+        else:
+            return "Bad status code: %s" % self.status_code
 
 
 class TooManyUsers(GitLabError):
@@ -51,14 +55,14 @@ def _handle_json_errors(response):
         for key in ["error", "message"]:
             if key in json_details:
                 raise GitLabAPIError(url, status_code, json_details[key])
-        raise GitLabAPIError(url, status_code, json_details)
+        raise GitLabAPIError(url, status_code, json.dumps(json_details, indent=2))
     if status_code >= 500:
         raise GitLabAPIError(url, status_code, response.text)
 
 
 def _handle_stream_errors(response):
     if response.status_code >= 400:
-        raise GitLabAPIError(response.url, "Incorrect status code:", response.status_code)
+        raise GitLabAPIError(response.url, response.status_code, "")
 
 
 def extract_next_page_number(response):
@@ -102,7 +106,7 @@ class GitLabHelper():
         return response
 
     def get_project_id(self, project_name):
-        encoded_project_name = urllib.parse.quote(project_name, safe=list())
+        encoded_project_name = urllib.parse.quote(project_name, safe="")
         url = "/projects/%s" % encoded_project_name
         try:
             res = self.make_request("GET", url)

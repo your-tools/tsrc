@@ -37,7 +37,7 @@ class SequentialExecutor():
 
     def process(self, items):
         if not items:
-            return True
+            return
         ui.info_1(self.task.description())
 
         self.errors = list()

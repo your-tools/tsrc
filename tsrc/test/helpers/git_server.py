@@ -148,7 +148,7 @@ class GitServer():
     def get_tags(self, name):
         src_path = self.get_path(name)
         rc, out = tsrc.git.run_git(src_path, "tag", raises=False)
-        return out
+        return out.splitlines()
 
     def get_branches(self, name):
         src_path = self.get_path(name)
