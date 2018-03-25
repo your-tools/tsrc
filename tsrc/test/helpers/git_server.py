@@ -78,7 +78,11 @@ class ManifestHandler():
 
     def change_branch(self, branch):
         tsrc.git.run_git(self.path, "checkout", "-B", branch)
-        tsrc.git.run_git(self.path, "push", "--no-verify", "origin", "--set-upstream", branch)
+        tsrc.git.run_git(
+            self.path,
+            "push", "--no-verify", "origin",
+            "--set-upstream", branch
+        )
 
 
 class GitServer():
@@ -134,11 +138,13 @@ class GitServer():
             full_path.write_text(contents)
         commit_message = message or ("Create/Update %s" % file_path)
         tsrc.git.run_git(src_path, "add", file_path)
-        tsrc.git.run_git(src_path, "commit", "--message",
-                         commit_message)
+        tsrc.git.run_git(src_path, "commit", "--message", commit_message)
         current_branch = tsrc.git.get_current_branch(src_path)
-        tsrc.git.run_git(src_path, "push", "origin", "--set-upstream",
-                         current_branch)
+        tsrc.git.run_git(
+            src_path,
+            "push", "origin", "--set-upstream",
+            current_branch
+        )
 
     def tag(self, name, tag_name):
         src_path = self.get_path(name)
@@ -152,19 +158,23 @@ class GitServer():
 
     def get_branches(self, name):
         src_path = self.get_path(name)
-        rc, out = tsrc.git.run_git(src_path, "branch", "--list", raises=False)
+        _, out = tsrc.git.run_git_captured(src_path, "branch", "--list")
         return [x[2:].strip() for x in out.splitlines()]
 
     def get_sha1(self, name):
         src_path = self.get_path(name)
-        rc, out = tsrc.git.run_git(src_path, "rev-parse", "HEAD", raises=False)
+        _, out = tsrc.git.run_git_captured(src_path, "rev-parse", "HEAD")
         return out
 
     def change_repo_branch(self, name, new_branch):
         src_path = self.get_path(name)
         tsrc.git.run_git(src_path, "checkout", "-B", new_branch)
-        tsrc.git.run_git(src_path, "push", "--no-verify",
-                         "origin", "--set-upstream", new_branch)
+        tsrc.git.run_git(
+            src_path,
+            "push", "--no-verify", "origin",
+            "--set-upstream",
+            new_branch
+        )
 
     def delete_branch(self, name, branch):
         src_path = self.get_path(name)

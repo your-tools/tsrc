@@ -15,8 +15,7 @@ def test_push_use_tracked_branch(repo_path, push_args):
     repository_info = tsrc.cli.push.RepositoryInfo(repo_path)
     dummy_push = DummyPush(repository_info, push_args)
     dummy_push.push()
-    rc, out = tsrc.git.run_git(repo_path, "ls-remote", raises=False)
-    assert rc == 0
+    _, out = tsrc.git.run_git_captured(repo_path, "ls-remote")
     assert "local" not in out
     assert "heads/remote" in out
 
@@ -27,7 +26,6 @@ def test_push_use_given_push_spec(repo_path, push_args):
     repository_info = tsrc.cli.push.RepositoryInfo(repo_path)
     dummy_push = DummyPush(repository_info, push_args)
     dummy_push.push()
-    rc, out = tsrc.git.run_git(repo_path, "ls-remote", raises=False)
-    assert rc == 0
+    _, out = tsrc.git.run_git_captured(repo_path, "ls-remote")
     assert "local" not in out
     assert "heads/remote" in out

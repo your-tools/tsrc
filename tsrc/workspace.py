@@ -146,8 +146,10 @@ class LocalManifest:
 
         tsrc.git.run_git(self.clone_path, "fetch")
         tsrc.git.run_git(self.clone_path, "checkout", "-B", options.branch)
-        tsrc.git.run_git(self.clone_path, "branch", options.branch,
-                         "--set-upstream-to", "origin/%s" % options.branch)
+        tsrc.git.run_git(
+            self.clone_path, "branch", options.branch,
+            "--set-upstream-to", "origin/%s" % options.branch
+        )
         if options.tag:
             ref = options.tag
         else:
@@ -340,7 +342,11 @@ class RemoteSetter(tsrc.executor.Task):
     def process(self, repo):
         full_path = self.workspace.joinpath(repo.src)
         try:
-            _, old_url = tsrc.git.run_git(full_path, "remote", "get-url", "origin", raises=False)
+            rc, old_url = tsrc.git.run_git_captured(
+                full_path,
+                "remote", "get-url", "origin",
+                check=False,
+            )
             if old_url != repo.url:
                 ui.info_2(repo.src, old_url, "->", repo.url)
                 tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
