@@ -1,6 +1,6 @@
 """ Parse tsrc config files """
 
-import path
+from path import Path
 import ruamel.yaml
 import schema
 import xdg
@@ -34,7 +34,7 @@ def parse_config_file(file_path, config_schema, roundtrip=False):
 
 
 def get_tsrc_config_path():
-    config_path = path.Path(xdg.XDG_CONFIG_HOME)
+    config_path = Path(xdg.XDG_CONFIG_HOME)
     config_path = config_path.joinpath("tsrc.yml")
     return config_path
 

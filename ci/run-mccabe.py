@@ -11,7 +11,7 @@ import ast
 import sys
 
 import mccabe
-import path
+from path import Path
 
 
 def ignore(py_source):
@@ -23,7 +23,7 @@ def ignore(py_source):
 
 
 def yield_sources():
-    top = path.Path(".")
+    top = Path(".")
     for py_source in top.walkfiles("*.py"):
         py_source = py_source.relpath(top)
         if not ignore(py_source):

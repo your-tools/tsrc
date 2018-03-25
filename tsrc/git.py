@@ -4,7 +4,7 @@
 import os
 import subprocess
 
-import path
+from path import Path
 import ui
 
 import tsrc
@@ -169,12 +169,12 @@ def get_current_tag(working_path):
 
 def get_repo_root(working_path=None):
     if not working_path:
-        working_path = path.Path(os.getcwd())
+        working_path = Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")
     status, output = run_git_captured(working_path, *cmd, check=False)
     if status != 0:
         raise WorktreeNotFound(working_path)
-    return path.Path(output)
+    return Path(output)
 
 
 def find_ref(repo, candidate_refs):

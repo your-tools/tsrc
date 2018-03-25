@@ -2,7 +2,7 @@
 
 import os
 
-import path
+from path import Path
 
 import tsrc
 import tsrc.workspace
@@ -18,7 +18,7 @@ def find_workspace_path():
     while tail:
         tsrc_path = os.path.join(head, ".tsrc")
         if os.path.isdir(tsrc_path):
-            return path.Path(head)
+            return Path(head)
 
         else:
             head, tail = os.path.split(head)
@@ -27,7 +27,7 @@ def find_workspace_path():
 
 def get_workspace(args):
     if args.workspace_path:
-        workspace_path = path.Path(args.workspace_path)
+        workspace_path = Path(args.workspace_path)
     else:
         workspace_path = find_workspace_path()
     return tsrc.workspace.Workspace(workspace_path)
