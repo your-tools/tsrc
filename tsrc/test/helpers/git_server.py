@@ -20,8 +20,11 @@ class ManifestHandler():
         tsrc.git.run_git(self.path, "commit", "--message", "Add an empty manifest")
         tsrc.git.run_git(self.path, "push", "origin", "master")
 
-    def add_repo(self, src, url):
-        self.data["repos"].append({"url": str(url), "src": src})
+    def add_repo(self, src, url, branch="master"):
+        repo_config = ({"url": str(url), "src": src})
+        if branch != "master":
+            repo_config["branch"] = branch
+        self.data["repos"].append(repo_config)
         self.push(message="add %s" % src)
 
     def configure_group(self, name, repos):
@@ -101,7 +104,7 @@ class GitServer():
     def get_url(self, name):
         return str("file://" + self.bare_path.joinpath(name))
 
-    def _create_repo(self, name, empty=False):
+    def _create_repo(self, name, empty=False, branch="master"):
         bare_path = self.bare_path.joinpath(name)
         bare_path.makedirs_p()
         tsrc.git.run_git(bare_path, "init", "--bare")
@@ -109,18 +112,21 @@ class GitServer():
         src_path.makedirs_p()
         tsrc.git.run_git(src_path, "init")
         tsrc.git.run_git(src_path, "remote", "add", "origin", bare_path)
+        tsrc.git.run_git(bare_path, "symbolic-ref", "HEAD", "refs/heads/%s" % branch)
         src_path.joinpath("README").touch()
         tsrc.git.run_git(src_path, "add", "README")
         tsrc.git.run_git(src_path, "commit", "--message", "Initial commit")
+        if branch != "master":
+            tsrc.git.run_git(src_path, "checkout", "-b", branch)
         if not empty:
-            tsrc.git.run_git(src_path, "push", "origin", "master")
+            tsrc.git.run_git(src_path, "push", "origin", "%s:%s" % (branch, branch))
         return str(bare_path)
 
-    def add_repo(self, name, add_to_manifest=True, empty=False):
-        self._create_repo(name, empty=empty)
+    def add_repo(self, name, add_to_manifest=True, empty=False, default_branch="master"):
+        self._create_repo(name, empty=empty, branch=default_branch)
         url = self.get_url(name)
         if add_to_manifest:
-            self.manifest.add_repo(name, url)
+            self.manifest.add_repo(name, url, branch=default_branch)
         return url
 
     def add_group(self, group_name, repos):

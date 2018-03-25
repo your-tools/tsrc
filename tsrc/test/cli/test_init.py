@@ -165,3 +165,12 @@ def test_no_remote_named_origin(tsrc_cli, git_server, workspace_path):
     tsrc.git.run_git(foo_path, "remote", "rename", "origin", "upstream")
 
     tsrc_cli.run("init", git_server.manifest_url)
+
+
+def test_repo_default_branch_not_master(tsrc_cli, git_server, workspace_path):
+    git_server.add_repo("foo", default_branch="devel")
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    foo_path = workspace_path.joinpath("foo")
+    assert tsrc.git.get_current_branch(foo_path) == "devel"

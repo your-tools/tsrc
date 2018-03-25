@@ -78,3 +78,15 @@ def test_git_server_tag(workspace_path, git_server):
     git_server.tag("foo", "v0.1")
     _, out = tsrc.git.run_git_captured(workspace_path, "ls-remote", foo_url)
     assert "refs/tags/v0.1" in out
+
+
+def test_git_server_default_branch_devel(workspace_path, git_server):
+    foo_url = git_server.add_repo("foo", default_branch="devel")
+    tsrc.git.run_git(workspace_path, "clone", foo_url)
+    foo_path = workspace_path.joinpath("foo")
+    cloned_branch = tsrc.git.get_current_branch(foo_path)
+    assert cloned_branch == "devel"
+
+    manifest = read_remote_manifest(workspace_path, git_server)
+    foo_config = manifest.get_repo("foo")
+    assert foo_config.branch == "devel"
