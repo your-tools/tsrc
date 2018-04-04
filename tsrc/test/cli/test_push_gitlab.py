@@ -146,3 +146,23 @@ def test_unwipify_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_
         target_branch="master",
         title="nice title"
     )
+
+
+def test_wipify_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+    existing_mr = {
+        "title": "not ready",
+        "web_url": "http://example.com/42",
+        "iid": "42",
+    }
+    gitlab_mock.find_opened_merge_request.return_value = existing_mr
+
+    push_args.wip = True
+    execute_push(repo_path, push_args, gitlab_mock)
+
+    gitlab_mock.assert_mr_not_created()
+    gitlab_mock.assert_mr_updated(
+        existing_mr,
+        remove_source_branch=True,
+        target_branch="master",
+        title="WIP: not ready"
+    )

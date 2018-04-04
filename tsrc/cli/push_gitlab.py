@@ -29,7 +29,7 @@ def select_assignee(choices):
 
 
 def wipify(title):
-    if title.startswith(WIP_PREFIX):
+    if not title.startswith(WIP_PREFIX):
         return WIP_PREFIX + title
     else:
         return title
