@@ -76,16 +76,17 @@ def ensure_token():
     return token
 
 
-def request_reviewers(gh_api, owner, name, pr_number, reviewers):
-    # github3.py does not provide any way to request reviewers ...
-    # using ._session seems safe because session.build_url() and session.post()
-    # are not likely to go away.
+def request_reviewers(repo, pr_number, reviewers):
+    owner_name = repo.owner.login
+    repo_name = repo.name
+    # github3.py does not provide any way to request reviewers, so
+    # we have to use private members here
     # pylint: disable=protected-access
-    session = gh_api._session
-    url = session.build_url(
-        "repos", owner, name, "pulls", pr_number, "requested_reviewers"
+    url = repo._build_url(
+        "repos", owner_name, repo_name, "pulls", pr_number, "requested_reviewers"
     )
-    ret = session.post(url, json={"reviewers": reviewers})
+    # pylint: disable=protected-access
+    ret = repo._post(url, data={"reviewers": reviewers})
     if not 200 <= ret.status_code < 300:
         raise GitHubAPIError(url, ret.status_code, ret.json().get("message"))
 

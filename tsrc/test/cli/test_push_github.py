@@ -11,8 +11,6 @@ from tsrc.cli.push_github import PushAction
 @pytest.fixture
 def github_mock():
     github_mock = mock.create_autospec(github3.GitHub, instance=True)
-    mock_session = mock.Mock()
-    github_mock._session = mock_session
     return github_mock
 
 
@@ -26,7 +24,8 @@ def execute_push(repo_path, push_args, github_api):
 def test_create(repo_path, tsrc_cli, github_mock, push_args):
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = list()
-    mock_repo.owner = "owner"
+    mock_repo.owner = mock.Mock()
+    mock_repo.owner.login = "owner"
     mock_repo.name = "project"
     github_mock.repository.return_value = mock_repo
     mock_pr = mock.Mock()
@@ -34,7 +33,6 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
     mock_pr.html_url = "https://github.com/owner/project/pull/42"
     mock_pr.number = 42
     mock_issue = mock.Mock()
-    github_mock.issue.return_value = mock_issue
 
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
@@ -42,21 +40,20 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
     push_args.assignee = "assignee1"
     push_args.reviewers = ["reviewer1", "reviewer2"]
 
-    github_mock._session.post.return_value = mock.Mock(status_code=201)
-    github_mock._session.build_url.return_value = "request_url"
+    mock_repo._build_url.return_value = "request_url"
+    mock_repo._post.return_value = mock.Mock(status_code=201)
+    mock_repo.issue.return_value = mock_issue
 
     execute_push(repo_path, push_args, github_mock)
 
-    github_mock.repository.assert_called_with("owner", "project")
-    github_mock._session.build_url.assert_called_with(
-        "repos", "owner", "project", "pulls", 42, "requested_reviewers")
-    github_mock._session.post.assert_called_with(
-        "request_url", json={"reviewers": ["reviewer1", "reviewer2"]})
-    mock_repo.pull_requests.assert_called_with()
-    github_mock.issue.assert_called_with(
-        "owner", "project", 42)
-    mock_issue.assign.assert_called_with("assignee1")
     mock_repo.create_pull.assert_called_with("new feature", "master", "new-feature")
+    mock_repo.pull_requests.assert_called_with()
+    mock_repo.issue.assert_called_with(42)
+    mock_issue.assign.assert_called_with("assignee1")
+    mock_repo._build_url.assert_called_with(
+        "repos", "owner", "project", "pulls", 42, "requested_reviewers")
+    mock_repo._post.assert_called_with(
+        "request_url", data={"reviewers": ["reviewer1", "reviewer2"]})
 
 
 def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
