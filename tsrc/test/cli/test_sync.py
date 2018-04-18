@@ -28,7 +28,7 @@ def test_sync_with_errors(tsrc_cli, git_server, workspace_path, message_recorder
     tsrc_cli.run("sync", expect_fail=True)
 
     assert message_recorder.find("Synchronize workspace failed")
-    assert message_recorder.find("\* foo/bar")
+    assert message_recorder.find(r"\* foo/bar")
 
 
 def test_sync_finds_root(tsrc_cli, git_server, workspace_path, monkeypatch):

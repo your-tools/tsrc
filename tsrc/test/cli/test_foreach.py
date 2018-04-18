@@ -39,7 +39,7 @@ def test_foreach_with_errors(tsrc_cli, git_server, message_recorder):
     cmd.append("foo")
     tsrc_cli.run("foreach", *cmd, expect_fail=True)
     assert message_recorder.find("Running `.*` .* failed")
-    assert message_recorder.find("\* spam")
+    assert message_recorder.find(r"\* spam")
 
 
 def test_foreach_happy(tsrc_cli, git_server, message_recorder):
