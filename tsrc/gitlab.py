@@ -117,6 +117,11 @@ class GitLabHelper():
             else:
                 raise
 
+    def get_default_branch(self, project_id):
+        url = "projects/%s" % project_id
+        project_desc = self.make_request("GET", url)
+        return project_desc["default_branch"]
+
     def find_opened_merge_request(self, project_id, source_branch):
         url = "/projects/%s/merge_requests" % project_id
         params = {

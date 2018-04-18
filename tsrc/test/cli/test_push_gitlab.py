@@ -1,3 +1,5 @@
+import copy
+
 import mock
 
 import pytest
@@ -14,7 +16,13 @@ THEO = {"name": "theo", "id": 2}
 JOHN = {"name": "john", "id": 3}
 BART = {"name": "bart", "id": 4}
 
-MR_STUB = {"id": "3978", "iid": "42", "web_url": "http://mr/42", "title": "Boring title"}
+MR_STUB = {
+    "id": "3978",
+    "iid": "42",
+    "web_url": "http://mr/42",
+    "title": "Boring title",
+    "target_branch": "master"
+}
 
 PROJECT_IDS = {
     "owner/project": "42"
@@ -55,7 +63,7 @@ def execute_push(repo_path, push_args, gitlab_mock):
     push_action.execute()
 
 
-def test_creating_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
+def test_creating_merge_request_explicit_target_branch(repo_path, tsrc_cli, gitlab_mock, push_args):
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -79,6 +87,25 @@ def test_creating_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
         remove_source_branch=True,
         target_branch="next",
         title="Best feature ever"
+    )
+
+
+def test_creating_merge_request_uses_default_branch(repo_path, tsrc_cli, gitlab_mock, push_args):
+    gitlab_mock.get_default_branch.return_value = "devel"
+    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+
+    gitlab_mock.find_opened_merge_request.return_value = list()
+    gitlab_mock.create_merge_request.return_value = MR_STUB
+
+    push_args.assignee = "john"
+
+    execute_push(repo_path, push_args, gitlab_mock)
+
+    gitlab_mock.assert_mr_created(
+        "42", "new-feature",
+        target_branch="devel",
+        title="new-feature"
     )
 
 
@@ -116,6 +143,19 @@ def test_close_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     )
 
 
+def test_do_not_change_mr_target(repo_path, tsrc_cli, gitlab_mock, push_args):
+    mr_stub = copy.copy(MR_STUB)
+    mr_stub["target_branch"] = "release/1.6.0"
+    gitlab_mock.find_opened_merge_request.return_value = mr_stub
+
+    execute_push(repo_path, push_args, gitlab_mock)
+    gitlab_mock.assert_mr_updated(
+        mr_stub,
+        remove_source_branch=True,
+        title="Boring title",
+    )
+
+
 def test_accept_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
@@ -143,7 +183,6 @@ def test_unwipify_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_
     gitlab_mock.assert_mr_updated(
         existing_mr,
         remove_source_branch=True,
-        target_branch="master",
         title="nice title"
     )
 
@@ -163,6 +202,5 @@ def test_wipify_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_ar
     gitlab_mock.assert_mr_updated(
         existing_mr,
         remove_source_branch=True,
-        target_branch="master",
         title="WIP: not ready"
     )

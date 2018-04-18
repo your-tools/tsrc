@@ -15,7 +15,7 @@ def push_args():
     args.push_spec = None
     args.ready = False
     args.reviewers = None
-    args.target_branch = "master"
+    args.target_branch = None
     args.title = None
     args.wip = False
     return args

@@ -121,7 +121,7 @@ def main(args=None):
 
     push_parser = workspace_subparser(subparsers, "push")
     push_parser.add_argument("-f", "--force", action="store_true", default=False)
-    push_parser.add_argument("-t", "--target", dest="target_branch", default="master")
+    push_parser.add_argument("-t", "--target", dest="target_branch")
     push_parser.add_argument("push_spec", nargs="?")
     push_parser.add_argument("-a", "--assignee", dest="assignee")
 
