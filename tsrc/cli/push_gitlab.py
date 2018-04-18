@@ -101,9 +101,11 @@ class PushAction(tsrc.cli.push.PushAction):
 
         params = {
             "title": title,
-            "target_branch": self.target_branch,
             "remove_source_branch": True,
         }
+        requested_target_branch = self.target_branch
+        if requested_target_branch and requested_target_branch != merge_request["target_branch"]:
+            params["target_branch"] = requested_target_branch
         if assignee:
             params["assignee_id"] = assignee["id"]
 
@@ -134,10 +136,15 @@ class PushAction(tsrc.cli.push.PushAction):
         )
 
     def create_merge_request(self):
+        requested_target_branch = self.target_branch
+        if not requested_target_branch:
+            target_branch = self.gl_helper.get_default_branch(self.project_id)
+        else:
+            target_branch = requested_target_branch
         return self.gl_helper.create_merge_request(
             self.project_id, self.remote_branch,
             title=self.remote_branch,
-            target_branch=self.target_branch
+            target_branch=target_branch
         )
 
     def ensure_merge_request(self):

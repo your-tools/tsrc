@@ -56,10 +56,15 @@ class PushAction(tsrc.cli.push.PushAction):
     def create_pull_request(self):
         ui.info_2("Creating pull request", ui.ellipsis, end="")
         title = self.args.title or self.remote_branch
+        requested_target_branch = self.target_branch
+        if not requested_target_branch:
+            target_branch = self.repository.default_branch
+        else:
+            target_branch = requested_target_branch
         try:
             pull_request = self.repository.create_pull(
                 title,
-                self.target_branch,
+                target_branch,
                 self.remote_branch
             )
             ui.info("done", ui.check)

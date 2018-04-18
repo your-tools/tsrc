@@ -30,6 +30,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
     github_mock.repository.return_value = mock_repo
     mock_pr = mock.Mock()
     mock_repo.create_pull.return_value = mock_pr
+    mock_repo.default_branch = "devel"
     mock_pr.html_url = "https://github.com/owner/project/pull/42"
     mock_pr.number = 42
     mock_issue = mock.Mock()
@@ -46,7 +47,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
 
     execute_push(repo_path, push_args, github_mock)
 
-    mock_repo.create_pull.assert_called_with("new feature", "master", "new-feature")
+    mock_repo.create_pull.assert_called_with("new feature", "devel", "new-feature")
     mock_repo.pull_requests.assert_called_with()
     mock_repo.issue.assert_called_with(42)
     mock_issue.assign.assert_called_with("assignee1")
@@ -59,6 +60,7 @@ def test_create(repo_path, tsrc_cli, github_mock, push_args):
 def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
     stub_repo = mock.Mock()
     stub_repo.pull_requests.return_value = list()
+    stub_repo.default_branch = "master"
     github_mock.repository.return_value = stub_repo
     tsrc.git.run_git(repo_path, "checkout", "-b", "local")
     tsrc.git.run_git(repo_path, "push", "-u", "origin", "local:remote")
