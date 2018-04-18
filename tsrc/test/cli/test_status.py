@@ -15,8 +15,8 @@ def test_status_happy(tsrc_cli, git_server, workspace_path, message_recorder):
 
     tsrc_cli.run("status")
 
-    assert message_recorder.find("\* foo/bar   master")
-    assert message_recorder.find("\* spam/eggs fish")
+    assert message_recorder.find(r"\* foo/bar   master")
+    assert message_recorder.find(r"\* spam/eggs fish")
 
 
 def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder):
@@ -28,7 +28,7 @@ def test_status_dirty(tsrc_cli, git_server, workspace_path, message_recorder):
 
     tsrc_cli.run("status")
 
-    assert message_recorder.find("\* foo/bar master \(dirty\)")
+    assert message_recorder.find(r"\* foo/bar master \(dirty\)")
 
 
 def test_status_not_on_any_branch(tsrc_cli, git_server, workspace_path, message_recorder):
@@ -43,8 +43,8 @@ def test_status_not_on_any_branch(tsrc_cli, git_server, workspace_path, message_
 
     tsrc_cli.run("status")
 
-    assert message_recorder.find("\* foo/bar \s+ master")
-    assert message_recorder.find("\* spam/eggs [a-f0-9]{7}")
+    assert message_recorder.find(r"\* foo/bar \s+ master")
+    assert message_recorder.find(r"\* spam/eggs [a-f0-9]{7}")
 
 
 def test_status_on_tag(tsrc_cli, git_server, workspace_path, message_recorder):
@@ -61,5 +61,5 @@ def test_status_on_tag(tsrc_cli, git_server, workspace_path, message_recorder):
 
     tsrc_cli.run("status")
 
-    assert message_recorder.find("\* foo/bar   master")
-    assert message_recorder.find("\* spam/eggs v1.0")
+    assert message_recorder.find(r"\* foo/bar   master")
+    assert message_recorder.find(r"\* spam/eggs v1.0")
