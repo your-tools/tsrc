@@ -8,3 +8,5 @@ htmlcov
 dist/
 build/
 site/
+
+.mypy_cache/
