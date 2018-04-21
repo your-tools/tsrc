@@ -6,7 +6,7 @@ Mostly used by tsrc/cli.py
 
 import stat
 import textwrap
-from typing import Iterable, List, Tuple, Dict, Any, Optional
+from typing import Iterable, List, Tuple, Dict, Any, Optional, NewType
 
 import attr
 from path import Path
@@ -246,13 +246,15 @@ class Workspace():
         return self.local_manifest.get_url(src)
 
 
-class Cloner(tsrc.executor.Task):
+class Cloner(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
+    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Cloning missing repos"
 
+    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
@@ -304,18 +306,24 @@ class Cloner(tsrc.executor.Task):
         self.reset_repo(repo)
 
 
-class FileCopier(tsrc.executor.Task):
+# pylint: disable=invalid-name
+Copy = NewType('Copy', Tuple[str, str])
+
+
+class FileCopier(tsrc.executor.Task[Copy]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
+    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Copying files"
 
-    def display_item(self, item: Tuple[str, str]) -> str:
+    # pylint: disable=no-self-use
+    def display_item(self, item: Copy) -> str:
         src, dest = item
         return "%s -> %s" % (src, dest)
 
-    def process(self, item: Tuple[str, str]) -> None:
+    def process(self, item: Copy) -> None:
         src, dest = item
         ui.info(src, "->", dest)
         try:
@@ -331,16 +339,19 @@ class FileCopier(tsrc.executor.Task):
             raise tsrc.Error(str(e))
 
 
-class RemoteSetter(tsrc.executor.Task):
+class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace) -> None:
         self.workspace = workspace
 
+    # pylint: disable=no-self-use
     def quiet(self) -> bool:
         return True
 
+    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Setting remote URLs"
 
+    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
@@ -350,7 +361,7 @@ class RemoteSetter(tsrc.executor.Task):
         except Exception as error:
             raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url, error)
 
-    def try_process_repo(self, repo):
+    def try_process_repo(self, repo: tsrc.Repo) -> None:
         full_path = self.workspace.joinpath(repo.src)
         rc, old_url = tsrc.git.run_git_captured(
             full_path,
@@ -362,13 +373,13 @@ class RemoteSetter(tsrc.executor.Task):
         else:
             self.process_repo_add_remote(repo)
 
-    def process_repo_remote_exists(self, repo, *, old_url):
+    def process_repo_remote_exists(self, repo: tsrc.Repo, *, old_url: str) -> None:
         full_path = self.workspace.joinpath(repo.src)
         if old_url != repo.url:
             ui.info_2(repo.src, old_url, "->", repo.url)
             tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
 
-    def process_repo_add_remote(self, repo):
+    def process_repo_add_remote(self, repo: tsrc.Repo) -> None:
         full_path = self.workspace.joinpath(repo.src)
         tsrc.git.run_git(full_path, "remote", "add", "origin", repo.url)
 
@@ -377,17 +388,20 @@ class BadBranches(tsrc.Error):
     pass
 
 
-class Syncer(tsrc.executor.Task):
+class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
         self.bad_branches: List[Tuple[str, str, str]] = list()
 
+    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Synchronize workspace"
 
+    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
+    # pylint: disable=no-self-use
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)

@@ -1,6 +1,6 @@
 """ Entry point for tsrc foreach """
 
-from typing import List
+from typing import List, TypeVar
 import subprocess
 
 from path import Path
@@ -15,16 +15,21 @@ class CommandFailed(tsrc.Error):
     pass
 
 
-class CmdRunner(tsrc.executor.Task):
+T = TypeVar('T')
+
+
+class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Path, cmd: List[str], cmd_as_str: str, shell=False) -> None:
         self.workspace = workspace
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
         self.shell = shell
 
+    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
+    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Running `%s` on every repo" % self.cmd_as_str
 
