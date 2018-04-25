@@ -82,8 +82,8 @@ def test_merge(repo_path, tsrc_cli, github_mock, push_args):
 
     opened_pr_wrong_branch = mock.Mock()
     opened_pr_wrong_branch.number = 3
-    opened_pr_wrong_branch.state = "closed"
-    opened_pr_wrong_branch.head.ref = "new-feature"
+    opened_pr_wrong_branch.state = "open"
+    opened_pr_wrong_branch.head.ref = "wrong-branch"
 
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
