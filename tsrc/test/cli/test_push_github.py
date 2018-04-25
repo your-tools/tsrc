@@ -70,6 +70,28 @@ def test_push_custom_tracked_branch(repo_path, push_args, github_mock):
     stub_repo.create_pull.assert_called_with("new feature", "master", "remote")
 
 
+def test_update_target_and_title(repo_path, push_args, github_mock):
+    opened_pr = mock.Mock()
+    opened_pr.number = 2
+    opened_pr.state = "open"
+    opened_pr.head.ref = "new-feature"
+    opened_pr.base.ref = "devel"
+    opened_pr.title = "old title"
+    opened_pr.html_url = "https://github.com/foo/bar/pull/42"
+
+    stub_repo = mock.Mock()
+    stub_repo.pull_requests.return_value = [opened_pr]
+    stub_repo.default_branch = "master"
+    github_mock.repository.return_value = stub_repo
+    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run_git(repo_path, "push", "-u", "origin", "new-feature")
+
+    push_args.target_branch = "master"
+    push_args.mr_title = "new title"
+    execute_push(repo_path, push_args, github_mock)
+    opened_pr.update.assert_called_with(title="new title", base="master")
+
+
 def test_merge(repo_path, tsrc_cli, github_mock, push_args):
     closed_pr = mock.Mock()
     closed_pr.number = 1

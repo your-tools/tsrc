@@ -26,6 +26,16 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def post_push(self):
         self.pull_request = self.ensure_pull_request()
+        params = dict()
+        requested_target_branch = self.target_branch
+        if requested_target_branch:
+            params["base"] = requested_target_branch
+
+        requested_title = self.args.mr_title
+        if requested_title:
+            params["title"] = requested_title
+
+        self.pull_request.update(**params)
 
         if self.args.reviewers:
             message = ["Requesting review from", ", ".join(self.args.reviewers)]
