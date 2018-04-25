@@ -96,8 +96,20 @@ class PushAction(metaclass=abc.ABCMeta):
             return self.tracking_ref.split("/", maxsplit=1)[1]
 
     @property
-    def target_branch(self):
+    def requested_target_branch(self):
         return self.args.target_branch
+
+    @property
+    def requested_title(self):
+        return self.args.title
+
+    @property
+    def requested_reviewers(self):
+        return self.args.reviewers
+
+    @property
+    def requested_assignee(self):
+        return self.args.assignee
 
     @property
     def project_name(self):

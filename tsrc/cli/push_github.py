@@ -27,27 +27,25 @@ class PushAction(tsrc.cli.push.PushAction):
     def post_push(self):
         self.pull_request = self.ensure_pull_request()
         params = dict()
-        requested_target_branch = self.target_branch
-        if requested_target_branch:
-            params["base"] = requested_target_branch
+        if self.requested_target_branch:
+            params["base"] = self.requested_target_branch
 
-        requested_title = self.args.title
-        if requested_title:
-            params["title"] = requested_title
+        if self.requested_title:
+            params["title"] = self.requested_title
 
         self.pull_request.update(**params)
 
-        if self.args.reviewers:
-            message = ["Requesting review from", ", ".join(self.args.reviewers)]
+        if self.requested_reviewers:
+            message = ["Requesting review from", ", ".join(self.requested_reviewers)]
             ui.info_2(*message)
             tsrc.github.request_reviewers(
                 self.repository,
                 self.pull_request.number,
-                self.args.reviewers
+                self.requested_reviewers
             )
 
-        if self.args.assignee:
-            ui.info_2("Assigning to", self.args.assignee)
+        if self.requested_assignee:
+            ui.info_2("Assigning to", self.requested_assignee)
             self.assign_pull_request()
 
         if self.args.merge:
@@ -65,12 +63,11 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def create_pull_request(self):
         ui.info_2("Creating pull request", ui.ellipsis, end="")
-        title = self.args.title or self.remote_branch
-        requested_target_branch = self.target_branch
-        if not requested_target_branch:
-            target_branch = self.repository.default_branch
+        title = self.requested_title or self.remote_branch
+        if self.requested_target_branch:
+            target_branch = self.requested_target_branch
         else:
-            target_branch = requested_target_branch
+            target_branch = self.repository.default_branch
         try:
             pull_request = self.repository.create_pull(
                 title,
@@ -100,4 +97,4 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def assign_pull_request(self):
         issue = self.repository.issue(self.pull_request.number)
-        issue.assign(self.args.assignee)
+        issue.assign(self.requested_assignee)

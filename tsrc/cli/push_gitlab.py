@@ -59,9 +59,9 @@ class PushAction(tsrc.cli.push.PushAction):
         self.project_id = self.gl_helper.get_project_id(self.project_name)
 
     def handle_assignee(self):
-        if not self.args.assignee:
+        if not self.requested_assignee:
             return None
-        return self.find_assigne(self.args.assignee)
+        return self.find_assigne(self.requested_assignee)
 
     def get_review_candidates(self, query):
         group_name = self.project_name.split("/")[0]
@@ -103,9 +103,8 @@ class PushAction(tsrc.cli.push.PushAction):
             "title": title,
             "remove_source_branch": True,
         }
-        requested_target_branch = self.target_branch
-        if requested_target_branch and requested_target_branch != merge_request["target_branch"]:
-            params["target_branch"] = requested_target_branch
+        if self.requested_target_branch:
+            params["target_branch"] = self.requested_target_branch
         if assignee:
             params["assignee_id"] = assignee["id"]
 
@@ -118,11 +117,11 @@ class PushAction(tsrc.cli.push.PushAction):
                 ui.reset, "See merge request at", merge_request["web_url"])
 
     def handle_title(self, merge_request):
-        # If set from command line: use it
-        if self.args.title:
-            return self.args.title
+        # If explicitely set, use it
+        if self.requested_title:
+            return self.requested_title
         else:
-            # Change the title if we need to
+            # Else change the title if we need to
             title = merge_request["title"]
             if self.args.ready:
                 return unwipify(title)
@@ -136,11 +135,10 @@ class PushAction(tsrc.cli.push.PushAction):
         )
 
     def create_merge_request(self):
-        requested_target_branch = self.target_branch
-        if not requested_target_branch:
-            target_branch = self.gl_helper.get_default_branch(self.project_id)
+        if self.requested_target_branch:
+            target_branch = self.requested_target_branch
         else:
-            target_branch = requested_target_branch
+            target_branch = self.gl_helper.get_default_branch(self.project_id)
         return self.gl_helper.create_merge_request(
             self.project_id, self.remote_branch,
             title=self.remote_branch,
