@@ -11,7 +11,7 @@ def push_args():
     args.close = False
     args.force = False
     args.merge = False
-    args.mr_title = None
+    args.title = None
     args.push_spec = None
     args.ready = False
     args.reviewers = None

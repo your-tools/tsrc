@@ -127,7 +127,6 @@ def main(args=None):
 
     github_group = push_parser.add_argument_group("github options")
     github_group.add_argument("--merge", help="Merge pull request", action="store_true")
-    github_group.add_argument("--title", help="Title of the pull request")
     github_group.add_argument("--reviewer", dest="reviewers", action="append",
                               help="Request review from the given login")
 
@@ -136,7 +135,7 @@ def main(args=None):
     gitlab_group.add_argument("--close", action="store_true")
 
     message_group = gitlab_group.add_mutually_exclusive_group()
-    message_group.add_argument("-m", "--message", dest="mr_title")
+    message_group.add_argument("--title", dest="title")
     message_group.add_argument("--wip", action="store_true", help="Mark merge request as WIP")
     message_group.add_argument("--ready", action="store_true", help="Mark merge request as ready")
 
