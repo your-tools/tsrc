@@ -119,8 +119,8 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def handle_title(self, merge_request):
         # If set from command line: use it
-        if self.args.mr_title:
-            return self.args.mr_title
+        if self.args.title:
+            return self.args.title
         else:
             # Change the title if we need to
             title = merge_request["title"]

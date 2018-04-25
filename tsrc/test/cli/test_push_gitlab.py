@@ -72,7 +72,7 @@ def test_creating_merge_request_explicit_target_branch(repo_path, tsrc_cli, gitl
 
     push_args.assignee = "john"
     push_args.target_branch = "next"
-    push_args.mr_title = "Best feature ever"
+    push_args.title = "Best feature ever"
 
     execute_push(repo_path, push_args, gitlab_mock)
 
@@ -116,7 +116,7 @@ def test_existing_merge_request(repo_path, tsrc_cli, gitlab_mock, push_args):
     gitlab_mock.find_opened_merge_request.return_value = MR_STUB
 
     push_args.target_branch = "next"
-    push_args.mr_title = "Best feature ever"
+    push_args.title = "Best feature ever"
     execute_push(repo_path, push_args, gitlab_mock)
 
     gitlab_mock.assert_mr_not_created()

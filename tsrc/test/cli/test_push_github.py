@@ -87,7 +87,7 @@ def test_update_target_and_title(repo_path, push_args, github_mock):
     tsrc.git.run_git(repo_path, "push", "-u", "origin", "new-feature")
 
     push_args.target_branch = "master"
-    push_args.mr_title = "new title"
+    push_args.title = "new title"
     execute_push(repo_path, push_args, github_mock)
     opened_pr.update.assert_called_with(title="new title", base="master")
 

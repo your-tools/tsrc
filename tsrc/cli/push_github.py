@@ -31,7 +31,7 @@ class PushAction(tsrc.cli.push.PushAction):
         if requested_target_branch:
             params["base"] = requested_target_branch
 
-        requested_title = self.args.mr_title
+        requested_title = self.args.title
         if requested_title:
             params["title"] = requested_title
 
