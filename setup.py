@@ -11,7 +11,7 @@ def get_long_description():
 
 
 setup(name="tsrc",
-      version="0.4.0-alpha-1",
+      version="0.4.0-alpha1",
       description="Manage multiple repositories",
       long_description=get_long_description(),
       url="https://github.com/SuperTanker/tsrc",

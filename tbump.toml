@@ -1,5 +1,5 @@
 [version]
-current = "0.4.0-alpha-1"
+current = "0.4.0-alpha1"
 regex = '''
   (?P<major>\d+)
   \.
@@ -8,8 +8,7 @@ regex = '''
   (?P<patch>\d+)
   (
     -
-    (?P<channel>alpha|beta)
-    -
+    (?P<channel>alpha|beta|r)
     (?P<release>\d+)
   )?
 '''
