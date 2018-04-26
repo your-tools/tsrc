@@ -120,3 +120,24 @@ def test_merge(repo_path, tsrc_cli, github_mock, push_args):
 
     mock_repo.create_pull.assert_not_called()
     opened_pr.merge.assert_called_with()
+
+
+def test_close(repo_path, tsrc_cli, github_mock, push_args):
+    opened_pr = mock.Mock()
+    opened_pr.number = 2
+    opened_pr.state = "open"
+    opened_pr.head.ref = "new-feature"
+    opened_pr.html_url = "https://github.com/foo/bar/pull/42"
+
+    mock_repo = mock.Mock()
+    mock_repo.pull_requests.return_value = [opened_pr]
+    github_mock.repository.return_value = mock_repo
+
+    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+
+    push_args.merge = True
+    push_args.close = True
+    execute_push(repo_path, push_args, github_mock)
+
+    opened_pr.close.assert_called_with()
