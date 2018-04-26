@@ -26,6 +26,10 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def post_push(self):
         self.pull_request = self.ensure_pull_request()
+        if self.args.close:
+            ui.info_2("Closing merge request #%s" % self.pull_request.number)
+            self.pull_request.close()
+            return
         params = dict()
         if self.requested_target_branch:
             params["base"] = self.requested_target_branch
