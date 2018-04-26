@@ -1,9 +1,17 @@
 # v0.4.0
 
+## Highlights
+
+* Preliminary GitHub support
+* `tsrc push`: new features and bug fixes
+* Improved fixed reference handling
+* Support for shallow clones
+
+See below for the details.
+
 ## Preliminary GitHub support
 
-No configuration required. Just make sure you are using `tsrc` from a repository which has a URL starting with
-`git@github.com`.
+* Added support for creating merge requests on GitHub. No configuration required. Just make sure you are using `tsrc` from a repository which has a URL starting with `git@github.com`.
 
 `tsrc` will prompt you once for your login and password and then store an API token.
 
@@ -16,11 +24,15 @@ Afterwards, you'll be able to use `tsrc` push to:
 
 This change has no impact if you were already using `GitLab`.
 
-## New tsrc push features
+## `tsrc push`: new features and bug fixes
 
-* Add ``--close`` option. (GitLab only for now)
+* Add ``--close`` option.
+* **Breaking change**: `-m/--message` option is gone, use `--title` instead. There's a concept of "description" or "message" for pull requests and merge requests, but the value of the option was only used to update the *title*, so it had to be renamed.
 * Do not assume local and remote tracking branch have the same name.
 * Allow using `tsrc push <local>:<remote>` to explicitly specify local and remote branch names.
+* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/SuperTanker/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
+* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/SuperTanker/tsrc/issues/80)). Patch by @maximerety.
+
 
 ## Improve fixed reference handling
 
@@ -60,7 +72,6 @@ Note that due to limitations in `git` itself, the `shallow` option cannot be use
 
 
 * We now use [pipenv](https://docs.pipenv.org/) for dependency handling.
-* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/SuperTanker/tsrc/issues/80)). Patch by @maximerety.
 
 # v0.3.2 (2017-11-02)
 
