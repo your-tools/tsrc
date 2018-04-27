@@ -118,7 +118,7 @@ class GitLabHelper():
                 raise
 
     def get_default_branch(self, project_id):
-        url = "projects/%s" % project_id
+        url = "/projects/%s" % project_id
         project_desc = self.make_request("GET", url)
         return project_desc["default_branch"]
 
