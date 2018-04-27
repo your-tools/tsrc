@@ -1,3 +1,7 @@
+# v0.4.1 (2018-04-27)
+
+* Fixed regression: `tsrc push` was no longer able to create a merge request on GitLab if `--target` was not set.
+
 # v0.4.0 (2018-04-26)
 
 ## Highlights
