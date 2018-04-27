@@ -1,4 +1,4 @@
-tsrc: manage multiple repos / GitLab automation
+tsrc: manage multiple repos / Review automation
 ===============================================
 
 .. image:: https://img.shields.io/travis/SuperTanker/tsrc.svg?branch=master
@@ -67,8 +67,8 @@ In this example:
 * ``foo`` will be cloned in ``<workspace>/foo`` using ``git@example.com:foo.git`` origin url.
 * Similarly, ``bar`` will be cloned in ``<workspace>/bar`` using ``git@example.com/bar.git``
 
-Managing Merge Requests
-+++++++++++++++++++++++
+Managing Merge Requests on GitLab
++++++++++++++++++++++++++++++++++
 
 * Generate a token from GitLab
 
@@ -93,6 +93,17 @@ Managing Merge Requests
 * When the review is done, tell GitLab to merge it once the CI passes::
 
     $ tsrc push --accept
+
+Managing Pull Requests on GitHub
+++++++++++++++++++++++++++++++++
+
+* Start working on your branch
+
+* Run `tsrc push` once. You will be prompted for your login and password (then a token will be saved so you don't have to authenticate again). The pull request will be created.
+
+You can use the `--reviewer` option several times to request reviews from your team mates. You can also assign someone to the pull request with the `--assign` option.
+
+Then you can use `tsrc push --merge` to merge the pull request, or `tsrc push --close` to close it.
 
 
 Why not Google repo?
