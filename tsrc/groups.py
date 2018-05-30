@@ -3,6 +3,9 @@
 from typing import Any, Dict, Iterable, List, Optional, Set
 import tsrc
 
+# pylint: disable=pointless-statement
+Dict
+
 
 class GroupError(tsrc.Error):
     pass
@@ -38,9 +41,9 @@ class UnknownElement(GroupError):
 
 class GroupList:
     def __init__(self, *, elements: Iterable[Any]) -> None:
-        self.groups: Dict[str, Group] = dict()
+        self.groups = dict()  # type: Dict[str, Group]
         self.all_elements = elements
-        self._groups_seen: Set[str] = set()
+        self._groups_seen = set()  # type: Set[str]
 
     def add(self, name: str, elements: Iterable[Any], includes: List[str] = None) -> None:
         for element in elements:
@@ -53,7 +56,7 @@ class GroupList:
 
     def get_elements(self, groups: List[str] = None) -> Iterable[Any]:
         self._groups_seen = set()
-        res: Set[Any] = set()
+        res = set()  # type: Set[Any]
         if not groups:
             return self.all_elements
         self._rec_get_elements(res, groups, parent_group=None)

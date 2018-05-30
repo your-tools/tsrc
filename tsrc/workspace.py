@@ -19,6 +19,9 @@ import tsrc.executor
 import tsrc.git
 import tsrc.manifest
 
+# pylint: disable=pointless-statement
+Any, Dict, Optional
+
 OPTIONS_SCHEMA = schema.Schema({
     "url": str,
     schema.Optional("branch"): str,
@@ -31,11 +34,11 @@ OPTIONS_SCHEMA = schema.Schema({
 # pylint: disable=too-few-public-methods
 @attr.s
 class Options:
-    url: str = attr.ib(default=None)
-    branch: str = attr.ib(default="master")
-    tag: Optional[str] = attr.ib(default=None)
-    shallow: bool = attr.ib(default=False)
-    groups: List[str] = attr.ib(default=list())
+    url = attr.ib(default=None)  # type: str
+    branch = attr.ib(default="master")  # type: str
+    tag = attr.ib(default=None)  # type: Optional[str]
+    shallow = attr.ib(default=False)  # type: bool
+    groups = attr.ib(default=list())  # type: List[str]
 
 
 def options_from_dict(as_dict: dict) -> Options:
@@ -49,12 +52,12 @@ def options_from_dict(as_dict: dict) -> Options:
 
 
 def options_from_args(args) -> Options:
-    as_dict: dict = vars(args)
+    as_dict = vars(args)  # type: dict
     return options_from_dict(as_dict)
 
 
 def options_from_file(cfg_path) -> Options:
-    as_dict: dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)
+    as_dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)  # type: dict
     return options_from_dict(as_dict)
 
 
@@ -67,7 +70,7 @@ class LocalManifest:
         hidden_path = workspace_path.joinpath(".tsrc")
         self.clone_path = hidden_path.joinpath("manifest")
         self.cfg_path = hidden_path.joinpath("manifest.yml")
-        self.manifest: Optional[tsrc.manifest.Manifest] = None
+        self.manifest = None  # type: Optional[tsrc.manifest.Manifest]
 
     @property
     def branch(self) -> str:
@@ -126,7 +129,7 @@ class LocalManifest:
         tsrc.git.run_git(self.clone_path, *cmd)
 
     def save_config(self, options: Options) -> None:
-        config: Dict[str, Any] = dict()
+        config = dict()  # type: Dict[str, Any]
         config["url"] = options.url
         config["branch"] = options.branch
         if options.tag:
@@ -164,7 +167,7 @@ class LocalManifest:
     def _clone_manifest(self, options: Options) -> None:
         parent, name = self.clone_path.splitpath()
         parent.makedirs_p()
-        ref: str = ""
+        ref = ""  # type: str
         if options.tag:
             ref = options.tag
         elif options.branch:
@@ -391,7 +394,7 @@ class BadBranches(tsrc.Error):
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
-        self.bad_branches: List[Tuple[str, str, str]] = list()
+        self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
     # pylint: disable=no-self-use
     def description(self) -> str:

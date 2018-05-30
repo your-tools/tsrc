@@ -17,6 +17,7 @@ schema = "*"
 tabulate = "*"
 unidecode = "*"
 xdg = "*"
+typing = "*"
 
 [dev-packages]
 apipkg = "*"

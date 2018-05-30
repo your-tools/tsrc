@@ -10,6 +10,9 @@ import ui
 
 import tsrc
 
+# pylint: disable=pointless-statement
+Any, Dict
+
 
 class GitError(tsrc.Error):
     pass
@@ -128,7 +131,7 @@ def run_git_captured(working_path: Path, *cmd: str, check=True) -> Tuple[int, st
     """
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
-    options: Dict[str, Any] = dict()
+    options = dict()  # type: Dict[str, Any]
     options["stdout"] = subprocess.PIPE
     options["stderr"] = subprocess.STDOUT
 

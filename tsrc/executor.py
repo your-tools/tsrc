@@ -8,6 +8,8 @@ import ui
 import tsrc
 
 
+# pylint: disable=pointless-statement
+Tuple
 T = TypeVar('T')
 
 
@@ -37,7 +39,7 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
 class SequentialExecutor(Generic[T]):
     def __init__(self, task: Task[T]) -> None:
         self.task = task
-        self.errors: List[Tuple[T, tsrc.Error]] = list()
+        self.errors = list()  # type: List[Tuple[T, tsrc.Error]]
 
     def process(self, items: List[T]) -> None:
         if not items:

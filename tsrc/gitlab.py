@@ -47,7 +47,7 @@ def handle_errors(response: requests.models.Response, stream=False) -> None:
 def _handle_json_errors(response: requests.models.Response):
     # Make sure we always have a dict containing some
     # kind of error:
-    json_details: Dict[str, str] = dict()
+    json_details = dict()  # type: Dict[str, str]
     try:
         json_details = response.json()
     except ValueError:
@@ -95,10 +95,10 @@ class GitLabHelper():
 
     def make_paginated_get_request(self, url: str, *,
                                    params: Dict[str, Any]) -> Iterable[Any]:
-        results: List[Any] = list()
+        results = list()  # type: List[Any]
         if params:
             params = params.copy()
-        next_page: Optional[int] = 1
+        next_page = 1  # type: Optional[int]
         while next_page:
             params["page"] = next_page
             response = self.get_response("GET", url, params=params)

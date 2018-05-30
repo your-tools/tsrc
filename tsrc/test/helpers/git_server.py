@@ -13,7 +13,7 @@ CopyConfig = Tuple[str, str]
 class ManifestHandler():
     def __init__(self, path: Path) -> None:
         self.path = path
-        self.data: Dict[str, Any] = {"repos": list()}
+        self.data = {"repos": list()}  # type: Dict[str, Any]
 
     @property
     def yaml_path(self) -> Path:

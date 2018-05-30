@@ -152,7 +152,7 @@ def main(arg_list: List[str] = None):
     if not command:
         parser.print_help()
         sys.exit(1)
-    module: Any = importlib.import_module("tsrc.cli.%s" % command)
+    module = importlib.import_module("tsrc.cli.%s" % command)  # type: Any
     if command == "foreach":
         fix_cmd_args_for_foreach(args, foreach_parser)
 
