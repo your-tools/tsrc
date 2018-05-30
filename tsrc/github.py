@@ -2,6 +2,7 @@
 
 
 from typing import List, Optional
+from tsrc.config import Config
 import getpass
 import uuid
 
@@ -60,7 +61,7 @@ def save_token(token: str) -> None:
     if cfg_path.exists():
         config = tsrc.config.parse_tsrc_config(roundtrip=True)
     else:
-        config = dict()
+        config = Config(dict())
     if "auth" not in config:
         config["auth"] = dict()
     auth = config["auth"]

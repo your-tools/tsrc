@@ -3,13 +3,16 @@
 from path import Path
 import ruamel.yaml
 import schema
-from typing import Any
+from typing import Any, Dict, NewType
 import xdg
 
 import tsrc
 
+Config = NewType('Config', Dict[str, Any])
 
-def parse_config_file(file_path: Path, config_schema: Any, roundtrip=False) -> Any:
+
+def parse_config_file(
+        file_path: Path, config_schema: schema.Schema, roundtrip=False) -> Config:
     try:
         contents = file_path.text()
     except OSError as os_error:
@@ -40,13 +43,13 @@ def get_tsrc_config_path() -> Path:
     return config_path
 
 
-def dump_tsrc_config(config: Any) -> None:
+def dump_tsrc_config(config: Config) -> None:
     dumped = ruamel.yaml.dump(config, Dumper=ruamel.yaml.RoundTripDumper)
     file_path = get_tsrc_config_path()
     file_path.write_text(dumped)
 
 
-def parse_tsrc_config(config_path: Path = None, roundtrip=False) -> Any:
+def parse_tsrc_config(config_path: Path = None, roundtrip=False) -> Config:
     auth_schema = {
         schema.Optional("gitlab"): {"token": str},
         schema.Optional("github"): {"token": str},

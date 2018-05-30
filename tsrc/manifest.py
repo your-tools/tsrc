@@ -2,14 +2,19 @@
 
 import operator
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, NewType, Optional
 
 from path import Path
 import schema
 
 import tsrc
 import tsrc.config
+from tsrc.config import Config
 import tsrc.groups
+from tsrc.groups import GroupList
+
+ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
+RepoConfig = NewType('RepoConfig', Dict[str, Any])
 
 
 class RepoNotFound(tsrc.Error):
@@ -22,9 +27,9 @@ class Manifest():
         self._repos = list()
         self.copyfiles = list()
         self.gitlab = dict()
-        self.group_list = None
+        self.group_list = Optional[GroupList[str]]
 
-    def load(self, config: Dict[str, Any]) -> None:
+    def load(self, config: ManifestConfig) -> None:
         self.copyfiles = list()
         self.gitlab = config.get("gitlab")
         repos = config.get("repos") or list()
@@ -42,7 +47,7 @@ class Manifest():
 
         self._handle_groups(config)
 
-    def _handle_copies(self, repo_config: Dict[str, Any]) -> None:
+    def _handle_copies(self, repo_config: RepoConfig) -> None:
         if "copy" not in repo_config:
             return
         to_cp = repo_config["copy"]
@@ -52,7 +57,7 @@ class Manifest():
             src_copy = os.path.join(repo_config["src"], src_copy)
             self.copyfiles.append((src_copy, dest_copy))
 
-    def _handle_groups(self, config: Dict[str, Any]) -> None:
+    def _handle_groups(self, config: ManifestConfig) -> None:
         elements = set([repo.src for repo in self._repos])
         self.group_list = tsrc.groups.GroupList(elements=elements)
         groups_config = config.get("groups", dict())
@@ -115,6 +120,7 @@ def load(manifest_path: Path) -> Manifest:
         schema.Optional("groups"): {str: group_schema},
     })
     parsed = tsrc.config.parse_config_file(manifest_path, manifest_schema)
+    parsed = ManifestConfig(parsed)  # type: ignore
     res = Manifest()
-    res.load(parsed)
+    res.load(parsed)  # type: ignore
     return res

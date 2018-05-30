@@ -6,7 +6,7 @@ import importlib
 import os
 import sys
 import textwrap
-from typing import Any, Callable, List
+from typing import Callable, List
 
 import colored_traceback
 import ui
@@ -16,7 +16,7 @@ import tsrc
 Args = argparse.Namespace
 
 
-def fix_cmd_args_for_foreach(args: Args, foreach_parser: Any) -> None:
+def fix_cmd_args_for_foreach(args: Args, foreach_parser: argparse.ArgumentParser) -> None:
     """ We want to support both:
       $ tsrc foreach -c 'shell command'
      and
@@ -50,7 +50,8 @@ def fix_cmd_args_for_foreach(args: Args, foreach_parser: Any) -> None:
     args.cmd_as_str = cmd_as_str
 
 
-def workspace_subparser(subparser: Any, name: str) -> Any:
+def workspace_subparser(
+        subparser: argparse._SubParsersAction, name: str) -> argparse.ArgumentParser:
     parser = subparser.add_parser(name)
     parser.add_argument("-w", "--workspace", dest="workspace_path")
     return parser
@@ -152,8 +153,8 @@ def main(arg_list: List[str] = None):
     if not command:
         parser.print_help()
         sys.exit(1)
-    module = importlib.import_module("tsrc.cli.%s" % command)  # type: Any
+    module = importlib.import_module("tsrc.cli.%s" % command)  # type: ignore
     if command == "foreach":
         fix_cmd_args_for_foreach(args, foreach_parser)
 
-    return module.main(args)
+    return module.main(args)  # type: ignore
