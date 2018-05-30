@@ -12,7 +12,8 @@ import tsrc
 GITLAB_API_VERSION = "v4"
 
 # pylint: disable=invalid-name
-MRType = NewType('MRType', Dict[str, Any])
+Assignee = NewType("Assignee", Dict[str, Any])
+MergeRequest = NewType("MergeRequest", Dict[str, Any])
 RequestData = NewType('RequestData', Dict[str, Any])
 RequestParams = NewType('RequestParams', Dict[str, Any])
 
@@ -39,14 +40,7 @@ class TooManyUsers(GitLabError):
     pass
 
 
-def handle_errors(response: requests.models.Response, stream=False) -> None:
-    if stream:
-        _handle_stream_errors(response)
-    else:
-        _handle_json_errors(response)
-
-
-def _handle_json_errors(response: requests.models.Response):
+def handle_errors(response: requests.models.Response) -> None:
     # Make sure we always have a dict containing some
     # kind of error:
     json_details = dict()  # type: Dict[str, str]
@@ -66,11 +60,6 @@ def _handle_json_errors(response: requests.models.Response):
         raise GitLabAPIError(url, status_code, response.text)
 
 
-def _handle_stream_errors(response: requests.models.Response) -> None:
-    if response.status_code >= 400:
-        raise GitLabAPIError(response.url, response.status_code, "")
-
-
 def extract_next_page_number(response: requests.models.Response) -> Optional[int]:
     header = response.headers['x-next-page']
     if header:
@@ -86,14 +75,10 @@ class GitLabHelper():
 
     def make_request(self, verb: str, url: str, *,
                      data: Optional[RequestData] = None,
-                     params: Optional[RequestParams] = None,
-                     stream=False) -> Any:
-        response = self.get_response(verb, url, data=data, params=params, stream=stream)
-        handle_errors(response, stream=stream)
-        if stream:
-            return response
-        else:
-            return response.json()
+                     params: Optional[RequestParams] = None) -> Any:
+        response = self.get_response(verb, url, data=data, params=params)
+        handle_errors(response)
+        return response.json()
 
     def make_paginated_get_request(self, url: str, *,
                                    params: RequestParams) -> Iterable[Any]:
@@ -110,13 +95,12 @@ class GitLabHelper():
         return results
 
     def get_response(self, verb: str, url: str, *,
-                     data: RequestData = None,
-                     params: RequestParams = None,
-                     stream=False) -> requests.models.Response:
+                     data: Optional[RequestData] = None,
+                     params: Optional[RequestParams] = None) -> requests.models.Response:
         full_url = self.gitlab_api_url + url
         response = requests.request(verb, full_url,
                                     headers={"PRIVATE-TOKEN": self.token},
-                                    data=data, params=params, stream=stream)
+                                    data=data, params=params)
         return response
 
     def get_project_id(self, project_name: str) -> int:
@@ -124,32 +108,36 @@ class GitLabHelper():
         url = "/projects/%s" % encoded_project_name
         try:
             res = self.make_request("GET", url)
-            return res["id"]
+            project_id = res["id"]  # type: int
+            return project_id
         except GitLabAPIError as e:
             if e.status_code == 404:
                 raise GitLabAPIError(url, 404, "Project not found: %s" % project_name) from None
             else:
                 raise
 
-    def get_default_branch(self, project_id: str):
+    def get_default_branch(self, project_id: int) -> str:
         url = "/projects/%s" % project_id
         project_desc = self.make_request("GET", url)
-        return project_desc["default_branch"]
+        res = project_desc["default_branch"]  # type: str
+        return res
 
-    def find_opened_merge_request(self, project_id: int, source_branch: str) -> Optional[MRType]:
+    def find_opened_merge_request(self, project_id: int,
+                                  source_branch: str) -> Optional[MergeRequest]:
         url = "/projects/%s/merge_requests" % project_id
         params = RequestParams({
             "state": "opened",
             "per_page": "100"  # Maximum number of items allowed in pagination
         })
-        previous_mrs = self.make_paginated_get_request(url, params=params)
+        previous_mrs = list()  # type: List[MergeRequest]
+        previous_mrs = self.make_paginated_get_request(url, params=params)  # type: ignore
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
                 return mr
         return None
 
     def create_merge_request(self, project_id: int, source_branch: str, *, title: str,
-                             target_branch="master") -> MRType:
+                             target_branch: str = "master") -> MergeRequest:
         ui.info_2("Creating merge request", ui.ellipsis, end="")
         url = "/projects/%i/merge_requests" % project_id
         data = RequestData({
@@ -160,15 +148,16 @@ class GitLabHelper():
         })
         result = self.make_request("POST", url, data=data)
         ui.info("done", ui.check)
-        return result
+        return result  # type: ignore
 
-    def update_merge_request(self, merge_request: MRType, **kwargs) -> requests.models.Response:
+    def update_merge_request(self, merge_request: MergeRequest,
+                             **kwargs: str) -> MergeRequest:
         project_id = merge_request["target_project_id"]
         merge_request_iid = merge_request["iid"]
         url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_iid)
-        return self.make_request("PUT", url, data=RequestData(kwargs))
+        return self.make_request("PUT", url, data=RequestData(kwargs))  # type: ignore
 
-    def accept_merge_request(self, merge_request: MRType) -> None:
+    def accept_merge_request(self, merge_request: MergeRequest) -> None:
         project_id = merge_request["project_id"]
         merge_request_iid = merge_request["iid"]
         ui.info_2("Merging when build succeeds", ui.ellipsis, end="")
@@ -186,12 +175,13 @@ class GitLabHelper():
         if total > 100:
             raise TooManyUsers()
         else:
-            return response.json()
+            return response.json()  # type: ignore
 
-    def get_group_members(self, group: str, query=None) -> Iterable[Any]:
+    def get_group_members(self, group: str, query: Optional[str] = None) -> List[Any]:
         params = RequestParams({"query": query})
-        return self.make_request("GET", "/groups/%s/members" % group, params=params)
+        return self.make_request("GET", "/groups/%s/members" % group, params=params)  # type: ignore
 
-    def get_project_members(self, project_id: int, query=None) -> Iterable[Any]:
+    def get_project_members(self, project_id: int, query: Optional[str] = None) -> List[Any]:
         params = RequestParams({"query": query})
-        return self.make_request("GET", "/projects/%s/members" % project_id, params=params)
+        res = self.make_request("GET", "/projects/%s/members" % project_id, params=params)
+        return res  # type: ignore

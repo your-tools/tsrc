@@ -1,5 +1,6 @@
 """ Custom exceptions """
 
+from typing import Any
 from path import Path
 
 DOC_URL = "https://supertanker.github.io/tsrc/ref/formats/"
@@ -9,7 +10,7 @@ class Error(Exception):
     """ Base class for our own errors
 
     """
-    def __init__(self, *args):
+    def __init__(self, *args: Any) -> None:
         super().__init__(self, *args)
         self.message = " ".join(str(x) for x in args)
 

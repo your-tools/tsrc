@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import os.path
 
 import ruamel.yaml
@@ -34,6 +34,7 @@ repos:
     manifest = tsrc.manifest.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
+    assert manifest.gitlab
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
     assert manifest.get_repos() == [
         tsrc.Repo(
@@ -83,7 +84,7 @@ repos:
         assert "no/such" in e.value.message
 
 
-def test_validates(tmp_path) -> None:
+def test_validates(tmp_path: Path) -> None:
     contents = """
 repos:
   - src: bar
@@ -103,9 +104,9 @@ gitlab:
 class ReposGetter:
     def __init__(self, tmp_path: Path) -> None:
         self.tmp_path = tmp_path
-        self.contents = None
+        self.contents = ""
 
-    def get_repos(self, groups: List[str] = None, all_=False) -> List[str]:
+    def get_repos(self, groups: Optional[List[str]] = None, all_: bool = False) -> List[str]:
         manifest_path = self.tmp_path.joinpath("manifest.yml")
         manifest_path.write_text(self.contents)
         manifest = tsrc.manifest.load(manifest_path)
@@ -113,11 +114,11 @@ class ReposGetter:
 
 
 @pytest.fixture
-def repos_getter(tmp_path):
+def repos_getter(tmp_path: Path) -> ReposGetter:
     return ReposGetter(tmp_path)
 
 
-def test_default_group(repos_getter) -> None:
+def test_default_group(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
   - { src: one, url: one.com }
@@ -132,7 +133,7 @@ groups:
     assert repos_getter.get_repos(groups=None) == ["one", "two"]
 
 
-def test_specific_group(repos_getter) -> None:
+def test_specific_group(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
   - { src: any, url: any.com }
@@ -149,7 +150,7 @@ groups:
     assert repos_getter.get_repos(groups=["default", "linux"]) == ["any", "linux1", "linux2"]
 
 
-def test_inclusion(repos_getter) -> None:
+def test_inclusion(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
   - { src: a, url: a.com }
@@ -170,7 +171,7 @@ groups:
     assert repos_getter.get_repos(groups=["c_group"]) == ["a", "b", "c"]
 
 
-def test_all_repos(repos_getter) -> None:
+def test_all_repos(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
   - { src: one, url: one.com }

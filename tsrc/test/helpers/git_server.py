@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import cast, Any, Dict, List, Tuple
 import ruamel.yaml
 import pytest
 
@@ -26,7 +26,7 @@ class ManifestHandler():
         tsrc.git.run_git(self.path, "commit", "--message", "Add an empty manifest")
         tsrc.git.run_git(self.path, "push", "origin", "master")
 
-    def add_repo(self, src: str, url: str, branch="master") -> None:
+    def add_repo(self, src: str, url: str, branch: str = "master") -> None:
         repo_config = ({"url": str(url), "src": src})
         if branch != "master":
             repo_config["branch"] = branch
@@ -50,7 +50,7 @@ class ManifestHandler():
     def get_repo(self, src: str) -> RepoConfig:
         for repo in self.data["repos"]:
             if repo["src"] == src:
-                return repo
+                return cast(RepoConfig, repo)
         assert False, "repo '%s' not found in manifest" % src
 
     def configure_repo(self, src: str, key: str, value: Any) -> None:
@@ -110,7 +110,7 @@ class GitServer():
     def get_url(self, name: str) -> str:
         return str("file://" + self.bare_path.joinpath(name))
 
-    def _create_repo(self, name: str, empty=False, branch="master") -> str:
+    def _create_repo(self, name: str, empty: bool = False, branch: str = "master") -> str:
         bare_path = self.bare_path.joinpath(name)
         bare_path.makedirs_p()
         tsrc.git.run_git(bare_path, "init", "--bare")
@@ -129,8 +129,8 @@ class GitServer():
         return str(bare_path)
 
     def add_repo(self, name: str,
-                 add_to_manifest=True, empty=False,
-                 default_branch="master") -> str:
+                 add_to_manifest: bool = True, empty: bool = False,
+                 default_branch: str = "master") -> str:
         self._create_repo(name, empty=empty, branch=default_branch)
         url = self.get_url(name)
         if add_to_manifest:
@@ -143,7 +143,7 @@ class GitServer():
         self.manifest.configure_group(group_name, repos)
 
     def push_file(self, name: str, file_path: str, *,
-                  contents="", message="") -> None:
+                  contents: str = "", message: str = "") -> None:
         src_path = self.get_path(name)
         full_path = src_path.joinpath(file_path)
         full_path.parent.makedirs_p()
@@ -196,5 +196,5 @@ class GitServer():
 
 
 @pytest.fixture
-def git_server(tmp_path):
+def git_server(tmp_path: Path) -> GitServer:
     return GitServer(tmp_path)

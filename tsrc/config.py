@@ -8,11 +8,12 @@ import xdg
 
 import tsrc
 
+# pylint: disable=invalid-name
 Config = NewType('Config', Dict[str, Any])
 
 
 def parse_config_file(
-        file_path: Path, config_schema: schema.Schema, roundtrip=False) -> Config:
+        file_path: Path, config_schema: schema.Schema, roundtrip: bool = False) -> Config:
     try:
         contents = file_path.text()
     except OSError as os_error:
@@ -34,7 +35,7 @@ def parse_config_file(
         config_schema.validate(parsed)
     except schema.SchemaError as schema_error:
         raise tsrc.InvalidConfig(file_path, str(schema_error))
-    return parsed
+    return Config(parsed)
 
 
 def get_tsrc_config_path() -> Path:
@@ -49,7 +50,7 @@ def dump_tsrc_config(config: Config) -> None:
     file_path.write_text(dumped)
 
 
-def parse_tsrc_config(config_path: Path = None, roundtrip=False) -> Config:
+def parse_tsrc_config(config_path: Path = None, roundtrip: bool = False) -> Config:
     auth_schema = {
         schema.Optional("gitlab"): {"token": str},
         schema.Optional("github"): {"token": str},

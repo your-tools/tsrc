@@ -3,7 +3,7 @@
 
 import os
 import subprocess
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple, Optional
 
 from path import Path
 import ui
@@ -19,7 +19,9 @@ class GitError(tsrc.Error):
 
 
 class GitCommandError(GitError):
-    def __init__(self, working_path: Path, cmd: Iterable[str], *, output=None) -> None:
+    def __init__(
+            self, working_path: Path, cmd: Iterable[str], *,
+            output: Optional[str] = None) -> None:
         self.cmd = cmd
         self.working_path = working_path
         self.output = output
@@ -41,9 +43,9 @@ class GitStatus:
         self.ahead = 0
         self.behind = 0
         self.dirty = False
-        self.tag = None
-        self.branch = None
-        self.sha1 = None
+        self.tag = None  # type: Optional[str]
+        self.branch = None  # type: Optional[str]
+        self.sha1 = None   # type: Optional[str]
 
     def update(self) -> None:
         self.update_sha1()
@@ -122,7 +124,7 @@ def run_git(working_path: Path, *cmd: str) -> None:
         raise GitCommandError(working_path, cmd)
 
 
-def run_git_captured(working_path: Path, *cmd: str, check=True) -> Tuple[int, str]:
+def run_git_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:
     """ Run git `cmd` in given `working_path`, capturing the output
 
     Return a tuple (returncode, output).
@@ -148,7 +150,7 @@ def run_git_captured(working_path: Path, *cmd: str, check=True) -> Tuple[int, st
     return returncode, out
 
 
-def get_sha1(working_path, short=False):
+def get_sha1(working_path: Path, short: bool = False) -> str:
     cmd = ["rev-parse"]
     if short:
         cmd.append("--short")
@@ -157,7 +159,7 @@ def get_sha1(working_path, short=False):
     return output
 
 
-def get_current_branch(working_path):
+def get_current_branch(working_path: Path) -> str:
     cmd = ("rev-parse", "--abbrev-ref", "HEAD")
     _, output = run_git_captured(working_path, *cmd)
     if output == "HEAD":
@@ -165,13 +167,13 @@ def get_current_branch(working_path):
     return output
 
 
-def get_current_tag(working_path):
+def get_current_tag(working_path: Path) -> str:
     cmd = ("tag", "--points-at", "HEAD")
     _, output = run_git_captured(working_path, *cmd)
     return output
 
 
-def get_repo_root(working_path=None):
+def get_repo_root(working_path: Optional[Path] = None) -> Path:
     if not working_path:
         working_path = Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")
@@ -181,7 +183,7 @@ def get_repo_root(working_path=None):
     return Path(output)
 
 
-def find_ref(repo, candidate_refs):
+def find_ref(repo: Path, candidate_refs: Iterable[str]) -> str:
     """ Find the first reference that exists in the given repo """
     run_git(repo, "fetch", "--all", "--prune")
     for candidate_ref in candidate_refs:
@@ -192,18 +194,18 @@ def find_ref(repo, candidate_refs):
     raise GitError("Could not find any of:", ref_list, "in repo", repo)
 
 
-def reset(repo, ref):
+def reset(repo: Path, ref: str) -> None:
     ui.info_2("Resetting", repo, "to", ref)
     run_git(repo, "reset", "--hard", ref)
 
 
-def get_status(working_path):
+def get_status(working_path: Path) -> GitStatus:
     status = GitStatus(working_path)
     status.update()
     return status
 
 
-def get_tracking_ref(working_path):
+def get_tracking_ref(working_path: Path) -> Optional[str]:
     rc, out = run_git_captured(
         working_path,
         "rev-parse", "--abbrev-ref",
@@ -216,6 +218,7 @@ def get_tracking_ref(working_path):
         return None
 
 
-def is_shallow(working_path):
+def is_shallow(working_path: Path) -> bool:
     root = get_repo_root(working_path)
-    return root.joinpath(".git/shallow").exists()
+    res = root.joinpath(".git/shallow").exists()  # type: bool
+    return res

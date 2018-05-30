@@ -1,12 +1,18 @@
+from path import Path
+
 import tsrc.cli
 
+from ui.tests.conftest import message_recorder
+from tsrc.test.helpers.cli import CLI
+from tsrc.test.helpers.git_server import GitServer
 
-def assert_shallow_clone(workspace_path, repo) -> None:
+
+def assert_shallow_clone(workspace_path: Path, repo: str) -> None:
     repo_path = workspace_path.joinpath(repo)
     assert tsrc.git.is_shallow(repo_path)
 
 
-def test_shallow_clones(tsrc_cli, git_server, workspace_path) -> None:
+def test_shallow_clones(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
@@ -21,7 +27,8 @@ def test_shallow_clones(tsrc_cli, git_server, workspace_path) -> None:
     assert_shallow_clone(workspace_path, "foo/baz")
 
 
-def test_shallow_with_fix_ref(tsrc_cli, git_server, workspace_path, message_recorder) -> None:
+def test_shallow_with_fix_ref(tsrc_cli: CLI, git_server: GitServer,
+                              workspace_path: Path, message_recorder: message_recorder) -> None:
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.push_file("foo", "one.c")

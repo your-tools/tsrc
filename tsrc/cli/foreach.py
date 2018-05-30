@@ -1,5 +1,6 @@
 """ Entry point for tsrc foreach """
 
+import argparse
 from typing import List, TypeVar
 import subprocess
 
@@ -19,7 +20,8 @@ T = TypeVar('T')
 
 
 class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace: Path, cmd: List[str], cmd_as_str: str, shell=False) -> None:
+    def __init__(self, workspace: Path, cmd: List[str],
+                 cmd_as_str: str, shell: bool = False) -> None:
         self.workspace = workspace
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
@@ -44,7 +46,7 @@ class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
             raise CommandFailed()
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
     cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)

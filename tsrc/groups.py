@@ -14,14 +14,15 @@ class GroupError(tsrc.Error):
 
 # pylint: disable=too-few-public-methods
 class Group(Generic[T]):
-    def __init__(self, name: str, elements: Iterable[T], includes: List[str] = None) -> None:
+    def __init__(self, name: str, elements: Iterable[T],
+                 includes: Optional[List[str]] = None) -> None:
         self.name = name
         self.elements = elements
         self.includes = includes or list()
 
 
 class GroupNotFound(GroupError):
-    def __init__(self, group_name: str, parent_group: Group = None) -> None:
+    def __init__(self, group_name: str, parent_group: Optional[Group] = None) -> None:
         self.group_name = group_name
         self.parent_group = parent_group
         if self.parent_group:
@@ -46,7 +47,8 @@ class GroupList(Generic[T]):
         self.all_elements = elements
         self._groups_seen = set()  # type: Set[str]
 
-    def add(self, name: str, elements: Iterable[T], includes: List[str] = None) -> None:
+    def add(self, name: str, elements: Iterable[T],
+            includes: Optional[List[str]] = None) -> None:
         for element in elements:
             if element not in self.all_elements:
                 raise UnknownElement(name, element)
@@ -55,7 +57,7 @@ class GroupList(Generic[T]):
     def get_group(self, name: str) -> Optional[Group]:
         return self.groups.get(name)
 
-    def get_elements(self, groups: List[str] = None) -> Iterable[T]:
+    def get_elements(self, groups: Optional[List[str]] = None) -> Iterable[T]:
         self._groups_seen = set()
         res = set()  # type: Set[T]
         if not groups:

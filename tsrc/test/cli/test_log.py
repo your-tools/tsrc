@@ -1,4 +1,9 @@
-def test_happy(tsrc_cli, git_server, message_recorder) -> None:
+from tsrc.test.helpers.cli import CLI
+from tsrc.test.helpers.git_server import GitServer
+from ui.tests.conftest import message_recorder
+
+
+def test_happy(tsrc_cli: CLI, git_server: GitServer, message_recorder: message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "bar.txt", message="boring bar")
@@ -19,7 +24,7 @@ def test_happy(tsrc_cli, git_server, message_recorder) -> None:
     assert not message_recorder.find("new foo!")
 
 
-def test_error(tsrc_cli, git_server) -> None:
+def test_error(tsrc_cli: CLI, git_server: GitServer) -> None:
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)

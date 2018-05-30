@@ -2,19 +2,24 @@
 
 import operator
 import os
-from typing import Any, Dict, List, NewType, Optional
+from typing import Any, Dict, List, NewType, Optional, Tuple
 
 from path import Path
 import schema
 
 import tsrc
 import tsrc.config
-from tsrc.config import Config
+from tsrc.repo import Repo
 import tsrc.groups
 from tsrc.groups import GroupList
 
+# pylint: disable=pointless-statement
+GroupList, Repo, Tuple
+
 ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
 RepoConfig = NewType('RepoConfig', Dict[str, Any])
+
+GitLabConfig = NewType('GitLabConfig', Dict[str, Any])
 
 
 class RepoNotFound(tsrc.Error):
@@ -23,11 +28,11 @@ class RepoNotFound(tsrc.Error):
 
 
 class Manifest():
-    def __init__(self):
-        self._repos = list()
-        self.copyfiles = list()
-        self.gitlab = dict()
-        self.group_list = Optional[GroupList[str]]
+    def __init__(self) -> None:
+        self._repos = list()  # type: List[Repo]
+        self.copyfiles = list()  # type: List[Tuple[str, str]]
+        self.gitlab = None  # type: Optional[GitLabConfig]
+        self.group_list = None  # type:  Optional[GroupList[str]]
 
     def load(self, config: ManifestConfig) -> None:
         self.copyfiles = list()
@@ -66,7 +71,7 @@ class Manifest():
             includes = group_config.get("includes", list())
             self.group_list.add(name, elements, includes=includes)
 
-    def get_repos(self, groups: List[str] = None, all_=False) -> List[tsrc.Repo]:
+    def get_repos(self, groups: Optional[List[str]] = None, all_: bool = False) -> List[tsrc.Repo]:
         if all_:
             return self._repos
 
@@ -79,9 +84,11 @@ class Manifest():
         return self._get_repos_in_groups(groups)
 
     def _has_default_group(self) -> bool:
+        assert self.group_list
         return self.group_list.get_group("default") is not None
 
     def _get_repos_in_groups(self, groups: List[str]) -> List[tsrc.Repo]:
+        assert self.group_list
         elements = self.group_list.get_elements(groups=groups)
         res = list()
         for src in elements:

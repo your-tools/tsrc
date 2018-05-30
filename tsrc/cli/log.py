@@ -1,5 +1,6 @@
 """ Entry point for tsrc log """
 
+import argparse
 import sys
 
 import ui
@@ -8,7 +9,7 @@ import tsrc.cli
 import tsrc.git
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
     all_ok = True

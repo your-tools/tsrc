@@ -7,22 +7,23 @@ import ui
 
 
 class Check:
-    def __init__(self, name, cmd):
+    def __init__(self, name, cmd, env=None):
         self.name = name
         self.cmd = cmd
         self.ok = False
+        self.env = env
 
     def run(self):
         ui.info_2(self.name)
-        rc = subprocess.call(self.cmd)
+        rc = subprocess.call(self.cmd, env=self.env)
         self.ok = (rc == 0)
 
 
 def init_checks():
     res = list()
 
-    def append_check(name, *cmd):
-        res.append(Check(name, cmd))
+    def append_check(name, *cmd, env=None):
+        res.append(Check(name, cmd, env=env))
 
     nprocs = multiprocessing.cpu_count()
 
@@ -33,7 +34,12 @@ def init_checks():
     append_check("pycodestyle", "pycodestyle", ".")
     append_check("pyflakes",    sys.executable, "ci/run-pyflakes.py")
     append_check("mccabe",      sys.executable, "ci/run-mccabe.py", "10")
-    append_check("mypy",        "mypy", "tsrc", "--strict-optional", "--ignore-missing-imports")
+
+    env = os.environ.copy()
+    env["MYPYPATH"] = "stubs/"
+    append_check("mypy",        "mypy", "tsrc",
+                                "--strict-optional", "--ignore-missing-imports", env=env)
+
     append_check("pylint",      "pylint", "tsrc", "--score", "no")
     append_check("pytest",      *pytest_args)
     append_check("docs",        "mkdocs", "build")

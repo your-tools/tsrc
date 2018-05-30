@@ -6,21 +6,21 @@ import tsrc.executor
 
 
 class Kaboom(tsrc.Error):
-    def __str__(self):
+    def __str__(self) -> str:
         return "Kaboom!"
 
 
-class FakeTask(tsrc.executor.Task):
-    def __init__(self):
+class FakeTask(tsrc.executor.Task[str]):
+    def __init__(self) -> None:
         pass
 
-    def description(self):
-        print("Frobnicating all items")
+    def description(self) -> str:
+        return "Frobnicating all items"
 
-    def display_item(self, item):
+    def display_item(self, item: str) -> str:
         return item
 
-    def process(self, item):
+    def process(self, item: str) -> None:
         ui.info("frobnicate", item)
         if item == "bar":
             print("ko :/")

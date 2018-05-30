@@ -1,5 +1,6 @@
 """ Entry point for tsrc version """
 
+import argparse
 import pkg_resources
 
 from path import Path
@@ -8,7 +9,7 @@ import ui
 import tsrc.git
 
 
-def get_details(location):
+def get_details(location: Path) -> str:
     # Maybe we are importing from a wheel or an egg:
     if not location.isdir():
         return ""
@@ -24,7 +25,7 @@ def get_details(location):
 
 
 # pylint: disable=unused-argument
-def main(args):
+def main(args: argparse.Namespace) -> None:
     tsrc_distribution = pkg_resources.get_distribution("tsrc")
     # pylint: disable=no-member
     version = tsrc_distribution.version

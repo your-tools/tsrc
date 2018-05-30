@@ -1,13 +1,17 @@
 """ Entry point for tsrc status """
 
+import argparse
+from typing import List, Tuple
 import shutil
 
 import ui
 
 import tsrc.cli
+from tsrc.git import GitStatus
+from tsrc.workspace import Workspace
 
 
-def describe_branch(git_status):
+def describe_branch(git_status: GitStatus) -> List[str]:
     if git_status.tag:
         return [ui.darkyellow, git_status.tag]
     elif git_status.branch:
@@ -17,15 +21,15 @@ def describe_branch(git_status):
     return list()
 
 
-def commit_string(number):
+def commit_string(number: int) -> str:
     if number == 1:
         return 'commit'
     else:
         return 'commits'
 
 
-def describe_position(git_status):
-    res = []
+def describe_position(git_status: GitStatus) -> List[str]:
+    res = []  # type: List[str]
     if git_status.ahead != 0:
         up = ui.Symbol("↑", "+")
         n_commits = commit_string(git_status.ahead)
@@ -39,24 +43,24 @@ def describe_position(git_status):
     return res
 
 
-def describe_dirty(git_status):
-    res = []
+def describe_dirty(git_status: GitStatus) -> List[str]:
+    res = []  # type: List[str]
     if git_status.dirty:
         res += [ui.red, "(dirty)"]
     return res
 
 
-def describe(git_status):
+def describe(git_status: GitStatus) -> List[str]:
     # Return a list of tokens suitable for ui.info()
-    res = []
+    res = []  # type: List[str]
     res += describe_branch(git_status)
     res += describe_position(git_status)
     res += describe_dirty(git_status)
     return res
 
 
-def collect_statuses(workspace):
-    result = list()
+def collect_statuses(workspace: Workspace) -> List[Tuple[str, GitStatus]]:
+    result = list()  # type: List[Tuple[str, GitStatus]]
     repos = workspace.get_repos()
 
     if not repos:
@@ -75,7 +79,7 @@ def collect_statuses(workspace):
     return result
 
 
-def display_statuses(statuses):
+def display_statuses(statuses: List[Tuple[str, GitStatus]]) -> None:
     if not statuses:
         return
     max_src = max((len(x[0]) for x in statuses))
@@ -85,7 +89,7 @@ def display_statuses(statuses):
         ui.info(*message)
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
     statuses = collect_statuses(workspace)

@@ -1,16 +1,15 @@
 """ Helpers for github web API """
 
-
-from typing import List, Optional
-from tsrc.config import Config
 import getpass
 import uuid
+from typing import List, Optional
 
 import github3
 from github3.repos.repo import Repository
 import ui
 
 import tsrc.config
+from tsrc.config import Config
 
 
 class GitHubAPIError(tsrc.Error):
@@ -32,7 +31,7 @@ def get_previous_token() -> Optional[str]:
     github_auth = auth.get("github")
     if not github_auth:
         return None
-    return github_auth.get("token")
+    return github_auth.get("token")  # type: ignore
 
 
 def generate_token() -> str:
@@ -47,13 +46,13 @@ def generate_token() -> str:
     note = "tsrc-" + str(uuid.uuid4())
     note_url = "https://supertanker.github.io/tsrc"
 
-    def ask_2fa():
-        return ui.ask_string("2FA code: ")
+    def ask_2fa() -> None:
+        return ui.ask_string("2FA code: ")  # type: ignore
 
     authorization = github3.authorize(username, password, scopes,
                                       note=note, note_url=note_url,
                                       two_factor_callback=ask_2fa)
-    return authorization.token
+    return authorization.token  # type: ignore
 
 
 def save_token(token: str) -> None:

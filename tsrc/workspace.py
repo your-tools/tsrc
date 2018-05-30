@@ -4,6 +4,7 @@ Mostly used by tsrc/cli.py
 
 """
 
+import argparse
 import stat
 import textwrap
 from typing import Iterable, List, Tuple, Dict, Any, Optional, NewType
@@ -51,12 +52,12 @@ def options_from_dict(as_dict: dict) -> Options:
     return res
 
 
-def options_from_args(args) -> Options:
+def options_from_args(args: argparse.Namespace) -> Options:
     as_dict = vars(args)  # type: dict
     return options_from_dict(as_dict)
 
 
-def options_from_file(cfg_path) -> Options:
+def options_from_file(cfg_path: Path) -> Options:
     as_dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)  # type: dict
     return options_from_dict(as_dict)
 
@@ -105,7 +106,7 @@ class LocalManifest:
         gitlab_config = self.manifest.gitlab
         if not gitlab_config:
             raise tsrc.Error("No gitlab configuration found in manifest")
-        return gitlab_config["url"]
+        return gitlab_config["url"]  # type: ignore
 
     def get_url(self, src: str) -> str:
         assert self.manifest, "manifest is empty. Did you call load()?"
@@ -261,7 +262,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def check_shallow_with_sha1(self, repo: tsrc.Repo):
+    def check_shallow_with_sha1(self, repo: tsrc.Repo) -> None:
         if not repo.sha1:
             return
         if self.workspace.shallow:
@@ -343,7 +344,7 @@ class FileCopier(tsrc.executor.Task[Copy]):
 
 
 class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace) -> None:
+    def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
     # pylint: disable=no-self-use
@@ -429,8 +430,9 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         except tsrc.Error:
             raise tsrc.Error("Not on any branch")
 
+        # is repo.branch allowed to be None ?
         if current_branch and current_branch != repo.branch:
-            self.bad_branches.append((repo.src, current_branch, repo.branch))
+            self.bad_branches.append((repo.src, current_branch, repo.branch))  # type: ignore
 
     @staticmethod
     def fetch(repo_path: Path) -> None:
