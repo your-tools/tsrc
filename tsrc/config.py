@@ -8,7 +8,6 @@ import xdg
 
 import tsrc
 
-# pylint: disable=invalid-name
 Config = NewType('Config', Dict[str, Any])
 
 

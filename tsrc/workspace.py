@@ -310,7 +310,6 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         self.reset_repo(repo)
 
 
-# pylint: disable=invalid-name
 Copy = NewType('Copy', Tuple[str, str])
 
 

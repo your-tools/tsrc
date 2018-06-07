@@ -11,7 +11,6 @@ import tsrc
 
 GITLAB_API_VERSION = "v4"
 
-# pylint: disable=invalid-name
 Assignee = NewType("Assignee", Dict[str, Any])
 MergeRequest = NewType("MergeRequest", Dict[str, Any])
 RequestData = NewType('RequestData', Dict[str, Any])
