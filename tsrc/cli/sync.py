@@ -1,11 +1,12 @@
 """ Entry point for tsrc sync """
 
+import argparse
 import ui
 
 import tsrc.cli
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.update_manifest()
     workspace.load_manifest()

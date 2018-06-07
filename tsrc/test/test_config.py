@@ -1,6 +1,7 @@
 import textwrap
 
 import schema
+from path import Path
 
 import tsrc.config
 
@@ -8,7 +9,7 @@ import pytest
 import mock
 
 
-def test_read_config(tmp_path):
+def test_read_config(tmp_path: Path) -> None:
     tsrc_yml_path = tmp_path.joinpath("tsrc.yml")
     tsrc_yml_path.write_text(
         textwrap.dedent(
@@ -22,7 +23,7 @@ def test_read_config(tmp_path):
     assert config["auth"]["gitlab"]["token"] == "MY_SECRET_TOKEN"
 
 
-def test_invalid_syntax(tmp_path):
+def test_invalid_syntax(tmp_path: Path) -> None:
     foo_yml = tmp_path.joinpath("foo.yml")
     foo_yml.write_text(textwrap.dedent(
         """
@@ -35,12 +36,12 @@ def test_invalid_syntax(tmp_path):
     with pytest.raises(tsrc.InvalidConfig) as e:
         dummy_schema = mock.Mock()
         tsrc.config.parse_config_file(foo_yml, dummy_schema)
-    assert e.value.path == foo_yml
+    assert e.value.config_path == foo_yml
     assert "flow sequence" in e.value.details
     assert "ligne 3, col 9" in e.value.details
 
 
-def test_invalid_schema(tmp_path):
+def test_invalid_schema(tmp_path: Path) -> None:
     foo_yml = tmp_path.joinpath("foo.yml")
     foo_yml.write_text(textwrap.dedent(
         """

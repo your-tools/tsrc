@@ -3,11 +3,15 @@
 
 import os
 import subprocess
+from typing import Any, Dict, Iterable, Tuple, Optional
 
 from path import Path
 import ui
 
 import tsrc
+
+# pylint: disable=pointless-statement
+Any, Dict
 
 
 class GitError(tsrc.Error):
@@ -15,7 +19,9 @@ class GitError(tsrc.Error):
 
 
 class GitCommandError(GitError):
-    def __init__(self, working_path, cmd, *, output=None):
+    def __init__(
+            self, working_path: Path, cmd: Iterable[str], *,
+            output: Optional[str] = None) -> None:
         self.cmd = cmd
         self.working_path = working_path
         self.output = output
@@ -28,7 +34,7 @@ class GitCommandError(GitError):
 
 # pylint: disable=too-many-instance-attributes
 class GitStatus:
-    def __init__(self, working_path):
+    def __init__(self, working_path: Path) -> None:
         self.working_path = working_path
         self.untracked = 0
         self.staged = 0
@@ -37,33 +43,33 @@ class GitStatus:
         self.ahead = 0
         self.behind = 0
         self.dirty = False
-        self.tag = None
-        self.branch = None
-        self.sha1 = None
+        self.tag = None  # type: Optional[str]
+        self.branch = None  # type: Optional[str]
+        self.sha1 = None   # type: Optional[str]
 
-    def update(self):
+    def update(self) -> None:
         self.update_sha1()
         self.update_branch()
         self.update_tag()
         self.update_remote_status()
         self.update_worktree_status()
 
-    def update_sha1(self):
+    def update_sha1(self) -> None:
         self.sha1 = get_sha1(self.working_path, short=True)
 
-    def update_branch(self):
+    def update_branch(self) -> None:
         try:
             self.branch = get_current_branch(self.working_path)
         except GitError:
             pass
 
-    def update_tag(self):
+    def update_tag(self) -> None:
         try:
             self.tag = get_current_tag(self.working_path)
         except GitError:
             pass
 
-    def update_remote_status(self):
+    def update_remote_status(self) -> None:
         rc, ahead_rev = run_git_captured(
             self.working_path,
             "rev-list", "@{upstream}..HEAD",
@@ -81,7 +87,7 @@ class GitStatus:
         if rc == 0:
             self.behind = len(behind_rev.splitlines())
 
-    def update_worktree_status(self):
+    def update_worktree_status(self) -> None:
         _, out = run_git_captured(self.working_path, "status", "--porcelain")
 
         for line in out.splitlines():
@@ -100,11 +106,11 @@ class GitStatus:
 
 
 class WorktreeNotFound(GitError):
-    def __init__(self, working_path):
+    def __init__(self, working_path: Path) -> None:
         super().__init__("'{}' is not inside a git repository".format(working_path))
 
 
-def run_git(working_path, *cmd):
+def run_git(working_path: Path, *cmd: str) -> None:
     """ Run git `cmd` in given `working_path`
 
     Raise GitCommandError if return code is non-zero.
@@ -118,7 +124,7 @@ def run_git(working_path, *cmd):
         raise GitCommandError(working_path, cmd)
 
 
-def run_git_captured(working_path, *cmd, check=True):
+def run_git_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:
     """ Run git `cmd` in given `working_path`, capturing the output
 
     Return a tuple (returncode, output).
@@ -127,7 +133,7 @@ def run_git_captured(working_path, *cmd, check=True):
     """
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
-    options = dict()
+    options = dict()  # type: Dict[str, Any]
     options["stdout"] = subprocess.PIPE
     options["stderr"] = subprocess.STDOUT
 
@@ -144,7 +150,7 @@ def run_git_captured(working_path, *cmd, check=True):
     return returncode, out
 
 
-def get_sha1(working_path, short=False):
+def get_sha1(working_path: Path, short: bool = False) -> str:
     cmd = ["rev-parse"]
     if short:
         cmd.append("--short")
@@ -153,7 +159,7 @@ def get_sha1(working_path, short=False):
     return output
 
 
-def get_current_branch(working_path):
+def get_current_branch(working_path: Path) -> str:
     cmd = ("rev-parse", "--abbrev-ref", "HEAD")
     _, output = run_git_captured(working_path, *cmd)
     if output == "HEAD":
@@ -161,13 +167,13 @@ def get_current_branch(working_path):
     return output
 
 
-def get_current_tag(working_path):
+def get_current_tag(working_path: Path) -> str:
     cmd = ("tag", "--points-at", "HEAD")
     _, output = run_git_captured(working_path, *cmd)
     return output
 
 
-def get_repo_root(working_path=None):
+def get_repo_root(working_path: Optional[Path] = None) -> Path:
     if not working_path:
         working_path = Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")
@@ -177,7 +183,7 @@ def get_repo_root(working_path=None):
     return Path(output)
 
 
-def find_ref(repo, candidate_refs):
+def find_ref(repo: Path, candidate_refs: Iterable[str]) -> str:
     """ Find the first reference that exists in the given repo """
     run_git(repo, "fetch", "--all", "--prune")
     for candidate_ref in candidate_refs:
@@ -188,18 +194,18 @@ def find_ref(repo, candidate_refs):
     raise GitError("Could not find any of:", ref_list, "in repo", repo)
 
 
-def reset(repo, ref):
+def reset(repo: Path, ref: str) -> None:
     ui.info_2("Resetting", repo, "to", ref)
     run_git(repo, "reset", "--hard", ref)
 
 
-def get_status(working_path):
+def get_status(working_path: Path) -> GitStatus:
     status = GitStatus(working_path)
     status.update()
     return status
 
 
-def get_tracking_ref(working_path):
+def get_tracking_ref(working_path: Path) -> Optional[str]:
     rc, out = run_git_captured(
         working_path,
         "rev-parse", "--abbrev-ref",
@@ -212,6 +218,7 @@ def get_tracking_ref(working_path):
         return None
 
 
-def is_shallow(working_path):
+def is_shallow(working_path: Path) -> bool:
     root = get_repo_root(working_path)
-    return root.joinpath(".git/shallow").exists()
+    res = root.joinpath(".git/shallow").exists()  # type: bool
+    return res

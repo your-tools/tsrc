@@ -6,14 +6,19 @@ import importlib
 import os
 import sys
 import textwrap
+from typing import Callable, List, Optional
 
 import colored_traceback
 import ui
 
 import tsrc
 
+ArgsList = Optional[List[str]]
+MainFunc = Callable[..., None]
 
-def fix_cmd_args_for_foreach(args, foreach_parser):
+
+def fix_cmd_args_for_foreach(args: argparse.Namespace,
+                             foreach_parser: argparse.ArgumentParser) -> None:
     """ We want to support both:
       $ tsrc foreach -c 'shell command'
      and
@@ -27,7 +32,7 @@ def fix_cmd_args_for_foreach(args, foreach_parser):
     * args.cmd_as_str suitable for display purposes
 
     """
-    def die(message):
+    def die(message: str) -> None:
         ui.error(message)
         print(foreach_parser.epilog, end="")
         sys.exit(1)
@@ -47,16 +52,18 @@ def fix_cmd_args_for_foreach(args, foreach_parser):
     args.cmd_as_str = cmd_as_str
 
 
-def workspace_subparser(subparser, name):
+# pylint: disable=protected-access
+def workspace_subparser(
+        subparser: argparse._SubParsersAction, name: str) -> argparse.ArgumentParser:
     parser = subparser.add_parser(name)
     parser.add_argument("-w", "--workspace", dest="workspace_path")
     return parser
 
 
-def main_wrapper(main_func):
+def main_wrapper(main_func: MainFunc) -> MainFunc:
     """ Wraps main() entry point to better deal with errors """
     @functools.wraps(main_func)
-    def wrapped(args=None):
+    def wrapped(args: ArgsList = None) -> None:
         colored_traceback.add_hook()
         try:
             main_func(args=args)
@@ -71,7 +78,7 @@ def main_wrapper(main_func):
     return wrapped
 
 
-def setup_ui(args):
+def setup_ui(args: argparse.Namespace) -> None:
     verbose = None
     if os.environ.get("VERBOSE"):
         verbose = True
@@ -81,7 +88,7 @@ def setup_ui(args):
 
 
 @main_wrapper
-def main(args=None):
+def main(args: ArgsList = None) -> None:
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--verbose", help="Show debug messages",
@@ -142,15 +149,15 @@ def main(args=None):
     workspace_subparser(subparsers, "status")
     workspace_subparser(subparsers, "sync")
 
-    args = parser.parse_args(args=args)
-    setup_ui(args)
+    args_ns = parser.parse_args(args=args)  # type: argparse.Namespace
+    setup_ui(args_ns)
 
-    command = args.command
+    command = args_ns.command
     if not command:
         parser.print_help()
         sys.exit(1)
     module = importlib.import_module("tsrc.cli.%s" % command)
     if command == "foreach":
-        fix_cmd_args_for_foreach(args, foreach_parser)
+        fix_cmd_args_for_foreach(args_ns, foreach_parser)
 
-    return module.main(args)
+    return module.main(args_ns)  # type: ignore

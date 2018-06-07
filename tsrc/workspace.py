@@ -4,10 +4,13 @@ Mostly used by tsrc/cli.py
 
 """
 
+import argparse
 import stat
 import textwrap
+from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType
 
 import attr
+from path import Path
 import ruamel.yaml
 import schema
 import ui
@@ -16,6 +19,9 @@ import tsrc
 import tsrc.executor
 import tsrc.git
 import tsrc.manifest
+
+# pylint: disable=pointless-statement
+Any, Dict, Optional
 
 OPTIONS_SCHEMA = schema.Schema({
     "url": str,
@@ -29,14 +35,14 @@ OPTIONS_SCHEMA = schema.Schema({
 # pylint: disable=too-few-public-methods
 @attr.s
 class Options:
-    url = attr.ib(default=None)
-    branch = attr.ib(default="master")
-    tag = attr.ib(default=None)
-    shallow = attr.ib(default=False)
-    groups = attr.ib(default=list())
+    url = attr.ib(default=None)  # type: str
+    branch = attr.ib(default="master")  # type: str
+    tag = attr.ib(default=None)  # type: Optional[str]
+    shallow = attr.ib(default=False)  # type: bool
+    groups = attr.ib(default=list())  # type: List[str]
 
 
-def options_from_dict(as_dict):
+def options_from_dict(as_dict: dict) -> Options:
     res = Options()
     res.url = as_dict["url"]
     res.branch = as_dict.get("branch", "master")
@@ -46,13 +52,13 @@ def options_from_dict(as_dict):
     return res
 
 
-def options_from_args(args):
-    as_dict = vars(args)
+def options_from_args(args: argparse.Namespace) -> Options:
+    as_dict = vars(args)  # type: dict
     return options_from_dict(as_dict)
 
 
-def options_from_file(cfg_path):
-    as_dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)
+def options_from_file(cfg_path: Path) -> Options:
+    as_dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)  # type: dict
     return options_from_dict(as_dict)
 
 
@@ -61,55 +67,58 @@ class LocalManifest:
     hidden <workspace>/.tsrc directory, along with its configuration
 
     """
-    def __init__(self, workspace_path):
+    def __init__(self, workspace_path: Path) -> None:
         hidden_path = workspace_path.joinpath(".tsrc")
         self.clone_path = hidden_path.joinpath("manifest")
         self.cfg_path = hidden_path.joinpath("manifest.yml")
-        self.manifest = None
+        self.manifest = None  # type: Optional[tsrc.manifest.Manifest]
 
     @property
-    def branch(self):
+    def branch(self) -> str:
         return self.load_config().branch
 
     @property
-    def shallow(self):
+    def shallow(self) -> bool:
         return self.load_config().shallow
 
     @property
-    def copyfiles(self):
+    def copyfiles(self) -> List[Tuple[str, str]]:
+        assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.copyfiles
 
     @property
-    def active_groups(self):
+    def active_groups(self) -> List[str]:
         return self.load_config().groups
 
-    def get_repos(self):
+    def get_repos(self) -> List[tsrc.Repo]:
+        assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.get_repos(groups=self.active_groups)
 
-    def load(self):
+    def load(self) -> None:
         yml_path = self.clone_path.joinpath("manifest.yml")
         if not yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(yml_path))
         self.manifest = tsrc.manifest.load(yml_path)
 
-    def get_gitlab_url(self):
+    def get_gitlab_url(self) -> str:
         assert self.manifest, "manifest is empty. Did you call load()?"
         gitlab_config = self.manifest.gitlab
         if not gitlab_config:
             raise tsrc.Error("No gitlab configuration found in manifest")
-        return gitlab_config["url"]
+        return cast(str, gitlab_config["url"])
 
-    def get_url(self, src):
+    def get_url(self, src: str) -> str:
+        assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.get_url(src)
 
-    def configure(self, options):
+    def configure(self, options: Options) -> None:
         if not options.url:
             raise tsrc.Error("Manifest URL is required")
         self._ensure_git_state(options)
         self.save_config(options)
 
-    def update(self):
+    def update(self) -> None:
         ui.info_2("Updating manifest")
         if not self.clone_path.exists():
             message = "Could not find manifest in {}. "
@@ -120,8 +129,8 @@ class LocalManifest:
         cmd = ("reset", "--hard", "@{u}")
         tsrc.git.run_git(self.clone_path, *cmd)
 
-    def save_config(self, options):
-        config = dict()
+    def save_config(self, options: Options) -> None:
+        config = dict()  # type: Dict[str, Any]
         config["url"] = options.url
         config["branch"] = options.branch
         if options.tag:
@@ -132,16 +141,16 @@ class LocalManifest:
         with self.cfg_path.open("w") as fp:
             ruamel.yaml.dump(config, fp)
 
-    def load_config(self):
+    def load_config(self) -> Options:
         return options_from_file(self.cfg_path)
 
-    def _ensure_git_state(self, options):
+    def _ensure_git_state(self, options: Options) -> None:
         if self.clone_path.exists():
             self._reset_manifest_clone(options)
         else:
             self._clone_manifest(options)
 
-    def _reset_manifest_clone(self, options):
+    def _reset_manifest_clone(self, options: Options) -> None:
         tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", options.url)
 
         tsrc.git.run_git(self.clone_path, "fetch")
@@ -156,52 +165,52 @@ class LocalManifest:
             ref = "origin/%s" % options.branch
         tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
 
-    def _clone_manifest(self, options):
+    def _clone_manifest(self, options: Options) -> None:
         parent, name = self.clone_path.splitpath()
         parent.makedirs_p()
-        ref = None
+        ref = ""  # type: str
         if options.tag:
             ref = options.tag
         elif options.branch:
             ref = options.branch
-        args = ("clone", options.url, name)
+        args = ["clone", options.url, name]
         if ref:
-            args += ("--branch", ref)
+            args += ["--branch", ref]
         tsrc.git.run_git(self.clone_path.parent, *args)
 
 
 class Workspace():
-    def __init__(self, root_path):
+    def __init__(self, root_path: Path) -> None:
         self.root_path = root_path
         self.local_manifest = LocalManifest(root_path)
 
-    def joinpath(self, *parts):
+    def joinpath(self, *parts: str) -> Path:
         return self.root_path.joinpath(*parts)
 
-    def get_repos(self):
+    def get_repos(self) -> List[tsrc.Repo]:
         return self.local_manifest.get_repos()
 
-    def load_manifest(self):
+    def load_manifest(self) -> None:
         self.local_manifest.load()
 
-    def get_gitlab_url(self):
+    def get_gitlab_url(self) -> str:
         return self.local_manifest.get_gitlab_url()
 
-    def configure_manifest(self, manifest_options):
+    def configure_manifest(self, manifest_options: Options) -> None:
         self.local_manifest.configure(manifest_options)
 
-    def update_manifest(self):
+    def update_manifest(self) -> None:
         self.local_manifest.update()
 
     @property
-    def active_groups(self):
+    def active_groups(self) -> List[str]:
         return self.local_manifest.active_groups
 
     @property
-    def shallow(self):
+    def shallow(self) -> bool:
         return self.local_manifest.shallow
 
-    def clone_missing(self):
+    def clone_missing(self) -> None:
         """ Clone missing repos.
 
         Called at the beginning of `tsrc init` and `tsrc sync`
@@ -215,43 +224,45 @@ class Workspace():
         cloner = Cloner(self)
         tsrc.executor.run_sequence(to_clone, cloner)
 
-    def set_remotes(self):
+    def set_remotes(self) -> None:
         remote_setter = RemoteSetter(self)
         tsrc.executor.run_sequence(self.get_repos(), remote_setter)
 
-    def copy_files(self):
+    def copy_files(self) -> None:
         file_copier = FileCopier(self)
         tsrc.executor.run_sequence(self.local_manifest.copyfiles, file_copier)
 
-    def sync(self):
+    def sync(self) -> None:
         syncer = Syncer(self)
         try:
             tsrc.executor.run_sequence(self.get_repos(), syncer)
         finally:
             syncer.display_bad_branches()
 
-    def enumerate_repos(self):
+    def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
         """ Yield (index, repo, full_path) for all the repos """
         for i, repo in enumerate(self.get_repos()):
             full_path = self.joinpath(repo.src)
             yield (i, repo, full_path)
 
-    def get_url(self, src):
+    def get_url(self, src: str) -> str:
         """ Return the url of the project in `src` """
         return self.local_manifest.get_url(src)
 
 
-class Cloner(tsrc.executor.Task):
-    def __init__(self, workspace):
+class Cloner(tsrc.executor.Task[tsrc.Repo]):
+    def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def description(self):
+    # pylint: disable=no-self-use
+    def description(self) -> str:
         return "Cloning missing repos"
 
-    def display_item(self, repo):
+    # pylint: disable=no-self-use
+    def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def check_shallow_with_sha1(self, repo):
+    def check_shallow_with_sha1(self, repo: tsrc.Repo) -> None:
         if not repo.sha1:
             return
         if self.workspace.shallow:
@@ -262,7 +273,7 @@ class Cloner(tsrc.executor.Task):
             message = message.format(repo=repo)
             ui.fatal(message)
 
-    def clone_repo(self, repo):
+    def clone_repo(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
@@ -282,7 +293,7 @@ class Cloner(tsrc.executor.Task):
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
 
-    def reset_repo(self, repo):
+    def reset_repo(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace.joinpath(repo.src)
         ref = repo.sha1
         if ref:
@@ -292,25 +303,30 @@ class Cloner(tsrc.executor.Task):
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
 
-    def process(self, repo):
+    def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
         self.check_shallow_with_sha1(repo)
         self.clone_repo(repo)
         self.reset_repo(repo)
 
 
-class FileCopier(tsrc.executor.Task):
-    def __init__(self, workspace):
+Copy = NewType('Copy', Tuple[str, str])
+
+
+class FileCopier(tsrc.executor.Task[Copy]):
+    def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def description(self):
+    # pylint: disable=no-self-use
+    def description(self) -> str:
         return "Copying files"
 
-    def display_item(self, item):
+    # pylint: disable=no-self-use
+    def display_item(self, item: Copy) -> str:
         src, dest = item
         return "%s -> %s" % (src, dest)
 
-    def process(self, item):
+    def process(self, item: Copy) -> None:
         src, dest = item
         ui.info(src, "->", dest)
         try:
@@ -326,26 +342,29 @@ class FileCopier(tsrc.executor.Task):
             raise tsrc.Error(str(e))
 
 
-class RemoteSetter(tsrc.executor.Task):
-    def __init__(self, workspace):
+class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
+    def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def quiet(self):
+    # pylint: disable=no-self-use
+    def quiet(self) -> bool:
         return True
 
-    def description(self):
+    # pylint: disable=no-self-use
+    def description(self) -> str:
         return "Setting remote URLs"
 
-    def display_item(self, repo):
+    # pylint: disable=no-self-use
+    def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def process(self, repo):
+    def process(self, repo: tsrc.Repo) -> None:
         try:
             self.try_process_repo(repo)
         except Exception as error:
             raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url, error)
 
-    def try_process_repo(self, repo):
+    def try_process_repo(self, repo: tsrc.Repo) -> None:
         full_path = self.workspace.joinpath(repo.src)
         rc, old_url = tsrc.git.run_git_captured(
             full_path,
@@ -357,13 +376,13 @@ class RemoteSetter(tsrc.executor.Task):
         else:
             self.process_repo_add_remote(repo)
 
-    def process_repo_remote_exists(self, repo, *, old_url):
+    def process_repo_remote_exists(self, repo: tsrc.Repo, *, old_url: str) -> None:
         full_path = self.workspace.joinpath(repo.src)
         if old_url != repo.url:
             ui.info_2(repo.src, old_url, "->", repo.url)
             tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
 
-    def process_repo_add_remote(self, repo):
+    def process_repo_add_remote(self, repo: tsrc.Repo) -> None:
         full_path = self.workspace.joinpath(repo.src)
         tsrc.git.run_git(full_path, "remote", "add", "origin", repo.url)
 
@@ -372,18 +391,21 @@ class BadBranches(tsrc.Error):
     pass
 
 
-class Syncer(tsrc.executor.Task):
-    def __init__(self, workspace):
+class Syncer(tsrc.executor.Task[tsrc.Repo]):
+    def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
-        self.bad_branches = list()
+        self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
-    def description(self):
+    # pylint: disable=no-self-use
+    def description(self) -> str:
         return "Synchronize workspace"
 
-    def display_item(self, repo):
+    # pylint: disable=no-self-use
+    def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def process(self, repo):
+    # pylint: disable=no-self-use
+    def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)
         self.fetch(repo_path)
@@ -400,25 +422,26 @@ class Syncer(tsrc.executor.Task):
             self.check_branch(repo, repo_path)
             self.sync_repo_to_branch(repo_path)
 
-    def check_branch(self, repo, repo_path):
+    def check_branch(self, repo: tsrc.Repo, repo_path: Path) -> None:
         current_branch = None
         try:
             current_branch = tsrc.git.get_current_branch(repo_path)
         except tsrc.Error:
             raise tsrc.Error("Not on any branch")
 
+        # FIXME: is repo.branch allowed to be None ?
         if current_branch and current_branch != repo.branch:
-            self.bad_branches.append((repo.src, current_branch, repo.branch))
+            self.bad_branches.append((repo.src, current_branch, repo.branch))  # type: ignore
 
     @staticmethod
-    def fetch(repo_path):
+    def fetch(repo_path: Path) -> None:
         try:
             tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", "origin")
         except tsrc.Error:
             raise tsrc.Error("fetch failed")
 
     @staticmethod
-    def sync_repo_to_ref(repo_path, ref):
+    def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
@@ -429,13 +452,13 @@ class Syncer(tsrc.executor.Task):
             raise tsrc.Error("updating ref failed")
 
     @staticmethod
-    def sync_repo_to_branch(repo_path):
+    def sync_repo_to_branch(repo_path: Path) -> None:
         try:
             tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{u}")
         except tsrc.Error:
             raise tsrc.Error("updating branch failed")
 
-    def display_bad_branches(self):
+    def display_bad_branches(self) -> None:
         if not self.bad_branches:
             return
         ui.error("Some projects were not on the correct branch")

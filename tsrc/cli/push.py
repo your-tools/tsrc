@@ -1,15 +1,21 @@
 """ Common code for push to GitHub or GitLab """
 
 import abc
+import argparse
 import importlib
 import re
+from typing import cast, Iterable, Optional
 
+from path import Path
 import ui
 
 import tsrc.git
 
+# pylint: disable=pointless-statement
+Optional
 
-def service_from_url(url):
+
+def service_from_url(url: str) -> str:
     """
     >>> service_from_url("git@github.com:foo/bar")
     'github'
@@ -23,7 +29,7 @@ def service_from_url(url):
         return "gitlab"
 
 
-def project_name_from_url(url):
+def project_name_from_url(url: str) -> str:
     """
     >>> project_name_from_url('git@example.com:foo/bar.git')
     'foo/bar'
@@ -43,16 +49,16 @@ def project_name_from_url(url):
 
 # pylint: disable=too-few-public-methods
 class RepositoryInfo:
-    def __init__(self, working_path=None):
-        self.project_name = None
-        self.url = None
-        self.path = None
-        self.current_branch = None
-        self.service = None
-        self.tracking_ref = None
+    def __init__(self, working_path: Path = None) -> None:
+        self.project_name = None  # type: Optional[str]
+        self.url = None  # type: Optional[str]
+        self.path = None  # type: Optional[Path]
+        self.current_branch = None  # type: Optional[str]
+        self.service = None  # type: Optional[str]
+        self.tracking_ref = None  # type: Optional[str]
         self.read_working_path(working_path=working_path)
 
-    def read_working_path(self, working_path=None):
+    def read_working_path(self, working_path: Path = None) -> None:
         self.path = tsrc.git.get_repo_root(working_path=working_path)
         self.current_branch = tsrc.git.get_current_branch(self.path)
         rc, out = tsrc.git.run_git_captured(self.path, "remote", "get-url", "origin", check=False)
@@ -66,64 +72,64 @@ class RepositoryInfo:
 
 
 class PushAction(metaclass=abc.ABCMeta):
-    def __init__(self, repository_info, args):
+    def __init__(self, repository_info: RepositoryInfo, args: argparse.Namespace) -> None:
         self.args = args
         self.repository_info = repository_info
 
     @property
-    def repo_path(self):
+    def repo_path(self) -> Path:
         return self.repository_info.path
 
     @property
-    def tracking_ref(self):
+    def tracking_ref(self) -> Optional[str]:
         return self.repository_info.tracking_ref
 
     @property
-    def remote_name(self):
+    def remote_name(self) -> Optional[str]:
         if not self.tracking_ref:
             return None
         return self.tracking_ref.split("/", maxsplit=1)[0]
 
     @property
-    def current_branch(self):
+    def current_branch(self) -> Optional[str]:
         return self.repository_info.current_branch
 
     @property
-    def remote_branch(self):
+    def remote_branch(self) -> Optional[str]:
         if not self.tracking_ref:
             return self.current_branch
         else:
             return self.tracking_ref.split("/", maxsplit=1)[1]
 
     @property
-    def requested_target_branch(self):
-        return self.args.target_branch
+    def requested_target_branch(self) -> Optional[str]:
+        return cast(Optional[str], self.args.target_branch)
 
     @property
-    def requested_title(self):
-        return self.args.title
+    def requested_title(self) -> Optional[str]:
+        return cast(Optional[str], self.args.title)
 
     @property
-    def requested_reviewers(self):
-        return self.args.reviewers
+    def requested_reviewers(self) -> Iterable[str]:
+        return cast(Iterable[str], self.args.reviewers)
 
     @property
-    def requested_assignee(self):
-        return self.args.assignee
+    def requested_assignee(self) -> Optional[str]:
+        return cast(Optional[str], self.args.assignee)
 
     @property
-    def project_name(self):
+    def project_name(self) -> Optional[str]:
         return self.repository_info.project_name
 
     @abc.abstractmethod
-    def setup_service(self):
+    def setup_service(self) -> None:
         pass
 
     @abc.abstractmethod
-    def post_push(self):
+    def post_push(self) -> None:
         pass
 
-    def push(self):
+    def push(self) -> None:
         ui.info_2("Running git push")
         remote_name = self.remote_name or "origin"
         if self.args.push_spec:
@@ -135,15 +141,15 @@ class PushAction(metaclass=abc.ABCMeta):
             cmd.append("--force")
         tsrc.git.run_git(self.repo_path, *cmd)
 
-    def execute(self):
+    def execute(self) -> None:
         self.setup_service()
         self.push()
         self.post_push()
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
     repository_info = RepositoryInfo()
     service_name = repository_info.service
     module = importlib.import_module("tsrc.cli.push_%s" % service_name)
-    push_action = module.PushAction(repository_info, args)
+    push_action = module.PushAction(repository_info, args)  # type: ignore
     push_action.execute()

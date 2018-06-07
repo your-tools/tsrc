@@ -1,14 +1,28 @@
 """ Support for finding elements inside a list of groups """
 
+from typing import Dict, Generic, Iterable, List, Optional, Set, TypeVar
 import tsrc
+
+# pylint: disable=pointless-statement
+Dict
+T = TypeVar('T')
 
 
 class GroupError(tsrc.Error):
     pass
 
 
+# pylint: disable=too-few-public-methods
+class Group(Generic[T]):
+    def __init__(self, name: str, elements: Iterable[T],
+                 includes: Optional[List[str]] = None) -> None:
+        self.name = name
+        self.elements = elements
+        self.includes = includes or list()
+
+
 class GroupNotFound(GroupError):
-    def __init__(self, group_name, parent_group=None):
+    def __init__(self, group_name: str, parent_group: Optional[Group] = None) -> None:
         self.group_name = group_name
         self.parent_group = parent_group
         if self.parent_group:
@@ -20,45 +34,40 @@ class GroupNotFound(GroupError):
 
 
 class UnknownElement(GroupError):
-    def __init__(self, group_name, element):
+    def __init__(self, group_name: str, element: T) -> None:
         self.group_name = group_name
         self.element = element
         message = "%s: unknown element: %s" % (group_name, element)
         super().__init__(message)
 
 
-# pylint: disable=too-few-public-methods
-class Group:
-    def __init__(self, name, elements, includes=None):
-        self.name = name
-        self.elements = elements
-        self.includes = includes or list()
-
-
-class GroupList:
-    def __init__(self, *, elements):
-        self.groups = dict()
+class GroupList(Generic[T]):
+    def __init__(self, *, elements: Iterable[T]) -> None:
+        self.groups = dict()  # type: Dict[str, Group]
         self.all_elements = elements
-        self._groups_seen = set()
+        self._groups_seen = set()  # type: Set[str]
 
-    def add(self, name, elements, includes=None):
+    def add(self, name: str, elements: Iterable[T],
+            includes: Optional[List[str]] = None) -> None:
         for element in elements:
             if element not in self.all_elements:
                 raise UnknownElement(name, element)
         self.groups[name] = Group(name, elements, includes=includes)
 
-    def get_group(self, name):
+    def get_group(self, name: str) -> Optional[Group]:
         return self.groups.get(name)
 
-    def get_elements(self, groups=None):
+    def get_elements(self, groups: Optional[List[str]] = None) -> Iterable[T]:
         self._groups_seen = set()
-        res = set()
+        res = set()  # type: Set[T]
         if not groups:
             return self.all_elements
         self._rec_get_elements(res, groups, parent_group=None)
         return res
 
-    def _rec_get_elements(self, res, group_names, *, parent_group):
+    def _rec_get_elements(self, res: Set[T],
+                          group_names: List[str], *,
+                          parent_group: Optional[Group]) -> None:
         for group_name in group_names:
             if group_name in self._groups_seen:
                 return

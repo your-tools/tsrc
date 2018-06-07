@@ -1,11 +1,15 @@
-import types
-
+from path import Path
 import pytest
+from typing import Any
+from types import SimpleNamespace
+
+from tsrc.test.helpers.cli import CLI
+from tsrc.test.helpers.git_server import GitServer
 
 
 @pytest.fixture
-def push_args():
-    args = types.SimpleNamespace()
+def push_args() -> SimpleNamespace:
+    args = SimpleNamespace()
     args.accept = False
     args.assignee = None
     args.close = False
@@ -22,7 +26,7 @@ def push_args():
 
 
 @pytest.fixture
-def repo_path(monkeypatch, git_server, tsrc_cli, workspace_path):
+def repo_path(monkeypatch: Any, git_server: GitServer, tsrc_cli: CLI, workspace_path: Path) -> Path:
     """ Path to a freshly cloned repository """
     git_server.add_repo("owner/project")
     manifest_url = git_server.manifest_url

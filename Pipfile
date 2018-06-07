@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 attrs = "*"
 colored-traceback = "*"
 colorama = "*"
@@ -20,7 +17,7 @@ schema = "*"
 tabulate = "*"
 unidecode = "*"
 xdg = "*"
-
+typing = "*"
 
 [dev-packages]
 apipkg = "*"
@@ -40,3 +37,4 @@ pytest-cov = "*"
 pytest-sugar = "*"
 pytest-xdist = "*"
 requests = "*"
+mypy = "*"

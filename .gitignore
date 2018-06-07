@@ -1,10 +1,12 @@
 __pycache__
 *.egg-info
 .cache
-.coverage
+.coverage*
 .ci
 .tox
 htmlcov
 dist/
 build/
 site/
+
+.mypy_cache/

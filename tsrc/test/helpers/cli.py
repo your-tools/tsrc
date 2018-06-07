@@ -1,3 +1,4 @@
+from typing import Any
 import os
 from path import Path
 import pytest
@@ -6,12 +7,12 @@ import tsrc.cli
 
 
 class CLI():
-    def __init__(self):
+    def __init__(self) -> None:
         self.workspace_path = Path(os.getcwd())
 
-    def run(self, *args, expect_fail=False):
+    def run(self, *args: str, expect_fail: bool = False) -> None:
         try:
-            tsrc.cli.main.main(args=args)
+            tsrc.cli.main.main(args=args)  # type: ignore
             rc = 0
         except SystemExit as e:
             rc = e.code
@@ -22,7 +23,7 @@ class CLI():
 
 
 @pytest.fixture
-def tsrc_cli(workspace_path, monkeypatch):
+def tsrc_cli(workspace_path: Path, monkeypatch: Any) -> CLI:
     monkeypatch.chdir(workspace_path)
     res = CLI()
     return res
