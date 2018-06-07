@@ -38,7 +38,7 @@ def init_checks():
     env = os.environ.copy()
     env["MYPYPATH"] = "stubs/"
     append_check("mypy",        "mypy", "tsrc",
-                                "--strict-optional", "--ignore-missing-imports", env=env)
+                                "--strict", "--ignore-missing-imports", env=env)
 
     append_check("pylint",      "pylint", "tsrc", "--score", "no")
     append_check("pytest",      *pytest_args)
