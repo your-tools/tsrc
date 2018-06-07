@@ -1,4 +1,4 @@
-from typing import Any
+from typing import cast, Any
 
 
 import tsrc.cli
@@ -9,7 +9,8 @@ from path import Path
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
-    return workspace_path.joinpath(repo).exists()  # type: ignore
+    res = workspace_path.joinpath(repo).exists()
+    return cast(bool, res)
 
 
 def assert_cloned(workspace_path: Path, repo: str) -> None:

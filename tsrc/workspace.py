@@ -7,7 +7,7 @@ Mostly used by tsrc/cli.py
 import argparse
 import stat
 import textwrap
-from typing import Iterable, List, Tuple, Dict, Any, Optional, NewType
+from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType
 
 import attr
 from path import Path
@@ -106,7 +106,7 @@ class LocalManifest:
         gitlab_config = self.manifest.gitlab
         if not gitlab_config:
             raise tsrc.Error("No gitlab configuration found in manifest")
-        return gitlab_config["url"]  # type: ignore
+        return cast(str, gitlab_config["url"])
 
     def get_url(self, src: str) -> str:
         assert self.manifest, "manifest is empty. Did you call load()?"
@@ -430,7 +430,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         except tsrc.Error:
             raise tsrc.Error("Not on any branch")
 
-        # is repo.branch allowed to be None ?
+        # FIXME: is repo.branch allowed to be None ?
         if current_branch and current_branch != repo.branch:
             self.bad_branches.append((repo.src, current_branch, repo.branch))  # type: ignore
 

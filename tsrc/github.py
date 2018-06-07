@@ -2,7 +2,7 @@
 
 import getpass
 import uuid
-from typing import List, Optional
+from typing import cast, List, Optional
 
 import github3
 from github3.repos.repo import Repository
@@ -31,7 +31,7 @@ def get_previous_token() -> Optional[str]:
     github_auth = auth.get("github")
     if not github_auth:
         return None
-    return github_auth.get("token")  # type: ignore
+    return cast(Optional[str], github_auth.get("token"))
 
 
 def generate_token() -> str:
@@ -46,13 +46,13 @@ def generate_token() -> str:
     note = "tsrc-" + str(uuid.uuid4())
     note_url = "https://supertanker.github.io/tsrc"
 
-    def ask_2fa() -> None:
-        return ui.ask_string("2FA code: ")  # type: ignore
+    def ask_2fa() -> str:
+        return cast(str, ui.ask_string("2FA code: "))
 
     authorization = github3.authorize(username, password, scopes,
                                       note=note, note_url=note_url,
                                       two_factor_callback=ask_2fa)
-    return authorization.token  # type: ignore
+    return cast(str, authorization.token)
 
 
 def save_token(token: str) -> None:

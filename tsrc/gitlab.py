@@ -1,7 +1,7 @@
 """ Tiny wrapper for gitlab REST API """
 
 import json
-from typing import Any, Dict, Iterable, List, Optional, NewType
+from typing import cast, Any, Dict, Iterable, List, Optional, NewType
 import urllib.parse
 
 import requests
@@ -130,7 +130,7 @@ class GitLabHelper():
             "per_page": "100"  # Maximum number of items allowed in pagination
         })
         previous_mrs = list()  # type: List[MergeRequest]
-        previous_mrs = self.make_paginated_get_request(url, params=params)  # type: ignore
+        previous_mrs = cast(List[MergeRequest], self.make_paginated_get_request(url, params=params))
         for mr in previous_mrs:
             if mr["source_branch"] == source_branch:
                 return mr
@@ -148,14 +148,14 @@ class GitLabHelper():
         })
         result = self.make_request("POST", url, data=data)
         ui.info("done", ui.check)
-        return result  # type: ignore
+        return cast(MergeRequest, result)
 
     def update_merge_request(self, merge_request: MergeRequest,
                              **kwargs: str) -> MergeRequest:
         project_id = merge_request["target_project_id"]
         merge_request_iid = merge_request["iid"]
         url = "/projects/%s/merge_requests/%s" % (project_id, merge_request_iid)
-        return self.make_request("PUT", url, data=RequestData(kwargs))  # type: ignore
+        return cast(MergeRequest, self.make_request("PUT", url, data=RequestData(kwargs)))
 
     def accept_merge_request(self, merge_request: MergeRequest) -> None:
         project_id = merge_request["project_id"]
@@ -175,13 +175,14 @@ class GitLabHelper():
         if total > 100:
             raise TooManyUsers()
         else:
-            return response.json()  # type: ignore
+            return cast(List[str], response.json())
 
     def get_group_members(self, group: str, query: Optional[str] = None) -> List[Any]:
         params = RequestParams({"query": query})
-        return self.make_request("GET", "/groups/%s/members" % group, params=params)  # type: ignore
+        response = self.make_request("GET", "/groups/%s/members" % group, params=params)
+        return cast(List[Any], response)
 
     def get_project_members(self, project_id: int, query: Optional[str] = None) -> List[Any]:
         params = RequestParams({"query": query})
         res = self.make_request("GET", "/projects/%s/members" % project_id, params=params)
-        return res  # type: ignore
+        return cast(List[Any], res)

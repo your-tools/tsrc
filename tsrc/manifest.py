@@ -2,7 +2,7 @@
 
 import operator
 import os
-from typing import Any, Dict, List, NewType, Optional, Tuple
+from typing import cast, Any, Dict, List, NewType, Optional, Tuple
 
 from path import Path
 import schema
@@ -128,6 +128,7 @@ def load(manifest_path: Path) -> Manifest:
     })
     parsed = tsrc.config.parse_config_file(manifest_path, manifest_schema)
     parsed = ManifestConfig(parsed)  # type: ignore
+    as_manifest_config = cast(ManifestConfig, parsed)
     res = Manifest()
-    res.load(parsed)  # type: ignore
+    res.load(as_manifest_config)
     return res
