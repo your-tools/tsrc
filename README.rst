@@ -99,11 +99,11 @@ Managing Pull Requests on GitHub
 
 * Start working on your branch
 
-* Run `tsrc push` once. You will be prompted for your login and password (then a token will be saved so you don't have to authenticate again). The pull request will be created.
+* Run ``tsrc push`` once. You will be prompted for your login and password (then a token will be saved so you don't have to authenticate again). The pull request will be created.
 
-You can use the `--reviewer` option several times to request reviews from your team mates. You can also assign someone to the pull request with the `--assign` option.
+You can use the ``--reviewer`` option several times to request reviews from your team mates. You can also assign someone to the pull request with the ``--assign`` option.
 
-Then you can use `tsrc push --merge` to merge the pull request, or `tsrc push --close` to close it.
+Then you can use ``tsrc push --merge`` to merge the pull request, or ``tsrc push --close`` to close it.
 
 
 Why not Google repo?
