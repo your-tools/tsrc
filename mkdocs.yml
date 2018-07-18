@@ -20,7 +20,7 @@ pages:
 
 - Getting started:
   - Basic usage: guide/basics.md
-  - Handling GitLab merge requests: guide/merge_requests.md
+  - Automating code review: guide/review.md
 
 
 - Reference:
