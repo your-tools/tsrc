@@ -40,6 +40,8 @@ Here's how you can create and assign a merge request:
 $ tsrc push [--assignee ASSIGNEE]
 ```
 
+If `ASSIGNEE` is set to a valid GitLab username, it will be used to assign the merge request.
+
 
 When the review is done, you can accept it and let GitLab merge the branch once
 the CI pipeline passes with the following command:
@@ -60,15 +62,15 @@ Here's how to create a pull request and request reviewers:
 
 ```bash
 # start working on your branch
-$ tsrc push [--reviewer REVIEWER ...] [--assignee ASSIGNEE}
+$ tsrc push [--reviewer REVIEWER] [--assignee ASSIGNEE]
 ```
-Here `REVIEWER` should be the username of a member of your organization.
+Here `REVIEWER` and `ASSIGNEE` should be usernames of members of your organization.
 
 You can specify the `--reviewer` option several times, and you can also assign someone to the pull request with the `--assignee` option.
 
 
 !!! note
-    `tsrc` does work across repositories yet. See [issue #73](https://github.com/SuperTanker/tsrc/issues/73).
+    `tsrc` does not work across repositories yet. See [issue #73](https://github.com/SuperTanker/tsrc/issues/73).
 
 
 ## Merging or closing a pull request
