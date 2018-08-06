@@ -63,7 +63,7 @@ class Manifest():
             self.copyfiles.append((src_copy, dest_copy))
 
     def _handle_groups(self, config: ManifestConfig) -> None:
-        elements = set([repo.src for repo in self._repos])
+        elements = set(repo.src for repo in self._repos)
         self.group_list = tsrc.groups.GroupList(elements=elements)
         groups_config = config.get("groups", dict())
         for name, group_config in groups_config.items():
