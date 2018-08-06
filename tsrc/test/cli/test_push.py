@@ -1,4 +1,4 @@
-from types import SimpleNamespace
+import argparse
 
 from path import Path
 import tsrc.cli.push
@@ -12,7 +12,7 @@ class DummyPush(tsrc.cli.push.PushAction):
         pass
 
 
-def test_push_use_tracked_branch(repo_path: Path, push_args: SimpleNamespace) -> None:
+def test_push_use_tracked_branch(repo_path: Path, push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "local")
     tsrc.git.run_git(repo_path, "push", "-u", "origin", "local:remote")
     repository_info = tsrc.cli.push.RepositoryInfo(repo_path)
@@ -23,7 +23,7 @@ def test_push_use_tracked_branch(repo_path: Path, push_args: SimpleNamespace) ->
     assert "heads/remote" in out
 
 
-def test_push_use_given_push_spec(repo_path: Path, push_args: SimpleNamespace) -> None:
+def test_push_use_given_push_spec(repo_path: Path, push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "local")
     push_args.push_spec = "local:remote"
     repository_info = tsrc.cli.push.RepositoryInfo(repo_path)

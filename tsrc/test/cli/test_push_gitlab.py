@@ -1,6 +1,6 @@
+import argparse
 import copy
 from typing import Any, List
-from types import SimpleNamespace
 
 from path import Path
 import mock
@@ -62,7 +62,7 @@ def gitlab_mock() -> Any:
     return gl_mock
 
 
-def execute_push(repo_path: Path, push_args: SimpleNamespace,
+def execute_push(repo_path: Path, push_args: argparse.Namespace,
                  gitlab_mock: GitLabHelper) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
@@ -71,7 +71,7 @@ def execute_push(repo_path: Path, push_args: SimpleNamespace,
 
 
 def test_creating_merge_request_explicit_target_branch(
-        repo_path: Path, tsrc_cli: CLI, gitlab_mock: Any, push_args: SimpleNamespace) -> None:
+        repo_path: Path, tsrc_cli: CLI, gitlab_mock: Any, push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -99,7 +99,7 @@ def test_creating_merge_request_explicit_target_branch(
 
 
 def test_creating_merge_request_uses_default_branch(
-        repo_path: Path, tsrc_cli: CLI, gitlab_mock: Any, push_args: SimpleNamespace) -> None:
+        repo_path: Path, tsrc_cli: CLI, gitlab_mock: Any, push_args: argparse.Namespace) -> None:
     gitlab_mock.get_default_branch.return_value = "devel"
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
@@ -119,7 +119,7 @@ def test_creating_merge_request_uses_default_branch(
 
 
 def test_existing_merge_request(repo_path: Path, tsrc_cli: CLI, gitlab_mock:
-                                Any, push_args: SimpleNamespace) -> None:
+                                Any, push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -139,7 +139,7 @@ def test_existing_merge_request(repo_path: Path, tsrc_cli: CLI, gitlab_mock:
 
 
 def test_close_merge_request(repo_path: Path, tsrc_cli: CLI,
-                             gitlab_mock: Any, push_args: SimpleNamespace) -> None:
+                             gitlab_mock: Any, push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -155,7 +155,7 @@ def test_close_merge_request(repo_path: Path, tsrc_cli: CLI,
 
 
 def test_do_not_change_mr_target(repo_path: Path, tsrc_cli: CLI,
-                                 gitlab_mock: Any, push_args: SimpleNamespace) -> None:
+                                 gitlab_mock: Any, push_args: argparse.Namespace) -> None:
     mr_stub = copy.copy(MR_STUB)
     mr_stub["target_branch"] = "release/1.6.0"
     gitlab_mock.find_opened_merge_request.return_value = mr_stub
@@ -169,7 +169,7 @@ def test_do_not_change_mr_target(repo_path: Path, tsrc_cli: CLI,
 
 
 def test_accept_merge_request(repo_path: Path, tsrc_cli: CLI,
-                              gitlab_mock: Any, push_args: SimpleNamespace) -> None:
+                              gitlab_mock: Any, push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
@@ -183,7 +183,7 @@ def test_accept_merge_request(repo_path: Path, tsrc_cli: CLI,
 
 def test_unwipify_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
                                          gitlab_mock: Any,
-                                         push_args: SimpleNamespace) -> None:
+                                         push_args: argparse.Namespace) -> None:
     existing_mr = {
         "title": "WIP: nice title",
         "web_url": "http://example.com/42",
@@ -204,7 +204,7 @@ def test_unwipify_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
 
 def test_wipify_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
                                        gitlab_mock: Any,
-                                       push_args: SimpleNamespace) -> None:
+                                       push_args: argparse.Namespace) -> None:
     existing_mr = {
         "title": "not ready",
         "web_url": "http://example.com/42",

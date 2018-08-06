@@ -1,15 +1,15 @@
 from path import Path
 import pytest
 from typing import Any
-from types import SimpleNamespace
+import argparse
 
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
 
 @pytest.fixture
-def push_args() -> SimpleNamespace:
-    args = SimpleNamespace()
+def push_args() -> argparse.Namespace:
+    args = argparse.Namespace()
     args.accept = False
     args.assignee = None
     args.close = False
