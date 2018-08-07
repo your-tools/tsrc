@@ -9,13 +9,10 @@ import tsrc.git
 from tsrc.workspace import Workspace
 import tsrc.workspace
 
-from ui.tests.conftest import message_recorder
-from .helpers.git_server import git_server
-from .helpers.cli import tsrc_cli
-from .helpers.push import repo_path, push_args
-
-# silence pyflakes:
-message_recorder, git_server, tsrc_cli, repo_path, push_args
+from ui.tests.conftest import message_recorder  # noqa
+from .helpers.git_server import git_server  # noqa
+from .helpers.cli import tsrc_cli  # noqa
+from .helpers.push import repo_path, push_args  # noqa
 
 
 @pytest.fixture()

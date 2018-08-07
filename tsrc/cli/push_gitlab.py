@@ -2,7 +2,7 @@
 
 
 import argparse
-from typing import List, Optional, Set
+from typing import List, Optional, Set  # noqa
 
 import ui
 
@@ -13,8 +13,6 @@ from tsrc.gitlab import Assignee, GitLabHelper, MergeRequest
 import tsrc.git
 import tsrc.cli.push
 from tsrc.cli.push import RepositoryInfo
-
-_ = Set
 
 
 WIP_PREFIX = "WIP: "

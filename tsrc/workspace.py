@@ -7,7 +7,7 @@ Mostly used by tsrc/cli.py
 import argparse
 import stat
 import textwrap
-from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType
+from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType  # noqa
 
 import attr
 from path import Path
@@ -20,7 +20,6 @@ import tsrc.executor
 import tsrc.git
 import tsrc.manifest
 
-_ = Any, Dict, Optional
 
 OPTIONS_SCHEMA = schema.Schema({
     "url": str,

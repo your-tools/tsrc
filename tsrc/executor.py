@@ -1,14 +1,13 @@
 """ Helpers to run things on multiple repos and collect errors """
 
 import abc
-from typing import Generic, List, Tuple, TypeVar
+from typing import Generic, List, Tuple, TypeVar  # noqa
 
 import ui
 
 import tsrc
 
 
-_ = Tuple
 T = TypeVar('T')
 
 

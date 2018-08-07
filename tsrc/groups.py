@@ -1,9 +1,8 @@
 """ Support for finding elements inside a list of groups """
 
-from typing import Dict, Generic, Iterable, List, Optional, Set, TypeVar
+from typing import Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
 import tsrc
 
-_ = Dict
 T = TypeVar('T')
 
 

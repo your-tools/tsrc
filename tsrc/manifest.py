@@ -2,18 +2,16 @@
 
 import operator
 import os
-from typing import cast, Any, Dict, List, NewType, Optional, Tuple
+from typing import cast, Any, Dict, List, NewType, Optional, Tuple # noqa
 
 from path import Path
 import schema
 
 import tsrc
 import tsrc.config
-from tsrc.repo import Repo
+from tsrc.repo import Repo  # noqa
 import tsrc.groups
-from tsrc.groups import GroupList
-
-_ = GroupList, Repo, Tuple
+from tsrc.groups import GroupList  # noqa
 
 ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
 RepoConfig = NewType('RepoConfig', Dict[str, Any])

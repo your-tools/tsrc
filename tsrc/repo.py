@@ -1,9 +1,7 @@
 """ Repo value object """
 
 import attr
-from typing import Optional
-
-_ = Optional
+from typing import Optional  # noqa
 
 
 @attr.s(frozen=True)

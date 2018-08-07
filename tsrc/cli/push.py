@@ -11,8 +11,6 @@ import ui
 
 import tsrc.git
 
-_ = Optional
-
 
 def service_from_url(url: str) -> str:
     """

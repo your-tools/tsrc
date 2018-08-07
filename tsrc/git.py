@@ -3,14 +3,12 @@
 
 import os
 import subprocess
-from typing import Any, Dict, Iterable, Tuple, Optional
+from typing import Any, Dict, Iterable, Tuple, Optional  # noqa
 
 from path import Path
 import ui
 
 import tsrc
-
-_ = Any, Dict
 
 
 class GitError(tsrc.Error):
