@@ -28,6 +28,8 @@ coverage = "*"
 execnet = "*"
 mkdocs = "*"
 mock = "*"
+scandir = { version = "*", markers="python_version <= '3.4'" }
+pathlib2 = { version = "*", markers="python_version <= '3.5'" }
 py = "*"
 pytest = "*"
 pytest-cov = "*"
