@@ -1,15 +1,13 @@
 """ Helpers to run things on multiple repos and collect errors """
 
 import abc
-from typing import Generic, List, Tuple, TypeVar
+from typing import Generic, List, Tuple, TypeVar  # noqa
 
 import ui
 
 import tsrc
 
 
-# pylint: disable=pointless-statement
-Tuple
 T = TypeVar('T')
 
 
@@ -23,7 +21,6 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
     def description(self) -> str:
         pass
 
-    # pylint: disable=no-self-use
     def quiet(self) -> bool:
         return False
 

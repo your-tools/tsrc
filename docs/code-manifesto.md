@@ -1,6 +1,6 @@
 # Basics
 
-We use `pycodestyle` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
+We use `flake8` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
 In addition, every text file must be pushed using UNIX line endings. (On Windows, you are advised to set `core.autocrlf` to `true` in your git config file.)
 
@@ -114,8 +114,6 @@ if value == "option1" or value == "option2"
 # Doc strings and comments
 
 First off, bad comments are worse that no comments.
-
-However by default, `pylint` mandates that all public functions and methods (those that do not start with underscore) have a doc string. This is useful when you write a library, but for the code in `tsrc` this is useless and so we disable this rule in our `pylintrc`.
 
 Also note that you should use comments to explain **why**, never **what**. If the **what** is no clear, it means the behavior of the function or method cannot be easily understood by reading implementation, and so you should fix the implementation instead.
 

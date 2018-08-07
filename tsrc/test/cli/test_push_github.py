@@ -1,5 +1,5 @@
+import argparse
 from typing import Any
-from types import SimpleNamespace
 
 import github3
 import mock
@@ -19,7 +19,7 @@ def github_mock() -> Any:
     return github_mock
 
 
-def execute_push(repo_path: Path, push_args: SimpleNamespace, github_mock: Any) -> None:
+def execute_push(repo_path: Path, push_args: argparse.Namespace, github_mock: Any) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
     push_action = PushAction(repository_info, push_args, github_api=github_mock)
@@ -27,7 +27,7 @@ def execute_push(repo_path: Path, push_args: SimpleNamespace, github_mock: Any) 
 
 
 def test_create(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
-                push_args: SimpleNamespace) -> None:
+                push_args: argparse.Namespace) -> None:
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = list()
     mock_repo.owner = mock.Mock()
@@ -63,7 +63,7 @@ def test_create(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
         "request_url", data={"reviewers": ["reviewer1", "reviewer2"]})
 
 
-def test_push_custom_tracked_branch(repo_path: Path, push_args: SimpleNamespace,
+def test_push_custom_tracked_branch(repo_path: Path, push_args: argparse.Namespace,
                                     github_mock: Any) -> None:
     stub_repo = mock.Mock()
     stub_repo.pull_requests.return_value = list()
@@ -77,7 +77,7 @@ def test_push_custom_tracked_branch(repo_path: Path, push_args: SimpleNamespace,
     stub_repo.create_pull.assert_called_with("new feature", "master", "remote")
 
 
-def test_update_target_and_title(repo_path: Path, push_args: SimpleNamespace,
+def test_update_target_and_title(repo_path: Path, push_args: argparse.Namespace,
                                  github_mock: Any) -> None:
     opened_pr = mock.Mock()
     opened_pr.number = 2
@@ -101,7 +101,7 @@ def test_update_target_and_title(repo_path: Path, push_args: SimpleNamespace,
 
 
 def test_merge(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
-               push_args: SimpleNamespace) -> None:
+               push_args: argparse.Namespace) -> None:
     closed_pr = mock.Mock()
     closed_pr.number = 1
     closed_pr.state = "closed"
@@ -132,7 +132,7 @@ def test_merge(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
 
 
 def test_close(repo_path: Path, tsrc_cli: CLI,
-               github_mock: Any, push_args: SimpleNamespace) -> None:
+               github_mock: Any, push_args: argparse.Namespace) -> None:
     opened_pr = mock.Mock()
     opened_pr.number = 2
     opened_pr.state = "open"

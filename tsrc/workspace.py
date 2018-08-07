@@ -7,7 +7,7 @@ Mostly used by tsrc/cli.py
 import argparse
 import stat
 import textwrap
-from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType
+from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType  # noqa
 
 import attr
 from path import Path
@@ -20,8 +20,6 @@ import tsrc.executor
 import tsrc.git
 import tsrc.manifest
 
-# pylint: disable=pointless-statement
-Any, Dict, Optional
 
 OPTIONS_SCHEMA = schema.Schema({
     "url": str,
@@ -32,7 +30,6 @@ OPTIONS_SCHEMA = schema.Schema({
 })
 
 
-# pylint: disable=too-few-public-methods
 @attr.s
 class Options:
     url = attr.ib(default=None)  # type: str
@@ -254,11 +251,9 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Cloning missing repos"
 
-    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
@@ -317,11 +312,9 @@ class FileCopier(tsrc.executor.Task[Copy]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Copying files"
 
-    # pylint: disable=no-self-use
     def display_item(self, item: Copy) -> str:
         src, dest = item
         return "%s -> %s" % (src, dest)
@@ -346,15 +339,12 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    # pylint: disable=no-self-use
     def quiet(self) -> bool:
         return True
 
-    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Setting remote URLs"
 
-    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
@@ -396,15 +386,12 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         self.workspace = workspace
         self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
-    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Synchronize workspace"
 
-    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    # pylint: disable=no-self-use
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
         repo_path = self.workspace.joinpath(repo.src)

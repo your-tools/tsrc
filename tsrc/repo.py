@@ -1,13 +1,9 @@
 """ Repo value object """
 
 import attr
-from typing import Optional
-
-# pylint: disable=pointless-statement
-Optional
+from typing import Optional  # noqa
 
 
-# pylint: disable=too-few-public-methods
 @attr.s(frozen=True)
 class Repo():
     src = attr.ib()  # type: str

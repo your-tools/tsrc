@@ -18,6 +18,7 @@ tabulate = "*"
 unidecode = "*"
 xdg = "*"
 typing = "*"
+"flake8" = "*"
 
 [dev-packages]
 apipkg = "*"
@@ -25,13 +26,11 @@ astroid = "*"
 backports-abc = "*"
 coverage = "*"
 execnet = "*"
-mccabe = "*"
 mkdocs = "*"
 mock = "*"
+scandir = { version = "*", markers="python_version <= '3.4'" }
+pathlib2 = { version = "*", markers="python_version <= '3.5'" }
 py = "*"
-pycodestyle = "*"
-pyflakes = "*"
-pylint = ">= 1.8"
 pytest = "*"
 pytest-cov = "*"
 pytest-sugar = "*"

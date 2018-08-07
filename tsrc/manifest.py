@@ -2,19 +2,16 @@
 
 import operator
 import os
-from typing import cast, Any, Dict, List, NewType, Optional, Tuple
+from typing import cast, Any, Dict, List, NewType, Optional, Tuple # noqa
 
 from path import Path
 import schema
 
 import tsrc
 import tsrc.config
-from tsrc.repo import Repo
+from tsrc.repo import Repo  # noqa
 import tsrc.groups
-from tsrc.groups import GroupList
-
-# pylint: disable=pointless-statement
-GroupList, Repo, Tuple
+from tsrc.groups import GroupList  # noqa
 
 ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
 RepoConfig = NewType('RepoConfig', Dict[str, Any])
@@ -63,7 +60,7 @@ class Manifest():
             self.copyfiles.append((src_copy, dest_copy))
 
     def _handle_groups(self, config: ManifestConfig) -> None:
-        elements = set([repo.src for repo in self._repos])
+        elements = set(repo.src for repo in self._repos)
         self.group_list = tsrc.groups.GroupList(elements=elements)
         groups_config = config.get("groups", dict())
         for name, group_config in groups_config.items():

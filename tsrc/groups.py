@@ -1,10 +1,8 @@
 """ Support for finding elements inside a list of groups """
 
-from typing import Dict, Generic, Iterable, List, Optional, Set, TypeVar
+from typing import Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
 import tsrc
 
-# pylint: disable=pointless-statement
-Dict
 T = TypeVar('T')
 
 
@@ -12,7 +10,6 @@ class GroupError(tsrc.Error):
     pass
 
 
-# pylint: disable=too-few-public-methods
 class Group(Generic[T]):
     def __init__(self, name: str, elements: Iterable[T],
                  includes: Optional[List[str]] = None) -> None:

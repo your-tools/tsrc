@@ -15,7 +15,7 @@ markdown_extensions:
       permalink: True
       separator: "_"
 
-pages:
+nav:
 - Home: index.md
 
 - Getting started:
