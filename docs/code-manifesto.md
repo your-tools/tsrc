@@ -1,6 +1,6 @@
 # Basics
 
-We use `pycodestyle` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
+We use `flake8` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
 In addition, every text file must be pushed using UNIX line endings. (On Windows, you are advised to set `core.autocrlf` to `true` in your git config file.)
 

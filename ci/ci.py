@@ -25,23 +25,19 @@ def init_checks():
     def append_check(name, *cmd, env=None):
         res.append(Check(name, cmd, env=env))
 
-    nprocs = multiprocessing.cpu_count()
-
-    pytest_args = ["pytest", "--cov", ".", "--cov-report", "term", "-n", str(nprocs)]
-    if os.environ.get("CI"):
-        pytest_args.extend(["-p", "no:sugar"])
-
-    append_check("pycodestyle", "pycodestyle", ".")
-    append_check("pyflakes",    sys.executable, "ci/run-pyflakes.py")
-    append_check("mccabe",      sys.executable, "ci/run-mccabe.py", "10")
+    append_check("flake8", "flake8", ".")
 
     env = os.environ.copy()
     env["MYPYPATH"] = "stubs/"
-    append_check("mypy",        "mypy", "tsrc",
-                                "--strict", "--ignore-missing-imports", env=env)
+    append_check("mypy", "mypy", "tsrc", "--strict", "--ignore-missing-imports", env=env)
 
-    append_check("pytest",      *pytest_args)
-    append_check("docs",        "mkdocs", "build")
+    nprocs = multiprocessing.cpu_count()
+    pytest_args = ["pytest", "--cov", ".", "--cov-report", "term", "-n", str(nprocs)]
+    if os.environ.get("CI"):
+        pytest_args.extend(["-p", "no:sugar"])
+    append_check("pytest", *pytest_args)
+
+    append_check("docs", "mkdocs", "build")
     return res
 
 
