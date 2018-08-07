@@ -23,7 +23,6 @@ def parse_config_file(
         else:
             parsed = ruamel.yaml.safe_load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
-        # pylint: disable=no-member
         context = "(ligne %s, col %s) " % (
             yaml_error.context_mark.line,
             yaml_error.context_mark.column

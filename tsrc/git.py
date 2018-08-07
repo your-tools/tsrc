@@ -10,8 +10,7 @@ import ui
 
 import tsrc
 
-# pylint: disable=pointless-statement
-Any, Dict
+_ = Any, Dict
 
 
 class GitError(tsrc.Error):
@@ -32,7 +31,6 @@ class GitCommandError(GitError):
         super().__init__(message)
 
 
-# pylint: disable=too-many-instance-attributes
 class GitStatus:
     def __init__(self, working_path: Path) -> None:
         self.working_path = working_path

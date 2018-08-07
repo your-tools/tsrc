@@ -83,11 +83,9 @@ def request_reviewers(repo: Repository, pr_number: int, reviewers: List[str]) ->
     repo_name = repo.name
     # github3.py does not provide any way to request reviewers, so
     # we have to use private members here
-    # pylint: disable=protected-access
     url = repo._build_url(
         "repos", owner_name, repo_name, "pulls", pr_number, "requested_reviewers"
     )
-    # pylint: disable=protected-access
     ret = repo._post(url, data={"reviewers": reviewers})
     if not 200 <= ret.status_code < 300:
         raise GitHubAPIError(url, ret.status_code, ret.json().get("message"))

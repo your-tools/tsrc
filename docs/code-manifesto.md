@@ -115,8 +115,6 @@ if value == "option1" or value == "option2"
 
 First off, bad comments are worse that no comments.
 
-However by default, `pylint` mandates that all public functions and methods (those that do not start with underscore) have a doc string. This is useful when you write a library, but for the code in `tsrc` this is useless and so we disable this rule in our `pylintrc`.
-
 Also note that you should use comments to explain **why**, never **what**. If the **what** is no clear, it means the behavior of the function or method cannot be easily understood by reading implementation, and so you should fix the implementation instead.
 
 In conclusion, use comments and doc strings sparingly: that way, they will not rot and they will stay useful.

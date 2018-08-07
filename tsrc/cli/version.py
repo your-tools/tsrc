@@ -24,10 +24,8 @@ def get_details(location: Path) -> str:
     return res
 
 
-# pylint: disable=unused-argument
 def main(args: argparse.Namespace) -> None:
     tsrc_distribution = pkg_resources.get_distribution("tsrc")
-    # pylint: disable=no-member
     version = tsrc_distribution.version
     message = "tsrc version %s" % version
     location = Path(tsrc_distribution.location)

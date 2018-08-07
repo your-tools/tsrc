@@ -13,8 +13,7 @@ from tsrc.repo import Repo
 import tsrc.groups
 from tsrc.groups import GroupList
 
-# pylint: disable=pointless-statement
-GroupList, Repo, Tuple
+_ = GroupList, Repo, Tuple
 
 ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
 RepoConfig = NewType('RepoConfig', Dict[str, Any])

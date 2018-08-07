@@ -14,8 +14,7 @@ import tsrc.git
 import tsrc.cli.push
 from tsrc.cli.push import RepositoryInfo
 
-# pylint: disable=pointless-statement
-Set
+_ = Set
 
 
 WIP_PREFIX = "WIP: "

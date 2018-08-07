@@ -11,8 +11,7 @@ import ui
 
 import tsrc.git
 
-# pylint: disable=pointless-statement
-Optional
+_ = Optional
 
 
 def service_from_url(url: str) -> str:
@@ -47,7 +46,6 @@ def project_name_from_url(url: str) -> str:
     return res
 
 
-# pylint: disable=too-few-public-methods
 class RepositoryInfo:
     def __init__(self, working_path: Path = None) -> None:
         self.project_name = None  # type: Optional[str]

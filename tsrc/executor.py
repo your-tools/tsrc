@@ -8,8 +8,7 @@ import ui
 import tsrc
 
 
-# pylint: disable=pointless-statement
-Tuple
+_ = Tuple
 T = TypeVar('T')
 
 
@@ -23,7 +22,6 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
     def description(self) -> str:
         pass
 
-    # pylint: disable=no-self-use
     def quiet(self) -> bool:
         return False
 

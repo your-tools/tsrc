@@ -27,11 +27,9 @@ class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
         self.cmd_as_str = cmd_as_str
         self.shell = shell
 
-    # pylint: disable=no-self-use
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    # pylint: disable=no-self-use
     def description(self) -> str:
         return "Running `%s` on every repo" % self.cmd_as_str
 

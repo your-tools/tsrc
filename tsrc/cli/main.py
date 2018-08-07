@@ -52,7 +52,6 @@ def fix_cmd_args_for_foreach(args: argparse.Namespace,
     args.cmd_as_str = cmd_as_str
 
 
-# pylint: disable=protected-access
 def workspace_subparser(
         subparser: argparse._SubParsersAction, name: str) -> argparse.ArgumentParser:
     parser = subparser.add_parser(name)

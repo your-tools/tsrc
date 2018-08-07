@@ -40,7 +40,6 @@ def init_checks():
     append_check("mypy",        "mypy", "tsrc",
                                 "--strict", "--ignore-missing-imports", env=env)
 
-    append_check("pylint",      "pylint", "tsrc", "--score", "no")
     append_check("pytest",      *pytest_args)
     append_check("docs",        "mkdocs", "build")
     return res

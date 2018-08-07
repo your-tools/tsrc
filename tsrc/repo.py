@@ -3,11 +3,9 @@
 import attr
 from typing import Optional
 
-# pylint: disable=pointless-statement
-Optional
+_ = Optional
 
 
-# pylint: disable=too-few-public-methods
 @attr.s(frozen=True)
 class Repo():
     src = attr.ib()  # type: str
