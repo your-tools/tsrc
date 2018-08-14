@@ -1,3 +1,8 @@
+# v0.5.0 (2018-08-14)
+
+* Add support for setting approvers with the `-r,--approvers` option in `tsrc push` (GitLab Enterprise Edition only).
+
+
 # v0.4.1 (2018-04-27)
 
 * Fixed regression: `tsrc push` was no longer able to create a merge request on GitLab if `--target` was not set.
