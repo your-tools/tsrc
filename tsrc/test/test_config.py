@@ -1,3 +1,4 @@
+import ruamel.yaml
 import textwrap
 
 import schema
@@ -36,9 +37,9 @@ def test_invalid_syntax(tmp_path: Path) -> None:
     with pytest.raises(tsrc.InvalidConfig) as e:
         dummy_schema = mock.Mock()
         tsrc.config.parse_config_file(foo_yml, dummy_schema)
-    assert e.value.config_path == foo_yml
-    assert "flow sequence" in e.value.details
-    assert "ligne 3, col 9" in e.value.details
+    raised_error = e.value
+    assert raised_error.config_path == foo_yml
+    assert isinstance(raised_error.cause, ruamel.yaml.error.YAMLError)
 
 
 def test_invalid_schema(tmp_path: Path) -> None:
@@ -54,4 +55,4 @@ def test_invalid_schema(tmp_path: Path) -> None:
     )
     with pytest.raises(tsrc.InvalidConfig) as e:
         tsrc.config.parse_config_file(foo_yml, foo_schema)
-    assert "42 should be instance of 'str'" in e.value.details
+    assert isinstance(e.value.cause, schema.SchemaError)
