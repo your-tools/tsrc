@@ -1,14 +1,12 @@
 import argparse
-import copy
 from typing import Any, List
 
+from gitlab import Gitlab
 from path import Path
 import mock
 
-import pytest
 
 import tsrc.git
-from tsrc.gitlab import GitLabHelper
 import tsrc.gitlab
 from tsrc.test.helpers.cli import CLI
 from tsrc.cli.push import RepositoryInfo
@@ -16,208 +14,211 @@ from tsrc.cli.push_gitlab import PushAction
 
 
 GITLAB_URL = "http://gitlab.example.com"
-TIMOTHEE = {"name": "timothee", "id": 1}
-THEO = {"name": "theo", "id": 2}
-JOHN = {"name": "john", "id": 3}
-BART = {"name": "bart", "id": 4}
 
-MR_STUB = {
-    "id": "3978",
-    "iid": "42",
-    "web_url": "http://mr/42",
-    "title": "Boring title",
-    "target_branch": "master"
-}
-
-PROJECT_IDS = {
-    "owner/project": "42"
-}
+ALICE = mock.Mock(username="alice", id=1)
+BOB = mock.Mock(username="bob", id=2)
+EVE = mock.Mock(username="eve", id=3)
 
 
-@pytest.fixture
-def gitlab_mock() -> Any:
-    # FIXME: a type that contains GitLabHelper plus other methods ?
-    all_users = [JOHN, BART, TIMOTHEE, THEO]
+class UserList:
 
-    def get_project_members(project_id: str, query: str) -> List[str]:
-        assert project_id in PROJECT_IDS.values()
-        return [user for user in all_users if query in user["name"]]  # type: ignore
+    def __init__(self, user_list: List[Any]) -> None:
+        self.user_list = user_list
+        self.index = -1
+        self.total = len(user_list)
+        self.next_page = None
 
-    def get_group_members(group_name: str, query: str) -> List[str]:
-        return [user for user in all_users if query in user["name"]]  # type: ignore
-
-    gl_mock = mock.create_autospec(tsrc.gitlab.GitLabHelper, instance=True)
-    gl_mock.get_project_members = get_project_members
-    gl_mock.get_group_members = get_group_members
-    gl_mock.get_project_id = lambda x: PROJECT_IDS[x]
-    # Define a few helper methods to make tests nicer to read:
-    new_defs = {
-        "assert_mr_created": gl_mock.create_merge_request.assert_called_with,
-        "assert_mr_not_created": gl_mock.create_merge_request.assert_not_called,
-        "assert_mr_updated": gl_mock.update_merge_request.assert_called_with,
-        "assert_mr_accepted": gl_mock.accept_merge_request.assert_called_with,
-    }
-    for name, func in new_defs.items():
-        setattr(gl_mock, name, func)
-    return gl_mock
+    def __iter__(self) -> Any:
+        return (user for user in self.user_list)
 
 
-def execute_push(repo_path: Path, push_args: argparse.Namespace,
-                 gitlab_mock: GitLabHelper) -> None:
+def execute_query(*, query: str, **kwargs: Any) -> UserList:
+    matches = list()
+    for user in [ALICE, BOB, EVE]:
+        if user.username == query:
+            matches.append(user)
+    return UserList(matches)
+
+
+def gitlab_mock_with_merge_requests(mock_merge_requests: List[Any]) -> Any:
+    gitlab_mock = mock.Mock()
+
+    mock_project = mock.Mock()
+    mock_project.members.list.side_effect = execute_query
+    mock_project.mergerequests.list.return_value = mock_merge_requests
+
+    mock_group = mock.Mock()
+    mock_group.members.list.side_effect = execute_query
+
+    gitlab_mock.projects.get.return_value = mock_project
+
+    gitlab_mock.groups.get.return_value = mock_group
+
+    return gitlab_mock
+
+
+def execute_push(repo_path: Path, push_args: argparse.Namespace, gitlab_mock: Gitlab) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
-    push_action = PushAction(repository_info, push_args, gl_helper=gitlab_mock)
+    push_action = PushAction(repository_info, push_args, gitlab_api=gitlab_mock)
     push_action.execute()
 
 
-def test_creating_merge_request_explicit_target_branch(
-        repo_path: Path, tsrc_cli: CLI, gitlab_mock: Any, push_args: argparse.Namespace) -> None:
+def test_creating_merge_request_explicit_target_branch_with_assignee(
+        repo_path: Path, tsrc_cli: CLI,
+        push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
-    gitlab_mock.find_opened_merge_request.return_value = list()
-    gitlab_mock.create_merge_request.return_value = MR_STUB
+    gitlab_mock = gitlab_mock_with_merge_requests([])
 
-    push_args.assignee = "john"
+    push_args.assignee = "alice"
     push_args.target_branch = "next"
     push_args.title = "Best feature ever"
 
+    mock_project = gitlab_mock.projects.get()
+    new_mr = mock.Mock()
+    mock_project.mergerequests.create.return_value = new_mr
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_created(
-        "42", "new-feature",
-        target_branch="next",
-        title="new-feature"
+    mock_project.mergerequests.create.assert_called_once_with(
+        {
+            "source_branch": "new-feature",
+            "target_branch": "next",
+            "title": "new-feature",
+        }
     )
-    gitlab_mock.assert_mr_updated(
-        MR_STUB,
-        assignee_id=JOHN["id"],
-        remove_source_branch=True,
-        target_branch="next",
-        title="Best feature ever"
-    )
+
+    new_mr.title = "Best feature ever"
+    new_mr.save.assert_called_once_with()
 
 
 def test_creating_merge_request_uses_default_branch(
-        repo_path: Path, tsrc_cli: CLI, gitlab_mock: Any, push_args: argparse.Namespace) -> None:
-    gitlab_mock.get_default_branch.return_value = "devel"
+        repo_path: Path, tsrc_cli: CLI, push_args: argparse.Namespace) -> None:
+
+    gitlab_mock = gitlab_mock_with_merge_requests([])
+    mock_project = gitlab_mock.projects.get()
+    mock_project.default_branch = "devel"
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
-    gitlab_mock.find_opened_merge_request.return_value = list()
-    gitlab_mock.create_merge_request.return_value = MR_STUB
+    mock_project = gitlab_mock.projects.get()
+    new_mr = mock.Mock(iid="43", web_url="http://43")
+    mock_project.mergerequests.create.return_value = new_mr
 
-    push_args.assignee = "john"
-
+    push_args.assignee = "alice"
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_created(
-        "42", "new-feature",
-        target_branch="devel",
-        title="new-feature"
+    mock_project.mergerequests.create.assert_called_once_with(
+        {
+            "source_branch": "new-feature",
+            "target_branch": "devel",
+            "title": "new-feature",
+        }
     )
 
 
-def test_existing_merge_request(repo_path: Path, tsrc_cli: CLI, gitlab_mock:
-                                Any, push_args: argparse.Namespace) -> None:
+def test_set_approvers(repo_path: Path, tsrc_cli: CLI, push_args: argparse.Namespace) -> None:
+
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
-    gitlab_mock.find_opened_merge_request.return_value = MR_STUB
+    push_args.reviewers = ["alice", "eve"]
+
+    mock_mr = mock.Mock(iid="42", web_url="http://42")
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
+
+    execute_push(repo_path, push_args, gitlab_mock)
+
+    mock_mr.approvals.set_approvers.assert_called_once_with([ALICE.id, EVE.id])
+    mock_mr.save.assert_called_once()
+
+
+def test_update_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
+                                       push_args: argparse.Namespace) -> None:
+    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+
+    mock_mr = mock.Mock(iid="42", web_url="http://42", title="old title")
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 
     push_args.target_branch = "next"
     push_args.title = "Best feature ever"
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_not_created()
-    gitlab_mock.assert_mr_updated(
-        MR_STUB,
-        remove_source_branch=True,
-        target_branch="next",
-        title="Best feature ever"
-    )
+    gitlab_mock.mergerequests.create.assert_not_called()
+    assert mock_mr.remove_source_branch
+    assert mock_mr.target_branch == "next"
+    assert mock_mr.title == "Best feature ever"
 
 
 def test_close_merge_request(repo_path: Path, tsrc_cli: CLI,
-                             gitlab_mock: Any, push_args: argparse.Namespace) -> None:
+                             push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
-    gitlab_mock.find_opened_merge_request.return_value = MR_STUB
+    mock_mr = mock.Mock(iid="42", web_url="http://42", title="old title")
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 
     push_args.close = True
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_updated(
-        MR_STUB,
-        state_event="close"
-    )
+    assert mock_mr.state_event == "close"
+    mock_mr.save.assert_called_once()
 
 
 def test_do_not_change_mr_target(repo_path: Path, tsrc_cli: CLI,
-                                 gitlab_mock: Any, push_args: argparse.Namespace) -> None:
-    mr_stub = copy.copy(MR_STUB)
-    mr_stub["target_branch"] = "release/1.6.0"
-    gitlab_mock.find_opened_merge_request.return_value = mr_stub
+                                 push_args: argparse.Namespace) -> None:
+
+    mock_mr = mock.Mock(iid="42", web_url="http://42", target_branch="old-branch")
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 
     execute_push(repo_path, push_args, gitlab_mock)
-    gitlab_mock.assert_mr_updated(
-        mr_stub,
-        remove_source_branch=True,
-        title="Boring title",
-    )
+
+    assert mock_mr.target_branch == "old-branch"
 
 
 def test_accept_merge_request(repo_path: Path, tsrc_cli: CLI,
-                              gitlab_mock: Any, push_args: argparse.Namespace) -> None:
+                              push_args: argparse.Namespace) -> None:
     tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
     tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
-    gitlab_mock.find_opened_merge_request.return_value = MR_STUB
+    mock_mr = mock.Mock(iid="42", web_url="http://42", target_branch="old-branch")
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 
     push_args.accept = True
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_accepted(MR_STUB)
+    mock_mr.merge.assert_called_once_with(merge_when_pipeline_succeeds=True)
 
 
 def test_unwipify_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
-                                         gitlab_mock: Any,
                                          push_args: argparse.Namespace) -> None:
-    existing_mr = {
-        "title": "WIP: nice title",
-        "web_url": "http://example.com/42",
-        "iid": "42",
-    }
-    gitlab_mock.find_opened_merge_request.return_value = existing_mr
+    mock_mr = mock.Mock(
+        title="WIP: nice title",
+        web_url="http://example.com/42",
+        iid=42,
+    )
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 
     push_args.ready = True
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_not_created()
-    gitlab_mock.assert_mr_updated(
-        existing_mr,
-        remove_source_branch=True,
-        title="nice title"
-    )
+    assert mock_mr.title == "nice title"
+    mock_mr.save.assert_called_once()
 
 
 def test_wipify_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
-                                       gitlab_mock: Any,
                                        push_args: argparse.Namespace) -> None:
-    existing_mr = {
-        "title": "not ready",
-        "web_url": "http://example.com/42",
-        "iid": "42",
-    }
-    gitlab_mock.find_opened_merge_request.return_value = existing_mr
+    mock_mr = mock.Mock(
+        title="not ready",
+        web_url="http://example.com/42",
+        iid=42,
+    )
+    gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 
     push_args.wip = True
     execute_push(repo_path, push_args, gitlab_mock)
 
-    gitlab_mock.assert_mr_not_created()
-    gitlab_mock.assert_mr_updated(
-        existing_mr,
-        remove_source_branch=True,
-        title="WIP: not ready"
-    )
+    assert mock_mr.title == "WIP: not ready"
+    mock_mr.save.assert_called_once()

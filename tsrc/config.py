@@ -16,23 +16,18 @@ def parse_config_file(
     try:
         contents = file_path.text()
     except OSError as os_error:
-        raise tsrc.InvalidConfig(file_path, "Could not read file: %s" % str(os_error))
+        raise tsrc.InvalidConfig(file_path, os_error)
     try:
         if roundtrip:
-            parsed = ruamel.yaml.load(contents, ruamel.yaml.RoundTripLoader)
+            parsed = ruamel.yaml.safe_load(contents, ruamel.yaml.RoundTripLoader)
         else:
             parsed = ruamel.yaml.safe_load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
-        context = "(ligne %s, col %s) " % (
-            yaml_error.context_mark.line,
-            yaml_error.context_mark.column
-        )
-        message = "%s - YAML error: %s" % (context, yaml_error.context)
-        raise tsrc.InvalidConfig(file_path, message)
+        raise tsrc.InvalidConfig(file_path, yaml_error)
     try:
         config_schema.validate(parsed)
     except schema.SchemaError as schema_error:
-        raise tsrc.InvalidConfig(file_path, str(schema_error))
+        raise tsrc.InvalidConfig(file_path, schema_error)
     return Config(parsed)
 
 

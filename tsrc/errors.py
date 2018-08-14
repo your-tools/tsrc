@@ -19,14 +19,14 @@ class Error(Exception):
 
 
 class InvalidConfig(Error):
-    def __init__(self, config_path: Path, details: str) -> None:
+    def __init__(self, config_path: Path, cause: Exception) -> None:
         self.config_path = config_path
-        self.details = details
+        self.cause = cause
         super().__init__(self.detailed_message)
 
     @property
     def detailed_message(self) -> str:
-        res = "%s: %s" % (self.config_path, self.details)
+        res = "%s: %s" % (self.config_path, self.cause)
         res += "\n"
         res += "See %s for details" % DOC_URL
         return res
