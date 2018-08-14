@@ -19,6 +19,7 @@ unidecode = "*"
 xdg = "*"
 typing = "*"
 "flake8" = "*"
+python-gitlab = "*"
 
 [dev-packages]
 apipkg = "*"

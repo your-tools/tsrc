@@ -130,11 +130,11 @@ def main(args: ArgsList = None) -> None:
     push_parser.add_argument("-t", "--target", dest="target_branch")
     push_parser.add_argument("push_spec", nargs="?")
     push_parser.add_argument("-a", "--assignee", dest="assignee")
+    push_parser.add_argument("-r", "--reviewer", "--approver", dest="reviewers", action="append",
+                             help="Request review from the given users")
 
     github_group = push_parser.add_argument_group("github options")
     github_group.add_argument("--merge", help="Merge pull request", action="store_true")
-    github_group.add_argument("--reviewer", dest="reviewers", action="append",
-                              help="Request review from the given login")
 
     gitlab_group = push_parser.add_argument_group("gitlab options")
     gitlab_group.add_argument("--accept", action="store_true")
