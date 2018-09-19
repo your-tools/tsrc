@@ -30,8 +30,8 @@ $ tsrc init git@gitlab.local:acme/manifest.git
 In this example:
 
 * A clone of the manifest repository will be created in a hidden `.tsrc/manifest` folder.
-* `foo` will be cloned in `<work>/foo` using `git@gitlab.com/acme/foo.git` origin url.
-* Similarly, `bar` will be cloned in `<work>/bar` using `git@gitlab.com:acme/bar.git`.
+* `foo` will be cloned in `<work>/foo` using `git@gitlab.local/acme/foo.git` origin url.
+* Similarly, `bar` will be cloned in `<work>/bar` using `git@gitlab.local:acme/bar.git`.
 
 
 ## Making sure all the repositories are up to date
