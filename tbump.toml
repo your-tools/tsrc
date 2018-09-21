@@ -21,11 +21,10 @@ message_template = "Bump to {new_version}"
 src = "setup.py"
 
 
-[[hook]]
+[[before_push]]
 name = "Check Changelog"
 cmd = "grep -q {new_version} docs/changelog.md"
 
-[[hook]]
+[[after_push]]
 name = "Publish to pypi"
 cmd = "./publish.sh"
-after_push = true
