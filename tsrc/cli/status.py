@@ -12,13 +12,14 @@ from tsrc.workspace import Workspace
 
 
 def describe_branch(git_status: GitStatus) -> List[str]:
-    if git_status.tag:
-        return [ui.darkyellow, git_status.tag]
-    elif git_status.branch:
-        return [ui.green, git_status.branch]
+    res = list()  # type: List[str]
+    if git_status.branch:
+        res += [ui.green, git_status.branch]
     elif git_status.sha1:
-        return [ui.red, git_status.sha1]
-    return list()
+        res += [ui.red, git_status.sha1]
+    if git_status.tag:
+        res += [ui.reset, ui.brown, "on", git_status.tag]
+    return res
 
 
 def commit_string(number: int) -> str:

@@ -1,3 +1,8 @@
+# Next release
+
+* Fix [#113](https://github.com/SuperTanker/tsrc/issues/113): do not hide branch when showing tag status.
+* Add support for Python 3.7
+
 # v0.5.0 (2018-08-14)
 
 * Add support for setting approvers with the `-r,--approvers` option in `tsrc push` (GitLab Enterprise Edition only).
