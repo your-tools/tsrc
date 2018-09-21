@@ -72,4 +72,4 @@ def test_status_on_tag(tsrc_cli: CLI, git_server: GitServer,
     tsrc_cli.run("status")
 
     assert message_recorder.find(r"\* foo/bar   master")
-    assert message_recorder.find(r"\* spam/eggs v1.0")
+    assert message_recorder.find(r"\* spam/eggs master on v1.0")
