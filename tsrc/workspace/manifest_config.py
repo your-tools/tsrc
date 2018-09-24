@@ -1,9 +1,10 @@
-from typing import Optional, List  # noqa
+from typing import Any, Dict, Optional, List  # noqa
 import argparse
 
 import attr
 from path import Path
 import schema
+import ruamel.yaml
 
 import tsrc.config
 
@@ -43,3 +44,16 @@ def from_args(args: argparse.Namespace) -> ManifestConfig:
 def from_file(cfg_path: Path) -> ManifestConfig:
     as_dict = tsrc.config.parse_config_file(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: dict
     return from_dict(as_dict)
+
+
+def to_file(config: ManifestConfig, cfg_path: Path) -> None:
+    as_dict = dict()  # type: Dict[str, Any]
+    as_dict["url"] = config.url
+    as_dict["branch"] = config.branch
+    if config.tag:
+        as_dict["tag"] = config.tag
+    if config.groups:
+        as_dict["groups"] = config.groups
+    as_dict["shallow"] = config.shallow
+    with cfg_path.open("w") as fp:
+        ruamel.yaml.dump(as_dict, fp)

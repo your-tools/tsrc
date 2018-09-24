@@ -6,7 +6,6 @@ import textwrap
 from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType  # noqa
 
 from path import Path
-import ruamel.yaml
 import ui
 
 import tsrc
@@ -14,7 +13,9 @@ import tsrc.executor
 import tsrc.git
 import tsrc.manifest
 
-from .manifest_config import ManifestConfig, from_file as manifest_config_from_file
+from .manifest_config import ManifestConfig
+from .manifest_config import from_file as manifest_config_from_file
+from .manifest_config import to_file as manifest_config_to_file
 
 
 class LocalManifest:
@@ -85,16 +86,7 @@ class LocalManifest:
         tsrc.git.run_git(self.clone_path, *cmd)
 
     def save_config(self, config: ManifestConfig) -> None:
-        as_dict = dict()  # type: Dict[str, Any]
-        as_dict["url"] = config.url
-        as_dict["branch"] = config.branch
-        if config.tag:
-            as_dict["tag"] = config.tag
-        if config.groups:
-            as_dict["groups"] = config.groups
-        as_dict["shallow"] = config.shallow
-        with self.cfg_path.open("w") as fp:
-            ruamel.yaml.dump(as_dict, fp)
+        manifest_config_to_file(config, self.cfg_path)
 
     def load_config(self) -> ManifestConfig:
         return manifest_config_from_file(self.cfg_path)
