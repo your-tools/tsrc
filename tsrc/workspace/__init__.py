@@ -161,19 +161,19 @@ class Workspace():
             repo_path = self.joinpath(repo.src)
             if not repo_path.exists():
                 to_clone.append(repo)
-        cloner = Cloner(self)
+        cloner = Cloner(self.root_path, shallow=self.shallow)
         tsrc.executor.run_sequence(to_clone, cloner)
 
     def set_remotes(self) -> None:
-        remote_setter = RemoteSetter(self)
+        remote_setter = RemoteSetter(self.root_path)
         tsrc.executor.run_sequence(self.get_repos(), remote_setter)
 
     def copy_files(self) -> None:
-        file_copier = FileCopier(self)
+        file_copier = FileCopier(self.root_path)
         tsrc.executor.run_sequence(self.local_manifest.copyfiles, file_copier)
 
     def sync(self) -> None:
-        syncer = Syncer(self)
+        syncer = Syncer(self.root_path)
         try:
             tsrc.executor.run_sequence(self.get_repos(), syncer)
         finally:
@@ -191,8 +191,9 @@ class Workspace():
 
 
 class Cloner(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace: Workspace) -> None:
-        self.workspace = workspace
+    def __init__(self, workspace_path: Path, *, shallow: bool = False) -> None:
+        self.workspace_path = workspace_path
+        self.shallow = shallow
 
     def description(self) -> str:
         return "Cloning missing repos"
@@ -203,7 +204,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
     def check_shallow_with_sha1(self, repo: tsrc.Repo) -> None:
         if not repo.sha1:
             return
-        if self.workspace.shallow:
+        if self.shallow:
             message = textwrap.dedent(
                 "Cannot use --shallow with a fixed sha1 ({repo.sha1})\n"
                 "Consider using a tag instead"
@@ -212,7 +213,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             ui.fatal(message)
 
     def clone_repo(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace.joinpath(repo.src)
+        repo_path = self.workspace_path.joinpath(repo.src)
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
         clone_args = ["clone", repo.url]
@@ -223,7 +224,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             ref = repo.branch
         if ref:
             clone_args.extend(["--branch", ref])
-        if self.workspace.shallow:
+        if self.shallow:
             clone_args.extend(["--depth", "1"])
         clone_args.append(name)
         try:
@@ -232,7 +233,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             raise tsrc.Error("Cloning failed")
 
     def reset_repo(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace.joinpath(repo.src)
+        repo_path = self.workspace_path.joinpath(repo.src)
         ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
@@ -252,8 +253,8 @@ Copy = NewType('Copy', Tuple[str, str])
 
 
 class FileCopier(tsrc.executor.Task[Copy]):
-    def __init__(self, workspace: Workspace) -> None:
-        self.workspace = workspace
+    def __init__(self, workspace_path: Path) -> None:
+        self.workspace_path = workspace_path
 
     def description(self) -> str:
         return "Copying files"
@@ -266,8 +267,8 @@ class FileCopier(tsrc.executor.Task[Copy]):
         src, dest = item
         ui.info(src, "->", dest)
         try:
-            src_path = self.workspace.joinpath(src)
-            dest_path = self.workspace.joinpath(dest)
+            src_path = self.workspace_path.joinpath(src)
+            dest_path = self.workspace_path.joinpath(dest)
             if dest_path.exists():
                 # Re-set the write permissions on the file:
                 dest_path.chmod(stat.S_IWRITE)
@@ -279,8 +280,8 @@ class FileCopier(tsrc.executor.Task[Copy]):
 
 
 class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace: Workspace) -> None:
-        self.workspace = workspace
+    def __init__(self, workspace_path: Path) -> None:
+        self.workspace_path = workspace_path
 
     def quiet(self) -> bool:
         return True
@@ -298,7 +299,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
             raise tsrc.Error(repo.src, ":", "Failed to set remote url to %s" % repo.url, error)
 
     def try_process_repo(self, repo: tsrc.Repo) -> None:
-        full_path = self.workspace.joinpath(repo.src)
+        full_path = self.workspace_path.joinpath(repo.src)
         rc, old_url = tsrc.git.run_git_captured(
             full_path,
             "remote", "get-url", "origin",
@@ -310,13 +311,13 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
             self.process_repo_add_remote(repo)
 
     def process_repo_remote_exists(self, repo: tsrc.Repo, *, old_url: str) -> None:
-        full_path = self.workspace.joinpath(repo.src)
+        full_path = self.workspace_path.joinpath(repo.src)
         if old_url != repo.url:
             ui.info_2(repo.src, old_url, "->", repo.url)
             tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
 
     def process_repo_add_remote(self, repo: tsrc.Repo) -> None:
-        full_path = self.workspace.joinpath(repo.src)
+        full_path = self.workspace_path.joinpath(repo.src)
         tsrc.git.run_git(full_path, "remote", "add", "origin", repo.url)
 
 
@@ -325,8 +326,8 @@ class BadBranches(tsrc.Error):
 
 
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace: Workspace) -> None:
-        self.workspace = workspace
+    def __init__(self, workspace_path: Path) -> None:
+        self.workspace_path = workspace_path
         self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
     def description(self) -> str:
@@ -337,7 +338,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
 
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
-        repo_path = self.workspace.joinpath(repo.src)
+        repo_path = self.workspace_path.joinpath(repo.src)
         self.fetch(repo_path)
         ref = None
 
