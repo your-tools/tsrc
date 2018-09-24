@@ -14,8 +14,6 @@ import tsrc.git
 import tsrc.manifest
 
 from .manifest_config import ManifestConfig
-from .manifest_config import from_file as manifest_config_from_file
-from .manifest_config import to_file as manifest_config_to_file
 
 
 class LocalManifest:
@@ -86,10 +84,10 @@ class LocalManifest:
         tsrc.git.run_git(self.clone_path, *cmd)
 
     def save_config(self, config: ManifestConfig) -> None:
-        manifest_config_to_file(config, self.cfg_path)
+        config.save_to_file(self.cfg_path)
 
     def load_config(self) -> ManifestConfig:
-        return manifest_config_from_file(self.cfg_path)
+        return ManifestConfig.from_file(self.cfg_path)
 
     def _ensure_git_state(self, config: ManifestConfig) -> None:
         if self.clone_path.exists():

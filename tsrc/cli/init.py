@@ -13,7 +13,7 @@ def main(args: argparse.Namespace) -> None:
     workspace_path = args.workspace_path or os.getcwd()
     workspace = tsrc.workspace.Workspace(Path(workspace_path))
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
-    manifest_config = tsrc.workspace.manifest_config.from_args(args)
+    manifest_config = tsrc.workspace.ManifestConfig.from_args(args)
     workspace.configure_manifest(manifest_config)
     workspace.load_manifest()
     workspace.clone_missing()
