@@ -14,8 +14,7 @@ import tsrc.executor
 import tsrc.git
 import tsrc.manifest
 
-from .options import Options
-from .options import options_from_file
+from .manifest_config import ManifestConfig, from_file as manifest_config_from_file
 
 
 class LocalManifest:
@@ -68,11 +67,11 @@ class LocalManifest:
         assert self.manifest, "manifest is empty. Did you call load()?"
         return self.manifest.get_url(src)
 
-    def configure(self, options: Options) -> None:
-        if not options.url:
+    def configure(self, manifest_config: ManifestConfig) -> None:
+        if not manifest_config.url:
             raise tsrc.Error("Manifest URL is required")
-        self._ensure_git_state(options)
-        self.save_config(options)
+        self._ensure_git_state(manifest_config)
+        self.save_config(manifest_config)
 
     def update(self) -> None:
         ui.info_2("Updating manifest")
@@ -85,51 +84,51 @@ class LocalManifest:
         cmd = ("reset", "--hard", "@{u}")
         tsrc.git.run_git(self.clone_path, *cmd)
 
-    def save_config(self, options: Options) -> None:
-        config = dict()  # type: Dict[str, Any]
-        config["url"] = options.url
-        config["branch"] = options.branch
-        if options.tag:
-            config["tag"] = options.tag
-        if options.groups:
-            config["groups"] = options.groups
-        config["shallow"] = options.shallow
+    def save_config(self, config: ManifestConfig) -> None:
+        as_dict = dict()  # type: Dict[str, Any]
+        as_dict["url"] = config.url
+        as_dict["branch"] = config.branch
+        if config.tag:
+            as_dict["tag"] = config.tag
+        if config.groups:
+            as_dict["groups"] = config.groups
+        as_dict["shallow"] = config.shallow
         with self.cfg_path.open("w") as fp:
-            ruamel.yaml.dump(config, fp)
+            ruamel.yaml.dump(as_dict, fp)
 
-    def load_config(self) -> Options:
-        return options_from_file(self.cfg_path)
+    def load_config(self) -> ManifestConfig:
+        return manifest_config_from_file(self.cfg_path)
 
-    def _ensure_git_state(self, options: Options) -> None:
+    def _ensure_git_state(self, config: ManifestConfig) -> None:
         if self.clone_path.exists():
-            self._reset_manifest_clone(options)
+            self._reset_manifest_clone(config)
         else:
-            self._clone_manifest(options)
+            self._clone_manifest(config)
 
-    def _reset_manifest_clone(self, options: Options) -> None:
-        tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", options.url)
+    def _reset_manifest_clone(self, config: ManifestConfig) -> None:
+        tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", config.url)
 
         tsrc.git.run_git(self.clone_path, "fetch")
-        tsrc.git.run_git(self.clone_path, "checkout", "-B", options.branch)
+        tsrc.git.run_git(self.clone_path, "checkout", "-B", config.branch)
         tsrc.git.run_git(
-            self.clone_path, "branch", options.branch,
-            "--set-upstream-to", "origin/%s" % options.branch
+            self.clone_path, "branch", config.branch,
+            "--set-upstream-to", "origin/%s" % config.branch
         )
-        if options.tag:
-            ref = options.tag
+        if config.tag:
+            ref = config.tag
         else:
-            ref = "origin/%s" % options.branch
+            ref = "origin/%s" % config.branch
         tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
 
-    def _clone_manifest(self, options: Options) -> None:
+    def _clone_manifest(self, config: ManifestConfig) -> None:
         parent, name = self.clone_path.splitpath()
         parent.makedirs_p()
         ref = ""  # type: str
-        if options.tag:
-            ref = options.tag
-        elif options.branch:
-            ref = options.branch
-        args = ["clone", options.url, name]
+        if config.tag:
+            ref = config.tag
+        elif config.branch:
+            ref = config.branch
+        args = ["clone", config.url, name]
         if ref:
             args += ["--branch", ref]
         tsrc.git.run_git(self.clone_path.parent, *args)
@@ -152,8 +151,8 @@ class Workspace():
     def get_gitlab_url(self) -> str:
         return self.local_manifest.get_gitlab_url()
 
-    def configure_manifest(self, manifest_options: Options) -> None:
-        self.local_manifest.configure(manifest_options)
+    def configure_manifest(self, manifest_config: ManifestConfig) -> None:
+        self.local_manifest.configure(manifest_config)
 
     def update_manifest(self) -> None:
         self.local_manifest.update()

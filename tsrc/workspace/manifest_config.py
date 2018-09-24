@@ -7,7 +7,7 @@ import schema
 
 import tsrc.config
 
-OPTIONS_SCHEMA = schema.Schema({
+MANIFEST_CONFIG_SCHEMA = schema.Schema({
     "url": str,
     schema.Optional("branch"): str,
     schema.Optional("tag"): str,
@@ -17,7 +17,7 @@ OPTIONS_SCHEMA = schema.Schema({
 
 
 @attr.s
-class Options:
+class ManifestConfig:
     url = attr.ib(default=None)  # type: str
     branch = attr.ib(default="master")  # type: str
     tag = attr.ib(default=None)  # type: Optional[str]
@@ -25,8 +25,8 @@ class Options:
     groups = attr.ib(default=list())  # type: List[str]
 
 
-def options_from_dict(as_dict: dict) -> Options:
-    res = Options()
+def from_dict(as_dict: dict) -> ManifestConfig:
+    res = ManifestConfig()
     res.url = as_dict["url"]
     res.branch = as_dict.get("branch", "master")
     res.tag = as_dict.get("tag")
@@ -35,11 +35,11 @@ def options_from_dict(as_dict: dict) -> Options:
     return res
 
 
-def options_from_args(args: argparse.Namespace) -> Options:
+def from_args(args: argparse.Namespace) -> ManifestConfig:
     as_dict = vars(args)  # type: dict
-    return options_from_dict(as_dict)
+    return from_dict(as_dict)
 
 
-def options_from_file(cfg_path: Path) -> Options:
-    as_dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)  # type: dict
-    return options_from_dict(as_dict)
+def from_file(cfg_path: Path) -> ManifestConfig:
+    as_dict = tsrc.config.parse_config_file(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: dict
+    return from_dict(as_dict)
