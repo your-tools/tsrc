@@ -186,3 +186,22 @@ def test_repo_default_branch_not_master(tsrc_cli: CLI, git_server: GitServer,
 
     foo_path = workspace_path / "foo"
     assert tsrc.git.get_current_branch(foo_path) == "devel"
+
+
+def test_several_remotes(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
+    foo_url = git_server.add_repo("foo")
+    git_server.manifest.set_repo_remotes(
+        "foo",
+        [("origin", foo_url),
+         ("upstream", "git@upstream.com")])
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    foo_path = workspace_path / "foo"
+    rc, output = tsrc.git.run_git_captured(
+        foo_path,
+        "remote", "get-url", "upstream",
+        check=False,
+    )
+    assert rc == 0, output
+    assert output == "git@upstream.com"

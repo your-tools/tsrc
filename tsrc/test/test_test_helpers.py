@@ -51,7 +51,8 @@ def test_git_server_add_repo_updates_manifest(workspace_path: Path, git_server: 
     repos = manifest.get_repos()
     assert len(repos) == 2
     for repo in repos:
-        _, out = tsrc.git.run_git_captured(workspace_path, "ls-remote", repo.url)
+        clone_url = repo.clone_url
+        _, out = tsrc.git.run_git_captured(workspace_path, "ls-remote", clone_url)
         assert "refs/heads/master" in out
 
 

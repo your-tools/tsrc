@@ -1,7 +1,7 @@
 """ Implementation of the tsrc Workspace: a collection of git repositories
 """
 
-from typing import cast, Iterable, List, Tuple, Dict, Any, Optional, NewType  # noqa
+from typing import Iterable, List, Tuple
 
 from path import Path
 
@@ -75,7 +75,3 @@ class Workspace():
         for i, repo in enumerate(self.get_repos()):
             full_path = self.root_path / repo.src
             yield (i, repo, full_path)
-
-    def get_url(self, src: str) -> str:
-        """ Return the url of the project in `src` """
-        return self.local_manifest.get_url(src)

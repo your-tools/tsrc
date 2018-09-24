@@ -34,7 +34,10 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         repo_path = self.workspace_path / repo.src
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
-        clone_args = ["clone", repo.url]
+        first_remote = repo.remotes[0]
+        remote_name = first_remote.name
+        remote_url = first_remote.url
+        clone_args = ["clone", "--origin", remote_name, remote_url]
         ref = None
         if repo.tag:
             ref = repo.tag

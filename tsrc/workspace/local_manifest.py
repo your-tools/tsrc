@@ -53,10 +53,6 @@ class LocalManifest:
             raise tsrc.Error("No gitlab configuration found in manifest")
         return cast(str, gitlab_config["url"])
 
-    def get_url(self, src: str) -> str:
-        assert self.manifest, "manifest is empty. Did you call load()?"
-        return self.manifest.get_url(src)
-
     def configure(self, manifest_config: ManifestConfig) -> None:
         if not manifest_config.url:
             raise tsrc.Error("Manifest URL is required")

@@ -25,7 +25,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
         repo_path = self.workspace_path / repo.src
-        self.fetch(repo_path)
+        self.fetch(repo)
         ref = None
 
         if repo.tag:
@@ -50,12 +50,14 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         if current_branch and current_branch != repo.branch:
             self.bad_branches.append((repo.src, current_branch, repo.branch))  # type: ignore
 
-    @staticmethod
-    def fetch(repo_path: Path) -> None:
-        try:
-            tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", "origin")
-        except tsrc.Error:
-            raise tsrc.Error("fetch failed")
+    def fetch(self, repo: tsrc.Repo) -> None:
+        repo_path = self.workspace_path / repo.src
+        for remote in repo.remotes:
+            try:
+                ui.info_2("Fetching", remote.name)
+                tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", remote.name)
+            except tsrc.Error:
+                raise tsrc.Error("fetch from %s failed" % remote.name)
 
     @staticmethod
     def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
@@ -70,6 +72,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
 
     @staticmethod
     def sync_repo_to_branch(repo_path: Path) -> None:
+        ui.info_2("Updating branch")
         try:
             tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{u}")
         except tsrc.Error:

@@ -255,3 +255,20 @@ def test_custom_group(tsrc_cli: CLI, git_server: GitServer, message_recorder:
     tsrc_cli.run("sync")
     assert message_recorder.find("bar")
     assert not message_recorder.find("other")
+
+
+def test_fetch_additional_remotes(tsrc_cli: CLI, git_server: GitServer,
+                                  workspace_path: Path) -> None:
+    git_server.add_repo("foo")
+    foo2_url = git_server.add_repo("foo2")
+    git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])
+    tsrc_cli.run("init", git_server.manifest_url)
+    foo_path = workspace_path / "foo"
+    tsrc.git.run_git(foo_path, "fetch", "other")
+    first_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
+    git_server.push_file("foo2", "new.txt")
+
+    tsrc_cli.run("sync")
+    second_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
+
+    assert first_sha1 != second_sha1, "remote 'other' was not fetched"

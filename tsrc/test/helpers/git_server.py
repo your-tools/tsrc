@@ -8,6 +8,7 @@ from path import Path
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]
+RemoteConfig = Tuple[str, str]
 
 
 class ManifestHandler():
@@ -76,6 +77,16 @@ class ManifestHandler():
         for copy_src, copy_dest in copies:
             copy_dicts.append({"src": copy_src, "dest": copy_dest})
         self.configure_repo(src, "copy", copy_dicts)
+
+    def set_repo_remotes(self, src: str, remotes: List[RemoteConfig]) -> None:
+        remote_dicts = list()
+        for name, url in remotes:
+            remote_dicts.append({"name": name, "url": url})
+        repo = self.get_repo(src)
+        repo["remotes"] = remote_dicts
+        del repo["url"]
+        message = "%s: remotes: %s" % (src, remote_dicts)
+        self.push(message)
 
     def push(self, message: str) -> None:
         to_write = ruamel.yaml.dump(self.data)
