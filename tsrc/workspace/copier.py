@@ -25,8 +25,8 @@ class FileCopier(tsrc.executor.Task[Copy]):
         src, dest = item
         ui.info(src, "->", dest)
         try:
-            src_path = self.workspace_path.joinpath(src)
-            dest_path = self.workspace_path.joinpath(dest)
+            src_path = self.workspace_path / src
+            dest_path = self.workspace_path / dest
             if dest_path.exists():
                 # Re-set the write permissions on the file:
                 dest_path.chmod(stat.S_IWRITE)

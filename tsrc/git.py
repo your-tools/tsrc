@@ -216,5 +216,5 @@ def get_tracking_ref(working_path: Path) -> Optional[str]:
 
 def is_shallow(working_path: Path) -> bool:
     root = get_repo_root(working_path)
-    res = root.joinpath(".git/shallow").exists()  # type: bool
+    res = (root / ".git/shallow").exists()  # type: bool
     return res

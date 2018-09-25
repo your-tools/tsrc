@@ -13,9 +13,9 @@ class LocalManifest:
 
     """
     def __init__(self, workspace_path: Path) -> None:
-        hidden_path = workspace_path.joinpath(".tsrc")
-        self.clone_path = hidden_path.joinpath("manifest")
-        self.cfg_path = hidden_path.joinpath("manifest.yml")
+        hidden_path = workspace_path / ".tsrc"
+        self.clone_path = hidden_path / "manifest"
+        self.cfg_path = hidden_path / "manifest.yml"
         self.manifest = None  # type: Optional[tsrc.manifest.Manifest]
 
     @property
@@ -40,7 +40,7 @@ class LocalManifest:
         return self.manifest.get_repos(groups=self.active_groups)
 
     def load(self) -> None:
-        yml_path = self.clone_path.joinpath("manifest.yml")
+        yml_path = self.clone_path / "manifest.yml"
         if not yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(yml_path))

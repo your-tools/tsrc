@@ -19,7 +19,7 @@ def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
 
     tsrc_cli.run("sync")
 
-    bar_txt_path = workspace_path.joinpath("foo", "bar", "bar.txt")
+    bar_txt_path = workspace_path / "foo/bar/bar.txt"
     assert bar_txt_path.text() == "this is bar"
 
 
@@ -30,8 +30,8 @@ def test_sync_with_errors(tsrc_cli: CLI, git_server: GitServer, workspace_path:
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
     git_server.push_file("foo/bar", "bar.txt", contents="Bar is true")
-    bar_src = workspace_path.joinpath("foo/bar")
-    bar_src.joinpath("bar.txt").write_text("Bar is false")
+    bar_src = workspace_path / "foo/bar"
+    (bar_src / "bar.txt").write_text("Bar is false")
 
     tsrc_cli.run("sync", expect_fail=True)
 
@@ -43,7 +43,7 @@ def test_sync_finds_root(tsrc_cli: CLI, git_server: GitServer, workspace_path:
                          Path, monkeypatch: Any) -> None:
     git_server.add_repo("foo/bar")
     tsrc_cli.run("init", git_server.manifest_url)
-    monkeypatch.chdir(workspace_path.joinpath("foo/bar"))
+    monkeypatch.chdir(workspace_path / "foo/bar")
     tsrc_cli.run("sync")
 
 
@@ -56,7 +56,7 @@ def test_new_repo_added_to_manifest(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("sync")
 
-    assert workspace_path.joinpath("spam/eggs").exists()
+    assert (workspace_path / "spam/eggs").exists()
 
 
 def test_switching_manifest_branches(tsrc_cli: CLI, git_server: GitServer,
@@ -69,7 +69,7 @@ def test_switching_manifest_branches(tsrc_cli: CLI, git_server: GitServer,
     # branch of the manifest
     git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
-    bar_path = workspace_path.joinpath("bar")
+    bar_path = workspace_path / "bar"
 
     # Sync on master branch: bar should not be cloned
     tsrc_cli.run("sync")
@@ -88,7 +88,7 @@ def test_sync_not_on_master(tsrc_cli: CLI, git_server: GitServer,
     git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     tsrc.git.run_git(foo_path, "checkout", "-B", "devel")
     # push so that sync still works
     tsrc.git.run_git(foo_path, "push", "-u", "origin", "devel", "--no-verify")
@@ -109,7 +109,7 @@ def test_copies_are_up_to_date(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("sync")
 
-    assert workspace_path.joinpath("top.txt").text() == "v2"
+    assert (workspace_path / "top.txt").text() == "v2"
 
 
 def test_copies_are_readonly(tsrc_cli: CLI, git_server: GitServer,
@@ -121,7 +121,7 @@ def test_copies_are_readonly(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("init", manifest_url)
 
-    foo_txt = workspace_path.joinpath("top.txt")
+    foo_txt = workspace_path / "top.txt"
     assert not os.access(foo_txt, os.W_OK)
 
 
@@ -150,8 +150,8 @@ def test_tags_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_pa
 
     tsrc_cli.run("sync")
 
-    foo_path = workspace_path.joinpath("foo")
-    assert not foo_path.joinpath("new.txt").exists()
+    foo_path = workspace_path / "foo"
+    assert not (foo_path / "new.txt").exists()
 
 
 def test_sha1s_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
@@ -165,8 +165,8 @@ def test_sha1s_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_p
 
     tsrc_cli.run("sync")
 
-    foo_path = workspace_path.joinpath("foo")
-    assert not foo_path.joinpath("new.txt").exists()
+    foo_path = workspace_path / "foo"
+    assert not (foo_path / "new.txt").exists()
 
 
 def test_tags_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
@@ -184,8 +184,8 @@ def test_tags_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("sync")
 
-    foo_path = workspace_path.joinpath("foo")
-    assert foo_path.joinpath("new.txt").exists()
+    foo_path = workspace_path / "foo"
+    assert (foo_path / "new.txt").exists()
 
 
 def test_sha1s_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
@@ -202,8 +202,8 @@ def test_sha1s_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("sync")
 
-    foo_path = workspace_path.joinpath("foo")
-    assert foo_path.joinpath("new.txt").exists()
+    foo_path = workspace_path / "foo"
+    assert (foo_path / "new.txt").exists()
 
 
 def test_tags_are_skipped_when_not_clean_tags(tsrc_cli: CLI, git_server:
@@ -213,7 +213,7 @@ def test_tags_are_skipped_when_not_clean_tags(tsrc_cli: CLI, git_server:
     git_server.manifest.set_repo_tag("foo", "v0.1")
 
     tsrc_cli.run("init", git_server.manifest_url)
-    workspace_path.joinpath("foo", "untracked.txt").write_text("")
+    (workspace_path / "foo/untracked.txt").write_text("")
 
     git_server.push_file("foo", "new.txt")
     git_server.tag("foo", "v0.2")
@@ -221,8 +221,8 @@ def test_tags_are_skipped_when_not_clean_tags(tsrc_cli: CLI, git_server:
 
     tsrc_cli.run("sync", expect_fail=True)
 
-    foo_path = workspace_path.joinpath("foo")
-    assert not foo_path.joinpath("new.txt").exists()
+    foo_path = workspace_path / "foo"
+    assert not (foo_path / "new.txt").exists()
 
 
 def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
@@ -232,7 +232,7 @@ def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 
     tsrc_cli.run("init", git_server.manifest_url)
-    workspace_path.joinpath("foo", "untracked.txt").write_text("")
+    (workspace_path / "foo/untracked.txt").write_text("")
 
     git_server.push_file("foo", "new.txt")
     new_sha1 = git_server.get_sha1("foo")
@@ -240,8 +240,8 @@ def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("sync", expect_fail=True)
 
-    foo_path = workspace_path.joinpath("foo")
-    assert not foo_path.joinpath("new.txt").exists()
+    foo_path = workspace_path / "foo"
+    assert not (foo_path / "new.txt").exists()
 
 
 def test_custom_group(tsrc_cli: CLI, git_server: GitServer, message_recorder:

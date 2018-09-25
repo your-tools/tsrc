@@ -23,7 +23,7 @@ def tmp_path(tmpdir: Any) -> Path:
 
 @pytest.fixture
 def workspace_path(tmp_path: Path) -> Path:
-    return tmp_path.joinpath("work").mkdir()
+    return (tmp_path / "work").mkdir()
 
 
 @pytest.fixture

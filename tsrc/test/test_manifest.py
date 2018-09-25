@@ -95,7 +95,7 @@ repos:
 gitlab:
   url: foo
 """
-    manifest_path = tmp_path.joinpath("manifest.yml")
+    manifest_path = tmp_path / "manifest.yml"
     manifest_path.write_text(contents)
     res = tsrc.manifest.load(manifest_path)
     assert res
@@ -107,7 +107,7 @@ class ReposGetter:
         self.contents = ""
 
     def get_repos(self, groups: Optional[List[str]] = None, all_: bool = False) -> List[str]:
-        manifest_path = self.tmp_path.joinpath("manifest.yml")
+        manifest_path = self.tmp_path / "manifest.yml"
         manifest_path.write_text(self.contents)
         manifest = tsrc.manifest.load(manifest_path)
         return [repo.src for repo in manifest.get_repos(groups=groups, all_=all_)]

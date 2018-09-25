@@ -11,7 +11,7 @@ import mock
 
 
 def test_read_config(tmp_path: Path) -> None:
-    tsrc_yml_path = tmp_path.joinpath("tsrc.yml")
+    tsrc_yml_path = tmp_path / "tsrc.yml"
     tsrc_yml_path.write_text(
         textwrap.dedent(
             """\
@@ -25,7 +25,7 @@ def test_read_config(tmp_path: Path) -> None:
 
 
 def test_invalid_syntax(tmp_path: Path) -> None:
-    foo_yml = tmp_path.joinpath("foo.yml")
+    foo_yml = tmp_path / "foo.yml"
     foo_yml.write_text(textwrap.dedent(
         """
         foo:
@@ -43,7 +43,7 @@ def test_invalid_syntax(tmp_path: Path) -> None:
 
 
 def test_invalid_schema(tmp_path: Path) -> None:
-    foo_yml = tmp_path.joinpath("foo.yml")
+    foo_yml = tmp_path / "foo.yml"
     foo_yml.write_text(textwrap.dedent(
         """
         foo:

@@ -31,7 +31,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             ui.fatal(message)
 
     def clone_repo(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace_path.joinpath(repo.src)
+        repo_path = self.workspace_path / repo.src
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
         clone_args = ["clone", repo.url]
@@ -51,7 +51,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             raise tsrc.Error("Cloning failed")
 
     def reset_repo(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace_path.joinpath(repo.src)
+        repo_path = self.workspace_path / repo.src
         ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)

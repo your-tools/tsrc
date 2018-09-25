@@ -33,7 +33,7 @@ def parse_config_file(
 
 def get_tsrc_config_path() -> Path:
     config_path = Path(xdg.XDG_CONFIG_HOME)
-    config_path = config_path.joinpath("tsrc.yml")
+    config_path = config_path / "tsrc.yml"
     return config_path
 
 

@@ -8,7 +8,7 @@ from tsrc.test.helpers.git_server import GitServer
 
 
 def assert_shallow_clone(workspace_path: Path, repo: str) -> None:
-    repo_path = workspace_path.joinpath(repo)
+    repo_path = workspace_path / repo
     assert tsrc.git.is_shallow(repo_path)
 
 

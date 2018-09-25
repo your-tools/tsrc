@@ -24,7 +24,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
 
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src)
-        repo_path = self.workspace_path.joinpath(repo.src)
+        repo_path = self.workspace_path / repo.src
         self.fetch(repo_path)
         ref = None
 

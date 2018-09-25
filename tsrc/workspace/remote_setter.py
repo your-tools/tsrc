@@ -49,7 +49,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
             tsrc.git.run_git(full_path, "remote", "set-url", remote.name, remote.url)
 
     def process_repo_add_remote(self, repo: tsrc.Repo, remote: tsrc.repo.Remote) -> None:
-        full_path = self.workspace_path.joinpath(repo.src)
+        full_path = self.workspace_path / repo.src
         ui.info_2(repo.src)
         ui.info(ui.blue, "++", ui.reset, ui.brown, remote.name, ui.reset, repo.url)
         tsrc.git.run_git(full_path, "remote", "add", remote.name, remote.url)

@@ -23,9 +23,6 @@ class Workspace():
         self.root_path = root_path
         self.local_manifest = LocalManifest(root_path)
 
-    def joinpath(self, *parts: str) -> Path:
-        return self.root_path.joinpath(*parts)
-
     def get_repos(self) -> List[tsrc.Repo]:
         return self.local_manifest.get_repos()
 
@@ -52,7 +49,7 @@ class Workspace():
     def clone_missing(self) -> None:
         to_clone = list()
         for repo in self.get_repos():
-            repo_path = self.joinpath(repo.src)
+            repo_path = self.root_path / repo.src
             if not repo_path.exists():
                 to_clone.append(repo)
         cloner = Cloner(self.root_path, shallow=self.shallow)
@@ -76,7 +73,7 @@ class Workspace():
     def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
         """ Yield (index, repo, full_path) for all the repos """
         for i, repo in enumerate(self.get_repos()):
-            full_path = self.joinpath(repo.src)
+            full_path = self.root_path / repo.src
             yield (i, repo, full_path)
 
     def get_url(self, src: str) -> str:

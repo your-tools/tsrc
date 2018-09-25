@@ -20,9 +20,9 @@ T = TypeVar('T')
 
 
 class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace: Path, cmd: List[str],
+    def __init__(self, workspace_path: Path, cmd: List[str],
                  cmd_as_str: str, shell: bool = False) -> None:
-        self.workspace = workspace
+        self.workspace_path = workspace_path
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
         self.shell = shell
@@ -38,7 +38,7 @@ class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
                 ui.lightgray, "$ ",
                 ui.reset, ui.bold, self.cmd_as_str,
                 sep="")
-        full_path = self.workspace.joinpath(repo.src)
+        full_path = self.workspace_path / repo.src
         rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)
         if rc != 0:
             raise CommandFailed()
@@ -47,6 +47,6 @@ class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
-    cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)
+    cmd_runner = CmdRunner(workspace.root_path, args.cmd, args.cmd_as_str, shell=args.shell)
     tsrc.executor.run_sequence(workspace.get_repos(), cmd_runner)
     ui.info("OK", ui.check)
