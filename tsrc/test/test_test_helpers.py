@@ -1,7 +1,6 @@
 from path import Path
 
 import tsrc.git
-import tsrc.gitlab
 import tsrc.manifest
 
 from tsrc.test.helpers.cli import CLI

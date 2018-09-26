@@ -7,7 +7,6 @@ import mock
 
 
 import tsrc.git
-import tsrc.gitlab
 from tsrc.test.helpers.cli import CLI
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_gitlab import PushAction

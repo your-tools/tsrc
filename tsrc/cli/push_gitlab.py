@@ -12,7 +12,6 @@ import ui
 
 import tsrc
 import tsrc.config
-import tsrc.gitlab
 import tsrc.git
 import tsrc.cli.push
 from tsrc.cli.push import RepositoryInfo
