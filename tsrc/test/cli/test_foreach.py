@@ -77,3 +77,24 @@ def test_foreach_shell(
     cmd.append("doc")
     tsrc_cli.run("foreach", "-c", " ".join(cmd))
     assert message_recorder.find("`%s`" % " ".join(cmd))
+
+
+def test_foreach_groups(
+        tsrc_cli: CLI, git_server: GitServer,
+        message_recorder: message_recorder) -> None:
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_group("spam", ["eggs", "beacon"])
+    git_server.add_repo("other")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+
+    cmd = get_cmd_for_foreach_test(shell=False)
+
+    message_recorder.reset()
+    tsrc_cli.run("foreach", "-g", "foo", *cmd)
+
+    assert message_recorder.find("bar\n")
+    assert message_recorder.find("baz\n")
+    assert not message_recorder.find("eggs\n")
+    assert not message_recorder.find("other\n")

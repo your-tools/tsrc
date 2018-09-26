@@ -103,6 +103,7 @@ def main(args: ArgsList = None) -> None:
     foreach_parser = add_workspace_subparser(subparsers, "foreach")
     foreach_parser.add_argument("cmd", nargs="*")
     foreach_parser.add_argument("-c", dest="shell", action="store_true")
+    foreach_parser.add_argument("-g", "--group", action="append", dest="groups")
     foreach_parser.epilog = textwrap.dedent("""\
     Usage:
        # Run command directly
