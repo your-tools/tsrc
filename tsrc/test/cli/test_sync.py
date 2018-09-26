@@ -89,9 +89,9 @@ def test_sync_not_on_master(tsrc_cli: CLI, git_server: GitServer,
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
     foo_path = workspace_path.joinpath("foo")
-    tsrc.git.run_git(foo_path, "checkout", "-B", "devel")
+    tsrc.git.run(foo_path, "checkout", "-B", "devel")
     # push so that sync still works
-    tsrc.git.run_git(foo_path, "push", "-u", "origin", "devel", "--no-verify")
+    tsrc.git.run(foo_path, "push", "-u", "origin", "devel", "--no-verify")
 
     tsrc_cli.run("sync", expect_fail=True)
 

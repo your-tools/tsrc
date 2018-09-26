@@ -1,6 +1,7 @@
 from path import Path
 
-import tsrc.cli
+import tsrc
+import tsrc.git
 
 from ui.tests.conftest import message_recorder
 from tsrc.test.helpers.cli import CLI

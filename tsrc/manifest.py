@@ -8,10 +8,6 @@ from path import Path
 import schema
 
 import tsrc
-import tsrc.config
-from tsrc.repo import Repo  # noqa
-import tsrc.groups
-from tsrc.groups import GroupList  # noqa
 
 ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
 RepoConfig = NewType('RepoConfig', Dict[str, Any])
@@ -26,10 +22,10 @@ class RepoNotFound(tsrc.Error):
 
 class Manifest():
     def __init__(self) -> None:
-        self._repos = list()  # type: List[Repo]
+        self._repos = list()  # type: List[tsrc.Repo]
         self.copyfiles = list()  # type: List[Tuple[str, str]]
         self.gitlab = None  # type: Optional[GitLabConfig]
-        self.group_list = None  # type:  Optional[GroupList[str]]
+        self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
 
     def load(self, config: ManifestConfig) -> None:
         self.copyfiles = list()
@@ -41,8 +37,7 @@ class Manifest():
             branch = repo_config.get("branch", "master")
             tag = repo_config.get("tag")
             sha1 = repo_config.get("sha1")
-            repo = tsrc.Repo(url=url, src=src, branch=branch,
-                             sha1=sha1, tag=tag)
+            repo = tsrc.Repo(url=url, src=src, branch=branch, sha1=sha1, tag=tag)
             self._repos.append(repo)
 
             self._handle_copies(repo_config)
@@ -61,7 +56,7 @@ class Manifest():
 
     def _handle_groups(self, config: ManifestConfig) -> None:
         elements = set(repo.src for repo in self._repos)
-        self.group_list = tsrc.groups.GroupList(elements=elements)
+        self.group_list = tsrc.GroupList(elements=elements)
         groups_config = config.get("groups", dict())
         for name, group_config in groups_config.items():
             elements = group_config["repos"]
@@ -123,7 +118,7 @@ def load(manifest_path: Path) -> Manifest:
         schema.Optional("gitlab"): gitlab_schema,
         schema.Optional("groups"): {str: group_schema},
     })
-    parsed = tsrc.config.parse_config_file(manifest_path, manifest_schema)
+    parsed = tsrc.parse_config_file(manifest_path, manifest_schema)
     parsed = ManifestConfig(parsed)  # type: ignore
     as_manifest_config = cast(ManifestConfig, parsed)
     res = Manifest()

@@ -1,7 +1,8 @@
 from typing import cast, Any
 
 
-import tsrc.cli
+import tsrc
+import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -64,7 +65,7 @@ def test_change_repo_url(tsrc_cli: CLI, git_server: GitServer, workspace_path: P
     tsrc_cli.run("init", git_server.manifest_url)
     assert_cloned(workspace_path, "foo")
     foo_path = workspace_path.joinpath("foo")
-    _, actual_url = tsrc.git.run_git_captured(foo_path, "remote", "get-url", "origin")
+    _, actual_url = tsrc.git.run_captured(foo_path, "remote", "get-url", "origin")
     assert actual_url == new_url
 
 
@@ -112,8 +113,8 @@ def test_resets_to_tag(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pat
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path.joinpath("foo")
-    _, expected_ref = tsrc.git.run_git_captured(foo_path, "rev-parse", "v1.0")
-    _, actual_ref = tsrc.git.run_git_captured(foo_path, "rev-parse", "HEAD")
+    _, expected_ref = tsrc.git.run_captured(foo_path, "rev-parse", "v1.0")
+    _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
     assert expected_ref == actual_ref
 
 
@@ -128,7 +129,7 @@ def test_resets_to_sha1(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pa
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path.joinpath("foo")
-    _, actual_ref = tsrc.git.run_git_captured(foo_path, "rev-parse", "HEAD")
+    _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
     assert initial_sha1 == actual_ref
 
 
@@ -173,7 +174,7 @@ def test_no_remote_named_origin(tsrc_cli: CLI, git_server: GitServer, workspace_
 
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path.joinpath("foo")
-    tsrc.git.run_git(foo_path, "remote", "rename", "origin", "upstream")
+    tsrc.git.run(foo_path, "remote", "rename", "origin", "upstream")
 
     tsrc_cli.run("init", git_server.manifest_url)
 

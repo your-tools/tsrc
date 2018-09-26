@@ -1,7 +1,7 @@
 """ Entry point for tsrc foreach """
 
 import argparse
-from typing import List, TypeVar
+from typing import List
 import subprocess
 
 from path import Path
@@ -9,14 +9,13 @@ import ui
 
 import tsrc
 import tsrc.cli
-import tsrc.workspace
 
 
 class CommandFailed(tsrc.Error):
     pass
 
 
-class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
+class CmdRunner(tsrc.Task[tsrc.Repo]):
     def __init__(self, workspace: Path, cmd: List[str],
                  cmd_as_str: str, shell: bool = False) -> None:
         self.workspace = workspace
@@ -45,5 +44,5 @@ def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
     cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)
-    tsrc.executor.run_sequence(workspace.get_repos(), cmd_runner)
+    tsrc.run_sequence(workspace.get_repos(), cmd_runner)
     ui.info("OK", ui.check)

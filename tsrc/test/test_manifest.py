@@ -3,7 +3,7 @@ import os.path
 
 import ruamel.yaml
 
-import tsrc.manifest
+import tsrc
 from path import Path
 
 import pytest
@@ -31,7 +31,7 @@ repos:
         dest: CMakeLists.txt
       - src: .clang-format
 """
-    manifest = tsrc.manifest.Manifest()
+    manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
     assert manifest.gitlab
@@ -74,7 +74,7 @@ repos:
   - src: bar
     url: git@example.com:proj_two/bar
 """
-    manifest = tsrc.manifest.Manifest()
+    manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
     assert manifest.get_url("foo") == "git@example.com:proj_one/foo"
