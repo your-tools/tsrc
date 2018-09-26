@@ -146,11 +146,11 @@ def run_git_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple
     return returncode, out
 
 
-def get_sha1(working_path: Path, short: bool = False) -> str:
+def get_sha1(working_path: Path, short: bool = False, ref: str="HEAD") -> str:
     cmd = ["rev-parse"]
     if short:
         cmd.append("--short")
-    cmd.append("HEAD")
+    cmd.append(ref)
     _, output = run_git_captured(working_path, *cmd)
     return output
 
