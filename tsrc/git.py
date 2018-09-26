@@ -205,7 +205,7 @@ def get_tracking_ref(working_path: Path) -> Optional[str]:
     rc, out = run_git_captured(
         working_path,
         "rev-parse", "--abbrev-ref",
-        "--symbolic-full-name", "@{u}",
+        "--symbolic-full-name", "@{upstream}",
         check=False
     )
     if rc == 0:

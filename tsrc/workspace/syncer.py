@@ -74,7 +74,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def sync_repo_to_branch(repo_path: Path) -> None:
         ui.info_2("Updating branch")
         try:
-            tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{u}")
+            tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{upstream}")
         except tsrc.Error:
             raise tsrc.Error("updating branch failed")
 

@@ -67,7 +67,7 @@ class LocalManifest:
             raise tsrc.Error(message.format(self.clone_path))
         cmd = ("fetch", "--prune", "origin")
         tsrc.git.run_git(self.clone_path, *cmd)
-        cmd = ("reset", "--hard", "@{u}")
+        cmd = ("reset", "--hard", "@{upstream}")
         tsrc.git.run_git(self.clone_path, *cmd)
 
     def save_config(self, config: ManifestConfig) -> None:
