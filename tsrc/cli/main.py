@@ -52,7 +52,7 @@ def fix_cmd_args_for_foreach(args: argparse.Namespace,
     args.cmd_as_str = cmd_as_str
 
 
-def workspace_subparser(
+def add_workspace_subparser(
         subparser: argparse._SubParsersAction, name: str) -> argparse.ArgumentParser:
     parser = subparser.add_parser(name)
     parser.add_argument("-w", "--workspace", dest="workspace_path")
@@ -100,7 +100,7 @@ def main(args: ArgsList = None) -> None:
 
     subparsers.add_parser("version")
 
-    foreach_parser = workspace_subparser(subparsers, "foreach")
+    foreach_parser = add_workspace_subparser(subparsers, "foreach")
     foreach_parser.add_argument("cmd", nargs="*")
     foreach_parser.add_argument("-c", dest="shell", action="store_true")
     foreach_parser.epilog = textwrap.dedent("""\
@@ -113,19 +113,19 @@ def main(args: ArgsList = None) -> None:
     """)
     foreach_parser.formatter_class = argparse.RawDescriptionHelpFormatter
 
-    init_parser = workspace_subparser(subparsers, "init")
+    init_parser = add_workspace_subparser(subparsers, "init")
     init_parser.add_argument("url", nargs="?")
     init_parser.add_argument("-b", "--branch")
     init_parser.add_argument("-g", "--group", action="append", dest="groups")
     init_parser.add_argument("-s", "--shallow", action="store_true", dest="shallow", default=False)
     init_parser.set_defaults(branch="master")
 
-    log_parser = workspace_subparser(subparsers, "log")
+    log_parser = add_workspace_subparser(subparsers, "log")
     log_parser.add_argument("--from", required=True, dest="from_", metavar="FROM")
     log_parser.add_argument("--to")
     log_parser.set_defaults(to="HEAD")
 
-    push_parser = workspace_subparser(subparsers, "push")
+    push_parser = add_workspace_subparser(subparsers, "push")
     push_parser.add_argument("-f", "--force", action="store_true", default=False)
     push_parser.add_argument("-t", "--target", dest="target_branch")
     push_parser.add_argument("push_spec", nargs="?")
@@ -145,8 +145,8 @@ def main(args: ArgsList = None) -> None:
     message_group.add_argument("--wip", action="store_true", help="Mark merge request as WIP")
     message_group.add_argument("--ready", action="store_true", help="Mark merge request as ready")
 
-    workspace_subparser(subparsers, "status")
-    workspace_subparser(subparsers, "sync")
+    add_workspace_subparser(subparsers, "status")
+    add_workspace_subparser(subparsers, "sync")
 
     args_ns = parser.parse_args(args=args)  # type: argparse.Namespace
     setup_ui(args_ns)
