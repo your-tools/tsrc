@@ -13,8 +13,8 @@ class FakeTask(tsrc.Task[str]):
     def __init__(self) -> None:
         pass
 
-    def description(self) -> str:
-        return "Frobnicating all items"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info("Frobnicating", num_items, "items")
 
     def display_item(self, item: str) -> str:
         return item

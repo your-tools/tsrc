@@ -27,8 +27,11 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def description(self) -> str:
-        return "Running `%s` on every repo" % self.cmd_as_str
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_1("Running `%s` on %d repos" % (self.cmd_as_str, num_items))
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Command failed for %s repo(s)" % num_errors)
 
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src, "\n",

@@ -249,8 +249,11 @@ class Cloner(tsrc.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def description(self) -> str:
-        return "Cloning missing repos"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Cloning missing repos")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to clone missing repos")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -310,8 +313,11 @@ class FileCopier(tsrc.Task[Copy]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def description(self) -> str:
-        return "Copying files"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Copying files")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to perform the following copies:")
 
     def display_item(self, item: Copy) -> str:
         src, dest = item
@@ -340,8 +346,11 @@ class RemoteSetter(tsrc.Task[tsrc.Repo]):
     def quiet(self) -> bool:
         return True
 
-    def description(self) -> str:
-        return "Setting remote URLs"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Setting remote URLs")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.info_2("Failed to set remote URLs")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -384,8 +393,11 @@ class Syncer(tsrc.Task[tsrc.Repo]):
         self.workspace = workspace
         self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
-    def description(self) -> str:
-        return "Synchronize workspace"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_1("Synchronizing workspace")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to synchronize workspace")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
