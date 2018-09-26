@@ -16,9 +16,6 @@ class CommandFailed(tsrc.Error):
     pass
 
 
-T = TypeVar('T')
-
-
 class CmdRunner(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace: Path, cmd: List[str],
                  cmd_as_str: str, shell: bool = False) -> None:
