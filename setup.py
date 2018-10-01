@@ -10,15 +10,16 @@ def get_long_description():
         return fp.read()
 
 
-setup(name="tsrc",
-      version="0.5.0",
-      description="Manage multiple repositories",
-      long_description=get_long_description(),
-      url="https://github.com/SuperTanker/tsrc",
-      author="Kontrol SAS",
-      packages=find_packages(),
-      include_package_data=True,
-      install_requires=[
+setup(
+    name="tsrc",
+    version="0.5.0",
+    description="Manage multiple repositories",
+    long_description=get_long_description(),
+    url="https://github.com/SuperTanker/tsrc",
+    author="Kontrol SAS",
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
         "attrs",
         "colored_traceback",
         "colorama",
@@ -33,16 +34,12 @@ setup(name="tsrc",
         "tabulate",
         "unidecode",
         "xdg",
-      ],
-      classifiers=[
+    ],
+    classifiers=[
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
-      ],
-      entry_points={
-        "console_scripts": [
-          "tsrc = tsrc.cli.main:main",
-         ]
-      }
-      )
+    ],
+    entry_points={"console_scripts": ["tsrc = tsrc.cli.main:main"]},
+)
