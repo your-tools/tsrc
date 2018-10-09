@@ -1,4 +1,26 @@
-# Next release
+# v0.6.0
+
+* Add support for multiple remotes:
+
+```yaml
+# still valid (implicit 'origin' remote)
+src: foo
+url: git@github.com/foo
+
+# also valid (two explicit remotes)
+src: fooo
+remotes:
+  - { name: origin, url: git@github.com:john/foo }
+  - { name: upstream, url: git@github.com:foo/foo}
+
+# not valid (ambiguous)
+src: foo
+url: git@github.com:john/foo
+remotes:
+   - { name: upstream, url: git@github.com:foo/foo }
+```
+
+Thanks @tst2005 and @cgestes for their help with the configuration format.
 
 * Fix [#113](https://github.com/SuperTanker/tsrc/issues/113): do not hide branch when showing tag status.
 * Add support for Python 3.7

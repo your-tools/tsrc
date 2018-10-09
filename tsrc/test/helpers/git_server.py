@@ -9,6 +9,7 @@ from path import Path
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]
+RemoteConfig = Tuple[str, str]
 
 
 class ManifestHandler():
@@ -18,7 +19,7 @@ class ManifestHandler():
 
     @property
     def yaml_path(self) -> Path:
-        return self.path.joinpath("manifest.yml")
+        return self.path / "manifest.yml"
 
     def init(self) -> None:
         to_write = ruamel.yaml.dump(self.data)
@@ -78,6 +79,16 @@ class ManifestHandler():
             copy_dicts.append({"src": copy_src, "dest": copy_dest})
         self.configure_repo(src, "copy", copy_dicts)
 
+    def set_repo_remotes(self, src: str, remotes: List[RemoteConfig]) -> None:
+        remote_dicts = list()
+        for name, url in remotes:
+            remote_dicts.append({"name": name, "url": url})
+        repo = self.get_repo(src)
+        repo["remotes"] = remote_dicts
+        del repo["url"]
+        message = "%s: remotes: %s" % (src, remote_dicts)
+        self.push(message)
+
     def push(self, message: str) -> None:
         to_write = ruamel.yaml.dump(self.data)
         self.yaml_path.write_text(to_write)
@@ -98,21 +109,21 @@ class ManifestHandler():
 class GitServer():
     def __init__(self, tmpdir: Path) -> None:
         self.tmpdir = tmpdir
-        self.bare_path = tmpdir.joinpath("srv")
-        self.src_path = tmpdir.joinpath("src")
+        self.bare_path = tmpdir / "srv"
+        self.src_path = tmpdir / "src"
         self.add_repo("manifest", add_to_manifest=False)
         self.manifest = ManifestHandler(self.get_path("manifest"))
         self.manifest.init()
         self.manifest_url = self.get_url("manifest")
 
     def get_path(self, name: str) -> Path:
-        return self.src_path.joinpath(name)
+        return self.src_path / name
 
     def get_url(self, name: str) -> str:
-        return str("file://" + self.bare_path.joinpath(name))
+        return str("file://" + (self.bare_path / name))
 
     def _create_repo(self, name: str, empty: bool = False, branch: str = "master") -> str:
-        bare_path = self.bare_path.joinpath(name)
+        bare_path = self.bare_path / name
         bare_path.makedirs_p()
         tsrc.git.run(bare_path, "init", "--bare")
         src_path = self.get_path(name)
@@ -120,7 +131,7 @@ class GitServer():
         tsrc.git.run(src_path, "init")
         tsrc.git.run(src_path, "remote", "add", "origin", bare_path)
         tsrc.git.run(bare_path, "symbolic-ref", "HEAD", "refs/heads/%s" % branch)
-        src_path.joinpath("README").touch()
+        (src_path / "README").touch()
         tsrc.git.run(src_path, "add", "README")
         tsrc.git.run(src_path, "commit", "--message", "Initial commit")
         if branch != "master":
@@ -146,7 +157,7 @@ class GitServer():
     def push_file(self, name: str, file_path: str, *,
                   contents: str = "", message: str = "") -> None:
         src_path = self.get_path(name)
-        full_path = src_path.joinpath(file_path)
+        full_path = src_path / file_path
         full_path.parent.makedirs_p()
         full_path.touch()
         if contents:

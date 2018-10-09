@@ -11,7 +11,7 @@ from path import Path
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
-    res = workspace_path.joinpath(repo).exists()
+    res = (workspace_path / repo).exists()
     return cast(bool, res)
 
 
@@ -35,7 +35,7 @@ def test_init_simple(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path)
 def test_init_with_args(tsrc_cli: CLI, git_server: GitServer, monkeypatch: Any,
                         tmp_path: Path) -> None:
     git_server.add_repo("foo")
-    work2_path = tmp_path.joinpath("work2").mkdir()
+    work2_path = (tmp_path / "work2").mkdir()
     tsrc_cli.run("init", "--workspace", work2_path, git_server.manifest_url)
     assert_cloned(work2_path, "foo")
 
@@ -65,7 +65,7 @@ def test_change_repo_url(tsrc_cli: CLI, git_server: GitServer, workspace_path: P
     git_server.manifest.set_repo_url("foo", new_url)
     tsrc_cli.run("init", git_server.manifest_url)
     assert_cloned(workspace_path, "foo")
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     _, actual_url = tsrc.git.run_captured(foo_path, "remote", "get-url", "origin")
     assert actual_url == new_url
 
@@ -79,7 +79,7 @@ def test_copy_files_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: 
 
     tsrc_cli.run("init", manifest_url)
 
-    assert workspace_path.joinpath("CMakeLists.txt").text() == top_cmake_contents
+    assert (workspace_path / "CMakeLists.txt").text() == top_cmake_contents
 
 
 def test_copy_files_source_does_not_exist(
@@ -105,7 +105,7 @@ def test_uses_correct_branch_for_repo(tsrc_cli: CLI, git_server: GitServer,
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     assert tsrc.git.get_current_branch(foo_path) == "next"
 
 
@@ -126,7 +126,7 @@ def test_resets_to_tag(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pat
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     _, expected_ref = tsrc.git.run_captured(foo_path, "rev-parse", "v1.0")
     _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
     assert expected_ref == actual_ref
@@ -142,7 +142,7 @@ def test_resets_to_sha1(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pa
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
     assert initial_sha1 == actual_ref
 
@@ -187,7 +187,7 @@ def test_no_remote_named_origin(tsrc_cli: CLI, git_server: GitServer, workspace_
     git_server.add_repo("foo")
 
     tsrc_cli.run("init", git_server.manifest_url)
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     tsrc.git.run(foo_path, "remote", "rename", "origin", "upstream")
 
     tsrc_cli.run("init", git_server.manifest_url)
@@ -199,5 +199,24 @@ def test_repo_default_branch_not_master(tsrc_cli: CLI, git_server: GitServer,
 
     tsrc_cli.run("init", git_server.manifest_url)
 
-    foo_path = workspace_path.joinpath("foo")
+    foo_path = workspace_path / "foo"
     assert tsrc.git.get_current_branch(foo_path) == "devel"
+
+
+def test_several_remotes(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
+    foo_url = git_server.add_repo("foo")
+    git_server.manifest.set_repo_remotes(
+        "foo",
+        [("origin", foo_url),
+         ("upstream", "git@upstream.com")])
+
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    foo_path = workspace_path / "foo"
+    rc, output = tsrc.git.run_captured(
+        foo_path,
+        "remote", "get-url", "upstream",
+        check=False,
+    )
+    assert rc == 0, output
+    assert output == "git@upstream.com"

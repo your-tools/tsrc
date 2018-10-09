@@ -1,4 +1,5 @@
 from typing import List, Optional
+import textwrap
 import os.path
 
 import ruamel.yaml
@@ -19,7 +20,7 @@ repos:
     branch: next
 
   - src: bar
-    url: git@example.com:foo.git
+    url: git@example.com:bar.git
     branch: master
     sha1: ad2b68539c78e749a372414165acdf2a1bb68203
 
@@ -38,21 +39,21 @@ repos:
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
     assert manifest.get_repos() == [
         tsrc.Repo(
-            url="git@example.com:foo.git",
+            remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:foo.git")],
             src="foo",
             branch="next",
             sha1=None,
             tag=None
         ),
         tsrc.Repo(
-            url="git@example.com:foo.git",
+            remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:bar.git")],
             src="bar",
             branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
             tag=None
         ),
         tsrc.Repo(
-            url="git@example.com:master.git",
+            remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:master.git")],
             src="master",
             branch="master",
             sha1=None,
@@ -65,7 +66,7 @@ repos:
     ]
 
 
-def test_find() -> None:
+def test_get_repo() -> None:
     contents = """
 repos:
   - src: foo
@@ -77,28 +78,100 @@ repos:
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
-    assert manifest.get_url("foo") == "git@example.com:proj_one/foo"
-    assert manifest.get_url("bar") == "git@example.com:proj_two/bar"
+
+    def assert_clone_url(src: str, url: str) -> None:
+        repo = manifest.get_repo(src)
+        assert repo.clone_url == url
+
+    assert_clone_url("foo", "git@example.com:proj_one/foo")
+    assert_clone_url("bar", "git@example.com:proj_two/bar")
     with pytest.raises(tsrc.manifest.RepoNotFound) as e:
-        manifest.get_url("no/such")
+        manifest.get_repo("no/such")
         assert "no/such" in e.value.message
 
 
-def test_validates(tmp_path: Path) -> None:
+def test_remotes() -> None:
     contents = """
 repos:
-  - src: bar
-    url: baz
-    copy:
-      - src: foo
-        dest: bar
-gitlab:
-  url: foo
+  - src: foo
+    url: git@example.com/foo
+    remotes:
+      - name: upstream
+        url: git@upstream.com/foo
 """
-    manifest_path = tmp_path.joinpath("manifest.yml")
-    manifest_path.write_text(contents)
+    manifest = tsrc.manifest.Manifest()
+    parsed = ruamel.yaml.safe_load(contents)
+    manifest.load(parsed)
+    one_repo = manifest.get_repo("foo")
+    assert len(one_repo.remotes) == 1
+
+
+def assert_valid_schema(tmp_path: Path, contents: str) -> tsrc.manifest.Manifest:
+    manifest_path = tmp_path / "manifest.yml"
+    manifest_path.write_text(textwrap.dedent(contents))
     res = tsrc.manifest.load(manifest_path)
-    assert res
+    return res
+
+
+def assert_invalid_schema(tmp_path: Path, contents: str) -> tsrc.Error:
+    manifest_path = tmp_path / "manifest.yml"
+    manifest_path.write_text(textwrap.dedent(contents))
+    try:
+        tsrc.manifest.load(manifest_path)
+    except tsrc.InvalidConfig as error:
+        return error
+    pytest.fail("Did not raise tsrc.InvalidConfig")
+
+
+def test_validates(tmp_path: Path) -> None:
+    assert_valid_schema(
+        tmp_path,
+        """
+        repos:
+          - src: bar
+            url: baz
+            copy:
+              - src: foo
+                dest: bar
+        gitlab:
+          url: foo
+        """
+    )
+
+
+def test_allow_url(tmp_path: Path) -> None:
+    assert_valid_schema(
+        tmp_path,
+        """
+          repos:
+            - { src: bar, url: git@example.com/bar }
+         """
+    )
+
+
+def test_allow_several_remotes(tmp_path: Path) -> None:
+    assert_valid_schema(
+        tmp_path,
+        """
+          repos:
+            - { src: bar, url: git@example.com/bar }
+          """
+    )
+
+
+def test_disallow_url_and_remotes(tmp_path: Path) -> None:
+    error = assert_invalid_schema(
+        tmp_path,
+        """
+        repos:
+          - src: bar
+            url: git@example.com/bar
+            remotes:
+            - { name: upstream, url: git@upstream.com/bar }
+        """
+    )
+    assert "remotes" in error.message
+    assert "url" in error.message
 
 
 class ReposGetter:
@@ -107,7 +180,7 @@ class ReposGetter:
         self.contents = ""
 
     def get_repos(self, groups: Optional[List[str]] = None, all_: bool = False) -> List[str]:
-        manifest_path = self.tmp_path.joinpath("manifest.yml")
+        manifest_path = self.tmp_path / "manifest.yml"
         manifest_path.write_text(self.contents)
         manifest = tsrc.manifest.load(manifest_path)
         return [repo.src for repo in manifest.get_repos(groups=groups, all_=all_)]

@@ -32,17 +32,35 @@ class Manifest():
         self.gitlab = config.get("gitlab")
         repos = config.get("repos") or list()
         for repo_config in repos:
-            url = repo_config["url"]
+            self._handle_repo(repo_config)
+            self._handle_copies(repo_config)
+
+        self._handle_groups(config)
+
+    def _handle_repo(self, repo_config: RepoConfig) -> None:
             src = repo_config["src"]
             branch = repo_config.get("branch", "master")
             tag = repo_config.get("tag")
             sha1 = repo_config.get("sha1")
-            repo = tsrc.Repo(url=url, src=src, branch=branch, sha1=sha1, tag=tag)
+            url = repo_config.get("url")
+            if url:
+                origin = tsrc.Remote(name="origin", url=url)
+                remotes = [origin]
+            else:
+                remotes = self._handle_remotes(repo_config)
+            repo = tsrc.Repo(src=src, branch=branch,
+                             sha1=sha1, tag=tag,
+                             remotes=remotes)
             self._repos.append(repo)
 
-            self._handle_copies(repo_config)
-
-        self._handle_groups(config)
+    def _handle_remotes(self, repo_config: RepoConfig) -> List[tsrc.Remote]:
+            remotes_config = repo_config.get("remotes")
+            res = list()  # type: List[tsrc.Remote]
+            if remotes_config:
+                for remote_config in remotes_config:
+                    remote = tsrc.Remote(name=remote_config["name"], url=remote_config["url"])
+                    res.append(remote)
+            return res
 
     def _handle_copies(self, repo_config: RepoConfig) -> None:
         if "copy" not in repo_config:
@@ -87,10 +105,6 @@ class Manifest():
             res.append(self.get_repo(src))
         return sorted(res, key=operator.attrgetter("src"))
 
-    def get_url(self, src: str) -> str:
-        repo = self.get_repo(src)
-        return repo.url
-
     def get_repo(self, src: str) -> tsrc.Repo:
         for repo in self._repos:
             if repo.src == src:
@@ -98,17 +112,26 @@ class Manifest():
         raise RepoNotFound(src)
 
 
-def load(manifest_path: Path) -> Manifest:
-    gitlab_schema = {"url": str}
+def validate_repo(data: Any) -> None:
     copy_schema = {"src": str, schema.Optional("dest"): str}
-    repo_schema = {
+    remote_schema = {"name": str, "url": str}
+    repo_schema = schema.Schema({
         "src": str,
-        "url": str,
         schema.Optional("branch"): str,
         schema.Optional("copy"): [copy_schema],
         schema.Optional("sha1"): str,
         schema.Optional("tag"): str,
-    }
+        schema.Optional("remotes"): [remote_schema],
+        schema.Optional("url"): str,
+    })
+    repo_schema.validate(data)
+    if ("url" in data) and ("remotes" in data):
+        raise schema.SchemaError("Repo config cannot contain both an url and a list of remotes")
+
+
+def load(manifest_path: Path) -> Manifest:
+    gitlab_schema = {"url": str}
+    repo_schema = schema.Use(validate_repo)
     group_schema = {
         "repos": [str],
         schema.Optional("includes"): [str],

@@ -146,11 +146,11 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     return returncode, out
 
 
-def get_sha1(working_path: Path, short: bool = False) -> str:
+def get_sha1(working_path: Path, short: bool = False, ref: str="HEAD") -> str:
     cmd = ["rev-parse"]
     if short:
         cmd.append("--short")
-    cmd.append("HEAD")
+    cmd.append(ref)
     _, output = run_captured(working_path, *cmd)
     return output
 
@@ -205,7 +205,7 @@ def get_tracking_ref(working_path: Path) -> Optional[str]:
     rc, out = run_captured(
         working_path,
         "rev-parse", "--abbrev-ref",
-        "--symbolic-full-name", "@{u}",
+        "--symbolic-full-name", "@{upstream}",
         check=False
     )
     if rc == 0:
@@ -216,5 +216,5 @@ def get_tracking_ref(working_path: Path) -> Optional[str]:
 
 def is_shallow(working_path: Path) -> bool:
     root = get_repo_root(working_path)
-    res = root.joinpath(".git/shallow").exists()  # type: bool
+    res = (root / ".git/shallow").exists()  # type: bool
     return res

@@ -31,6 +31,6 @@ def repo_path(monkeypatch: Any, git_server: GitServer, tsrc_cli: CLI, workspace_
     git_server.add_repo("owner/project")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    repo_path = workspace_path.joinpath("owner/project")
+    repo_path = workspace_path / "owner/project"
     monkeypatch.chdir(repo_path)
     return repo_path

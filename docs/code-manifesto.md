@@ -321,7 +321,7 @@ Note that `get_` methods are OK if they do more than simple computations (expens
 # Yes
 work_path = Path("foo/work")
 work_path.mkdir_p()
-foo_path = work_path.joinpath("foo.txt")
+foo_path = work_path / "foo.txt"
 foo_path.write_text("this is bar")
 
 # No

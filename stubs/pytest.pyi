@@ -1,4 +1,4 @@
-from typing import Any, Callable, Type
+from typing import Any, Callable, Type, NoReturn
 
 
 class Marker():
@@ -12,3 +12,4 @@ mark = Marker()
 
 def fixture(*args: Any, **kwargs: Any) -> Callable: ...
 def raises(error: Type[Exception]) -> Any: ...
+def fail(message: str) -> NoReturn: ...
