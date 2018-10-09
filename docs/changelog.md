@@ -1,6 +1,6 @@
 # v0.6.0
 
-## Add support for multiple remotes:
+## Add support for multiple remotes
 
 ```yaml
 # still valid (implicit 'origin' remote)
