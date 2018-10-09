@@ -1,7 +1,9 @@
 from typing import cast, Any
+from ui.tests.conftest import message_recorder
 
 
-import tsrc.cli
+import tsrc
+import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -64,11 +66,11 @@ def test_change_repo_url(tsrc_cli: CLI, git_server: GitServer, workspace_path: P
     tsrc_cli.run("init", git_server.manifest_url)
     assert_cloned(workspace_path, "foo")
     foo_path = workspace_path / "foo"
-    _, actual_url = tsrc.git.run_git_captured(foo_path, "remote", "get-url", "origin")
+    _, actual_url = tsrc.git.run_captured(foo_path, "remote", "get-url", "origin")
     assert actual_url == new_url
 
 
-def test_copy_files(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
+def test_copy_files_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
     manifest_url = git_server.manifest_url
     git_server.add_repo("master")
     top_cmake_contents = "# Top CMakeLists.txt"
@@ -78,6 +80,19 @@ def test_copy_files(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
     tsrc_cli.run("init", manifest_url)
 
     assert (workspace_path / "CMakeLists.txt").text() == top_cmake_contents
+
+
+def test_copy_files_source_does_not_exist(
+        tsrc_cli: CLI,
+        git_server: GitServer,
+        workspace_path: Path,
+        message_recorder: message_recorder) -> None:
+    manifest_url = git_server.manifest_url
+    git_server.add_repo("master")
+    git_server.manifest.set_repo_file_copies("master", [("top.cmake", "CMakeLists.txt")])
+
+    tsrc_cli.run("init", manifest_url, expect_fail=True)
+    assert message_recorder.find("Failed to perform the following copies")
 
 
 def test_uses_correct_branch_for_repo(tsrc_cli: CLI, git_server: GitServer,
@@ -112,8 +127,8 @@ def test_resets_to_tag(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pat
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    _, expected_ref = tsrc.git.run_git_captured(foo_path, "rev-parse", "v1.0")
-    _, actual_ref = tsrc.git.run_git_captured(foo_path, "rev-parse", "HEAD")
+    _, expected_ref = tsrc.git.run_captured(foo_path, "rev-parse", "v1.0")
+    _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
     assert expected_ref == actual_ref
 
 
@@ -128,7 +143,7 @@ def test_resets_to_sha1(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pa
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    _, actual_ref = tsrc.git.run_git_captured(foo_path, "rev-parse", "HEAD")
+    _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
     assert initial_sha1 == actual_ref
 
 
@@ -173,7 +188,7 @@ def test_no_remote_named_origin(tsrc_cli: CLI, git_server: GitServer, workspace_
 
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path / "foo"
-    tsrc.git.run_git(foo_path, "remote", "rename", "origin", "upstream")
+    tsrc.git.run(foo_path, "remote", "rename", "origin", "upstream")
 
     tsrc_cli.run("init", git_server.manifest_url)
 
@@ -198,7 +213,7 @@ def test_several_remotes(tsrc_cli: CLI, git_server: GitServer, workspace_path: P
     tsrc_cli.run("init", git_server.manifest_url)
 
     foo_path = workspace_path / "foo"
-    rc, output = tsrc.git.run_git_captured(
+    rc, output = tsrc.git.run_captured(
         foo_path,
         "remote", "get-url", "upstream",
         check=False,

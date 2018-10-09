@@ -16,8 +16,11 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         self.workspace_path = workspace_path
         self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
-    def description(self) -> str:
-        return "Synchronize workspace"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_1("Synchronizing workspace")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to synchronize workspace")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -55,7 +58,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         for remote in repo.remotes:
             try:
                 ui.info_2("Fetching", remote.name)
-                tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", remote.name)
+                tsrc.git.run(repo_path, "fetch", "--tags", "--prune", remote.name)
             except tsrc.Error:
                 raise tsrc.Error("fetch from %s failed" % remote.name)
 
@@ -66,7 +69,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         if status.dirty:
             raise tsrc.Error("%s dirty, skipping")
         try:
-            tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+            tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:
             raise tsrc.Error("updating ref failed")
 
@@ -74,7 +77,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def sync_repo_to_branch(repo_path: Path) -> None:
         ui.info_2("Updating branch")
         try:
-            tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{upstream}")
+            tsrc.git.run(repo_path, "merge", "--ff-only", "@{upstream}")
         except tsrc.Error:
             raise tsrc.Error("updating branch failed")
 

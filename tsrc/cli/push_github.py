@@ -10,9 +10,7 @@ from github3.pulls import PullRequest
 import ui
 
 import tsrc
-import tsrc.config
 import tsrc.github
-import tsrc.cli.push
 from tsrc.cli.push import RepositoryInfo
 
 

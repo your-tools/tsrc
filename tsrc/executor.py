@@ -1,6 +1,7 @@
 """ Helpers to run things on multiple repos and collect errors """
 
 import abc
+import sys
 from typing import Generic, List, Tuple, TypeVar  # noqa
 
 import ui
@@ -16,9 +17,13 @@ class ExecutorFailed(tsrc.Error):
 
 
 class Task(Generic[T], metaclass=abc.ABCMeta):
+    def on_start(self, *, num_items: int) -> None:
+        pass
 
-    @abc.abstractmethod
-    def description(self) -> str:
+    def on_failure(self, *, num_errors: int) -> None:
+        pass
+
+    def on_success(self) -> None:
         pass
 
     def quiet(self) -> bool:
@@ -41,7 +46,7 @@ class SequentialExecutor(Generic[T]):
     def process(self, items: List[T]) -> None:
         if not items:
             return
-        ui.info_1(self.task.description())
+        self.task.on_start(num_items=len(items))
 
         self.errors = list()
         num_items = len(items)
@@ -52,15 +57,17 @@ class SequentialExecutor(Generic[T]):
 
         if self.errors:
             self.handle_errors()
+        else:
+            self.task.on_success()
 
     def handle_errors(self) -> None:
-        ui.error(self.task.description(), "failed")
+        self.task.on_failure(num_errors=len(self.errors))
         for item, error in self.errors:
             item_desc = self.task.display_item(item)
             message = [ui.green, "*", " ", ui.reset, ui.bold, item_desc]
             if error.message:
                 message.extend([ui.reset, ": ", error.message])
-            ui.info(*message, sep="")
+            ui.info(*message, sep="", fileobj=sys.stderr)
         raise ExecutorFailed()
 
     def process_one(self, item: T) -> None:

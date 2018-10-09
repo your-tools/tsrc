@@ -4,7 +4,7 @@ import os.path
 
 import ruamel.yaml
 
-import tsrc.manifest
+import tsrc
 from path import Path
 
 import pytest
@@ -32,7 +32,7 @@ repos:
         dest: CMakeLists.txt
       - src: .clang-format
 """
-    manifest = tsrc.manifest.Manifest()
+    manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
     assert manifest.gitlab
@@ -75,7 +75,7 @@ repos:
   - src: bar
     url: git@example.com:proj_two/bar
 """
-    manifest = tsrc.manifest.Manifest()
+    manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.load(parsed)
 
@@ -125,37 +125,37 @@ def assert_invalid_schema(tmp_path: Path, contents: str) -> tsrc.Error:
 
 def test_validates(tmp_path: Path) -> None:
     assert_valid_schema(
-      tmp_path,
-      """
-      repos:
-        - src: bar
-          url: baz
-          copy:
-            - src: foo
-              dest: bar
-      gitlab:
-        url: foo
-      """
+        tmp_path,
+        """
+        repos:
+          - src: bar
+            url: baz
+            copy:
+              - src: foo
+                dest: bar
+        gitlab:
+          url: foo
+        """
     )
 
 
 def test_allow_url(tmp_path: Path) -> None:
     assert_valid_schema(
-       tmp_path,
-       """
-        repos:
-          - { src: bar, url: git@example.com/bar }
+        tmp_path,
         """
+          repos:
+            - { src: bar, url: git@example.com/bar }
+         """
     )
 
 
 def test_allow_several_remotes(tmp_path: Path) -> None:
     assert_valid_schema(
-       tmp_path,
-       """
-        repos:
-          - { src: bar, url: git@example.com/bar }
+        tmp_path,
         """
+          repos:
+            - { src: bar, url: git@example.com/bar }
+          """
     )
 
 

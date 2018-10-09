@@ -6,8 +6,7 @@ from path import Path
 import mock
 
 
-import tsrc.git
-import tsrc.gitlab
+import tsrc
 from tsrc.test.helpers.cli import CLI
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_gitlab import PushAction
@@ -67,8 +66,8 @@ def execute_push(repo_path: Path, push_args: argparse.Namespace, gitlab_mock: Gi
 def test_creating_merge_request_explicit_target_branch_with_assignee(
         repo_path: Path, tsrc_cli: CLI,
         push_args: argparse.Namespace) -> None:
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     gitlab_mock = gitlab_mock_with_merge_requests([])
 
@@ -99,8 +98,8 @@ def test_creating_merge_request_uses_default_branch(
     gitlab_mock = gitlab_mock_with_merge_requests([])
     mock_project = gitlab_mock.projects.get()
     mock_project.default_branch = "devel"
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     mock_project = gitlab_mock.projects.get()
     new_mr = mock.Mock(iid="43", web_url="http://43")
@@ -120,8 +119,8 @@ def test_creating_merge_request_uses_default_branch(
 
 def test_set_approvers(repo_path: Path, tsrc_cli: CLI, push_args: argparse.Namespace) -> None:
 
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     push_args.reviewers = ["alice", "eve"]
 
@@ -136,8 +135,8 @@ def test_set_approvers(repo_path: Path, tsrc_cli: CLI, push_args: argparse.Names
 
 def test_update_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
                                        push_args: argparse.Namespace) -> None:
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     mock_mr = mock.Mock(iid="42", web_url="http://42", title="old title")
     gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
@@ -154,8 +153,8 @@ def test_update_existing_merge_request(repo_path: Path, tsrc_cli: CLI,
 
 def test_close_merge_request(repo_path: Path, tsrc_cli: CLI,
                              push_args: argparse.Namespace) -> None:
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     mock_mr = mock.Mock(iid="42", web_url="http://42", title="old title")
     gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
@@ -180,8 +179,8 @@ def test_do_not_change_mr_target(repo_path: Path, tsrc_cli: CLI,
 
 def test_accept_merge_request(repo_path: Path, tsrc_cli: CLI,
                               push_args: argparse.Namespace) -> None:
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     mock_mr = mock.Mock(iid="42", web_url="http://42", target_branch="old-branch")
     gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])

@@ -11,7 +11,7 @@ matrix:
       sudo: true
 
 install:
-  - pip install pipenv
+  - pip install pipenv==2018.05.18
   - pipenv install --dev
   - pipenv run python setup.py develop
 

@@ -4,7 +4,7 @@ import textwrap
 import schema
 from path import Path
 
-import tsrc.config
+import tsrc
 
 import pytest
 import mock
@@ -20,7 +20,7 @@ def test_read_config(tmp_path: Path) -> None:
                 token: MY_SECRET_TOKEN
             """)
     )
-    config = tsrc.config.parse_tsrc_config(config_path=tsrc_yml_path)
+    config = tsrc.parse_tsrc_config(config_path=tsrc_yml_path)
     assert config["auth"]["gitlab"]["token"] == "MY_SECRET_TOKEN"
 
 
@@ -36,7 +36,7 @@ def test_invalid_syntax(tmp_path: Path) -> None:
         """))
     with pytest.raises(tsrc.InvalidConfig) as e:
         dummy_schema = mock.Mock()
-        tsrc.config.parse_config_file(foo_yml, dummy_schema)
+        tsrc.parse_config_file(foo_yml, dummy_schema)
     raised_error = e.value
     assert raised_error.config_path == foo_yml
     assert isinstance(raised_error.cause, ruamel.yaml.error.YAMLError)
@@ -54,5 +54,5 @@ def test_invalid_schema(tmp_path: Path) -> None:
         {"foo": {"bar": str}}
     )
     with pytest.raises(tsrc.InvalidConfig) as e:
-        tsrc.config.parse_config_file(foo_yml, foo_schema)
+        tsrc.parse_config_file(foo_yml, foo_schema)
     assert isinstance(e.value.cause, schema.SchemaError)

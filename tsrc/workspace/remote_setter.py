@@ -10,11 +10,11 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace_path: Path) -> None:
         self.workspace_path = workspace_path
 
-    def quiet(self) -> bool:
-        return True
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Setting remote URLs")
 
-    def description(self) -> str:
-        return "Setting remote URLs"
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.info_2("Failed to set remote URLs")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -34,9 +34,9 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
             else:
                 self.add_remote(repo, remote)
 
-    def get_remote(self, repo: tsrc.Repo, name: str) -> Optional[tsrc.repo.Remote]:
+    def get_remote(self, repo: tsrc.Repo, name: str) -> Optional[tsrc.Remote]:
         full_path = self.workspace_path / repo.src
-        rc, url = tsrc.git.run_git_captured(
+        rc, url = tsrc.git.run_captured(
             full_path,
             "remote", "get-url", name,
             check=False,
@@ -44,18 +44,18 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         if rc != 0:
             return None
         else:
-            return tsrc.repo.Remote(name=name, url=url)
+            return tsrc.Remote(name=name, url=url)
 
-    def set_remote(self, repo: tsrc.Repo, remote: tsrc.repo.Remote) -> None:
+    def set_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
         full_path = self.workspace_path / repo.src
         ui.info_2(repo.src + ":", "Update remote", ui.reset,
                   ui.bold, remote.name, ui.reset,
                   "to new url:", ui.bold, remote.url)
-        tsrc.git.run_git(full_path, "remote", "set-url", remote.name, remote.url)
+        tsrc.git.run(full_path, "remote", "set-url", remote.name, remote.url)
 
-    def add_remote(self, repo: tsrc.Repo, remote: tsrc.repo.Remote) -> None:
+    def add_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
         full_path = self.workspace_path / repo.src
         ui.info_2(repo.src + ":", "Add remote",
                   ui.bold, remote.name, ui.reset,
                   ui.brown, "(%s)" % remote.url)
-        tsrc.git.run_git(full_path, "remote", "add", remote.name, remote.url)
+        tsrc.git.run(full_path, "remote", "add", remote.name, remote.url)

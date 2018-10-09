@@ -13,8 +13,11 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         self.workspace_path = workspace_path
         self.shallow = shallow
 
-    def description(self) -> str:
-        return "Cloning missing repos"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Cloning missing repos")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to clone missing repos")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -49,7 +52,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             clone_args.extend(["--depth", "1"])
         clone_args.append(name)
         try:
-            tsrc.git.run_git(parent, *clone_args)
+            tsrc.git.run(parent, *clone_args)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
 
@@ -59,7 +62,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
             try:
-                tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+                tsrc.git.run(repo_path, "reset", "--hard", ref)
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
 

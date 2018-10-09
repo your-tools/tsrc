@@ -66,9 +66,9 @@ class LocalManifest:
             message += "Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(self.clone_path))
         cmd = ("fetch", "--prune", "origin")
-        tsrc.git.run_git(self.clone_path, *cmd)
+        tsrc.git.run(self.clone_path, *cmd)
         cmd = ("reset", "--hard", "@{upstream}")
-        tsrc.git.run_git(self.clone_path, *cmd)
+        tsrc.git.run(self.clone_path, *cmd)
 
     def save_config(self, config: ManifestConfig) -> None:
         config.save_to_file(self.cfg_path)
@@ -83,11 +83,11 @@ class LocalManifest:
             self._clone_manifest(config)
 
     def _reset_manifest_clone(self, config: ManifestConfig) -> None:
-        tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", config.url)
+        tsrc.git.run(self.clone_path, "remote", "set-url", "origin", config.url)
 
-        tsrc.git.run_git(self.clone_path, "fetch")
-        tsrc.git.run_git(self.clone_path, "checkout", "-B", config.branch)
-        tsrc.git.run_git(
+        tsrc.git.run(self.clone_path, "fetch")
+        tsrc.git.run(self.clone_path, "checkout", "-B", config.branch)
+        tsrc.git.run(
             self.clone_path, "branch", config.branch,
             "--set-upstream-to", "origin/%s" % config.branch
         )
@@ -95,7 +95,7 @@ class LocalManifest:
             ref = config.tag
         else:
             ref = "origin/%s" % config.branch
-        tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
+        tsrc.git.run(self.clone_path, "reset", "--hard", ref)
 
     def _clone_manifest(self, config: ManifestConfig) -> None:
         parent, name = self.clone_path.splitpath()
@@ -108,4 +108,4 @@ class LocalManifest:
         args = ["clone", config.url, name]
         if ref:
             args += ["--branch", ref]
-        tsrc.git.run_git(self.clone_path.parent, *args)
+        tsrc.git.run(self.clone_path.parent, *args)

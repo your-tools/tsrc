@@ -1,8 +1,7 @@
 from path import Path
 
+import tsrc
 import tsrc.git
-import tsrc.gitlab
-import tsrc.manifest
 
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
@@ -16,8 +15,8 @@ def test_tsrc_cli_bad_args(tsrc_cli: CLI) -> None:
     tsrc_cli.run("bad", expect_fail=True)
 
 
-def read_remote_manifest(workspace_path: Path, git_server: GitServer) -> tsrc.manifest.Manifest:
-    tsrc.git.run_git(workspace_path, "clone", git_server.manifest_url)
+def read_remote_manifest(workspace_path: Path, git_server: GitServer) -> tsrc.Manifest:
+    tsrc.git.run(workspace_path, "clone", git_server.manifest_url)
     manifest_yml = workspace_path / "manifest/manifest.yml"
     manifest = tsrc.manifest.load(manifest_yml)
     return manifest
@@ -25,7 +24,7 @@ def read_remote_manifest(workspace_path: Path, git_server: GitServer) -> tsrc.ma
 
 def test_git_server_add_repo_can_clone(workspace_path: Path, git_server: GitServer) -> None:
     foobar_url = git_server.add_repo("foo/bar")
-    tsrc.git.run_git(workspace_path, "clone", foobar_url)
+    tsrc.git.run(workspace_path, "clone", foobar_url)
     assert (workspace_path / "bar").exists()
 
 
@@ -52,7 +51,7 @@ def test_git_server_add_repo_updates_manifest(workspace_path: Path, git_server: 
     assert len(repos) == 2
     for repo in repos:
         clone_url = repo.clone_url
-        _, out = tsrc.git.run_git_captured(workspace_path, "ls-remote", clone_url)
+        _, out = tsrc.git.run_captured(workspace_path, "ls-remote", clone_url)
         assert "refs/heads/master" in out
 
 
@@ -61,7 +60,7 @@ def test_git_server_change_manifest_branch(workspace_path: Path, git_server: Git
     git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
 
-    tsrc.git.run_git(
+    tsrc.git.run(
         workspace_path,
         "clone", git_server.manifest_url, "--branch", "devel"
     )
@@ -75,7 +74,7 @@ def test_git_server_change_repo_branch(workspace_path: Path, git_server: GitServ
     foo_url = git_server.add_repo("foo")
     git_server.change_repo_branch("foo", "devel")
     git_server.push_file("foo", "devel.txt", contents="this is devel\n")
-    tsrc.git.run_git(workspace_path, "clone", foo_url, "--branch", "devel")
+    tsrc.git.run(workspace_path, "clone", foo_url, "--branch", "devel")
     foo_path = workspace_path / "foo"
     assert (foo_path / "devel.txt").text() == "this is devel\n"
 
@@ -83,13 +82,13 @@ def test_git_server_change_repo_branch(workspace_path: Path, git_server: GitServ
 def test_git_server_tag(workspace_path: Path, git_server: GitServer) -> None:
     foo_url = git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
-    _, out = tsrc.git.run_git_captured(workspace_path, "ls-remote", foo_url)
+    _, out = tsrc.git.run_captured(workspace_path, "ls-remote", foo_url)
     assert "refs/tags/v0.1" in out
 
 
 def test_git_server_default_branch_devel(workspace_path: Path, git_server: GitServer) -> None:
     foo_url = git_server.add_repo("foo", default_branch="devel")
-    tsrc.git.run_git(workspace_path, "clone", foo_url)
+    tsrc.git.run(workspace_path, "clone", foo_url)
     foo_path = workspace_path / "foo"
     cloned_branch = tsrc.git.get_current_branch(foo_path)
     assert cloned_branch == "devel"

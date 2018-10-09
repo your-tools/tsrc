@@ -1,6 +1,7 @@
 from path import Path
 
-import tsrc.cli
+import tsrc
+import tsrc.git
 
 from ui.tests.conftest import message_recorder
 from tsrc.test.helpers.cli import CLI
@@ -18,7 +19,7 @@ def test_shallow_clones(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pa
     git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", "--shallow",  manifest_url)
+    tsrc_cli.run("init", "--shallow", manifest_url)
     assert_shallow_clone(workspace_path, "foo/bar")
     assert_shallow_clone(workspace_path, "spam/eggs")
 
