@@ -1,6 +1,6 @@
 # v0.6.0
 
-* Add support for multiple remotes:
+## Add support for multiple remotes:
 
 ```yaml
 # still valid (implicit 'origin' remote)
@@ -24,6 +24,10 @@ Thanks @tst2005 and @cgestes for their help with the configuration format.
 
 * Fix [#113](https://github.com/SuperTanker/tsrc/issues/113): do not hide branch when showing tag status.
 * Add support for Python 3.7
+
+## tsrc foreach
+
+* `tsrc foreach`: add a `--group` option to select the repositories to run the command on. Fix #40
 
 # v0.5.0 (2018-08-14)
 
