@@ -1,6 +1,6 @@
 """ Entry point for tsrc foreach """
 
-from typing import List, Optional, Tuple
+from typing import List
 import argparse
 import subprocess
 import sys
@@ -44,32 +44,22 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
             raise CommandFailed()
 
 
-def filter_repos(cloned_repos: List[tsrc.Repo],
-                 manifest: tsrc.Manifest, *,
-                 groups: Optional[List[str]]=None) -> Tuple[List[tsrc.Repo], List[tsrc.Repo]]:
-
-    found = list()  # type: List[tsrc.Repo]
-    not_cloned = list()  # type: List[tsrc.Repo]
-    from_manifest = manifest.get_repos(groups=groups)
-    for repo in from_manifest:
-        if repo in cloned_repos:
-            found.append(repo)
-        else:
-            not_cloned.append(repo)
-    return (found, not_cloned)
-
-
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
     cmd_runner = CmdRunner(workspace, args.cmd, args.cmd_as_str, shell=args.shell)
     manifest = workspace.local_manifest.manifest
     assert manifest
-    found, not_cloned = filter_repos(workspace.get_repos(), manifest, groups=args.groups)
+    cloned_repos = workspace.get_repos()
+    requested_repos = manifest.get_repos(groups=args.groups)
+
+    found = [x for x in requested_repos if x in cloned_repos]
+    missing = [x for x in requested_repos if x not in cloned_repos]
+
     tsrc.run_sequence(found, cmd_runner)
-    if not_cloned:
+    if missing:
         ui.warning("The following repos were skipped:")
-        for repo in not_cloned:
+        for repo in missing:
             ui.info("*", repo.src, fileobj=sys.stderr)
     else:
         ui.info("OK", ui.check)
