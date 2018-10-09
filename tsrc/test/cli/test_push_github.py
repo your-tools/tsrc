@@ -6,7 +6,7 @@ import mock
 from path import Path
 import pytest
 
-import tsrc.git
+import tsrc
 from tsrc.test.helpers.cli import CLI
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_github import PushAction
@@ -41,8 +41,8 @@ def test_create(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
     mock_pr.number = 42
     mock_issue = mock.Mock()
 
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
     push_args.title = "new feature"
     push_args.assignee = "assignee1"
     push_args.reviewers = ["reviewer1", "reviewer2"]
@@ -69,8 +69,8 @@ def test_push_custom_tracked_branch(repo_path: Path, push_args: argparse.Namespa
     stub_repo.pull_requests.return_value = list()
     stub_repo.default_branch = "master"
     github_mock.repository.return_value = stub_repo
-    tsrc.git.run_git(repo_path, "checkout", "-b", "local")
-    tsrc.git.run_git(repo_path, "push", "-u", "origin", "local:remote")
+    tsrc.git.run(repo_path, "checkout", "-b", "local")
+    tsrc.git.run(repo_path, "push", "-u", "origin", "local:remote")
 
     push_args.title = "new feature"
     execute_push(repo_path, push_args, github_mock)
@@ -91,8 +91,8 @@ def test_update_target_and_title(repo_path: Path, push_args: argparse.Namespace,
     stub_repo.pull_requests.return_value = [opened_pr]
     stub_repo.default_branch = "master"
     github_mock.repository.return_value = stub_repo
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "push", "-u", "origin", "new-feature")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "push", "-u", "origin", "new-feature")
 
     push_args.target_branch = "master"
     push_args.title = "new title"
@@ -122,8 +122,8 @@ def test_merge(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
     mock_repo.pull_requests.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
     github_mock.repository.return_value = mock_repo
 
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
     push_args.merge = True
     execute_push(repo_path, push_args, github_mock)
 
@@ -143,8 +143,8 @@ def test_close(repo_path: Path, tsrc_cli: CLI,
     mock_repo.pull_requests.return_value = [opened_pr]
     github_mock.repository.return_value = mock_repo
 
-    tsrc.git.run_git(repo_path, "checkout", "-b", "new-feature")
-    tsrc.git.run_git(repo_path, "commit", "--message", "new feature", "--allow-empty")
+    tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
+    tsrc.git.run(repo_path, "commit", "--message", "new feature", "--allow-empty")
 
     push_args.merge = True
     push_args.close = True

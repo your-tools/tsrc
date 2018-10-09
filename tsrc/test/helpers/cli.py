@@ -3,7 +3,7 @@ import os
 from path import Path
 import pytest
 
-import tsrc.cli
+import tsrc.cli.main
 
 
 class CLI():
@@ -12,7 +12,7 @@ class CLI():
 
     def run(self, *args: str, expect_fail: bool = False) -> None:
         try:
-            tsrc.cli.main.main(args=args)  # type: ignore
+            tsrc.cli.main.main(args=args)
             rc = 0
         except SystemExit as e:
             rc = e.code

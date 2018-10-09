@@ -45,7 +45,7 @@ def test_foreach_with_errors(
     cmd = get_cmd_for_foreach_test(shell=False)
     cmd.append("foo")
     tsrc_cli.run("foreach", *cmd, expect_fail=True)
-    assert message_recorder.find("Running `.*` .* failed")
+    assert message_recorder.find("Command failed")
     assert message_recorder.find(r"\* spam")
 
 
@@ -77,3 +77,40 @@ def test_foreach_shell(
     cmd.append("doc")
     tsrc_cli.run("foreach", "-c", " ".join(cmd))
     assert message_recorder.find("`%s`" % " ".join(cmd))
+
+
+def test_foreach_groups_happy(
+        tsrc_cli: CLI, git_server: GitServer,
+        message_recorder: message_recorder) -> None:
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_group("spam", ["eggs", "beacon"])
+    git_server.add_repo("other")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+
+    cmd = get_cmd_for_foreach_test(shell=False)
+
+    message_recorder.reset()
+    tsrc_cli.run("foreach", "-g", "foo", *cmd)
+
+    assert message_recorder.find("bar\n")
+    assert message_recorder.find("baz\n")
+    assert not message_recorder.find("eggs\n")
+    assert not message_recorder.find("other\n")
+
+
+def test_foreach_groups_warn_skipped(
+        tsrc_cli: CLI, git_server: GitServer,
+        message_recorder: message_recorder) -> None:
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_group("spam", ["eggs", "beacon"])
+    git_server.add_repo("other")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "-g", "foo")
+
+    cmd = get_cmd_for_foreach_test(shell=False)
+
+    message_recorder.reset()
+    tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", *cmd)

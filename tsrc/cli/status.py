@@ -6,12 +6,12 @@ import shutil
 
 import ui
 
+import tsrc
 import tsrc.cli
-from tsrc.git import GitStatus
-from tsrc.workspace import Workspace
+import tsrc.git
 
 
-def describe_branch(git_status: GitStatus) -> List[str]:
+def describe_branch(git_status: tsrc.git.Status) -> List[str]:
     res = list()  # type: List[str]
     if git_status.branch:
         res += [ui.green, git_status.branch]
@@ -29,7 +29,7 @@ def commit_string(number: int) -> str:
         return 'commits'
 
 
-def describe_position(git_status: GitStatus) -> List[str]:
+def describe_position(git_status: tsrc.git.Status) -> List[str]:
     res = []  # type: List[str]
     if git_status.ahead != 0:
         up = ui.Symbol("↑", "+")
@@ -44,14 +44,14 @@ def describe_position(git_status: GitStatus) -> List[str]:
     return res
 
 
-def describe_dirty(git_status: GitStatus) -> List[str]:
+def describe_dirty(git_status: tsrc.git.Status) -> List[str]:
     res = []  # type: List[str]
     if git_status.dirty:
         res += [ui.red, "(dirty)"]
     return res
 
 
-def describe(git_status: GitStatus) -> List[str]:
+def describe(git_status: tsrc.git.Status) -> List[str]:
     # Return a list of tokens suitable for ui.info()
     res = []  # type: List[str]
     res += describe_branch(git_status)
@@ -60,8 +60,8 @@ def describe(git_status: GitStatus) -> List[str]:
     return res
 
 
-def collect_statuses(workspace: Workspace) -> List[Tuple[str, GitStatus]]:
-    result = list()  # type: List[Tuple[str, GitStatus]]
+def collect_statuses(workspace: tsrc.Workspace) -> List[Tuple[str, tsrc.git.Status]]:
+    result = list()  # type: List[Tuple[str, tsrc.git.Status]]
     repos = workspace.get_repos()
 
     if not repos:
@@ -80,7 +80,7 @@ def collect_statuses(workspace: Workspace) -> List[Tuple[str, GitStatus]]:
     return result
 
 
-def display_statuses(statuses: List[Tuple[str, GitStatus]]) -> None:
+def display_statuses(statuses: List[Tuple[str, tsrc.git.Status]]) -> None:
     if not statuses:
         return
     max_src = max((len(x[0]) for x in statuses))

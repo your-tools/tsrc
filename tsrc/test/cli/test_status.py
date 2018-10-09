@@ -15,7 +15,7 @@ def test_status_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path:
     git_server.push_file("spam/eggs", "CMakeLists.txt")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc.git.run_git(
+    tsrc.git.run(
         workspace_path.joinpath("spam", "eggs"),
         "checkout", "-b", "fish"
     )
@@ -48,7 +48,7 @@ def test_status_not_on_any_branch(tsrc_cli: CLI, git_server: GitServer,
     tsrc_cli.run("init", git_server.manifest_url)
     # corrupt the git
     eggs_path = workspace_path.joinpath("spam/eggs")
-    tsrc.git.run_git(eggs_path, "checkout", "HEAD~1")
+    tsrc.git.run(eggs_path, "checkout", "HEAD~1")
 
     tsrc_cli.run("status")
 
@@ -64,7 +64,7 @@ def test_status_on_tag(tsrc_cli: CLI, git_server: GitServer,
     git_server.push_file("spam/eggs", "CMakeLists.txt")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc.git.run_git(
+    tsrc.git.run(
         workspace_path.joinpath("spam", "eggs"),
         "tag", "v1.0"
     )

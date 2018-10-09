@@ -11,10 +11,6 @@ from gitlab.exceptions import GitlabGetError
 import ui
 
 import tsrc
-import tsrc.config
-import tsrc.gitlab
-import tsrc.git
-import tsrc.cli.push
 from tsrc.cli.push import RepositoryInfo
 
 
@@ -40,7 +36,7 @@ class AmbiguousUser(tsrc.Error):
 
 
 def get_token() -> str:
-    config = tsrc.config.parse_tsrc_config()
+    config = tsrc.parse_tsrc_config()
     res = config["auth"]["gitlab"]["token"]  # type: str
     return res
 

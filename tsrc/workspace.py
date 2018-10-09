@@ -16,9 +16,7 @@ import schema
 import ui
 
 import tsrc
-import tsrc.executor
 import tsrc.git
-import tsrc.manifest
 
 
 OPTIONS_SCHEMA = schema.Schema({
@@ -55,7 +53,7 @@ def options_from_args(args: argparse.Namespace) -> Options:
 
 
 def options_from_file(cfg_path: Path) -> Options:
-    as_dict = tsrc.config.parse_config_file(cfg_path, OPTIONS_SCHEMA)  # type: dict
+    as_dict = tsrc.parse_config_file(cfg_path, OPTIONS_SCHEMA)  # type: dict
     return options_from_dict(as_dict)
 
 
@@ -68,7 +66,7 @@ class LocalManifest:
         hidden_path = workspace_path.joinpath(".tsrc")
         self.clone_path = hidden_path.joinpath("manifest")
         self.cfg_path = hidden_path.joinpath("manifest.yml")
-        self.manifest = None  # type: Optional[tsrc.manifest.Manifest]
+        self.manifest = None  # type: Optional[tsrc.Manifest]
 
     @property
     def branch(self) -> str:
@@ -96,7 +94,7 @@ class LocalManifest:
         if not yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(yml_path))
-        self.manifest = tsrc.manifest.load(yml_path)
+        self.manifest = tsrc.load_manifest(yml_path)
 
     def get_gitlab_url(self) -> str:
         assert self.manifest, "manifest is empty. Did you call load()?"
@@ -122,9 +120,9 @@ class LocalManifest:
             message += "Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(self.clone_path))
         cmd = ("fetch", "--prune", "origin")
-        tsrc.git.run_git(self.clone_path, *cmd)
+        tsrc.git.run(self.clone_path, *cmd)
         cmd = ("reset", "--hard", "@{u}")
-        tsrc.git.run_git(self.clone_path, *cmd)
+        tsrc.git.run(self.clone_path, *cmd)
 
     def save_config(self, options: Options) -> None:
         config = dict()  # type: Dict[str, Any]
@@ -148,11 +146,11 @@ class LocalManifest:
             self._clone_manifest(options)
 
     def _reset_manifest_clone(self, options: Options) -> None:
-        tsrc.git.run_git(self.clone_path, "remote", "set-url", "origin", options.url)
+        tsrc.git.run(self.clone_path, "remote", "set-url", "origin", options.url)
 
-        tsrc.git.run_git(self.clone_path, "fetch")
-        tsrc.git.run_git(self.clone_path, "checkout", "-B", options.branch)
-        tsrc.git.run_git(
+        tsrc.git.run(self.clone_path, "fetch")
+        tsrc.git.run(self.clone_path, "checkout", "-B", options.branch)
+        tsrc.git.run(
             self.clone_path, "branch", options.branch,
             "--set-upstream-to", "origin/%s" % options.branch
         )
@@ -160,7 +158,7 @@ class LocalManifest:
             ref = options.tag
         else:
             ref = "origin/%s" % options.branch
-        tsrc.git.run_git(self.clone_path, "reset", "--hard", ref)
+        tsrc.git.run(self.clone_path, "reset", "--hard", ref)
 
     def _clone_manifest(self, options: Options) -> None:
         parent, name = self.clone_path.splitpath()
@@ -173,7 +171,7 @@ class LocalManifest:
         args = ["clone", options.url, name]
         if ref:
             args += ["--branch", ref]
-        tsrc.git.run_git(self.clone_path.parent, *args)
+        tsrc.git.run(self.clone_path.parent, *args)
 
 
 class Workspace():
@@ -219,20 +217,20 @@ class Workspace():
             if not repo_path.exists():
                 to_clone.append(repo)
         cloner = Cloner(self)
-        tsrc.executor.run_sequence(to_clone, cloner)
+        tsrc.run_sequence(to_clone, cloner)
 
     def set_remotes(self) -> None:
         remote_setter = RemoteSetter(self)
-        tsrc.executor.run_sequence(self.get_repos(), remote_setter)
+        tsrc.run_sequence(self.get_repos(), remote_setter)
 
     def copy_files(self) -> None:
         file_copier = FileCopier(self)
-        tsrc.executor.run_sequence(self.local_manifest.copyfiles, file_copier)
+        tsrc.run_sequence(self.local_manifest.copyfiles, file_copier)
 
     def sync(self) -> None:
         syncer = Syncer(self)
         try:
-            tsrc.executor.run_sequence(self.get_repos(), syncer)
+            tsrc.run_sequence(self.get_repos(), syncer)
         finally:
             syncer.display_bad_branches()
 
@@ -247,12 +245,15 @@ class Workspace():
         return self.local_manifest.get_url(src)
 
 
-class Cloner(tsrc.executor.Task[tsrc.Repo]):
+class Cloner(tsrc.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def description(self) -> str:
-        return "Cloning missing repos"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Cloning missing repos")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to clone missing repos")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -284,7 +285,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             clone_args.extend(["--depth", "1"])
         clone_args.append(name)
         try:
-            tsrc.git.run_git(parent, *clone_args)
+            tsrc.git.run(parent, *clone_args)
         except tsrc.Error:
             raise tsrc.Error("Cloning failed")
 
@@ -294,7 +295,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         if ref:
             ui.info_2("Resetting", repo.src, "to", ref)
             try:
-                tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+                tsrc.git.run(repo_path, "reset", "--hard", ref)
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
 
@@ -308,12 +309,15 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
 Copy = NewType('Copy', Tuple[str, str])
 
 
-class FileCopier(tsrc.executor.Task[Copy]):
+class FileCopier(tsrc.Task[Copy]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
-    def description(self) -> str:
-        return "Copying files"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Copying files")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to perform the following copies:")
 
     def display_item(self, item: Copy) -> str:
         src, dest = item
@@ -335,15 +339,18 @@ class FileCopier(tsrc.executor.Task[Copy]):
             raise tsrc.Error(str(e))
 
 
-class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
+class RemoteSetter(tsrc.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
 
     def quiet(self) -> bool:
         return True
 
-    def description(self) -> str:
-        return "Setting remote URLs"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_2("Setting remote URLs")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.info_2("Failed to set remote URLs")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -356,7 +363,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
 
     def try_process_repo(self, repo: tsrc.Repo) -> None:
         full_path = self.workspace.joinpath(repo.src)
-        rc, old_url = tsrc.git.run_git_captured(
+        rc, old_url = tsrc.git.run_captured(
             full_path,
             "remote", "get-url", "origin",
             check=False,
@@ -370,24 +377,27 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         full_path = self.workspace.joinpath(repo.src)
         if old_url != repo.url:
             ui.info_2(repo.src, old_url, "->", repo.url)
-            tsrc.git.run_git(full_path, "remote", "set-url", "origin", repo.url)
+            tsrc.git.run(full_path, "remote", "set-url", "origin", repo.url)
 
     def process_repo_add_remote(self, repo: tsrc.Repo) -> None:
         full_path = self.workspace.joinpath(repo.src)
-        tsrc.git.run_git(full_path, "remote", "add", "origin", repo.url)
+        tsrc.git.run(full_path, "remote", "add", "origin", repo.url)
 
 
 class BadBranches(tsrc.Error):
     pass
 
 
-class Syncer(tsrc.executor.Task[tsrc.Repo]):
+class Syncer(tsrc.Task[tsrc.Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
         self.bad_branches = list()  # type: List[Tuple[str, str, str]]
 
-    def description(self) -> str:
-        return "Synchronize workspace"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info_1("Synchronizing workspace")
+
+    def on_failure(self, *, num_errors: int) -> None:
+        ui.error("Failed to synchronize workspace")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -423,7 +433,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
     @staticmethod
     def fetch(repo_path: Path) -> None:
         try:
-            tsrc.git.run_git(repo_path, "fetch", "--tags", "--prune", "origin")
+            tsrc.git.run(repo_path, "fetch", "--tags", "--prune", "origin")
         except tsrc.Error:
             raise tsrc.Error("fetch failed")
 
@@ -434,14 +444,14 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         if status.dirty:
             raise tsrc.Error("%s dirty, skipping")
         try:
-            tsrc.git.run_git(repo_path, "reset", "--hard", ref)
+            tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:
             raise tsrc.Error("updating ref failed")
 
     @staticmethod
     def sync_repo_to_branch(repo_path: Path) -> None:
         try:
-            tsrc.git.run_git(repo_path, "merge", "--ff-only", "@{u}")
+            tsrc.git.run(repo_path, "merge", "--ff-only", "@{u}")
         except tsrc.Error:
             raise tsrc.Error("updating branch failed")
 

@@ -4,10 +4,7 @@ from typing import Any
 from path import Path
 import pytest
 
-import tsrc.cli.main
-import tsrc.git
-from tsrc.workspace import Workspace
-import tsrc.workspace
+import tsrc
 
 from ui.tests.conftest import message_recorder  # noqa
 from .helpers.git_server import git_server  # noqa
@@ -27,5 +24,5 @@ def workspace_path(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def workspace(workspace_path: Path) -> Workspace:
-    return tsrc.workspace.Workspace(workspace_path)
+def workspace(workspace_path: Path) -> tsrc.Workspace:
+    return tsrc.Workspace(workspace_path)

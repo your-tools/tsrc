@@ -2,7 +2,6 @@ import pytest
 import ui
 
 import tsrc
-import tsrc.executor
 
 
 class Kaboom(tsrc.Error):
@@ -10,12 +9,12 @@ class Kaboom(tsrc.Error):
         return "Kaboom!"
 
 
-class FakeTask(tsrc.executor.Task[str]):
+class FakeTask(tsrc.Task[str]):
     def __init__(self) -> None:
         pass
 
-    def description(self) -> str:
-        return "Frobnicating all items"
+    def on_start(self, *, num_items: int) -> None:
+        ui.info("Frobnicating", num_items, "items")
 
     def display_item(self, item: str) -> str:
         return item
@@ -30,15 +29,15 @@ class FakeTask(tsrc.executor.Task[str]):
 
 def test_doing_nothing() -> None:
     task = FakeTask()
-    tsrc.executor.run_sequence(list(), task)
+    tsrc.run_sequence(list(), task)
 
 
 def test_happy() -> None:
     task = FakeTask()
-    tsrc.executor.run_sequence(["foo", "spam"], task)
+    tsrc.run_sequence(["foo", "spam"], task)
 
 
 def test_collect_errors() -> None:
     task = FakeTask()
-    with pytest.raises(tsrc.executor.ExecutorFailed):
-        tsrc.executor.run_sequence(["foo", "bar"], task)
+    with pytest.raises(tsrc.ExecutorFailed):
+        tsrc.run_sequence(["foo", "bar"], task)

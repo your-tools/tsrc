@@ -9,6 +9,7 @@ from typing import cast, Iterable, Optional
 from path import Path
 import ui
 
+import tsrc
 import tsrc.git
 
 
@@ -57,7 +58,7 @@ class RepositoryInfo:
     def read_working_path(self, working_path: Path = None) -> None:
         self.path = tsrc.git.get_repo_root(working_path=working_path)
         self.current_branch = tsrc.git.get_current_branch(self.path)
-        rc, out = tsrc.git.run_git_captured(self.path, "remote", "get-url", "origin", check=False)
+        rc, out = tsrc.git.run_captured(self.path, "remote", "get-url", "origin", check=False)
         if rc == 0:
             self.url = out
         if not self.url:
@@ -135,7 +136,7 @@ class PushAction(metaclass=abc.ABCMeta):
         cmd = ["push", "-u", remote_name, push_spec]
         if self.args.force:
             cmd.append("--force")
-        tsrc.git.run_git(self.repo_path, *cmd)
+        tsrc.git.run(self.repo_path, *cmd)
 
     def execute(self) -> None:
         self.setup_service()

@@ -8,8 +8,7 @@ import github3
 from github3.repos.repo import Repository
 import ui
 
-import tsrc.config
-from tsrc.config import Config
+import tsrc
 
 
 class GitHubAPIError(tsrc.Error):
@@ -60,7 +59,7 @@ def save_token(token: str) -> None:
     if cfg_path.exists():
         config = tsrc.config.parse_tsrc_config(roundtrip=True)
     else:
-        config = Config(dict())
+        config = tsrc.Config(dict())
     if "auth" not in config:
         config["auth"] = dict()
     auth = config["auth"]
