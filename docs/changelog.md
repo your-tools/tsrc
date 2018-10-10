@@ -1,3 +1,7 @@
+# v0.6.1 (2018-10-10)
+
+Fix weird output when configuring remotes.
+
 # v0.6.0 (2018-10-09)
 
 ## Highlights

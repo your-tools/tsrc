@@ -11,13 +11,16 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         self.workspace_path = workspace_path
 
     def on_start(self, *, num_items: int) -> None:
-        ui.info_2("Setting remote URLs")
+        ui.info_1("Configuring remotes")
 
     def on_failure(self, *, num_errors: int) -> None:
-        ui.info_2("Failed to set remote URLs")
+        ui.error("Failed to configure remotes")
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
+
+    def quiet(self) -> bool:
+        return True
 
     def process(self, repo: tsrc.Repo) -> None:
         try:
