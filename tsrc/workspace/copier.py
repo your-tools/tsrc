@@ -15,7 +15,7 @@ class FileCopier(tsrc.executor.Task[Copy]):
         self.workspace_path = workspace_path
 
     def on_start(self, *, num_items: int) -> None:
-        ui.info_2("Copying files")
+        ui.info_1("Copying files")
 
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to perform the following copies:")
