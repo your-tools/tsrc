@@ -26,5 +26,5 @@ name = "Check Changelog"
 cmd = "grep -q {new_version} docs/changelog.md"
 
 [[after_push]]
-name = "Publish to pypi"
+name = "Publish documentation and update project on Pypi"
 cmd = "./publish.sh"
