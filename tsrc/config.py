@@ -51,4 +51,4 @@ def parse_tsrc_config(config_path: Path = None, roundtrip: bool = False) -> Conf
     tsrc_schema = schema.Schema({"auth": auth_schema})
     if not config_path:
         config_path = get_tsrc_config_path()
-    return parse_config_file(config_path, tsrc_schema, roundtrip=roundtrip)
+    return parse_config(config_path, tsrc_schema, roundtrip=roundtrip)
