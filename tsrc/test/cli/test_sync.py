@@ -131,8 +131,7 @@ def test_changing_branch(tsrc_cli: CLI, git_server: GitServer,
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    git_server.change_repo_branch("foo", "next")
-    git_server.push_file("foo", "next.txt")
+    git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
     tsrc_cli.run("sync", expect_fail=True)
@@ -156,7 +155,7 @@ def test_tags_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_pa
 
 def test_sha1s_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
     git_server.add_repo("foo")
-    initial_sha1 = git_server.get_sha1("foo")
+    initial_sha1 = git_server.get_sha1("foo", "master")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 
     tsrc_cli.run("init", git_server.manifest_url)
@@ -191,13 +190,13 @@ def test_tags_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
 def test_sha1s_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
                                       workspace_path: Path) -> None:
     git_server.add_repo("foo")
-    initial_sha1 = git_server.get_sha1("foo")
+    initial_sha1 = git_server.get_sha1("foo", "master")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 
     tsrc_cli.run("init", git_server.manifest_url)
 
     git_server.push_file("foo", "new.txt")
-    new_sha1 = git_server.get_sha1("foo")
+    new_sha1 = git_server.get_sha1("foo", "master")
     git_server.manifest.set_repo_sha1("foo", new_sha1)
 
     tsrc_cli.run("sync")
@@ -228,14 +227,14 @@ def test_tags_are_skipped_when_not_clean_tags(tsrc_cli: CLI, git_server:
 def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
                                           workspace_path: Path) -> None:
     git_server.add_repo("foo")
-    initial_sha1 = git_server.get_sha1("foo")
+    initial_sha1 = git_server.get_sha1("foo", "master")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 
     tsrc_cli.run("init", git_server.manifest_url)
     (workspace_path / "foo/untracked.txt").write_text("")
 
     git_server.push_file("foo", "new.txt")
-    new_sha1 = git_server.get_sha1("foo")
+    new_sha1 = git_server.get_sha1("foo", "master")
     git_server.manifest.set_repo_sha1("foo", new_sha1)
 
     tsrc_cli.run("sync", expect_fail=True)

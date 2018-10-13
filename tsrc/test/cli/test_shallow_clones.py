@@ -31,7 +31,7 @@ def test_shallow_clones(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pa
 def test_shallow_with_fix_ref(tsrc_cli: CLI, git_server: GitServer,
                               workspace_path: Path, message_recorder: message_recorder) -> None:
     git_server.add_repo("foo")
-    initial_sha1 = git_server.get_sha1("foo")
+    initial_sha1 = git_server.get_sha1("foo", "master")
     git_server.push_file("foo", "one.c")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 

@@ -98,8 +98,7 @@ def test_copy_files_source_does_not_exist(
 def test_uses_correct_branch_for_repo(tsrc_cli: CLI, git_server: GitServer,
                                       workspace_path: Path) -> None:
     git_server.add_repo("foo")
-    git_server.change_repo_branch("foo", "next")
-    git_server.push_file("foo", "next.txt")
+    git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
     manifest_url = git_server.manifest_url
@@ -134,7 +133,7 @@ def test_resets_to_tag(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pat
 
 def test_resets_to_sha1(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
     git_server.add_repo("foo")
-    initial_sha1 = git_server.get_sha1("foo")
+    initial_sha1 = git_server.get_sha1("foo", "master")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 
     git_server.push_file("foo", "2.txt", message="Working on v2")
