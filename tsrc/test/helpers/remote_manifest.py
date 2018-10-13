@@ -1,46 +1,46 @@
 from typing import cast, Any, Dict, List, Tuple
 import ruamel.yaml
-
-import tsrc
-import tsrc.git
-
 from path import Path
+
+from .bare_repo import BareRepo
+
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]
 RemoteConfig = Tuple[str, str]
 
 
-class ManifestHandler():
-    """ Represent a local copy of a manifest. """
+class RemoteManifest():
+    """ Represent a bare git repo containing a manifest """
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, bare_repo: BareRepo) -> None:
         """ Init a new ManifestHandler. Note that path must
         be a git working copy, with a remote named 'origin'
         configured, so that changes made in the manifest
         can be published there
 
         """
-        self.path = path
+        self.repo = bare_repo
         self.data = {"repos": list()}  # type: Dict[str, Any]
+        self.url = bare_repo.url
+        self.branch = "master"
 
-    @property
-    def yaml_path(self) -> Path:
-        return self.path / "manifest.yml"
+    @classmethod
+    def create(cls, path: Path) -> "RemoteManifest":
+        bare_repo = BareRepo.create(path)
+        res = cls(bare_repo)
+        res.init()
+        return res
 
     def init(self) -> None:
-        to_write = ruamel.yaml.dump(self.data)
-        self.yaml_path.write_text(to_write)
-        tsrc.git.run(self.path, "add", "manifest.yml")
-        tsrc.git.run(self.path, "commit", "--message", "Add an empty manifest")
-        tsrc.git.run(self.path, "push", "origin", "master")
+        self.write_self(message="Add an empty manifest")
 
     def add_repo(self, src: str, url: str, branch: str = "master") -> None:
         repo_config = ({"url": str(url), "src": src})
         if branch != "master":
             repo_config["branch"] = branch
         self.data["repos"].append(repo_config)
-        self.push(message="add %s" % src)
+        self.write_self(message="add %s")
 
     def configure_group(self, name: str, repos: List[str]) -> None:
         groups = self.data.get("groups")
@@ -49,12 +49,12 @@ class ManifestHandler():
             groups = self.data["groups"]
         groups[name] = dict()
         groups[name]["repos"] = repos
-        self.push(message="add %s group" % name)
+        self.write_self(message="add %s group" % name)
 
     def configure_gitlab(self, *, url: str) -> None:
         self.data["gitlab"] = dict()
         self.data["gitlab"]["url"] = url
-        self.push("Add gitlab URL: %s" % url)
+        self.write_self("Add gitlab URL: %s" % url)
 
     def get_repo(self, src: str) -> RepoConfig:
         for repo in self.data["repos"]:
@@ -66,7 +66,7 @@ class ManifestHandler():
         repo = self.get_repo(src)
         repo[key] = value
         message = "Change %s %s: %s" % (src, key, value)
-        self.push(message)
+        self.write_self(message)
 
     def set_repo_url(self, src: str, url: str) -> None:
         self.configure_repo(src, "url", url)
@@ -94,20 +94,16 @@ class ManifestHandler():
         repo["remotes"] = remote_dicts
         del repo["url"]
         message = "%s: remotes: %s" % (src, remote_dicts)
-        self.push(message)
+        self.write_self(message)
 
-    def push(self, message: str) -> None:
-        to_write = ruamel.yaml.dump(self.data)
-        self.yaml_path.write_text(to_write)
-        tsrc.git.run(self.path, "add", "manifest.yml")
-        tsrc.git.run(self.path, "commit", "--message", message)
-        current_branch = tsrc.git.get_current_branch(self.path)
-        tsrc.git.run(self.path, "push", "origin", "--set-upstream", current_branch)
+    def write_self(self, message: str) -> None:
+        manifest_contents = ruamel.yaml.dump(self.data)
+        self.repo.ensure_file(
+            "manifest.yml",
+            contents=manifest_contents,
+            commit_message=message,
+            branch=self.branch
+        )
 
     def change_branch(self, branch: str) -> None:
-        tsrc.git.run(self.path, "checkout", "-B", branch)
-        tsrc.git.run(
-            self.path,
-            "push", "--no-verify", "origin",
-            "--set-upstream", branch
-        )
+        self.branch = branch

@@ -61,10 +61,20 @@ def test_change_manifest_branch(workspace_path: Path, git_server: GitServer) -> 
     assert len(manifest.get_repos()) == 2
 
 
-def test_change_repo_branch(workspace_path: Path, git_server: GitServer) -> None:
+def test_push_file_to_master(workspace_path: Path, git_server: GitServer) -> None:
     foo_url = git_server.add_repo("foo")
-    git_server.change_repo_branch("foo", "devel")
-    git_server.push_file("foo", "devel.txt", contents="this is devel\n")
+    git_server.push_file("foo", "foo.txt", contents="this is foo\n")
+
+    tsrc.git.run(workspace_path, "clone", foo_url)
+    foo_path = workspace_path / "foo"
+    assert (foo_path / "foo.txt").text() == "this is foo\n"
+
+
+def test_push_file_to_devel(workspace_path: Path, git_server: GitServer) -> None:
+    foo_url = git_server.add_repo("foo")
+    git_server.push_file("foo", "devel.txt", contents="this is devel\n", branch="devel")
+
+    assert set(git_server.get_branches("foo")) == {"master", "devel"}
     tsrc.git.run(workspace_path, "clone", foo_url, "--branch", "devel")
     foo_path = workspace_path / "foo"
     assert (foo_path / "devel.txt").text() == "this is devel\n"
