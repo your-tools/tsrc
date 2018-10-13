@@ -68,10 +68,21 @@ def test_roundtrip(tmp_path: Path) -> None:
     )
     foo_yml.write_text(contents)
     foo_schema = schema.Schema({"foo": int})
-    parsed = tsrc.parse_config(foo_yml, foo_schema)
+    parsed = tsrc.parse_config(foo_yml, foo_schema, roundtrip=True)
 
     parsed["foo"] = 42
     tsrc.dump_config(parsed, foo_yml)
     actual = foo_yml.text()
     expected = contents.replace("0", "42")
     assert actual == expected
+
+
+def test_use_pure_python_types_when_not_roundtripping(tmp_path: Path) -> None:
+    foo_yml = tmp_path / "foo.yml"
+    foo_yml.write_text("foo: 42\n")
+    foo_schema = schema.Schema({"foo": int})
+    parsed = tsrc.parse_config(foo_yml, foo_schema, roundtrip=False)
+    # Usually it's bad to compare types directly, and isinstance()
+    # should be used instead. But here we want to assert we have
+    # a proper dict, and not an OrderedDict or a yaml's CommentedMap
+    assert type(parsed) == type(dict())   # noqa
