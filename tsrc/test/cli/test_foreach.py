@@ -1,30 +1,21 @@
 import os
-from typing import List
+
+import mock
+from path import Path
 
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 from ui.tests.conftest import message_recorder
 
 
-def get_cmd_for_foreach_test(shell: bool = False) -> List[str]:
-    """ We need a cmd that:
-     * can fail if not called with the correct 'shell'
-       argument
-       (to check `foreach -c` option)
-     * can fail if a directory does not exist
-       (to check `foreach` error handling)
-    """
+def get_cat_cmd() ->str:
+    # We need a command that:
+    #    * Always exists, both on Windows and Unix
+    #    * can fail if a file does not exist (to check `foreach` error handling)
     if os.name == "nt":
-        if shell:
-            cmd = ["dir"]
-        else:
-            cmd = ["cmd.exe", "/c", "dir"]
+        return "type"
     else:
-        if shell:
-            cmd = ["cd"]
-        else:
-            cmd = ["ls"]
-    return cmd
+        return "cat"
 
 
 def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
@@ -38,12 +29,11 @@ def test_foreach_with_errors(
         message_recorder: message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
-    git_server.push_file("foo", "foo/bar.txt",
+    git_server.push_file("foo", "bar.txt",
                          contents="this is bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    cmd = get_cmd_for_foreach_test(shell=False)
-    cmd.append("foo")
+    cmd = [get_cat_cmd(), "bar.txt"]
     tsrc_cli.run("foreach", *cmd, expect_fail=True)
     assert message_recorder.find("Command failed")
     assert message_recorder.find(r"\* spam")
@@ -54,29 +44,31 @@ def test_foreach_happy(
         message_recorder: message_recorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
-    git_server.push_file("foo", "doc/index.html")
-    git_server.push_file("spam", "doc/index.html")
+    git_server.push_file("foo", "index.html")
+    git_server.push_file("spam", "index.html")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    cmd = get_cmd_for_foreach_test(shell=False)
-    cmd.append("doc")
+    cmd = [get_cat_cmd(), "index.html"]
     tsrc_cli.run("foreach", *cmd)
     assert message_recorder.find("`%s`" % " ".join(cmd))
 
 
 def test_foreach_shell(
-        tsrc_cli: CLI, git_server: GitServer,
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path,
         message_recorder: message_recorder) -> None:
     git_server.add_repo("foo")
-    git_server.add_repo("spam")
-    git_server.push_file("foo", "doc/index.html")
-    git_server.push_file("spam", "doc/index.html")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    cmd = get_cmd_for_foreach_test(shell=True)
-    cmd.append("doc")
-    tsrc_cli.run("foreach", "-c", " ".join(cmd))
-    assert message_recorder.find("`%s`" % " ".join(cmd))
+    foo_path = workspace_path / "foo"
+    with mock.patch("subprocess.call") as subprocess_mock:
+        subprocess_mock.return_value = 0
+        tsrc_cli.run("foreach", "-c", "command")
+        calls = subprocess_mock.call_args_list
+        first_call = calls[0]
+        args, kwargs = first_call
+        assert args[0] == "command"
+        assert kwargs["shell"]
+        assert kwargs["cwd"] == foo_path
 
 
 def test_foreach_groups_happy(
@@ -89,7 +81,7 @@ def test_foreach_groups_happy(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
 
-    cmd = get_cmd_for_foreach_test(shell=False)
+    cmd = [get_cat_cmd(), "README"]
 
     message_recorder.reset()
     tsrc_cli.run("foreach", "-g", "foo", *cmd)
@@ -110,7 +102,7 @@ def test_foreach_groups_warn_skipped(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "-g", "foo")
 
-    cmd = get_cmd_for_foreach_test(shell=False)
+    cmd = [get_cat_cmd(), "README"]
 
     message_recorder.reset()
     tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", *cmd)
