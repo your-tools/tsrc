@@ -1,3 +1,7 @@
+# v0.6.2
+
+Fix crash when using `tsrc push` on a GitHub repository for the first time.
+
 # v0.6.1 (2018-10-10)
 
 Fix weird output when configuring remotes.
