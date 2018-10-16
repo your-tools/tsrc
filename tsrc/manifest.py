@@ -141,7 +141,7 @@ def load(manifest_path: Path) -> Manifest:
         schema.Optional("gitlab"): gitlab_schema,
         schema.Optional("groups"): {str: group_schema},
     })
-    parsed = tsrc.parse_config_file(manifest_path, manifest_schema)
+    parsed = tsrc.parse_config(manifest_path, manifest_schema)
     parsed = ManifestConfig(parsed)  # type: ignore
     as_manifest_config = cast(ManifestConfig, parsed)
     res = Manifest()

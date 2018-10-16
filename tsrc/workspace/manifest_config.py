@@ -42,7 +42,7 @@ class ManifestConfig:
 
     @classmethod
     def from_file(cls: "ManifestConfig", cfg_path: Path) -> "ManifestConfig":
-        as_dict = tsrc.config.parse_config_file(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: dict
+        as_dict = tsrc.config.parse_config(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: dict
         return cls.from_dict(as_dict)
 
     def save_to_file(self, cfg_path: Path) -> None:

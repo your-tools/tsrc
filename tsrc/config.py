@@ -11,17 +11,17 @@ import tsrc
 Config = NewType('Config', Dict[str, Any])
 
 
-def parse_config_file(
-        file_path: Path, config_schema: schema.Schema, roundtrip: bool = False) -> Config:
+def parse_config(file_path: Path, config_schema: schema.Schema, roundtrip: bool = False) -> Config:
     try:
         contents = file_path.text()
     except OSError as os_error:
         raise tsrc.InvalidConfig(file_path, os_error)
     try:
         if roundtrip:
-            parsed = ruamel.yaml.safe_load(contents, ruamel.yaml.RoundTripLoader)
+            yaml = ruamel.yaml.YAML(typ="rt")
         else:
-            parsed = ruamel.yaml.safe_load(contents)
+            yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        parsed = yaml.load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
         raise tsrc.InvalidConfig(file_path, yaml_error)
     try:
@@ -31,6 +31,12 @@ def parse_config_file(
     return Config(parsed)
 
 
+def dump_config(config: Config, path: Path) -> None:
+    yaml = ruamel.yaml.YAML()
+    with path.open("w") as fileobj:
+        yaml.dump(config, fileobj)
+
+
 def get_tsrc_config_path() -> Path:
     config_path = Path(xdg.XDG_CONFIG_HOME)
     config_path = config_path / "tsrc.yml"
@@ -38,9 +44,8 @@ def get_tsrc_config_path() -> Path:
 
 
 def dump_tsrc_config(config: Config) -> None:
-    dumped = ruamel.yaml.dump(config, Dumper=ruamel.yaml.RoundTripDumper)
     file_path = get_tsrc_config_path()
-    file_path.write_text(dumped)
+    dump_config(config, file_path)
 
 
 def parse_tsrc_config(config_path: Path = None, roundtrip: bool = False) -> Config:
@@ -51,4 +56,4 @@ def parse_tsrc_config(config_path: Path = None, roundtrip: bool = False) -> Conf
     tsrc_schema = schema.Schema({"auth": auth_schema})
     if not config_path:
         config_path = get_tsrc_config_path()
-    return parse_config_file(config_path, tsrc_schema, roundtrip=roundtrip)
+    return parse_config(config_path, tsrc_schema, roundtrip=roundtrip)

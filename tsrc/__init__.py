@@ -1,7 +1,7 @@
 """ Common tools """
 
 
-from .config import parse_config_file  # noqa
+from .config import parse_config, dump_config  # noqa
 from .config import Config, parse_tsrc_config, dump_tsrc_config, get_tsrc_config_path # noqa
 from .errors import Error, InvalidConfig  # noqa
 from .executor import Task, run_sequence, ExecutorFailed # noqa
