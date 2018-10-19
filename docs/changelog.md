@@ -1,4 +1,4 @@
-# v0.6.2
+# v0.6.2 (2018-10-19)
 
 Fix crash when using `tsrc push` on a GitHub repository for the first time.
 
