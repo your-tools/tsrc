@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -x
+set -e
+
 mkdocs gh-deploy
 
 rm -fr dist/
