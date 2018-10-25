@@ -70,7 +70,7 @@ You can specify the `--reviewer` option several times, and you can also assign s
 
 
 !!! note
-    `tsrc` does not work across repositories yet. See [issue #73](https://github.com/SuperTanker/tsrc/issues/73).
+    `tsrc` does not work across repositories yet. See [issue #73](https://github.com/TankerHQ/tsrc/issues/73).
 
 
 ## Merging or closing a pull request

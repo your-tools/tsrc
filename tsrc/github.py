@@ -43,7 +43,7 @@ def generate_token() -> str:
     # Need a different note for each device, otherwise
     # gh_api.authorize() will fail
     note = "tsrc-" + str(uuid.uuid4())
-    note_url = "https://supertanker.github.io/tsrc"
+    note_url = "https://TankerHQ.github.io/tsrc"
 
     def ask_2fa() -> str:
         return cast(str, ui.ask_string("2FA code: "))
