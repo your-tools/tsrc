@@ -1,14 +1,14 @@
 tsrc: manage multiple repos / Review automation
 ===============================================
 
-.. image:: https://img.shields.io/travis/SuperTanker/tsrc.svg?branch=master
-  :target: https://travis-ci.org/SuperTanker/tsrc
+.. image:: https://img.shields.io/travis/TankerHQ/tsrc.svg?branch=master
+  :target: https://travis-ci.org/TankerHQ/tsrc
 
 .. image:: https://img.shields.io/pypi/v/tsrc.svg
   :target: https://pypi.org/project/tsrc/
 
-.. image:: https://img.shields.io/github/license/SuperTanker/tsrc.svg
-  :target: https://github.com/SuperTanker/tsrc/blob/master/LICENSE
+.. image:: https://img.shields.io/github/license/TankerHQ/tsrc.svg
+  :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
 
 Demo
 ----
@@ -18,7 +18,7 @@ Demo
 Documentation
 --------------
 
-See https://supertanker.github.io/tsrc/
+See https://TankerHQ.github.io/tsrc/
 
 Screenshots
 -----------
@@ -109,4 +109,4 @@ Then you can use ``tsrc push --merge`` to merge the pull request, or ``tsrc push
 Why not Google repo?
 --------------------
 
-See the `FAQ <https://supertanker.github.io/tsrc/faq/#why_not_repo>`_
+See the `FAQ <https://TankerHQ.github.io/tsrc/faq/#why_not_repo>`_

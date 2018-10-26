@@ -15,7 +15,7 @@ setup(
     version="0.6.2",
     description="Manage multiple repositories",
     long_description=get_long_description(),
-    url="https://github.com/SuperTanker/tsrc",
+    url="https://github.com/TankerHQ/tsrc",
     author="Kontrol SAS",
     packages=find_packages(),
     include_package_data=True,

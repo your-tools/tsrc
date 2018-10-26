@@ -39,7 +39,7 @@ Thanks @tst2005 and @cgestes for their help with the configuration format.
 
 ## Other fixes
 
-* Fix [#113](https://github.com/SuperTanker/tsrc/issues/113): do not hide branch when showing tag status.
+* Fix [#113](https://github.com/TankerHQ/tsrc/issues/113): do not hide branch when showing tag status.
 * Add support for Python 3.7
 
 # v0.5.0 (2018-08-14)
@@ -83,8 +83,8 @@ This change has no impact if you were already using `GitLab`.
 * **Breaking change**: `-m/--message` option is gone, use `--title` instead. There's a concept of "description" or "message" for pull requests and merge requests, but the value of the option was only used to update the *title*, so it had to be renamed.
 * Do not assume local and remote tracking branch have the same name.
 * Allow using `tsrc push <local>:<remote>` to explicitly specify local and remote branch names.
-* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/SuperTanker/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
-* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/SuperTanker/tsrc/issues/80)). Patch by @maximerety.
+* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/TankerHQ/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
+* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/TankerHQ/tsrc/issues/80)). Patch by @maximerety.
 
 
 ## Improve fixed reference handling
@@ -105,7 +105,7 @@ repos:
     tag: v0.1
 ```
 
-See the [dedicated section about manifest format](ref/formats.md#repos) and the [#57 pull request discussion](https://github.com/SuperTanker/tsrc/pull/57) for the details.
+See the [dedicated section about manifest format](ref/formats.md#repos) and the [#57 pull request discussion](https://github.com/TankerHQ/tsrc/pull/57) for the details.
 
 This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.
 
@@ -118,10 +118,10 @@ Note that due to limitations in `git` itself, the `shallow` option cannot be use
 
 ## Misc
 
-* Organization `TankerApp` was renamed to `SuperTanker`. New urls are:
+* Organization `TankerApp` was renamed to `TankerHQ`. New urls are:
 
-    * [github.com/SuperTanker/tsrc](https://github.com/SuperTanker/tsrc) for the git repository
-    * [supertanker.github.io/tsrc](https://supertanker.github.io/tsrc) for the documentation
+    * [github.com/TankerHQ/tsrc](https://github.com/TankerHQ/tsrc) for the git repository
+    * [TankerHQ.github.io/tsrc](https://TankerHQ.github.io/tsrc) for the documentation
 
 
 * We now use [pipenv](https://docs.pipenv.org/) for dependency handling.
@@ -164,7 +164,7 @@ This is required to create the `<workspace>/.tsrc/manifest.yml` file which is la
 
 # v0.2.3 (2017-09-01)
 
-* Split user interface functionality into its own project: [python-cli-ui](https://github.com/SuperTanker/python-cli-ui).
+* Split user interface functionality into its own project: [python-cli-ui](https://github.com/TankerHQ/python-cli-ui).
 
 * Add `--quiet` and `--color` global options.
 
