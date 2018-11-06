@@ -45,7 +45,7 @@ pytest-cov==2.6.0
 pytest-forked==0.2
 pytest-sugar==0.9.1
 pytest-xdist==1.23.2
-python-cli-ui==0.7.2
+python-cli-ui==0.7.3
 python-dateutil==2.7.5
 python-gitlab==1.6.0
 PyYAML==3.13
