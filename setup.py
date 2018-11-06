@@ -25,7 +25,7 @@ setup(
         "colorama",
         "github3.py >= 1.0",
         "path.py",
-        "python-cli-ui",
+        "python-cli-ui>=0.7.3",
         "python-gitlab",
         "pyparsing",
         "requests",
@@ -35,6 +35,25 @@ setup(
         "unidecode",
         "xdg",
     ],
+    extras_require={
+        "dev": [
+            "coverage==4.5.1",
+            "pluggy==0.7.1",
+            "pytest==3.8.1",
+            "pytest-cov==2.6.0",
+            "pytest-sugar==0.9.1",
+            "pytest-xdist==1.23.2",
+            "requests",
+            "mock",
+            "mypy==0.630",
+            "twine",
+            "wheel",
+            "flake8==3.5.0",
+            "flake8-comprehensions",
+            "mkdocs",
+        ]
+
+    },
     classifiers=[
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",

@@ -1,4 +1,8 @@
 [run]
 source = tsrc
-omit = tsrc/test/*
+
+omit =
+  tsrc/test/*
+  .venv/*
+
 branch = True
