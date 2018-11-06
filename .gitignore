@@ -10,3 +10,5 @@ build/
 site/
 
 .mypy_cache/
+
+.venv/

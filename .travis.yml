@@ -11,11 +11,10 @@ matrix:
       sudo: true
 
 install:
-  - pip install pipenv==2018.05.18
-  - pipenv install --dev
-  - pipenv run python setup.py develop
+  - curl https://raw.githubusercontent.com/dmerejkowsky/dmenv/master/installer.py -o dmenv-installer.py
+  - python3 dmenv-installer.py --dest ./dmenv
+  - ./dmenv install
 
 
 script:
-  - pipenv check
-  - pipenv run python ci/ci.py
+  - ./dmenv run -- python ci/ci.py
