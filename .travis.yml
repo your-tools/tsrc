@@ -11,8 +11,8 @@ matrix:
       sudo: true
 
 install:
-  - curl https://raw.githubusercontent.com/dmerejkowsky/dmenv/master/installer.py -o dmenv-installer.py
-  - python3 dmenv-installer.py --dest ./dmenv
+  - curl -L https://github.com/TankerHQ/dmenv/releases/download/v0.5.0/dmenv-linux -o dmenv
+  - chmod u+x dmenv
   - ./dmenv install
 
 
