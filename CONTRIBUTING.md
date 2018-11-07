@@ -38,35 +38,28 @@ support.
 
 # Checking your changes
 
-* Install latest [pipenv](https://docs.pipenv.org/) version.
+* Install latest [dmenv](https://github.com/TankerHQ/dmenv) version.
 * Install development and documentation dependencies:
 
 ```console
-$ pipenv install --dev
+$ dmenv install
 ```
-
-* Run `setup.py develop` at least once:
-
-```
-$ pipenv run python setup.py develop
-```
-
-(you should re-run this command every time the `setup.py` file changes).
 
 * Finally, run:
 
 ```console
-$ pipenv run python ci/ci.py
+$ source "$(dmenv show)/bin/activate"
+$ python ci/ci.py
 ```
 
 
 # Adding documentation
 
-* Follow the steps from the [Checking your changes](#checking_your_changes) section to setup your python environment
+* Follow the steps from the above section to setup your python environment
 * Launch the development server locally:
 
 ```bash
-$ pipenv run mkdocs serve
+$ dmenv run mkdocs serve
 ```
 
 * Edit the markdown files from the `docs/` folder and review the changes in your browser
