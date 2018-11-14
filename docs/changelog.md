@@ -1,6 +1,7 @@
-# Next
+# v0.6.3
 
-We now use [dmenv](https://github.com/TankerHQ/dmenv) for dependencies management
+* GitHub organization is now `TankerHQ`
+* We now use [dmenv](https://github.com/TankerHQ/dmenv) for dependencies management
 
 # v0.6.2 (2018-10-19)
 
