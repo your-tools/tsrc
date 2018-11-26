@@ -16,13 +16,21 @@ class CommandFailed(tsrc.Error):
     pass
 
 
+class CommandSucceeded(tsrc.Error):
+    pass
+
+
 class CmdRunner(tsrc.Task[tsrc.Repo]):
-    def __init__(self, workspace_path: Path, cmd: List[str],
-                 cmd_as_str: str, shell: bool = False) -> None:
+    def __init__(
+            self, workspace_path: Path,
+            cmd: List[str], cmd_as_str: str, shell: bool = False,
+            expect_failure: bool = False
+    ) -> None:
         self.workspace_path = workspace_path
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
         self.shell = shell
+        self.expect_failure = expect_failure
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
@@ -31,7 +39,10 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         ui.info_1("Running `%s` on %d repos" % (self.cmd_as_str, num_items))
 
     def on_failure(self, *, num_errors: int) -> None:
-        ui.error("Command failed for %s repo(s)" % num_errors)
+        if self.expect_failure:
+            ui.error("Command succeeded for %s repo(s)" % num_errors)
+        else:
+            ui.error("Command failed for %s repo(s)" % num_errors)
 
     def process(self, repo: tsrc.Repo) -> None:
         ui.info(repo.src, "\n",
@@ -40,14 +51,22 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
                 sep="")
         full_path = self.workspace_path / repo.src
         rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)
-        if rc != 0:
+        if rc != 0 and not self.expect_failure:
             raise CommandFailed()
+        if rc == 0 and self.expect_failure:
+            raise CommandSucceeded()
 
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
-    cmd_runner = CmdRunner(workspace.root_path, args.cmd, args.cmd_as_str, shell=args.shell)
+    cmd_runner = CmdRunner(
+        workspace.root_path,
+        args.cmd,
+        args.cmd_as_str,
+        shell=args.shell,
+        expect_failure=args.xfail
+    )
     manifest = workspace.local_manifest.manifest
     assert manifest
     cloned_repos = workspace.get_repos()
