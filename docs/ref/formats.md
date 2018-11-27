@@ -21,7 +21,10 @@ The manifest is always parsed as a dictionary.
 Each repository is also a dictionary, containing:
 
 * `src` (required): relative path of the repository in the workspace
-* `url` (required): URL to use when cloning the repository (usually using ssh)
+* Either:
+    * `url` if you just need one remote named `origin`
+    * A list of remotes with a `name` and `url`. In that case, the first remote
+      will be used for cloning the repository.
 * `branch` (optional): The branch to use when cloning the repository (defaults
   to `master`)
 * `tag` (optional):
@@ -32,36 +35,44 @@ Each repository is also a dictionary, containing:
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
         to the given sha1, else a warning message will be printed.
-* `copy` (optional): A list of dictionaries with `src` and `dest` keys, like so:
+* `copy` (optional): A list of dictionaries with `src` and `dest` key.
 
-        repos:
-          - src: foo
-            url: gitlab:proj1/foo
-            branch: next
+Here's a full example:
 
-          - src: bar
-            url: gitlab:proj1/bar
-            branch: master
-            sha1: ad2b68539c78e749a372414165acdf2a1bb68203
+```yaml
+repos:
+  - src: foo
+    url: git@gitlab.local:proj1/foo
+    branch: next
 
-          - src: app
-            url: gitlab:proj1/app
-            tag: v0.1
-            copy:
-              - src: top.cmake
-                dest: CMakeLists.txt
-              - src: .clang-format
+  - src: bar
+    remotes:
+      - name: origin
+        url: git@gitlab.local:proj1/bar
+      - name: upstream
+        url: git@github.com:user/bar
+    branch: master
+    sha1: ad2b68539c78e749a372414165acdf2a1bb68203
 
-    In this example:
+  - src: app
+    url: git@gitlab.local:proj1/app
+    tag: v0.1
+    copy:
+      - src: top.cmake
+        dest: CMakeLists.txt
+      - src: .clang-format
+```
 
-    * First, `proj1/foo` will be cloned into `<workspace>/foo` using the `next` branch.
-    * Then, `proj1/bar` will be cloned into `<workspace>/bar` using the `master` branch, and reset to `ad2b68539c78e749a372414165acdf2a1bb68203`.
-    * Finally:
-        * `proj1/app` will be cloned into `<workspace>/app` using the `v0.1` tag,
-        * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`, and
-        * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`.
+In this example:
 
-    Note that `copy` only works with files, not directories.
+* First, `proj1/foo` will be cloned into `<workspace>/foo` using the `next` branch.
+* Then, `proj1/bar` will be cloned into `<workspace>/bar` using the `master` branch, and reset to `ad2b68539c78e749a372414165acdf2a1bb68203`.
+* Finally:
+    * `proj1/app` will be cloned into `<workspace>/app` using the `v0.1` tag,
+    * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`, and
+    * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`.
+
+Note that `copy` only works with files, not directories.
 
 ## groups
 
