@@ -8,6 +8,7 @@ certifi==2018.10.15
 cffi==1.11.5
 chardet==3.0.4
 Click==7.0
+cli-ui==0.8.0b1
 colorama==0.4.0
 colored-traceback==0.3.0
 coverage==4.5.1
@@ -45,7 +46,6 @@ pytest-cov==2.6.0
 pytest-forked==0.2
 pytest-sugar==0.9.1
 pytest-xdist==1.23.2
-python-cli-ui==0.7.3
 python-dateutil==2.7.5
 python-gitlab==1.6.0
 PyYAML==3.13

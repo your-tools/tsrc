@@ -1,5 +1,5 @@
 from typing import cast, Any
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import message_recorder  # noqa
 
 
 import tsrc

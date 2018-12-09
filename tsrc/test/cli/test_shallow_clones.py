@@ -3,7 +3,7 @@ from path import Path
 import tsrc
 import tsrc.git
 
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import message_recorder  # noqa
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 

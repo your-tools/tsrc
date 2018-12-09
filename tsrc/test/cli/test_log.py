@@ -1,6 +1,6 @@
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import message_recorder  # noqa
 
 
 def test_happy(tsrc_cli: CLI, git_server: GitServer, message_recorder: message_recorder) -> None:

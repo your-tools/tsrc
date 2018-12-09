@@ -9,7 +9,7 @@ import textwrap
 from typing import Callable, List, Optional
 
 import colored_traceback
-import ui
+import cli_ui as ui
 
 import tsrc
 

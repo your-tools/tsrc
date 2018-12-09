@@ -3,7 +3,7 @@ from typing import List
 
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import message_recorder  # noqa
 
 
 def get_cmd_for_foreach_test(shell: bool = False) -> List[str]:

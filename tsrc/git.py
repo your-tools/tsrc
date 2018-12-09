@@ -6,7 +6,7 @@ import subprocess
 from typing import Any, Dict, Iterable, Tuple, Optional  # noqa
 
 from path import Path
-import ui
+import cli_ui as ui
 
 import tsrc
 

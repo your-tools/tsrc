@@ -4,7 +4,7 @@ import argparse
 from typing import List, Tuple
 import shutil
 
-import ui
+import cli_ui as ui
 
 import tsrc
 import tsrc.cli

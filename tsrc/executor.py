@@ -4,7 +4,7 @@ import abc
 import sys
 from typing import Generic, List, Tuple, TypeVar  # noqa
 
-import ui
+import cli_ui as ui
 
 import tsrc
 

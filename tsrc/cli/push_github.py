@@ -7,7 +7,7 @@ from typing import Optional
 import github3
 from github3 import GitHub
 from github3.pulls import PullRequest
-import ui
+import cli_ui as ui
 
 import tsrc
 import tsrc.github

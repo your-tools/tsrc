@@ -6,7 +6,7 @@ import pytest
 
 import tsrc
 
-from ui.tests.conftest import message_recorder  # noqa
+from cli_ui.tests import message_recorder  # noqa
 from .helpers.git_server import git_server  # noqa
 from .helpers.cli import tsrc_cli  # noqa
 from .helpers.push import repo_path, push_args  # noqa

@@ -3,7 +3,7 @@ import argparse
 import os
 
 from path import Path
-import ui
+import cli_ui as ui
 
 import tsrc
 import tsrc.workspace.manifest_config
