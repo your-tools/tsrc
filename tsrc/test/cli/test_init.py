@@ -1,5 +1,5 @@
 from typing import cast, Any
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import MessageRecorder
 
 
 import tsrc
@@ -86,7 +86,7 @@ def test_copy_files_source_does_not_exist(
         tsrc_cli: CLI,
         git_server: GitServer,
         workspace_path: Path,
-        message_recorder: message_recorder) -> None:
+        message_recorder: MessageRecorder) -> None:
     manifest_url = git_server.manifest_url
     git_server.add_repo("master")
     git_server.manifest.set_repo_file_copies("master", [("top.cmake", "CMakeLists.txt")])
