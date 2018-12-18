@@ -25,7 +25,7 @@ setup(
         "colorama",
         "github3.py >= 1.0",
         "path.py",
-        "python-cli-ui>=0.7.3",
+        "cli-ui>=0.9.1",
         "python-gitlab",
         "pyparsing",
         "requests",

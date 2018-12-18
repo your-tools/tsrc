@@ -6,6 +6,7 @@ attrs==18.2.0
 bleach==3.0.2
 certifi==2018.10.15
 chardet==3.0.4
+cli-ui==0.9.1
 Click==7.0
 colorama==0.4.0
 colored-traceback==0.3.0
@@ -44,7 +45,6 @@ pytest-cov==2.6.0
 pytest-forked==0.2
 pytest-sugar==0.9.1
 pytest-xdist==1.23.2
-python-cli-ui==0.7.3
 python-dateutil==2.7.5
 python-gitlab==1.6.0
 PyYAML==3.13
