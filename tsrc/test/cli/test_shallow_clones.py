@@ -3,7 +3,7 @@ from path import Path
 import tsrc
 import tsrc.git
 
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -29,7 +29,7 @@ def test_shallow_clones(tsrc_cli: CLI, git_server: GitServer, workspace_path: Pa
 
 
 def test_shallow_with_fix_ref(tsrc_cli: CLI, git_server: GitServer,
-                              workspace_path: Path, message_recorder: message_recorder) -> None:
+                              workspace_path: Path, message_recorder: MessageRecorder) -> None:
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.push_file("foo", "one.c")

@@ -25,7 +25,7 @@ setup(
         "colorama",
         "github3.py >= 1.0",
         "path.py",
-        "python-cli-ui>=0.7.3",
+        "cli-ui>=0.9.1",
         "python-gitlab",
         "pyparsing",
         "requests",
@@ -55,7 +55,6 @@ setup(
 
     },
     classifiers=[
-        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",

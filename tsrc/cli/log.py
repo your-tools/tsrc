@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-import ui
+import cli_ui as ui
 
 import tsrc
 import tsrc.cli

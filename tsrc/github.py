@@ -6,7 +6,7 @@ from typing import cast, List, Optional
 
 import github3
 from github3.repos.repo import Repository
-import ui
+import cli_ui as ui
 
 import tsrc
 

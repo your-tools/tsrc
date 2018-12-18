@@ -1,6 +1,6 @@
 from typing import cast, Optional, List, Tuple  # noqa
 from path import Path
-import ui
+import cli_ui as ui
 
 import tsrc
 import tsrc.manifest

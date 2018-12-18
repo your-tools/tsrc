@@ -9,7 +9,7 @@ import textwrap
 from typing import Callable, List, Optional
 
 import colored_traceback
-import ui
+import cli_ui as ui
 
 import tsrc
 
@@ -78,7 +78,7 @@ def main_wrapper(main_func: MainFunc) -> MainFunc:
 
 
 def setup_ui(args: argparse.Namespace) -> None:
-    verbose = None
+    verbose = False
     if os.environ.get("VERBOSE"):
         verbose = True
     if args.verbose:

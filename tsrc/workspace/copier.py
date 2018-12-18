@@ -1,7 +1,7 @@
 from typing import NewType, Tuple
 import stat
 
-import ui
+import cli_ui as ui
 from path import Path
 
 import tsrc.executor

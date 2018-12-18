@@ -1,12 +1,12 @@
 """ Fixtures for tsrc testing """
 
-from typing import Any
+from typing import Any, Iterator
 from path import Path
 import pytest
 
 import tsrc
 
-from ui.tests.conftest import message_recorder  # noqa
+from cli_ui.tests import MessageRecorder
 from .helpers.git_server import git_server  # noqa
 from .helpers.cli import tsrc_cli  # noqa
 from .helpers.push import repo_path, push_args  # noqa
@@ -26,3 +26,11 @@ def workspace_path(tmp_path: Path) -> Path:
 @pytest.fixture
 def workspace(workspace_path: Path) -> tsrc.Workspace:
     return tsrc.Workspace(workspace_path)
+
+
+@pytest.fixture()
+def message_recorder() -> Iterator[MessageRecorder]:
+    res = MessageRecorder()
+    res.start()
+    yield res
+    res.stop()

@@ -5,7 +5,7 @@ from path import Path
 
 import tsrc.cli
 
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -24,7 +24,7 @@ def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
 
 
 def test_sync_with_errors(tsrc_cli: CLI, git_server: GitServer, workspace_path:
-                          Path, message_recorder: message_recorder) -> None:
+                          Path, message_recorder: MessageRecorder) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
@@ -82,8 +82,7 @@ def test_switching_manifest_branches(tsrc_cli: CLI, git_server: GitServer,
 
 
 def test_sync_not_on_master(tsrc_cli: CLI, git_server: GitServer,
-                            workspace_path: Path, message_recorder:
-                            message_recorder) -> None:
+                            workspace_path: Path, message_recorder: MessageRecorder) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
@@ -126,7 +125,7 @@ def test_copies_are_readonly(tsrc_cli: CLI, git_server: GitServer,
 
 
 def test_changing_branch(tsrc_cli: CLI, git_server: GitServer,
-                         workspace_path: Path, message_recorder: message_recorder) -> None:
+                         workspace_path: Path, message_recorder: MessageRecorder) -> None:
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
@@ -244,8 +243,8 @@ def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
     assert not (foo_path / "new.txt").exists()
 
 
-def test_custom_group(tsrc_cli: CLI, git_server: GitServer, message_recorder:
-                      message_recorder) -> None:
+def test_custom_group(tsrc_cli: CLI, git_server: GitServer,
+                      message_recorder: MessageRecorder) -> None:
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_repo("other")
 

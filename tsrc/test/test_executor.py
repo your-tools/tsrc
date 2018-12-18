@@ -1,5 +1,5 @@
 import pytest
-import ui
+import cli_ui as ui
 
 import tsrc
 
