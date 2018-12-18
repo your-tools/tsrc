@@ -12,7 +12,7 @@ import tsrc.git
 
 
 def describe_branch(git_status: tsrc.git.Status) -> List[str]:
-    res = list()  # type: List[str]
+    res = list()  # type: List[ui.Token]
     if git_status.branch:
         res += [ui.green, git_status.branch]
     elif git_status.sha1:
@@ -30,7 +30,7 @@ def commit_string(number: int) -> str:
 
 
 def describe_position(git_status: tsrc.git.Status) -> List[str]:
-    res = []  # type: List[str]
+    res = []  # type: List[ui.Token]
     if git_status.ahead != 0:
         up = ui.Symbol("↑", "+")
         n_commits = commit_string(git_status.ahead)
@@ -45,7 +45,7 @@ def describe_position(git_status: tsrc.git.Status) -> List[str]:
 
 
 def describe_dirty(git_status: tsrc.git.Status) -> List[str]:
-    res = []  # type: List[str]
+    res = []  # type: List[ui.Token]
     if git_status.dirty:
         res += [ui.red, "(dirty)"]
     return res

@@ -78,7 +78,7 @@ def main_wrapper(main_func: MainFunc) -> MainFunc:
 
 
 def setup_ui(args: argparse.Namespace) -> None:
-    verbose = None
+    verbose = False
     if os.environ.get("VERBOSE"):
         verbose = True
     if args.verbose:
