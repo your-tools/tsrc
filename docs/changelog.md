@@ -1,3 +1,8 @@
+# v0.6.4
+
+* Remove support for Python 3.3.
+* Use new and shiny [cli-ui](https://pypi.org/project/cli-ui/) package instead of old `python-cli-ui`.
+
 # v0.6.3
 
 * GitHub organization is now `TankerHQ`
