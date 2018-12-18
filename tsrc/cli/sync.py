@@ -1,7 +1,7 @@
 """ Entry point for tsrc sync """
 
 import argparse
-import ui
+import cli_ui as ui
 
 import tsrc.cli
 

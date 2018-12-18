@@ -8,7 +8,7 @@ from typing import cast, Any, List, Optional, Set  # noqa
 from gitlab import Gitlab
 from gitlab.v4.objects import Group, User, Project, ProjectMergeRequest  # noqa
 from gitlab.exceptions import GitlabGetError
-import ui
+import cli_ui as ui
 
 import tsrc
 from tsrc.cli.push import RepositoryInfo

@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 from path import Path
-import ui
+import cli_ui as ui
 
 import tsrc
 import tsrc.cli
