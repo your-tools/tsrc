@@ -1,21 +1,23 @@
-# Generated with dmenv 0.7.0, python 3.6.8rc1, on Linux
+# Generated with dmenv 0.11.1, python 3.7.1, on Linux
 apipkg==1.5
 asn1crypto==0.24.0
 atomicwrites==1.2.1
 attrs==18.2.0
 bleach==3.0.2
 certifi==2018.11.29
+cffi==1.12.2
 chardet==3.0.4
 cli-ui==0.9.1
 Click==7.0
+codecov==2.0.15
 colorama==0.4.1
 colored-traceback==0.3.0
 coverage==4.5.1
 cryptography==2.4.2
 docutils==0.14
 execnet==1.5.0
-flake8==3.5.0
 flake8-comprehensions==1.4.1
+flake8==3.5.0
 github3.py==1.2.0
 idna==2.8
 importlib-metadata==0.7
@@ -28,10 +30,11 @@ mccabe==0.6.1
 mkdocs==1.0.4
 mock==2.0.0
 more-itertools==4.3.0
-mypy==0.630
 mypy-extensions==0.4.1
+mypy==0.630
 path.py==11.5.0
 pbr==5.1.1
+pip==19.0.3
 pkginfo==1.4.2
 pluggy==0.7.1
 py==1.7.0
@@ -40,19 +43,20 @@ pycparser==2.19
 pyflakes==1.6.0
 Pygments==2.3.1
 pyparsing==2.3.0
-pytest==3.8.1
 pytest-cov==2.6.0
 pytest-forked==0.2
 pytest-sugar==0.9.1
 pytest-xdist==1.23.2
+pytest==3.8.1
 python-dateutil==2.7.5
 python-gitlab==1.7.0
 PyYAML==3.13
 readme-renderer==24.0
-requests==2.21.0
 requests-toolbelt==0.8.0
+requests==2.21.0
 ruamel.yaml==0.15.81
 schema==0.6.8
+setuptools==40.8.0
 six==1.12.0
 tabulate==0.8.2
 termcolor==1.1.0
@@ -64,4 +68,5 @@ Unidecode==1.0.23
 uritemplate==3.0.0
 urllib3==1.24.1
 webencodings==0.5.1
+wheel==0.33.1
 xdg==3.0.2
