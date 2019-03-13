@@ -18,3 +18,4 @@ install:
 
 script:
   - ./dmenv run -- python ci/ci.py
+  - ./dmenv run codecov

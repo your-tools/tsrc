@@ -37,6 +37,7 @@ setup(
     ],
     extras_require={
         "dev": [
+            "codecov==2.0.15",
             "coverage==4.5.1",
             "pluggy==0.7.1",
             "pytest==3.8.1",
