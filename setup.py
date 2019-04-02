@@ -12,7 +12,7 @@ def get_long_description():
 
 setup(
     name="tsrc",
-    version="0.6.4",
+    version="0.6.5",
     description="Manage multiple repositories",
     long_description=get_long_description(),
     url="https://github.com/TankerHQ/tsrc",
