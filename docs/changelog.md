@@ -1,3 +1,7 @@
+# v0.6.6
+
+* Remove raw HTML from README.rst
+
 # v0.6.5
 
 * Use `codecov.io` to measure coveage
