@@ -1,3 +1,8 @@
+# v0.6.5
+
+* Use `codecov.io` to measure coveage
+* Prettify README
+
 # v0.6.4
 
 * Remove support for Python 3.3.
