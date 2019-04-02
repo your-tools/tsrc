@@ -19,7 +19,7 @@
    :target: https://pypi.org/project/tsrc/
 
 
-tsrc: manage multiple repos / Review automation
+tsrc: manage multiple repos / review automation
 ===============================================
 
 `Overview`_ · `Installation`_ · `Usage example`_ · `Documentation`_ · `Release notes`_ · `Contributing`_ · `License`_
