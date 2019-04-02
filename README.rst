@@ -1,10 +1,8 @@
 .. image::  https://raw.githubusercontent.com/TankerHQ/sdk-js/master/src/public/tanker.png
    :target: #readme
 
-.. role:: raw-html(raw)
-   :format: html
+|
 
-:raw-html:`<br />`
 
 .. image:: https://img.shields.io/github/license/TankerHQ/tsrc.svg
    :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
