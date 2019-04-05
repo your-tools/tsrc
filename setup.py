@@ -46,7 +46,7 @@ setup(
             "pytest-xdist==1.23.2",
             "requests",
             "mock",
-            "mypy==0.630",
+            "mypy==0.700",
             "twine",
             "wheel",
             "flake8==3.5.0",

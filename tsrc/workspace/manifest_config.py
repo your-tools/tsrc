@@ -26,7 +26,7 @@ class ManifestConfig:
     groups = attr.ib(default=list())  # type: List[str]
 
     @classmethod
-    def from_dict(cls: "ManifestConfig", as_dict: dict) -> "ManifestConfig":
+    def from_dict(cls, as_dict: Dict[str, Any]) -> "ManifestConfig":
         res = ManifestConfig()
         res.url = as_dict["url"]
         res.branch = as_dict.get("branch", "master")
@@ -36,13 +36,13 @@ class ManifestConfig:
         return res
 
     @classmethod
-    def from_args(cls: "ManifestConfig", args: argparse.Namespace) -> "ManifestConfig":
-        as_dict = vars(args)  # type: dict
+    def from_args(cls, args: argparse.Namespace) -> "ManifestConfig":
+        as_dict = vars(args)  # type: Dict[str, Any]
         return cls.from_dict(as_dict)
 
     @classmethod
-    def from_file(cls: "ManifestConfig", cfg_path: Path) -> "ManifestConfig":
-        as_dict = tsrc.config.parse_config(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: dict
+    def from_file(cls, cfg_path: Path) -> "ManifestConfig":
+        as_dict = tsrc.config.parse_config(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: Dict[str, Any]
         return cls.from_dict(as_dict)
 
     def save_to_file(self, cfg_path: Path) -> None:

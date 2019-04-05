@@ -1,6 +1,6 @@
 """ Support for finding elements inside a list of groups """
 
-from typing import Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
+from typing import Any, Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
 import tsrc
 
 T = TypeVar('T')
@@ -19,7 +19,7 @@ class Group(Generic[T]):
 
 
 class GroupNotFound(GroupError):
-    def __init__(self, group_name: str, parent_group: Optional[Group] = None) -> None:
+    def __init__(self, group_name: str, parent_group: Optional[Group[Any]] = None) -> None:
         self.group_name = group_name
         self.parent_group = parent_group
         if self.parent_group:
@@ -40,7 +40,7 @@ class UnknownElement(GroupError):
 
 class GroupList(Generic[T]):
     def __init__(self, *, elements: Iterable[T]) -> None:
-        self.groups = dict()  # type: Dict[str, Group]
+        self.groups = dict()  # type: Dict[str, Group[T]]
         self.all_elements = elements
         self._groups_seen = set()  # type: Set[str]
 
@@ -51,7 +51,7 @@ class GroupList(Generic[T]):
                 raise UnknownElement(name, element)
         self.groups[name] = Group(name, elements, includes=includes)
 
-    def get_group(self, name: str) -> Optional[Group]:
+    def get_group(self, name: str) -> Optional[Group[T]]:
         return self.groups.get(name)
 
     def get_elements(self, groups: Optional[List[str]] = None) -> Iterable[T]:
@@ -64,7 +64,7 @@ class GroupList(Generic[T]):
 
     def _rec_get_elements(self, res: Set[T],
                           group_names: List[str], *,
-                          parent_group: Optional[Group]) -> None:
+                          parent_group: Optional[Group[T]]) -> None:
         for group_name in group_names:
             if group_name in self._groups_seen:
                 return
