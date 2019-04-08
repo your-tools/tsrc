@@ -1,3 +1,7 @@
+# Next release
+
+* Remove support for Python 3.4
+
 # v0.6.6
 
 * Remove raw HTML from README.rst
