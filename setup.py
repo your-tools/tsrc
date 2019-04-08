@@ -46,7 +46,7 @@ setup(
             "pytest-xdist==1.23.2",
             "requests",
             "mock",
-            "mypy==0.630",
+            "mypy==0.700",
             "twine",
             "wheel",
             "flake8==3.5.0",
@@ -56,9 +56,9 @@ setup(
 
     },
     classifiers=[
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
     entry_points={"console_scripts": ["tsrc = tsrc.cli.main:main"]},
 )

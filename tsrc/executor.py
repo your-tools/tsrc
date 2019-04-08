@@ -2,7 +2,7 @@
 
 import abc
 import sys
-from typing import Generic, List, Tuple, TypeVar  # noqa
+from typing import Any, Generic, List, Tuple, TypeVar  # noqa
 
 import cli_ui as ui
 
@@ -77,6 +77,6 @@ class SequentialExecutor(Generic[T]):
             self.errors.append((item, error))
 
 
-def run_sequence(items: List[T], task: Task) -> None:
+def run_sequence(items: List[T], task: Task[Any]) -> None:
     executor = SequentialExecutor(task)
     return executor.process(items)
