@@ -2,21 +2,21 @@
 
 * Remove support for Python 3.4
 
-# v0.6.6
+# v0.6.6 (2019-04-02)
 
 * Remove raw HTML from README.rst
 
-# v0.6.5
+# v0.6.5 (2019-04-0)
 
 * Use `codecov.io` to measure coveage
 * Prettify README
 
-# v0.6.4
+# v0.6.4 (2019-01-07)
 
 * Remove support for Python 3.3.
 * Use new and shiny [cli-ui](https://pypi.org/project/cli-ui/) package instead of old `python-cli-ui`.
 
-# v0.6.3
+# v0.6.3 (2018-11-04)
 
 * GitHub organization is now `TankerHQ`
 * We now use [dmenv](https://github.com/TankerHQ/dmenv) for dependencies management
