@@ -10,6 +10,7 @@ from typing import Callable, List, Optional
 
 import colored_traceback
 import cli_ui as ui
+from path import Path
 
 import tsrc
 
@@ -125,7 +126,15 @@ def main(args: ArgsList = None) -> None:
     init_parser.add_argument("url", nargs="?")
     init_parser.add_argument("-b", "--branch")
     init_parser.add_argument("-g", "--group", action="append", dest="groups")
-    init_parser.add_argument("-s", "--shallow", action="store_true", dest="shallow", default=False)
+    init_parser.add_argument(
+        "-s", "--shallow", action="store_true", dest="shallow", default=False
+    )
+    init_parser.add_argument(
+        "--file",
+        help="use manifest from a file instead of a git repository",
+        type=Path,
+        dest="file_path",
+    )
     init_parser.set_defaults(branch="master")
 
     log_parser = add_workspace_subparser(subparsers, "log")

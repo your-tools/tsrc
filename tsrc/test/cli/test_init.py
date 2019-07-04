@@ -1,7 +1,6 @@
 from typing import cast, Any
 from cli_ui.tests import MessageRecorder
 
-
 import tsrc
 import tsrc.git
 from tsrc.test.helpers.cli import CLI
@@ -34,8 +33,14 @@ def test_init_simple(
     assert_cloned(workspace_path, "spam/eggs")
 
 
+def test_init_with_manifest_file(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    git_server.add_repo("foo")
+    tsrc_cli.run("init", "--file", git_server.manifest.yaml_path)
+    tsrc_cli.run("sync")
+
+
 def test_init_with_args(
     tsrc_cli: CLI, git_server: GitServer, monkeypatch: Any, tmp_path: Path
 ) -> None:
