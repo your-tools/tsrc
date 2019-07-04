@@ -7,7 +7,7 @@ from path import Path
 import tsrc.executor
 
 
-Copy = NewType('Copy', Tuple[str, str])
+Copy = NewType("Copy", Tuple[str, str])
 
 
 class FileCopier(tsrc.executor.Task[Copy]):

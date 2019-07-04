@@ -12,6 +12,7 @@ class LocalManifest:
     hidden <workspace>/.tsrc directory, along with its configuration
 
     """
+
     def __init__(self, workspace_path: Path) -> None:
         hidden_path = workspace_path / ".tsrc"
         self.clone_path = hidden_path / "manifest"
@@ -87,10 +88,12 @@ class LocalManifest:
 
         tsrc.git.run(self.clone_path, "fetch")
         tsrc.git.run(self.clone_path, "checkout", "-B", config.branch)
+        # fmt: off
         tsrc.git.run(
             self.clone_path, "branch", config.branch,
             "--set-upstream-to", "origin/%s" % config.branch
         )
+        # fmt: on
         if config.tag:
             ref = config.tag
         else:

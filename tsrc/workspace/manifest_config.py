@@ -8,13 +8,15 @@ import ruamel.yaml
 
 import tsrc.config
 
-MANIFEST_CONFIG_SCHEMA = schema.Schema({
-    "url": str,
-    schema.Optional("branch"): str,
-    schema.Optional("tag"): str,
-    schema.Optional("groups"): [str],
-    schema.Optional("shallow"): bool,
-})
+MANIFEST_CONFIG_SCHEMA = schema.Schema(
+    {
+        "url": str,
+        schema.Optional("branch"): str,
+        schema.Optional("tag"): str,
+        schema.Optional("groups"): [str],
+        schema.Optional("shallow"): bool,
+    }
+)
 
 
 @attr.s
@@ -42,7 +44,9 @@ class ManifestConfig:
 
     @classmethod
     def from_file(cls, cfg_path: Path) -> "ManifestConfig":
-        as_dict = tsrc.config.parse_config(cfg_path, MANIFEST_CONFIG_SCHEMA)  # type: Dict[str, Any]
+        as_dict = tsrc.config.parse_config(
+            cfg_path, MANIFEST_CONFIG_SCHEMA
+        )  # type: Dict[str, Any]
         return cls.from_dict(as_dict)
 
     def save_to_file(self, cfg_path: Path) -> None:

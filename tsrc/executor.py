@@ -9,7 +9,7 @@ import cli_ui as ui
 import tsrc
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ExecutorFailed(tsrc.Error):

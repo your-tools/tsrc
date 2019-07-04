@@ -17,8 +17,8 @@ class Error(tsrc.Error):
 
 class CommandError(Error):
     def __init__(
-            self, working_path: Path, cmd: Iterable[str], *,
-            output: Optional[str] = None) -> None:
+        self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
+    ) -> None:
         self.cmd = cmd
         self.working_path = working_path
         self.output = output
@@ -41,7 +41,7 @@ class Status:
         self.dirty = False
         self.tag = None  # type: Optional[str]
         self.branch = None  # type: Optional[str]
-        self.sha1 = None   # type: Optional[str]
+        self.sha1 = None  # type: Optional[str]
 
     def update(self) -> None:
         self.update_sha1()
@@ -67,18 +67,13 @@ class Status:
 
     def update_remote_status(self) -> None:
         rc, ahead_rev = run_captured(
-            self.working_path,
-            "rev-list", "@{upstream}..HEAD",
-            check=False
+            self.working_path, "rev-list", "@{upstream}..HEAD", check=False
         )
         if rc == 0:
             self.ahead = len(ahead_rev.splitlines())
 
         rc, behind_rev = run_captured(
-            self.working_path,
-            "rev-list",
-            "HEAD..@{upstream}",
-            check=False
+            self.working_path, "rev-list", "HEAD..@{upstream}", check=False
         )
         if rc == 0:
             self.behind = len(behind_rev.splitlines())
@@ -137,8 +132,8 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     process = subprocess.Popen(git_cmd, cwd=working_path, **options)
     out, _ = process.communicate()
     out = out.decode("utf-8")
-    if out.endswith('\n'):
-        out = out.strip('\n')
+    if out.endswith("\n"):
+        out = out.strip("\n")
     returncode = process.returncode
     ui.debug(ui.lightgray, "[%i]" % returncode, ui.reset, out)
     if check and returncode != 0:
@@ -146,7 +141,7 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     return returncode, out
 
 
-def get_sha1(working_path: Path, short: bool = False, ref: str="HEAD") -> str:
+def get_sha1(working_path: Path, short: bool = False, ref: str = "HEAD") -> str:
     cmd = ["rev-parse"]
     if short:
         cmd.append("--short")
@@ -202,12 +197,14 @@ def get_status(working_path: Path) -> Status:
 
 
 def get_tracking_ref(working_path: Path) -> Optional[str]:
+    # fmt: off
     rc, out = run_captured(
         working_path,
         "rev-parse", "--abbrev-ref",
         "--symbolic-full-name", "@{upstream}",
         check=False
     )
+    # fmt: on
     if rc == 0:
         return out
     else:

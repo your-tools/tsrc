@@ -18,7 +18,7 @@ from .remote_setter import RemoteSetter
 from .local_manifest import LocalManifest
 
 
-class Workspace():
+class Workspace:
     def __init__(self, root_path: Path) -> None:
         self.root_path = root_path
         self.local_manifest = LocalManifest(root_path)

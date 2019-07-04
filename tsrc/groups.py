@@ -3,7 +3,7 @@
 from typing import Any, Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
 import tsrc
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class GroupError(tsrc.Error):
@@ -11,15 +11,18 @@ class GroupError(tsrc.Error):
 
 
 class Group(Generic[T]):
-    def __init__(self, name: str, elements: Iterable[T],
-                 includes: Optional[List[str]] = None) -> None:
+    def __init__(
+        self, name: str, elements: Iterable[T], includes: Optional[List[str]] = None
+    ) -> None:
         self.name = name
         self.elements = elements
         self.includes = includes or list()
 
 
 class GroupNotFound(GroupError):
-    def __init__(self, group_name: str, parent_group: Optional[Group[Any]] = None) -> None:
+    def __init__(
+        self, group_name: str, parent_group: Optional[Group[Any]] = None
+    ) -> None:
         self.group_name = group_name
         self.parent_group = parent_group
         if self.parent_group:
@@ -44,8 +47,9 @@ class GroupList(Generic[T]):
         self.all_elements = elements
         self._groups_seen = set()  # type: Set[str]
 
-    def add(self, name: str, elements: Iterable[T],
-            includes: Optional[List[str]] = None) -> None:
+    def add(
+        self, name: str, elements: Iterable[T], includes: Optional[List[str]] = None
+    ) -> None:
         for element in elements:
             if element not in self.all_elements:
                 raise UnknownElement(name, element)
@@ -62,9 +66,9 @@ class GroupList(Generic[T]):
         self._rec_get_elements(res, groups, parent_group=None)
         return res
 
-    def _rec_get_elements(self, res: Set[T],
-                          group_names: List[str], *,
-                          parent_group: Optional[Group[T]]) -> None:
+    def _rec_get_elements(
+        self, res: Set[T], group_names: List[str], *, parent_group: Optional[Group[T]]
+    ) -> None:
         for group_name in group_names:
             if group_name in self._groups_seen:
                 return

@@ -43,14 +43,14 @@ repos:
             src="foo",
             branch="next",
             sha1=None,
-            tag=None
+            tag=None,
         ),
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:bar.git")],
             src="bar",
             branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
-            tag=None
+            tag=None,
         ),
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:master.git")],
@@ -135,7 +135,7 @@ def test_validates(tmp_path: Path) -> None:
                 dest: bar
         gitlab:
           url: foo
-        """
+        """,
     )
 
 
@@ -145,7 +145,7 @@ def test_allow_url(tmp_path: Path) -> None:
         """
           repos:
             - { src: bar, url: git@example.com/bar }
-         """
+         """,
     )
 
 
@@ -155,7 +155,7 @@ def test_allow_several_remotes(tmp_path: Path) -> None:
         """
           repos:
             - { src: bar, url: git@example.com/bar }
-          """
+          """,
     )
 
 
@@ -168,7 +168,7 @@ def test_disallow_url_and_remotes(tmp_path: Path) -> None:
             url: git@example.com/bar
             remotes:
             - { name: upstream, url: git@upstream.com/bar }
-        """
+        """,
     )
     assert "remotes" in error.message
     assert "url" in error.message
@@ -179,7 +179,9 @@ class ReposGetter:
         self.tmp_path = tmp_path
         self.contents = ""
 
-    def get_repos(self, groups: Optional[List[str]] = None, all_: bool = False) -> List[str]:
+    def get_repos(
+        self, groups: Optional[List[str]] = None, all_: bool = False
+    ) -> List[str]:
         manifest_path = self.tmp_path / "manifest.yml"
         manifest_path.write_text(self.contents)
         manifest = tsrc.manifest.load(manifest_path)
@@ -220,7 +222,11 @@ groups:
     repos: [linux1, linux2]
 """
     repos_getter.contents = contents
-    assert repos_getter.get_repos(groups=["default", "linux"]) == ["any", "linux1", "linux2"]
+    assert repos_getter.get_repos(groups=["default", "linux"]) == [
+        "any",
+        "linux1",
+        "linux2",
+    ]
 
 
 def test_inclusion(repos_getter: ReposGetter) -> None:

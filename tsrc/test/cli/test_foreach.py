@@ -34,12 +34,11 @@ def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
 
 
 def test_foreach_with_errors(
-        tsrc_cli: CLI, git_server: GitServer,
-        message_recorder: MessageRecorder) -> None:
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
-    git_server.push_file("foo", "foo/bar.txt",
-                         contents="this is bar")
+    git_server.push_file("foo", "foo/bar.txt", contents="this is bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
     cmd = get_cmd_for_foreach_test(shell=False)
@@ -50,8 +49,8 @@ def test_foreach_with_errors(
 
 
 def test_foreach_happy(
-        tsrc_cli: CLI, git_server: GitServer,
-        message_recorder: MessageRecorder) -> None:
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "doc/index.html")
@@ -65,8 +64,8 @@ def test_foreach_happy(
 
 
 def test_foreach_shell(
-        tsrc_cli: CLI, git_server: GitServer,
-        message_recorder: MessageRecorder) -> None:
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("spam")
     git_server.push_file("foo", "doc/index.html")
@@ -80,8 +79,8 @@ def test_foreach_shell(
 
 
 def test_foreach_groups_happy(
-        tsrc_cli: CLI, git_server: GitServer,
-        message_recorder: MessageRecorder) -> None:
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
@@ -101,8 +100,8 @@ def test_foreach_groups_happy(
 
 
 def test_foreach_groups_warn_skipped(
-        tsrc_cli: CLI, git_server: GitServer,
-        message_recorder: MessageRecorder) -> None:
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")

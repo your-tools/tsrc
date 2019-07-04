@@ -17,10 +17,12 @@ def main(args: argparse.Namespace) -> None:
         colors = ["green", "reset", "yellow", "reset", "bold blue", "reset"]
         log_format = "%m {}%h{} - {}%d{} %s {}<%an>{}"
         log_format = log_format.format(*("%C({})".format(x) for x in colors))
-        cmd = ["log",
-               "--color=always",
-               "--pretty=format:%s" % log_format,
-               "%s...%s" % (args.from_, args.to)]
+        cmd = [
+            "log",
+            "--color=always",
+            "--pretty=format:%s" % log_format,
+            "%s...%s" % (args.from_, args.to),
+        ]
         rc, out = tsrc.git.run_captured(full_path, *cmd, check=False)
         if rc != 0:
             all_ok = False

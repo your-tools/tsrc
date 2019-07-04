@@ -8,10 +8,12 @@ import xdg
 
 import tsrc
 
-Config = NewType('Config', Dict[str, Any])
+Config = NewType("Config", Dict[str, Any])
 
 
-def parse_config(file_path: Path, config_schema: schema.Schema, roundtrip: bool = False) -> Config:
+def parse_config(
+    file_path: Path, config_schema: schema.Schema, roundtrip: bool = False
+) -> Config:
     try:
         contents = file_path.text()
     except OSError as os_error:

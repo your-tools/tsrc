@@ -24,9 +24,9 @@ def describe_branch(git_status: tsrc.git.Status) -> List[str]:
 
 def commit_string(number: int) -> str:
     if number == 1:
-        return 'commit'
+        return "commit"
     else:
-        return 'commits'
+        return "commits"
 
 
 def describe_position(git_status: tsrc.git.Status) -> List[str]:
@@ -70,8 +70,7 @@ def collect_statuses(workspace: tsrc.Workspace) -> List[Tuple[str, tsrc.git.Stat
     num_repos = len(repos)
     max_len = max((len(x.src) for x in repos))
     for i, repo, full_path in workspace.enumerate_repos():
-        ui.info_count(i, num_repos,
-                      "Checking", repo.src.ljust(max_len + 1), end="\r")
+        ui.info_count(i, num_repos, "Checking", repo.src.ljust(max_len + 1), end="\r")
         status = tsrc.git.get_status(full_path)
         result.append((repo.src, status))
 

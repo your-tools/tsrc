@@ -6,7 +6,7 @@ import pytest
 import tsrc.cli.main
 
 
-class CLI():
+class CLI:
     def __init__(self) -> None:
         self.workspace_path = Path(os.getcwd())
 

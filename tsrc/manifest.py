@@ -2,17 +2,17 @@
 
 import operator
 import os
-from typing import cast, Any, Dict, List, NewType, Optional, Tuple # noqa
+from typing import cast, Any, Dict, List, NewType, Optional, Tuple  # noqa
 
 from path import Path
 import schema
 
 import tsrc
 
-ManifestConfig = NewType('ManifestConfig', Dict[str, Any])
-RepoConfig = NewType('RepoConfig', Dict[str, Any])
+ManifestConfig = NewType("ManifestConfig", Dict[str, Any])
+RepoConfig = NewType("RepoConfig", Dict[str, Any])
 
-GitLabConfig = NewType('GitLabConfig', Dict[str, Any])
+GitLabConfig = NewType("GitLabConfig", Dict[str, Any])
 
 
 class RepoNotFound(tsrc.Error):
@@ -20,7 +20,7 @@ class RepoNotFound(tsrc.Error):
         super().__init__("No repo found in '%s'" % src)
 
 
-class Manifest():
+class Manifest:
     def __init__(self) -> None:
         self._repos = list()  # type: List[tsrc.Repo]
         self.copyfiles = list()  # type: List[Tuple[str, str]]
@@ -38,29 +38,29 @@ class Manifest():
         self._handle_groups(config)
 
     def _handle_repo(self, repo_config: RepoConfig) -> None:
-            src = repo_config["src"]
-            branch = repo_config.get("branch", "master")
-            tag = repo_config.get("tag")
-            sha1 = repo_config.get("sha1")
-            url = repo_config.get("url")
-            if url:
-                origin = tsrc.Remote(name="origin", url=url)
-                remotes = [origin]
-            else:
-                remotes = self._handle_remotes(repo_config)
-            repo = tsrc.Repo(src=src, branch=branch,
-                             sha1=sha1, tag=tag,
-                             remotes=remotes)
-            self._repos.append(repo)
+        src = repo_config["src"]
+        branch = repo_config.get("branch", "master")
+        tag = repo_config.get("tag")
+        sha1 = repo_config.get("sha1")
+        url = repo_config.get("url")
+        if url:
+            origin = tsrc.Remote(name="origin", url=url)
+            remotes = [origin]
+        else:
+            remotes = self._handle_remotes(repo_config)
+        repo = tsrc.Repo(src=src, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
+        self._repos.append(repo)
 
     def _handle_remotes(self, repo_config: RepoConfig) -> List[tsrc.Remote]:
-            remotes_config = repo_config.get("remotes")
-            res = list()  # type: List[tsrc.Remote]
-            if remotes_config:
-                for remote_config in remotes_config:
-                    remote = tsrc.Remote(name=remote_config["name"], url=remote_config["url"])
-                    res.append(remote)
-            return res
+        remotes_config = repo_config.get("remotes")
+        res = list()  # type: List[tsrc.Remote]
+        if remotes_config:
+            for remote_config in remotes_config:
+                remote = tsrc.Remote(
+                    name=remote_config["name"], url=remote_config["url"]
+                )
+                res.append(remote)
+        return res
 
     def _handle_copies(self, repo_config: RepoConfig) -> None:
         if "copy" not in repo_config:
@@ -81,7 +81,9 @@ class Manifest():
             includes = group_config.get("includes", list())
             self.group_list.add(name, elements, includes=includes)
 
-    def get_repos(self, groups: Optional[List[str]] = None, all_: bool = False) -> List[tsrc.Repo]:
+    def get_repos(
+        self, groups: Optional[List[str]] = None, all_: bool = False
+    ) -> List[tsrc.Repo]:
         if all_:
             return self._repos
 
@@ -115,32 +117,35 @@ class Manifest():
 def validate_repo(data: Any) -> None:
     copy_schema = {"src": str, schema.Optional("dest"): str}
     remote_schema = {"name": str, "url": str}
-    repo_schema = schema.Schema({
-        "src": str,
-        schema.Optional("branch"): str,
-        schema.Optional("copy"): [copy_schema],
-        schema.Optional("sha1"): str,
-        schema.Optional("tag"): str,
-        schema.Optional("remotes"): [remote_schema],
-        schema.Optional("url"): str,
-    })
+    repo_schema = schema.Schema(
+        {
+            "src": str,
+            schema.Optional("branch"): str,
+            schema.Optional("copy"): [copy_schema],
+            schema.Optional("sha1"): str,
+            schema.Optional("tag"): str,
+            schema.Optional("remotes"): [remote_schema],
+            schema.Optional("url"): str,
+        }
+    )
     repo_schema.validate(data)
     if ("url" in data) and ("remotes" in data):
-        raise schema.SchemaError("Repo config cannot contain both an url and a list of remotes")
+        raise schema.SchemaError(
+            "Repo config cannot contain both an url and a list of remotes"
+        )
 
 
 def load(manifest_path: Path) -> Manifest:
     gitlab_schema = {"url": str}
     repo_schema = schema.Use(validate_repo)
-    group_schema = {
-        "repos": [str],
-        schema.Optional("includes"): [str],
-    }
-    manifest_schema = schema.Schema({
-        "repos": [repo_schema],
-        schema.Optional("gitlab"): gitlab_schema,
-        schema.Optional("groups"): {str: group_schema},
-    })
+    group_schema = {"repos": [str], schema.Optional("includes"): [str]}
+    manifest_schema = schema.Schema(
+        {
+            "repos": [repo_schema],
+            schema.Optional("gitlab"): gitlab_schema,
+            schema.Optional("groups"): {str: group_schema},
+        }
+    )
     parsed = tsrc.parse_config(manifest_path, manifest_schema)
     parsed = ManifestConfig(parsed)  # type: ignore
     as_manifest_config = cast(ManifestConfig, parsed)

@@ -15,8 +15,12 @@ from tsrc.cli.push import RepositoryInfo
 
 
 class PushAction(tsrc.cli.push.PushAction):
-    def __init__(self, repository_info: RepositoryInfo, args:
-                 argparse.Namespace, github_api: Optional[GitHub] = None) -> None:
+    def __init__(
+        self,
+        repository_info: RepositoryInfo,
+        args: argparse.Namespace,
+        github_api: Optional[GitHub] = None,
+    ) -> None:
         super().__init__(repository_info, args)
         self.github_api = github_api
         self.repository = None
@@ -49,9 +53,7 @@ class PushAction(tsrc.cli.push.PushAction):
             message = ["Requesting review from", ", ".join(self.requested_reviewers)]
             ui.info_2(*message)
             tsrc.github.request_reviewers(
-                self.repository,
-                self.pull_request.number,
-                self.requested_reviewers
+                self.repository, self.pull_request.number, self.requested_reviewers
             )
 
         if self.requested_assignee:
@@ -61,8 +63,9 @@ class PushAction(tsrc.cli.push.PushAction):
         if self.args.merge:
             self.merge_pull_request()
 
-        ui.info(ui.green, "::",
-                ui.reset, "See pull request at", self.pull_request.html_url)
+        ui.info(
+            ui.green, "::", ui.reset, "See pull request at", self.pull_request.html_url
+        )
 
     def find_opened_pull_request(self) -> Optional[PullRequest]:
         assert self.repository
@@ -82,9 +85,7 @@ class PushAction(tsrc.cli.push.PushAction):
             target_branch = self.repository.default_branch
         try:
             pull_request = self.repository.create_pull(
-                title,
-                target_branch,
-                self.remote_branch
+                title, target_branch, self.remote_branch
             )
             ui.info("done", ui.check)
         except github3.GitHubError as github_error:

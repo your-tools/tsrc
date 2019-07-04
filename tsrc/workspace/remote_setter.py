@@ -40,9 +40,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def get_remote(self, repo: tsrc.Repo, name: str) -> Optional[tsrc.Remote]:
         full_path = self.workspace_path / repo.src
         rc, url = tsrc.git.run_captured(
-            full_path,
-            "remote", "get-url", name,
-            check=False,
+            full_path, "remote", "get-url", name, check=False
         )
         if rc != 0:
             return None
@@ -51,14 +49,18 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
 
     def set_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
         full_path = self.workspace_path / repo.src
+        # fmt: off
         ui.info_2(repo.src + ":", "Update remote", ui.reset,
                   ui.bold, remote.name, ui.reset,
                   "to new url:", ui.bold, remote.url)
+        # fmt: on
         tsrc.git.run(full_path, "remote", "set-url", remote.name, remote.url)
 
     def add_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
         full_path = self.workspace_path / repo.src
+        # fmt: off
         ui.info_2(repo.src + ":", "Add remote",
                   ui.bold, remote.name, ui.reset,
                   ui.brown, "(%s)" % remote.url)
+        # fmt: on
         tsrc.git.run(full_path, "remote", "add", remote.name, remote.url)

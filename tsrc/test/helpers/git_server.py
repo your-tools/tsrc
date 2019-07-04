@@ -12,7 +12,7 @@ CopyConfig = Tuple[str, str]
 RemoteConfig = Tuple[str, str]
 
 
-class ManifestHandler():
+class ManifestHandler:
     def __init__(self, path: Path) -> None:
         self.path = path
         self.data = {"repos": list()}  # type: Dict[str, Any]
@@ -29,7 +29,7 @@ class ManifestHandler():
         tsrc.git.run(self.path, "push", "origin", "master")
 
     def add_repo(self, src: str, url: str, branch: str = "master") -> None:
-        repo_config = ({"url": str(url), "src": src})
+        repo_config = {"url": str(url), "src": src}
         if branch != "master":
             repo_config["branch"] = branch
         self.data["repos"].append(repo_config)
@@ -100,13 +100,11 @@ class ManifestHandler():
     def change_branch(self, branch: str) -> None:
         tsrc.git.run(self.path, "checkout", "-B", branch)
         tsrc.git.run(
-            self.path,
-            "push", "--no-verify", "origin",
-            "--set-upstream", branch
+            self.path, "push", "--no-verify", "origin", "--set-upstream", branch
         )
 
 
-class GitServer():
+class GitServer:
     def __init__(self, tmpdir: Path) -> None:
         self.tmpdir = tmpdir
         self.bare_path = tmpdir / "srv"
@@ -122,7 +120,9 @@ class GitServer():
     def get_url(self, name: str) -> str:
         return str("file://" + (self.bare_path / name))
 
-    def _create_repo(self, name: str, empty: bool = False, branch: str = "master") -> str:
+    def _create_repo(
+        self, name: str, empty: bool = False, branch: str = "master"
+    ) -> str:
         bare_path = self.bare_path / name
         bare_path.makedirs_p()
         tsrc.git.run(bare_path, "init", "--bare")
@@ -140,9 +140,13 @@ class GitServer():
             tsrc.git.run(src_path, "push", "origin", "%s:%s" % (branch, branch))
         return str(bare_path)
 
-    def add_repo(self, name: str,
-                 add_to_manifest: bool = True, empty: bool = False,
-                 default_branch: str = "master") -> str:
+    def add_repo(
+        self,
+        name: str,
+        add_to_manifest: bool = True,
+        empty: bool = False,
+        default_branch: str = "master",
+    ) -> str:
         self._create_repo(name, empty=empty, branch=default_branch)
         url = self.get_url(name)
         if add_to_manifest:
@@ -154,8 +158,9 @@ class GitServer():
             self.add_repo(repo)
         self.manifest.configure_group(group_name, repos)
 
-    def push_file(self, name: str, file_path: str, *,
-                  contents: str = "", message: str = "") -> None:
+    def push_file(
+        self, name: str, file_path: str, *, contents: str = "", message: str = ""
+    ) -> None:
         src_path = self.get_path(name)
         full_path = src_path / file_path
         full_path.parent.makedirs_p()
@@ -166,11 +171,7 @@ class GitServer():
         tsrc.git.run(src_path, "add", file_path)
         tsrc.git.run(src_path, "commit", "--message", commit_message)
         current_branch = tsrc.git.get_current_branch(src_path)
-        tsrc.git.run(
-            src_path,
-            "push", "origin", "--set-upstream",
-            current_branch
-        )
+        tsrc.git.run(src_path, "push", "origin", "--set-upstream", current_branch)
 
     def tag(self, name: str, tag_name: str) -> None:
         src_path = self.get_path(name)
@@ -196,10 +197,7 @@ class GitServer():
         src_path = self.get_path(name)
         tsrc.git.run(src_path, "checkout", "-B", new_branch)
         tsrc.git.run(
-            src_path,
-            "push", "--no-verify", "origin",
-            "--set-upstream",
-            new_branch
+            src_path, "push", "--no-verify", "origin", "--set-upstream", new_branch
         )
 
     def delete_branch(self, name: str, branch: str) -> None:
