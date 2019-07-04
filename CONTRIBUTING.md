@@ -48,7 +48,7 @@ $ dmenv install
 * Finally, run:
 
 ```console
-$ source "$(dmenv show)/bin/activate"
+$ source "$(dmenv show:venv_path)/bin/activate"
 $ python ci/ci.py
 ```
 
