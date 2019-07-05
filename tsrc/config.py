@@ -4,7 +4,7 @@ from path import Path
 import ruamel.yaml
 import schema
 from typing import Any, Dict, NewType, Optional
-import xdg
+import xdg.BaseDirectory
 
 import tsrc
 
@@ -43,8 +43,8 @@ def dump_config(config: Config, path: Path) -> None:
 
 
 def get_tsrc_config_path() -> Path:
-    config_path = Path(xdg.XDG_CONFIG_HOME)
-    config_path = config_path / "tsrc.yml"
+    config_path = xdg.BaseDirectory.save_config_path("")
+    config_path = Path(config_path) / "tsrc.yml"
     return config_path
 
 
