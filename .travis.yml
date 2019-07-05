@@ -10,7 +10,7 @@ matrix:
       sudo: true
 
 install:
-  - curl -L https://github.com/TankerHQ/dmenv/releases/download/v0.5.0/dmenv-linux -o dmenv
+  - curl -L https://github.com/TankerHQ/dmenv/releases/download/v0.15.0/dmenv-linux -o dmenv
   - chmod u+x dmenv
   - ./dmenv install
 
