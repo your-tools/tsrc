@@ -69,7 +69,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
-            raise tsrc.Error(f"{repo_path} is dirty, skipping")
+            raise tsrc.Error("%s is dirty, skipping" % repo_path)
         try:
             tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:
