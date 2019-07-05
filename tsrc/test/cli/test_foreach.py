@@ -1,5 +1,6 @@
 import os
 from typing import List
+import pytest
 
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
@@ -30,7 +31,8 @@ def get_cmd_for_foreach_test(shell: bool = False) -> List[str]:
 def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
-    tsrc_cli.run("foreach", expect_fail=True)
+    with pytest.raises(SystemExit):
+        tsrc_cli.run("foreach")
 
 
 def test_foreach_with_errors(

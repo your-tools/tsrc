@@ -11,15 +11,11 @@ class CLI:
         self.workspace_path = Path(os.getcwd())
 
     def run(self, *args: str, expect_fail: bool = False) -> None:
-        try:
-            tsrc.cli.main.main(args=args)
-            rc = 0
-        except SystemExit as e:
-            rc = e.code
-        if expect_fail and rc == 0:
-            assert False, "should have failed"
-        if rc != 0 and not expect_fail:
-            raise SystemExit(rc)
+        if expect_fail:
+            with pytest.raises(tsrc.Error):
+                tsrc.cli.main.testable_main(args)
+        else:
+            tsrc.cli.main.testable_main(args)
 
 
 @pytest.fixture

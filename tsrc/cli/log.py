@@ -1,7 +1,6 @@
 """ Entry point for tsrc log """
 
 import argparse
-import sys
 
 import cli_ui as ui
 
@@ -31,4 +30,4 @@ def main(args: argparse.Namespace) -> None:
             ui.info(ui.bold, "-" * len(repo.src))
             ui.info(out)
     if not all_ok:
-        sys.exit(1)
+        raise tsrc.Error()

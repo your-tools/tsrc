@@ -3,16 +3,7 @@ from path import Path
 import tsrc
 import tsrc.git
 
-from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-
-
-def test_tsrc_cli_help(tsrc_cli: CLI) -> None:
-    tsrc_cli.run("--help")
-
-
-def test_tsrc_cli_bad_args(tsrc_cli: CLI) -> None:
-    tsrc_cli.run("bad", expect_fail=True)
 
 
 def read_remote_manifest(workspace_path: Path, git_server: GitServer) -> tsrc.Manifest:
