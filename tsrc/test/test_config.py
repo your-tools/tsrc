@@ -18,7 +18,8 @@ def test_read_config(tmp_path: Path) -> None:
             auth:
               gitlab:
                 token: MY_SECRET_TOKEN
-            """)
+            """
+        )
     )
     config = tsrc.parse_tsrc_config(config_path=tsrc_yml_path)
     assert config["auth"]["gitlab"]["token"] == "MY_SECRET_TOKEN"
@@ -26,14 +27,17 @@ def test_read_config(tmp_path: Path) -> None:
 
 def test_invalid_syntax(tmp_path: Path) -> None:
     foo_yml = tmp_path / "foo.yml"
-    foo_yml.write_text(textwrap.dedent(
-        """
+    foo_yml.write_text(
+        textwrap.dedent(
+            """
         foo:
           bar:
             baz: [
 
         baz: 42
-        """))
+        """
+        )
+    )
     with pytest.raises(tsrc.InvalidConfig) as e:
         dummy_schema = mock.Mock()
         tsrc.parse_config(foo_yml, dummy_schema)
@@ -44,15 +48,15 @@ def test_invalid_syntax(tmp_path: Path) -> None:
 
 def test_invalid_schema(tmp_path: Path) -> None:
     foo_yml = tmp_path / "foo.yml"
-    foo_yml.write_text(textwrap.dedent(
-        """
+    foo_yml.write_text(
+        textwrap.dedent(
+            """
         foo:
             bar: 42
         """
-    ))
-    foo_schema = schema.Schema(
-        {"foo": {"bar": str}}
+        )
     )
+    foo_schema = schema.Schema({"foo": {"bar": str}})
     with pytest.raises(tsrc.InvalidConfig) as e:
         tsrc.parse_config(foo_yml, foo_schema)
     assert isinstance(e.value.cause, schema.SchemaError)
@@ -85,4 +89,4 @@ def test_use_pure_python_types_when_not_roundtripping(tmp_path: Path) -> None:
     # Usually it's bad to compare types directly, and isinstance()
     # should be used instead. But here we want to assert we have
     # a proper dict, and not an OrderedDict or a yaml's CommentedMap
-    assert type(parsed) == type(dict())   # noqa
+    assert type(parsed) == type(dict())  # noqa

@@ -12,6 +12,7 @@ class LocalManifest:
     hidden <workspace>/.tsrc directory, along with its configuration
 
     """
+
     def __init__(self, workspace_path: Path) -> None:
         hidden_path = workspace_path / ".tsrc"
         self.clone_path = hidden_path / "manifest"
@@ -40,7 +41,11 @@ class LocalManifest:
         return self.manifest.get_repos(groups=self.active_groups)
 
     def load(self) -> None:
-        yml_path = self.clone_path / "manifest.yml"
+        config = self.load_config()
+        if not config.file_path:
+            yml_path = self.clone_path / "manifest.yml"
+        else:
+            yml_path = config.file_path
         if not yml_path.exists():
             message = "No manifest found in {}. Did you run `tsrc init` ?"
             raise tsrc.Error(message.format(yml_path))
@@ -54,12 +59,17 @@ class LocalManifest:
         return cast(str, gitlab_config["url"])
 
     def configure(self, manifest_config: ManifestConfig) -> None:
-        if not manifest_config.url:
+        if not manifest_config.url and not manifest_config.file_path:
             raise tsrc.Error("Manifest URL is required")
-        self._ensure_git_state(manifest_config)
+        if manifest_config.url:
+            self._ensure_git_state(manifest_config)
         self.save_config(manifest_config)
 
     def update(self) -> None:
+        config = self.load_config()
+        if config.file_path:
+            return
+
         ui.info_2("Updating manifest")
         if not self.clone_path.exists():
             message = "Could not find manifest in {}. "
@@ -87,10 +97,12 @@ class LocalManifest:
 
         tsrc.git.run(self.clone_path, "fetch")
         tsrc.git.run(self.clone_path, "checkout", "-B", config.branch)
+        # fmt: off
         tsrc.git.run(
             self.clone_path, "branch", config.branch,
             "--set-upstream-to", "origin/%s" % config.branch
         )
+        # fmt: on
         if config.tag:
             ref = config.tag
         else:

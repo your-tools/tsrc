@@ -1,6 +1,10 @@
 # Next release
 
+* Add a `--file` option to `tsrc init` so that manifest can be read from
+  a custom path in the file system
 * Remove support for Python 3.4
+* Switch from `xdg` to `pyxdg`
+* Format the code with [black](https://github.com/python/black)
 
 # v0.6.6 (2019-04-02)
 

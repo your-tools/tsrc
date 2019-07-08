@@ -50,14 +50,18 @@ def wipify(title: str) -> str:
 
 def unwipify(title: str) -> str:
     if title.startswith(WIP_PREFIX):
-        return title[len(WIP_PREFIX):]
+        return title[len(WIP_PREFIX) :]
     else:
         return title
 
 
 class PushAction(tsrc.cli.push.PushAction):
-    def __init__(self, repository_info: RepositoryInfo, args:
-                 argparse.Namespace, gitlab_api: Optional[Gitlab] = None) -> None:
+    def __init__(
+        self,
+        repository_info: RepositoryInfo,
+        args: argparse.Namespace,
+        gitlab_api: Optional[Gitlab] = None,
+    ) -> None:
         super().__init__(repository_info, args)
         self.gitlab_api = gitlab_api
         self.group = None  # type: Optional[Group]
@@ -156,8 +160,7 @@ class PushAction(tsrc.cli.push.PushAction):
         if self.args.accept:
             merge_request.merge(merge_when_pipeline_succeeds=True)
 
-        ui.info(ui.green, "::",
-                ui.reset, "See merge request at", merge_request.web_url)
+        ui.info(ui.green, "::", ui.reset, "See merge request at", merge_request.web_url)
 
     def handle_title(self, merge_request: ProjectMergeRequest) -> str:
         # If explicitely set, use it
@@ -176,12 +179,12 @@ class PushAction(tsrc.cli.push.PushAction):
         assert self.remote_branch
         assert self.project
         res = self.project.mergerequests.list(
-            state="opened",
-            source_branch=self.remote_branch,
-            all=True
+            state="opened", source_branch=self.remote_branch, all=True
         )
         if len(res) >= 2:
-            raise tsrc.Error("Found more than one opened merge request with the same branch")
+            raise tsrc.Error(
+                "Found more than one opened merge request with the same branch"
+            )
         if not res:
             return None
         return res[0]

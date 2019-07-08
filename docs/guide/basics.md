@@ -1,11 +1,11 @@
 # Basic tsrc usage
 
 
-## Cloning a set of repositories
+## Creating a manifest
 
-`tsrc` is driven by a manifest file that contains the names and paths of repositories to clone.
+`tsrc` is driven by a manifest file that contains the names and paths of repositories to use.
 
-It uses the YAML syntax and looks like:
+It is a YAML file that looks like this:
 
 ```yaml
 repos:
@@ -19,26 +19,46 @@ repos:
 !!! note
     The full manifest file format is described in the [reference](../ref/formats.md).
 
-The manifest must be put in a git repository too. You can then use the following commands to create a new workspace:
+You can put the manifest in two different places:
 
-```console
+* The recommended way is to put the manifest inside its own git repository, so that changes in the
+  manifest can be tracked like any other code change. The file *must* be named `manifest.yml`
+
+* Alternatively, you can store the manifest in any file on your file system.
+
+## Cloning a set of repositories
+
+Once the manifest is ready, you can run the following commands to create a new workspace:
+
+```bash
 $ mkdir ~/work
 $ cd work
+
+# When the manifest is inside a git repository:
 $ tsrc init git@gitlab.local:acme/manifest.git
+
+# When the manifest is on the file system:
+$ tsrc init --file /path/to/manifest.yml
 ```
 
 In this example:
 
-* A clone of the manifest repository will be created in a hidden `.tsrc/manifest` folder.
-* `foo` will be cloned in `<work>/foo` using `git@gitlab.local/acme/foo.git` origin url.
+* If using a git repository, a clone of the manifest repository will be created in a hidden `.tsrc/manifest` folder.
+* Otherwise, `tsrc` will write the path of the manifest inside a persistent configuration file.
+* Then `foo` will be cloned in `<work>/foo` using `git@gitlab.local/acme/foo.git` as the `origin` remote URL.
 * Similarly, `bar` will be cloned in `<work>/bar` using `git@gitlab.local:acme/bar.git`.
+
 
 
 ## Making sure all the repositories are up to date
 
 You can update all the repositories by using `tsrc sync`.
 
-* The manifest itself will be updated first.
+* If `tsrc init` was called with a git URL, the manifest clone will be updated first.
+* Otherwise, `tsrc sync` will read its persistent configuration file and read the manifest
+  from the recorded path. **This means that if the manifest file path changes,
+  you'll have to re-run `tsrc init` for `tsrc sync` to work**.
+
 * If a new repository has been added to the manifest, it will be cloned.
 * Lastly, the other repositories will be updated.
 

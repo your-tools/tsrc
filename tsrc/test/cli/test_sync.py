@@ -23,8 +23,12 @@ def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
     assert bar_txt_path.text() == "this is bar"
 
 
-def test_sync_with_errors(tsrc_cli: CLI, git_server: GitServer, workspace_path:
-                          Path, message_recorder: MessageRecorder) -> None:
+def test_sync_with_errors(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
     git_server.add_repo("foo/bar")
     git_server.add_repo("spam/eggs")
     manifest_url = git_server.manifest_url
@@ -39,16 +43,18 @@ def test_sync_with_errors(tsrc_cli: CLI, git_server: GitServer, workspace_path:
     assert message_recorder.find(r"\* foo/bar")
 
 
-def test_sync_finds_root(tsrc_cli: CLI, git_server: GitServer, workspace_path:
-                         Path, monkeypatch: Any) -> None:
+def test_sync_finds_root(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path, monkeypatch: Any
+) -> None:
     git_server.add_repo("foo/bar")
     tsrc_cli.run("init", git_server.manifest_url)
     monkeypatch.chdir(workspace_path / "foo/bar")
     tsrc_cli.run("sync")
 
 
-def test_new_repo_added_to_manifest(tsrc_cli: CLI, git_server: GitServer,
-                                    workspace_path: Path) -> None:
+def test_new_repo_added_to_manifest(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo/bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
@@ -59,8 +65,9 @@ def test_new_repo_added_to_manifest(tsrc_cli: CLI, git_server: GitServer,
     assert (workspace_path / "spam/eggs").exists()
 
 
-def test_switching_manifest_branches(tsrc_cli: CLI, git_server: GitServer,
-                                     workspace_path: Path) -> None:
+def test_switching_manifest_branches(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     # Init with manifest_url on master
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
@@ -81,8 +88,12 @@ def test_switching_manifest_branches(tsrc_cli: CLI, git_server: GitServer,
     assert bar_path.exists()
 
 
-def test_sync_not_on_master(tsrc_cli: CLI, git_server: GitServer,
-                            workspace_path: Path, message_recorder: MessageRecorder) -> None:
+def test_sync_not_on_master(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
     git_server.add_repo("foo")
     git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
@@ -97,8 +108,9 @@ def test_sync_not_on_master(tsrc_cli: CLI, git_server: GitServer,
     assert message_recorder.find("not on the correct branch")
 
 
-def test_copies_are_up_to_date(tsrc_cli: CLI, git_server: GitServer,
-                               workspace_path: Path) -> None:
+def test_copies_are_up_to_date(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
@@ -111,8 +123,9 @@ def test_copies_are_up_to_date(tsrc_cli: CLI, git_server: GitServer,
     assert (workspace_path / "top.txt").text() == "v2"
 
 
-def test_copies_are_readonly(tsrc_cli: CLI, git_server: GitServer,
-                             workspace_path: Path) -> None:
+def test_copies_are_readonly(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
@@ -124,8 +137,12 @@ def test_copies_are_readonly(tsrc_cli: CLI, git_server: GitServer,
     assert not os.access(foo_txt, os.W_OK)
 
 
-def test_changing_branch(tsrc_cli: CLI, git_server: GitServer,
-                         workspace_path: Path, message_recorder: MessageRecorder) -> None:
+def test_changing_branch(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
@@ -138,7 +155,9 @@ def test_changing_branch(tsrc_cli: CLI, git_server: GitServer,
     assert message_recorder.find("not on the correct branch")
 
 
-def test_tags_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
+def test_tags_are_not_updated(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
     git_server.manifest.set_repo_tag("foo", "v0.1")
@@ -153,7 +172,9 @@ def test_tags_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_pa
     assert not (foo_path / "new.txt").exists()
 
 
-def test_sha1s_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
+def test_sha1s_are_not_updated(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -168,8 +189,9 @@ def test_sha1s_are_not_updated(tsrc_cli: CLI, git_server: GitServer, workspace_p
     assert not (foo_path / "new.txt").exists()
 
 
-def test_tags_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
-                                     workspace_path: Path) -> None:
+def test_tags_are_updated_when_clean(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
 
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
@@ -187,8 +209,9 @@ def test_tags_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
     assert (foo_path / "new.txt").exists()
 
 
-def test_sha1s_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
-                                      workspace_path: Path) -> None:
+def test_sha1s_are_updated_when_clean(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -205,8 +228,9 @@ def test_sha1s_are_updated_when_clean(tsrc_cli: CLI, git_server: GitServer,
     assert (foo_path / "new.txt").exists()
 
 
-def test_tags_are_skipped_when_not_clean_tags(tsrc_cli: CLI, git_server:
-                                              GitServer, workspace_path: Path) -> None:
+def test_tags_are_skipped_when_not_clean_tags(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
     git_server.manifest.set_repo_tag("foo", "v0.1")
@@ -224,8 +248,9 @@ def test_tags_are_skipped_when_not_clean_tags(tsrc_cli: CLI, git_server:
     assert not (foo_path / "new.txt").exists()
 
 
-def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
-                                          workspace_path: Path) -> None:
+def test_sha1s_are_skipped_when_not_clean(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -243,8 +268,9 @@ def test_sha1s_are_skipped_when_not_clean(tsrc_cli: CLI, git_server: GitServer,
     assert not (foo_path / "new.txt").exists()
 
 
-def test_custom_group(tsrc_cli: CLI, git_server: GitServer,
-                      message_recorder: MessageRecorder) -> None:
+def test_custom_group(
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_repo("other")
 
@@ -256,8 +282,9 @@ def test_custom_group(tsrc_cli: CLI, git_server: GitServer,
     assert not message_recorder.find("other")
 
 
-def test_fetch_additional_remotes(tsrc_cli: CLI, git_server: GitServer,
-                                  workspace_path: Path) -> None:
+def test_fetch_additional_remotes(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
     git_server.add_repo("foo")
     foo2_url = git_server.add_repo("foo2")
     git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])

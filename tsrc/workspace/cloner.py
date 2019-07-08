@@ -31,7 +31,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
                 "Consider using a tag instead"
             )
             message = message.format(repo=repo)
-            ui.fatal(message)
+            raise tsrc.Error(message)
 
     def clone_repo(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace_path / repo.src

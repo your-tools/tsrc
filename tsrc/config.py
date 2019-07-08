@@ -3,15 +3,19 @@
 from path import Path
 import ruamel.yaml
 import schema
-from typing import Any, Dict, NewType
-import xdg
+from typing import Any, Dict, NewType, Optional
+import xdg.BaseDirectory
 
 import tsrc
 
-Config = NewType('Config', Dict[str, Any])
+Config = NewType("Config", Dict[str, Any])
 
 
-def parse_config(file_path: Path, config_schema: schema.Schema, roundtrip: bool = False) -> Config:
+def parse_config(
+    file_path: Path,
+    config_schema: Optional[schema.Schema] = None,
+    roundtrip: bool = False,
+) -> Config:
     try:
         contents = file_path.text()
     except OSError as os_error:
@@ -24,10 +28,11 @@ def parse_config(file_path: Path, config_schema: schema.Schema, roundtrip: bool 
         parsed = yaml.load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
         raise tsrc.InvalidConfig(file_path, yaml_error)
-    try:
-        config_schema.validate(parsed)
-    except schema.SchemaError as schema_error:
-        raise tsrc.InvalidConfig(file_path, schema_error)
+    if config_schema:
+        try:
+            config_schema.validate(parsed)
+        except schema.SchemaError as schema_error:
+            raise tsrc.InvalidConfig(file_path, schema_error)
     return Config(parsed)
 
 
@@ -38,8 +43,8 @@ def dump_config(config: Config, path: Path) -> None:
 
 
 def get_tsrc_config_path() -> Path:
-    config_path = Path(xdg.XDG_CONFIG_HOME)
-    config_path = config_path / "tsrc.yml"
+    config_path = xdg.BaseDirectory.save_config_path("")
+    config_path = Path(config_path) / "tsrc.yml"
     return config_path
 
 

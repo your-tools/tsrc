@@ -113,8 +113,7 @@ $ tsrc init <manifest_url> --group foo
 # Clones a, b, bar and baz
 ```
 
-
-
+Note that `tsrc init` records the names of the groups it was invoked with, so that `tsrc sync` re-uses them later on. This means that if you want to change the groups used, you must re-run `tsrc init` with the new group list.
 
 
 ## tsrc.yml format

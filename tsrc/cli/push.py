@@ -58,7 +58,9 @@ class RepositoryInfo:
     def read_working_path(self, working_path: Path = None) -> None:
         self.path = tsrc.git.get_repo_root(working_path=working_path)
         self.current_branch = tsrc.git.get_current_branch(self.path)
-        rc, out = tsrc.git.run_captured(self.path, "remote", "get-url", "origin", check=False)
+        rc, out = tsrc.git.run_captured(
+            self.path, "remote", "get-url", "origin", check=False
+        )
         if rc == 0:
             self.url = out
         if not self.url:
@@ -69,7 +71,9 @@ class RepositoryInfo:
 
 
 class PushAction(metaclass=abc.ABCMeta):
-    def __init__(self, repository_info: RepositoryInfo, args: argparse.Namespace) -> None:
+    def __init__(
+        self, repository_info: RepositoryInfo, args: argparse.Namespace
+    ) -> None:
         self.args = args
         self.repository_info = repository_info
 

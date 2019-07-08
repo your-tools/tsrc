@@ -51,7 +51,9 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
 
         # FIXME: is repo.branch allowed to be None ?
         if current_branch and current_branch != repo.branch:
-            self.bad_branches.append((repo.src, current_branch, repo.branch))  # type: ignore
+            self.bad_branches.append(  # type: ignore
+                (repo.src, current_branch, repo.branch)
+            )
 
     def fetch(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace_path / repo.src
@@ -67,7 +69,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
-            raise tsrc.Error("%s dirty, skipping")
+            raise tsrc.Error("%s is dirty, skipping" % repo_path)
         try:
             tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:
@@ -87,8 +89,8 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         ui.error("Some projects were not on the correct branch")
         headers = ("project", "actual", "expected")
         data = [
-            ((ui.bold, name), (ui.red, actual), (ui.green, expected)) for
-            (name, actual, expected) in self.bad_branches
+            ((ui.bold, name), (ui.red, actual), (ui.green, expected))
+            for (name, actual, expected) in self.bad_branches
         ]
         ui.info_table(data, headers=headers)
         raise BadBranches()

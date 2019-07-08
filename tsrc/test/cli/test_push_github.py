@@ -19,15 +19,18 @@ def github_mock() -> Any:
     return github_mock
 
 
-def execute_push(repo_path: Path, push_args: argparse.Namespace, github_mock: Any) -> None:
+def execute_push(
+    repo_path: Path, push_args: argparse.Namespace, github_mock: Any
+) -> None:
     repository_info = RepositoryInfo()
     repository_info.read_working_path(repo_path)
     push_action = PushAction(repository_info, push_args, github_api=github_mock)
     push_action.execute()
 
 
-def test_create(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
-                push_args: argparse.Namespace) -> None:
+def test_create(
+    repo_path: Path, tsrc_cli: CLI, github_mock: Any, push_args: argparse.Namespace
+) -> None:
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = list()
     mock_repo.owner = mock.Mock()
@@ -58,13 +61,16 @@ def test_create(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
     mock_repo.issue.assert_called_with(42)
     mock_issue.assign.assert_called_with("assignee1")
     mock_repo._build_url.assert_called_with(
-        "repos", "owner", "project", "pulls", 42, "requested_reviewers")
+        "repos", "owner", "project", "pulls", 42, "requested_reviewers"
+    )
     mock_repo._post.assert_called_with(
-        "request_url", data={"reviewers": ["reviewer1", "reviewer2"]})
+        "request_url", data={"reviewers": ["reviewer1", "reviewer2"]}
+    )
 
 
-def test_push_custom_tracked_branch(repo_path: Path, push_args: argparse.Namespace,
-                                    github_mock: Any) -> None:
+def test_push_custom_tracked_branch(
+    repo_path: Path, push_args: argparse.Namespace, github_mock: Any
+) -> None:
     stub_repo = mock.Mock()
     stub_repo.pull_requests.return_value = list()
     stub_repo.default_branch = "master"
@@ -77,8 +83,9 @@ def test_push_custom_tracked_branch(repo_path: Path, push_args: argparse.Namespa
     stub_repo.create_pull.assert_called_with("new feature", "master", "remote")
 
 
-def test_update_target_and_title(repo_path: Path, push_args: argparse.Namespace,
-                                 github_mock: Any) -> None:
+def test_update_target_and_title(
+    repo_path: Path, push_args: argparse.Namespace, github_mock: Any
+) -> None:
     opened_pr = mock.Mock()
     opened_pr.number = 2
     opened_pr.state = "open"
@@ -100,8 +107,9 @@ def test_update_target_and_title(repo_path: Path, push_args: argparse.Namespace,
     opened_pr.update.assert_called_with(title="new title", base="master")
 
 
-def test_merge(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
-               push_args: argparse.Namespace) -> None:
+def test_merge(
+    repo_path: Path, tsrc_cli: CLI, github_mock: Any, push_args: argparse.Namespace
+) -> None:
     closed_pr = mock.Mock()
     closed_pr.number = 1
     closed_pr.state = "closed"
@@ -119,7 +127,11 @@ def test_merge(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
     opened_pr_wrong_branch.head.ref = "wrong-branch"
 
     mock_repo = mock.Mock()
-    mock_repo.pull_requests.return_value = [closed_pr, opened_pr, opened_pr_wrong_branch]
+    mock_repo.pull_requests.return_value = [
+        closed_pr,
+        opened_pr,
+        opened_pr_wrong_branch,
+    ]
     github_mock.repository.return_value = mock_repo
 
     tsrc.git.run(repo_path, "checkout", "-b", "new-feature")
@@ -131,8 +143,9 @@ def test_merge(repo_path: Path, tsrc_cli: CLI, github_mock: Any,
     opened_pr.merge.assert_called_with()
 
 
-def test_close(repo_path: Path, tsrc_cli: CLI,
-               github_mock: Any, push_args: argparse.Namespace) -> None:
+def test_close(
+    repo_path: Path, tsrc_cli: CLI, github_mock: Any, push_args: argparse.Namespace
+) -> None:
     opened_pr = mock.Mock()
     opened_pr.number = 2
     opened_pr.state = "open"

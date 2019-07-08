@@ -38,7 +38,7 @@ def generate_token() -> str:
     username = ui.ask_string("Please enter you GitHub username")
     password = getpass.getpass("Password: ")
 
-    scopes = ['repo']
+    scopes = ["repo"]
 
     # Need a different note for each device, otherwise
     # gh_api.authorize() will fail
@@ -48,9 +48,14 @@ def generate_token() -> str:
     def ask_2fa() -> str:
         return cast(str, ui.ask_string("2FA code: "))
 
-    authorization = github3.authorize(username, password, scopes,
-                                      note=note, note_url=note_url,
-                                      two_factor_callback=ask_2fa)
+    authorization = github3.authorize(
+        username,
+        password,
+        scopes,
+        note=note,
+        note_url=note_url,
+        two_factor_callback=ask_2fa,
+    )
     return cast(str, authorization.token)
 
 

@@ -17,8 +17,9 @@ class CommandFailed(tsrc.Error):
 
 
 class CmdRunner(tsrc.Task[tsrc.Repo]):
-    def __init__(self, workspace_path: Path, cmd: List[str],
-                 cmd_as_str: str, shell: bool = False) -> None:
+    def __init__(
+        self, workspace_path: Path, cmd: List[str], cmd_as_str: str, shell: bool = False
+    ) -> None:
         self.workspace_path = workspace_path
         self.cmd = cmd
         self.cmd_as_str = cmd_as_str
@@ -34,10 +35,12 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         ui.error("Command failed for %s repo(s)" % num_errors)
 
     def process(self, repo: tsrc.Repo) -> None:
+        # fmt: off
         ui.info(repo.src, "\n",
                 ui.lightgray, "$ ",
                 ui.reset, ui.bold, self.cmd_as_str,
                 sep="")
+        # fmt: on
         full_path = self.workspace_path / repo.src
         rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)
         if rc != 0:
@@ -47,7 +50,9 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
-    cmd_runner = CmdRunner(workspace.root_path, args.cmd, args.cmd_as_str, shell=args.shell)
+    cmd_runner = CmdRunner(
+        workspace.root_path, args.cmd, args.cmd_as_str, shell=args.shell
+    )
     manifest = workspace.local_manifest.manifest
     assert manifest
     cloned_repos = workspace.get_repos()
