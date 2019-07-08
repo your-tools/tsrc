@@ -18,7 +18,7 @@ tag_template = "v{new_version}"
 message_template = "Bump to {new_version}"
 
 [[file]]
-src = "setup.py"
+src = "setup.cfg"
 
 
 [[before_push]]
