@@ -1,4 +1,4 @@
-# Next release
+# v0.7.0 (2019-07-08)
 
 * Add a `--file` option to `tsrc init` so that manifest can be read from
   a custom path in the file system
