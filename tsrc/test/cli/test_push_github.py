@@ -10,6 +10,7 @@ import tsrc
 from tsrc.test.helpers.cli import CLI
 from tsrc.cli.push import RepositoryInfo
 from tsrc.cli.push_github import PushAction
+from tsrc.test.helpers.git_server import GitServer
 
 
 @pytest.fixture
@@ -22,14 +23,17 @@ def github_mock() -> Any:
 def execute_push(
     repo_path: Path, push_args: argparse.Namespace, github_mock: Any
 ) -> None:
-    repository_info = RepositoryInfo()
-    repository_info.read_working_path(repo_path)
+    workspace_mock = mock.Mock()
+    workspace_mock.get_github_enterprise_url.return_value = None
+    workspace_mock.get_gitlab_url.return_value = None
+
+    repository_info = RepositoryInfo(workspace_mock, repo_path)
     push_action = PushAction(repository_info, push_args, github_api=github_mock)
     push_action.execute()
 
 
 def test_create(
-    repo_path: Path, tsrc_cli: CLI, github_mock: Any, push_args: argparse.Namespace
+    repo_path: Path, tsrc_cli: CLI, github_mock: Any, push_args: argparse.Namespace, git_server: GitServer, workspace_path: Path
 ) -> None:
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = list()

@@ -14,6 +14,8 @@ The manifest is always parsed as a dictionary.
 
 * `gitlab.url` (optional): HTTP URL of the GitLab instance
 
+* `github_enterprise.url` (optional): HTTP URL of the Github Enterprise instance
+
 * `groups` (optional): list of groups
 
 ### repos

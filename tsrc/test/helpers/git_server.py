@@ -49,6 +49,11 @@ class ManifestHandler:
         self.data["gitlab"]["url"] = url
         self.push("Add gitlab URL: %s" % url)
 
+    def configure_github_enterprise(self, *, url: str) -> None:
+        self.data["github_enterprise"] = dict()
+        self.data["github_enterprise"]["url"] = url
+        self.push("Add github_enterprise URL: %s" % url)
+
     def get_repo(self, src: str) -> RepoConfig:
         for repo in self.data["repos"]:
             if repo["src"] == src:

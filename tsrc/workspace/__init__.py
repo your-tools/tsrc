@@ -32,6 +32,9 @@ class Workspace:
     def get_gitlab_url(self) -> str:
         return self.local_manifest.get_gitlab_url()
 
+    def get_github_enterprise_url(self) -> str:
+        return self.local_manifest.get_github_enterprise_url()
+
     def configure_manifest(self, manifest_config: ManifestConfig) -> None:
         self.local_manifest.configure(manifest_config)
 
