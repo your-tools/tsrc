@@ -11,9 +11,6 @@ import cli_ui as ui
 import tsrc
 
 
-DEFAULT_GITHUB_AUTH_SYSTEM = "github"
-
-
 class GitHubAPIError(tsrc.Error):
     def __init__(self, url: str, status_code: int, message: str) -> None:
         super().__init__(message)
@@ -25,7 +22,7 @@ class GitHubAPIError(tsrc.Error):
         return "%s - %s" % (self.status_code, self.message)
 
 
-def get_previous_token(auth_system: str = DEFAULT_GITHUB_AUTH_SYSTEM) -> Optional[str]:
+def get_previous_token(auth_system: str) -> Optional[str]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:
@@ -63,7 +60,7 @@ def generate_token(github_client: github3.GitHub) -> str:
     return cast(str, authorization.token)
 
 
-def save_token(token: str, auth_system: str = DEFAULT_GITHUB_AUTH_SYSTEM) -> None:
+def save_token(token: str, auth_system: str) -> None:
     cfg_path = tsrc.config.get_tsrc_config_path()
     if cfg_path.exists():
         config = tsrc.config.parse_tsrc_config(roundtrip=True)
@@ -78,11 +75,11 @@ def save_token(token: str, auth_system: str = DEFAULT_GITHUB_AUTH_SYSTEM) -> Non
     tsrc.config.dump_tsrc_config(config)
 
 
-def ensure_token(auth_system: str = DEFAULT_GITHUB_AUTH_SYSTEM) -> str:
-    token = get_previous_token(auth_system)
+def ensure_token(github_client: github3.GitHub, auth_system: str) -> str:
+    token = get_previous_token(auth_system=auth_system)
     if not token:
-        token = generate_token(auth_system)
-        save_token(token, auth_system)
+        token = generate_token(github_client=github_client)
+        save_token(token=token, auth_system=auth_system)
     return token
 
 
@@ -102,10 +99,10 @@ def request_reviewers(repo: Repository, pr_number: int, reviewers: List[str]) ->
 def login(github_enterprise_url: Optional[str] = None) -> github3.GitHub:
     if github_enterprise_url:
         gh_api = github3.GitHubEnterprise(url=github_enterprise_url)
-        token = ensure_token(gh_api, "github_enterprise")
+        token = ensure_token(github_client=gh_api, auth_system="github_enterprise")
     else:
         gh_api = github3.GitHub()
-        token = ensure_token(gh_api, DEFAULT_GITHUB_AUTH_SYSTEM)
+        token = ensure_token(github_client=gh_api, auth_system="github")
 
     gh_api.login(token=token)
     ui.info_2("Successfully logged in on GitHub")
