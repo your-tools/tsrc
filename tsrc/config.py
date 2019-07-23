@@ -16,6 +16,9 @@ def parse_config(
     config_schema: Optional[schema.Schema] = None,
     roundtrip: bool = False,
 ) -> Config:
+    if not file_path.exists():
+        dump_config({"auth": {}}, file_path)
+
     try:
         contents = file_path.text()
     except OSError as os_error:
@@ -57,6 +60,7 @@ def parse_tsrc_config(config_path: Path = None, roundtrip: bool = False) -> Conf
     auth_schema = {
         schema.Optional("gitlab"): {"token": str},
         schema.Optional("github"): {"token": str},
+        schema.Optional("github_enterprise"): {"token": str},
     }
     tsrc_schema = schema.Schema({"auth": auth_schema})
     if not config_path:
