@@ -22,15 +22,26 @@ class GitHubAPIError(tsrc.Error):
         return "%s - %s" % (self.status_code, self.message)
 
 
-def get_previous_token(auth_system: str) -> Optional[str]:
+def get_config_auth_object(auth_system: str) -> Optional[str]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:
         return None
-    github_auth = auth.get(auth_system)
+    return cast(Optional[str], auth.get(auth_system, None))
+
+
+def get_previous_token(auth_system: str) -> Optional[str]:
+    github_auth = get_config_auth_object(auth_system)
     if not github_auth:
         return None
     return cast(Optional[str], github_auth.get("token"))
+
+
+def get_verify_tls_setting(auth_system: str) -> object:
+    github_auth = get_config_auth_object(auth_system)
+    if not github_auth:
+        return True
+    return github_auth.get("verify", True)
 
 
 def generate_token(github_client: github3.GitHub) -> str:
@@ -98,7 +109,8 @@ def request_reviewers(repo: Repository, pr_number: int, reviewers: List[str]) ->
 
 def login(github_enterprise_url: Optional[str] = None) -> github3.GitHub:
     if github_enterprise_url:
-        gh_api = github3.GitHubEnterprise(url=github_enterprise_url)
+        verify = get_verify_tls_setting(auth_system="github_enterprise")
+        gh_api = github3.GitHubEnterprise(url=github_enterprise_url, verify=verify)
         token = ensure_token(github_client=gh_api, auth_system="github_enterprise")
     else:
         gh_api = github3.GitHub()

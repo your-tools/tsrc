@@ -66,6 +66,12 @@ repos:
 and there is a remote named `origin` which starts with `git@github.local` (hostname of `github_enterprise.url` configuration) , `tsrc` will assume you want to use GitHub Enterprise.
 
 Then, the first time you need access to GitHub API, it will ask for your credentials, generate a token and store it in the `~/.config/tsrc.yml` file.
+In the event your GitHub Enterprise instance has a self-signed certificate the trust store can be configured in the `~/.config/tsrc.yml` file via:
+```yaml
+auth:
+  github_enterprise:
+    verify: <path to your crt file e.g. /etc/pki/tls/certs/ca-bundle.crt | false to disable verification>
+```
 
 ## Creating a pull request
 
