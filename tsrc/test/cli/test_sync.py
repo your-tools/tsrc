@@ -108,6 +108,18 @@ def test_sync_not_on_master(
     assert message_recorder.find("not on the correct branch")
 
 
+def test_sync_with_force(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    git_server.add_repo("foo")
+    git_server.push_file("foo", "latest.txt", contents="1")
+    git_server.tag("foo", "latest")
+    tsrc_cli.run("init", git_server.manifest_url)
+    git_server.push_file("foo", "latest.txt", contents="2")
+    git_server.tag("foo", "latest", force=True)
+    tsrc_cli.run("sync", "--force")
+
+
 def test_copies_are_up_to_date(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
