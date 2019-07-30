@@ -129,9 +129,15 @@ def validate_repo(data: Any) -> None:
         }
     )
     repo_schema.validate(data)
-    if ("url" in data) and ("remotes" in data):
+    url = data.get("url")
+    remotes = data.get("remotes")
+    if url and remotes:
         raise schema.SchemaError(
             "Repo config cannot contain both an url and a list of remotes"
+        )
+    if not url and not remotes:
+        raise schema.SchemaError(
+            "Repo config should contain either a url or a non-empty list of remotes"
         )
 
 
