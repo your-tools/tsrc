@@ -1,3 +1,7 @@
+# v0.7.1 - (2019-08-02)
+
+* Fix crash in `tsrc sync` when the `repo` configuration in the manifest contained neither an URL nor a remote. `tsrc` now aborts as soon as the misconfiguration of the manifest is detected.
+
 # v0.7.0 (2019-07-08)
 
 * Add a `--file` option to `tsrc init` so that manifest can be read from

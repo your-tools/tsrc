@@ -106,6 +106,18 @@ repos:
     assert len(one_repo.remotes) == 1
 
 
+def test_no_url_and_no_remote(tmp_path: Path) -> None:
+    contents = """
+repos:
+  - src: foo
+    remotes: []
+"""
+    manifest_path = tmp_path / "manifest.yml"
+    manifest_path.write_text(contents)
+    with pytest.raises(tsrc.InvalidConfig):
+        tsrc.manifest.load(manifest_path)
+
+
 def assert_valid_schema(tmp_path: Path, contents: str) -> tsrc.manifest.Manifest:
     manifest_path = tmp_path / "manifest.yml"
     manifest_path.write_text(textwrap.dedent(contents))
