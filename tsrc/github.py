@@ -2,7 +2,7 @@
 
 import getpass
 import uuid
-from typing import cast, List, Optional
+from typing import cast, List, Optional, Dict, Any
 
 import github3
 from github3.repos.repo import Repository
@@ -22,12 +22,12 @@ class GitHubAPIError(tsrc.Error):
         return "%s - %s" % (self.status_code, self.message)
 
 
-def get_config_auth_object(auth_system: str) -> Optional[str]:
+def get_config_auth_object(auth_system: str) -> Dict[str, Any]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:
-        return None
-    return cast(Optional[str], auth.get(auth_system, None))
+        return dict()
+    return cast(Dict[str, Any], auth.get(auth_system, dict()))
 
 
 def get_previous_token(auth_system: str) -> Optional[str]:

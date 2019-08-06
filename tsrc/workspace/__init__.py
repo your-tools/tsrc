@@ -1,7 +1,7 @@
 """ Implementation of the tsrc Workspace: a collection of git repositories
 """
 
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Optional
 
 from path import Path
 
@@ -29,10 +29,10 @@ class Workspace:
     def load_manifest(self) -> None:
         self.local_manifest.load()
 
-    def get_gitlab_url(self) -> str:
+    def get_gitlab_url(self) -> Optional[str]:
         return self.local_manifest.get_gitlab_url()
 
-    def get_github_enterprise_url(self) -> str:
+    def get_github_enterprise_url(self) -> Optional[str]:
         return self.local_manifest.get_github_enterprise_url()
 
     def configure_manifest(self, manifest_config: ManifestConfig) -> None:

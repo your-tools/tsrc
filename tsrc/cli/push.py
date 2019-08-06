@@ -12,19 +12,22 @@ import cli_ui as ui
 
 import tsrc
 import tsrc.git
+import tsrc.cli
 
 
 def service_from_url(url: str, workspace: tsrc.Workspace) -> str:
     if url.startswith("git@github.com"):
         return "github"
 
-    if workspace.get_github_enterprise_url():
-        github_domain = urlparse(workspace.get_github_enterprise_url()).hostname
+    github_enterprise_url = workspace.get_github_enterprise_url()
+    if github_enterprise_url:
+        github_domain = urlparse(github_enterprise_url).hostname
         if url.startswith("git@%s" % github_domain):
             return "github_enterprise"
 
-    if workspace.get_gitlab_url():
-        gitlab_domain = urlparse(workspace.get_gitlab_url()).hostname
+    gitlab_url = workspace.get_gitlab_url()
+    if gitlab_url:
+        gitlab_domain = urlparse(gitlab_url).hostname
         if url.startswith("git@%s" % gitlab_domain):
             return "gitlab"
 
@@ -60,7 +63,9 @@ class RepositoryInfo:
         self.repository_login_url = None  # type: Optional[str]
         self.read_working_path(workspace=workspace, working_path=working_path)
 
-    def read_working_path(self, workspace: tsrc.Workspace, working_path: Path = None) -> None:
+    def read_working_path(
+        self, workspace: tsrc.Workspace, working_path: Path = None
+    ) -> None:
         self.path = tsrc.git.get_repo_root(working_path=working_path)
         self.current_branch = tsrc.git.get_current_branch(self.path)
         rc, out = tsrc.git.run_captured(

@@ -8,9 +8,7 @@ from tsrc.cli.push import RepositoryInfo
 
 class PushAction(tsrc.cli.push.PushAction):
     def __init__(
-        self,
-        repository_info: RepositoryInfo,
-        args: argparse.Namespace
+        self, repository_info: RepositoryInfo, args: argparse.Namespace
     ) -> None:
         super().__init__(repository_info, args)
 

@@ -17,6 +17,8 @@ class PushAction(tsrc.cli.push_github.PushAction):
         github_api: Optional[GitHub] = None,
     ) -> None:
         if not github_api:
-            github_api = tsrc.github.login(github_enterprise_url=repository_info.repository_login_url)
+            github_api = tsrc.github.login(
+                github_enterprise_url=repository_info.repository_login_url
+            )
 
         super().__init__(repository_info, args, github_api)

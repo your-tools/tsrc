@@ -36,30 +36,35 @@ def test_push_use_given_push_spec(
 def test_service_from_url() -> None:
     workspace_mock = mock_workspace_git_urls()
 
-    assert tsrc.cli.push.service_from_url("git@github.com:TankerHQ/tsrc.git", workspace_mock) == "github"
-    assert tsrc.cli.push.service_from_url("git@gitlab.example.com:TankerHQ/tsrc.git", workspace_mock) == "gitlab"
-    assert tsrc.cli.push.service_from_url("git@github.example.com:TankerHQ/tsrc.git", workspace_mock) \
-        == "github_enterprise"
-    assert tsrc.cli.push.service_from_url("git@git.example.com:TankerHQ/tsrc.git", workspace_mock) == "git"
+    def get_service(url: str) -> str:
+        return tsrc.cli.push.service_from_url(url, workspace_mock)
 
-    workspace_mock.get_github_enterprise_url.return_value = "https://github.example.com:8443/github"
-    workspace_mock.get_gitlab_url.return_value = "https://gitlab.example.com:8443/gitlab"
-    assert tsrc.cli.push.service_from_url("git@gitlab.example.com:TankerHQ/tsrc.git", workspace_mock) == "gitlab"
-    assert tsrc.cli.push.service_from_url("git@github.example.com:TankerHQ/tsrc.git", workspace_mock) \
-        == "github_enterprise"
-    assert tsrc.cli.push.service_from_url("git@gitlab.example.com:8443:TankerHQ/tsrc.git", workspace_mock) == "gitlab"
-    assert tsrc.cli.push.service_from_url("git@github.example.com:8443:TankerHQ/tsrc.git", workspace_mock) \
-        == "github_enterprise"
+    assert get_service("git@github.com:TankerHQ/tsrc.git") == "github"
+    assert get_service("git@gitlab.ex.co:TankerHQ/tsrc.git") == "gitlab"
+    assert get_service("git@github.ex.co:TankerHQ/tsrc.git") == "github_enterprise"
+    assert get_service("git@git.ex.co:TankerHQ/tsrc.git") == "git"
+
+    workspace_mock.get_github_enterprise_url.return_value = (
+        "https://github.ex.co:8443/github"
+    )
+    workspace_mock.get_gitlab_url.return_value = "https://gitlab.ex.co:8443/gitlab"
+    assert get_service("git@gitlab.ex.co:TankerHQ/tsrc.git") == "gitlab"
+    assert get_service("git@github.ex.co:TankerHQ/tsrc.git") == "github_enterprise"
+    assert get_service("git@gitlab.ex.co:8443:TankerHQ/tsrc.git") == "gitlab"
+    assert get_service("git@github.ex.co:8443:TankerHQ/tsrc.git") == "github_enterprise"
 
 
 def test_project_name_from_url() -> None:
-    assert tsrc.cli.push.project_name_from_url('git@example.com:foo/bar.git') == "foo/bar"
-    assert tsrc.cli.push.project_name_from_url('ssh://git@example.com:8022/foo/bar.git') == "foo/bar"
+    def project_name(url: str) -> str:
+        return tsrc.cli.push.project_name_from_url(url)
+
+    assert project_name("git@ex.co:foo/bar.git") == "foo/bar"
+    assert project_name("ssh://git@ex.co:8022/foo/bar.git") == "foo/bar"
 
 
-def mock_workspace_git_urls() -> tsrc.Workspace:
-    workspace_mock = mock.Mock()
-    workspace_mock.get_github_enterprise_url.return_value = "https://github.example.com/"
-    workspace_mock.get_gitlab_url.return_value = "https://gitlab.example.com/"
+def mock_workspace_git_urls() -> mock.Mock:
+    workspace_mock = mock.Mock(tsrc.Workspace)
+    workspace_mock.get_github_enterprise_url.return_value = "https://github.ex.co/"
+    workspace_mock.get_gitlab_url.return_value = "https://gitlab.ex.co/"
 
     return workspace_mock

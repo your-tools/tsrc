@@ -33,7 +33,12 @@ def execute_push(
 
 
 def test_create(
-    repo_path: Path, tsrc_cli: CLI, github_mock: Any, push_args: argparse.Namespace, git_server: GitServer, workspace_path: Path
+    repo_path: Path,
+    tsrc_cli: CLI,
+    github_mock: Any,
+    push_args: argparse.Namespace,
+    git_server: GitServer,
+    workspace_path: Path,
 ) -> None:
     mock_repo = mock.Mock()
     mock_repo.pull_requests.return_value = list()
