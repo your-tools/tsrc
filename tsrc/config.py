@@ -61,7 +61,7 @@ def parse_tsrc_config(config_path: Path = None, roundtrip: bool = False) -> Conf
         schema.Optional("gitlab"): {"token": str},
         schema.Optional("github"): {"token": str},
         schema.Optional("github_enterprise"): {
-            "token": str,
+            schema.Optional("token"): str,
             schema.Optional("verify"): object,
         },
     }

@@ -80,7 +80,7 @@ def save_token(token: str, auth_system: str) -> None:
     if "auth" not in config:
         config["auth"] = dict()
     auth = config["auth"]
-    if auth_system not in config:
+    if auth_system not in auth:
         auth[auth_system] = dict()
     auth[auth_system]["token"] = token
     tsrc.config.dump_tsrc_config(config)
