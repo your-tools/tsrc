@@ -1,6 +1,6 @@
 `tsrc` can automate part of the code review process.
 
-You can use it with GitLab or GitHub repositories.
+You can use it with GitLab, GitHub, GitHub Enterprise, or standard Git repositories.
 
 # Handling GitLab merge requests
 
@@ -50,11 +50,28 @@ the CI pipeline passes with the following command:
 $ tsrc push --accept
 ```
 
-# Handling GitHub pull requests
+# Handling GitHub & GitHub Enterprise pull requests
 
 If there is a remote named `origin` and starting with `git@github.com`, `tsrc` will assume you want to use GitHub.
 
+Alternatively, if GitHub Enterprise is configured in the *manifest* file such as:
+
+```yaml
+github_enterprise:
+  url: http://github.local
+
+repos:
+ - ...
+```
+and there is a remote named `origin` which starts with `git@github.local` (hostname of `github_enterprise.url` configuration) , `tsrc` will assume you want to use GitHub Enterprise.
+
 Then, the first time you need access to GitHub API, it will ask for your credentials, generate a token and store it in the `~/.config/tsrc.yml` file.
+In the event your GitHub Enterprise instance has a self-signed certificate the trust store can be configured in the `~/.config/tsrc.yml` file via:
+```yaml
+auth:
+  github_enterprise:
+    verify: <path to your crt file e.g. /etc/pki/tls/certs/ca-bundle.crt | false to disable verification>
+```
 
 ## Creating a pull request
 
@@ -85,3 +102,8 @@ $ tsrc push --close
 # Merge
 $ tsrc push --merge
 ```
+
+# Handling standard Git repositories
+
+If `tsrc` can't determine to use GitLab, GitHub, or GitHub Enterprise it will push the changes to the remote repository 
+without creating any pull requests on the user's behalf.

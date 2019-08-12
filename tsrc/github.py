@@ -2,7 +2,7 @@
 
 import getpass
 import uuid
-from typing import cast, List, Optional
+from typing import cast, List, Optional, Dict, Any
 
 import github3
 from github3.repos.repo import Repository
@@ -22,18 +22,29 @@ class GitHubAPIError(tsrc.Error):
         return "%s - %s" % (self.status_code, self.message)
 
 
-def get_previous_token() -> Optional[str]:
+def get_config_auth_object(auth_system: str) -> Dict[str, Any]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:
-        return None
-    github_auth = auth.get("github")
+        return dict()
+    return cast(Dict[str, Any], auth.get(auth_system, dict()))
+
+
+def get_previous_token(auth_system: str) -> Optional[str]:
+    github_auth = get_config_auth_object(auth_system)
     if not github_auth:
         return None
     return cast(Optional[str], github_auth.get("token"))
 
 
-def generate_token() -> str:
+def get_verify_tls_setting(auth_system: str) -> object:
+    github_auth = get_config_auth_object(auth_system)
+    if not github_auth:
+        return True
+    return github_auth.get("verify", True)
+
+
+def generate_token(github_client: github3.GitHub) -> str:
     ui.info_1("Creating new GitHub token")
     username = ui.ask_string("Please enter you GitHub username")
     password = getpass.getpass("Password: ")
@@ -55,11 +66,12 @@ def generate_token() -> str:
         note=note,
         note_url=note_url,
         two_factor_callback=ask_2fa,
+        github=github_client,
     )
     return cast(str, authorization.token)
 
 
-def save_token(token: str) -> None:
+def save_token(token: str, auth_system: str) -> None:
     cfg_path = tsrc.config.get_tsrc_config_path()
     if cfg_path.exists():
         config = tsrc.config.parse_tsrc_config(roundtrip=True)
@@ -68,17 +80,17 @@ def save_token(token: str) -> None:
     if "auth" not in config:
         config["auth"] = dict()
     auth = config["auth"]
-    if "github" not in config:
-        auth["github"] = dict()
-    auth["github"]["token"] = token
+    if auth_system not in auth:
+        auth[auth_system] = dict()
+    auth[auth_system]["token"] = token
     tsrc.config.dump_tsrc_config(config)
 
 
-def ensure_token() -> str:
-    token = get_previous_token()
+def ensure_token(github_client: github3.GitHub, auth_system: str) -> str:
+    token = get_previous_token(auth_system=auth_system)
     if not token:
-        token = generate_token()
-        save_token(token)
+        token = generate_token(github_client=github_client)
+        save_token(token=token, auth_system=auth_system)
     return token
 
 
@@ -95,9 +107,15 @@ def request_reviewers(repo: Repository, pr_number: int, reviewers: List[str]) ->
         raise GitHubAPIError(url, ret.status_code, ret.json().get("message"))
 
 
-def login() -> github3.GitHub:
-    token = ensure_token()
-    gh_api = github3.GitHub()
+def login(github_enterprise_url: Optional[str] = None) -> github3.GitHub:
+    if github_enterprise_url:
+        verify = get_verify_tls_setting(auth_system="github_enterprise")
+        gh_api = github3.GitHubEnterprise(url=github_enterprise_url, verify=verify)
+        token = ensure_token(github_client=gh_api, auth_system="github_enterprise")
+    else:
+        gh_api = github3.GitHub()
+        token = ensure_token(github_client=gh_api, auth_system="github")
+
     gh_api.login(token=token)
     ui.info_2("Successfully logged in on GitHub")
     return gh_api

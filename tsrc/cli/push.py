@@ -5,26 +5,33 @@ import argparse
 import importlib
 import re
 from typing import cast, Iterable, Optional
+from urllib.parse import urlparse
 
 from path import Path
 import cli_ui as ui
 
 import tsrc
 import tsrc.git
+import tsrc.cli
 
 
-def service_from_url(url: str) -> str:
-    """
-    >>> service_from_url("git@github.com:foo/bar")
-    'github'
-    >>> service_from_url("git@gitlab.local:foo/bar")
-    'gitlab'
-
-    """
+def service_from_url(url: str, workspace: tsrc.Workspace) -> str:
     if url.startswith("git@github.com"):
         return "github"
-    else:
-        return "gitlab"
+
+    github_enterprise_url = workspace.get_github_enterprise_url()
+    if github_enterprise_url:
+        github_domain = urlparse(github_enterprise_url).hostname
+        if url.startswith("git@%s" % github_domain):
+            return "github_enterprise"
+
+    gitlab_url = workspace.get_gitlab_url()
+    if gitlab_url:
+        gitlab_domain = urlparse(gitlab_url).hostname
+        if url.startswith("git@%s" % gitlab_domain):
+            return "gitlab"
+
+    return "git"
 
 
 def project_name_from_url(url: str) -> str:
@@ -46,16 +53,19 @@ def project_name_from_url(url: str) -> str:
 
 
 class RepositoryInfo:
-    def __init__(self, working_path: Path = None) -> None:
+    def __init__(self, workspace: tsrc.Workspace, working_path: Path = None) -> None:
         self.project_name = None  # type: Optional[str]
         self.url = None  # type: Optional[str]
         self.path = None  # type: Optional[Path]
         self.current_branch = None  # type: Optional[str]
         self.service = None  # type: Optional[str]
         self.tracking_ref = None  # type: Optional[str]
-        self.read_working_path(working_path=working_path)
+        self.repository_login_url = None  # type: Optional[str]
+        self.read_working_path(workspace=workspace, working_path=working_path)
 
-    def read_working_path(self, working_path: Path = None) -> None:
+    def read_working_path(
+        self, workspace: tsrc.Workspace, working_path: Path = None
+    ) -> None:
         self.path = tsrc.git.get_repo_root(working_path=working_path)
         self.current_branch = tsrc.git.get_current_branch(self.path)
         rc, out = tsrc.git.run_captured(
@@ -67,7 +77,12 @@ class RepositoryInfo:
             return
         self.tracking_ref = tsrc.git.get_tracking_ref(self.path)
         self.project_name = project_name_from_url(self.url)
-        self.service = service_from_url(self.url)
+        self.service = service_from_url(url=self.url, workspace=workspace)
+
+        if self.service == "gitlab":
+            self.repository_login_url = workspace.get_gitlab_url()
+        elif self.service == "github_enterprise":
+            self.repository_login_url = workspace.get_github_enterprise_url()
 
 
 class PushAction(metaclass=abc.ABCMeta):
@@ -149,7 +164,10 @@ class PushAction(metaclass=abc.ABCMeta):
 
 
 def main(args: argparse.Namespace) -> None:
-    repository_info = RepositoryInfo()
+    workspace = tsrc.cli.get_workspace(args)
+    workspace.load_manifest()
+
+    repository_info = RepositoryInfo(workspace)
     service_name = repository_info.service
     module = importlib.import_module("tsrc.cli.push_%s" % service_name)
     push_action = module.PushAction(repository_info, args)  # type: ignore

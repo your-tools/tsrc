@@ -13,6 +13,7 @@ ManifestConfig = NewType("ManifestConfig", Dict[str, Any])
 RepoConfig = NewType("RepoConfig", Dict[str, Any])
 
 GitLabConfig = NewType("GitLabConfig", Dict[str, Any])
+GithubEnterpriseConfig = NewType("GithubEnterpriseConfig", Dict[str, Any])
 
 
 class RepoNotFound(tsrc.Error):
@@ -25,11 +26,13 @@ class Manifest:
         self._repos = list()  # type: List[tsrc.Repo]
         self.copyfiles = list()  # type: List[Tuple[str, str]]
         self.gitlab = None  # type: Optional[GitLabConfig]
+        self.github_enterprise = None  # type: Optional[GithubEnterpriseConfig]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
 
     def load(self, config: ManifestConfig) -> None:
         self.copyfiles = list()
         self.gitlab = config.get("gitlab")
+        self.github_enterprise = config.get("github_enterprise")
         repos = config.get("repos") or list()
         for repo_config in repos:
             self._handle_repo(repo_config)
@@ -142,13 +145,14 @@ def validate_repo(data: Any) -> None:
 
 
 def load(manifest_path: Path) -> Manifest:
-    gitlab_schema = {"url": str}
+    remote_git_server_schema = {"url": str}
     repo_schema = schema.Use(validate_repo)
     group_schema = {"repos": [str], schema.Optional("includes"): [str]}
     manifest_schema = schema.Schema(
         {
             "repos": [repo_schema],
-            schema.Optional("gitlab"): gitlab_schema,
+            schema.Optional("gitlab"): remote_git_server_schema,
+            schema.Optional("github_enterprise"): remote_git_server_schema,
             schema.Optional("groups"): {str: group_schema},
         }
     )

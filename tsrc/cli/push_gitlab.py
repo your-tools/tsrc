@@ -80,11 +80,10 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def setup_service(self) -> None:
         if not self.gitlab_api:
-            workspace = tsrc.cli.get_workspace(self.args)
-            workspace.load_manifest()
-            gitlab_url = workspace.get_gitlab_url()
             token = get_token()
-            self.gitlab_api = Gitlab(gitlab_url, private_token=token)
+            self.gitlab_api = Gitlab(
+                self.repository_info.repository_login_url, private_token=token
+            )
 
         assert self.project_name
         self.project = self.gitlab_api.projects.get(self.project_name)

@@ -58,8 +58,11 @@ def gitlab_mock_with_merge_requests(mock_merge_requests: List[Any]) -> Any:
 def execute_push(
     repo_path: Path, push_args: argparse.Namespace, gitlab_mock: Gitlab
 ) -> None:
-    repository_info = RepositoryInfo()
-    repository_info.read_working_path(repo_path)
+    workspace_mock = mock.Mock()
+    workspace_mock.get_github_enterprise_url.return_value = None
+    workspace_mock.get_gitlab_url.return_value = GITLAB_URL
+
+    repository_info = RepositoryInfo(workspace_mock, repo_path)
     push_action = PushAction(repository_info, push_args, gitlab_api=gitlab_mock)
     push_action.execute()
 

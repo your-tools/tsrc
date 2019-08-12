@@ -14,6 +14,8 @@ def test_load() -> None:
     contents = """
 gitlab:
   url: http://gitlab.example.com
+github_enterprise:
+  url: http://github.example.com
 repos:
   - src: foo
     url: git@example.com:foo.git
@@ -37,6 +39,8 @@ repos:
     manifest.load(parsed)
     assert manifest.gitlab
     assert manifest.gitlab["url"] == "http://gitlab.example.com"
+    assert manifest.github_enterprise
+    assert manifest.github_enterprise["url"] == "http://github.example.com"
     assert manifest.get_repos() == [
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:foo.git")],
