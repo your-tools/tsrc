@@ -342,3 +342,38 @@ with open(foo_path, "w") as fileobj:
 Do not use `print`, use [python-cli-ui functions](https://TankerHQ.github.io/python-cli-ui#api) instead. This makes it easier to distinguish between real messages and the throw-away `print` statements you add for debugging.
 
 Also, using "high-level" methods such as `ui.info_1()` or `ui.warning()` will make it easier to have a consistent user interface.
+
+# Tests
+
+When writing assertions, use the form `assert <actual> == <expected>`:
+
+```python
+# Yes
+def test_foo():
+    assert foo(42) == True
+
+def test_big_stuff():
+    actual_result = ...
+    expected_result = ...
+
+    assert actual_result == expected_result
+
+
+# No
+def test_foo():
+    assert True == foo(42)
+
+
+def test_big_stuff():
+    actual_result = ...
+    expected_result = ...
+
+    assert expected_result == actual_result
+```
+
+Rationale:
+
+* The `assert(expected, actual)` convention comes from JUnit but we are not writing Java code,
+  and besides, the `assert(actual, expected)` convention also exists in other tools.
+* `pytest` does not really care, but we prefer being consistent in all tests.
+* It's a bit closer to what you would say in English: *"Assert that the result of foo() is 42"*.
