@@ -1,3 +1,7 @@
+# v0.8.0 - (2019-08-12)
+
+* Implement `tsrc sync --force`. Currently all it does is running `git fetch --force` on all repositories. Use with caution. See #152 for details.
+
 # v0.7.1 - (2019-08-02)
 
 * Fix crash in `tsrc sync` when the `repo` configuration in the manifest contained neither an URL nor a remote. `tsrc` now aborts as soon as the misconfiguration of the manifest is detected (Reported by @jongep86)
