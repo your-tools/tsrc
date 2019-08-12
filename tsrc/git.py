@@ -101,17 +101,17 @@ class WorktreeNotFound(Error):
         super().__init__("'{}' is not inside a git repository".format(working_path))
 
 
-def run(working_path: Path, *cmd: str) -> None:
+def run(working_path: Path, *cmd: str, check: bool = True) -> None:
     """ Run git `cmd` in given `working_path`
 
-    Raise GitCommandError if return code is non-zero.
+    Raise GitCommandError if return code is non-zero and `check` is True.
     """
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
 
     ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
     returncode = subprocess.call(git_cmd, cwd=working_path)
-    if returncode != 0:
+    if returncode != 0 and check:
         raise CommandError(working_path, cmd)
 
 

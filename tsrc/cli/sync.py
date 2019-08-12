@@ -15,6 +15,6 @@ def main(args: argparse.Namespace) -> None:
         ui.info(ui.green, "*", ui.reset, "Using groups:", ",".join(active_groups))
     workspace.clone_missing()
     workspace.set_remotes()
-    workspace.sync()
+    workspace.sync(force=args.force)
     workspace.copy_files()
     ui.info("Done", ui.check)

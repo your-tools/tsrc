@@ -185,7 +185,9 @@ def main_impl(args: ArgsList = None) -> None:
     )
 
     add_workspace_subparser(subparsers, "status")
-    add_workspace_subparser(subparsers, "sync")
+
+    sync_parser = add_workspace_subparser(subparsers, "sync")
+    sync_parser.add_argument("--force", action="store_true")
 
     args_ns = parser.parse_args(args=args)  # type: argparse.Namespace
     setup_ui(args_ns)

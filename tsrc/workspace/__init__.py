@@ -63,8 +63,8 @@ class Workspace:
         file_copier = FileCopier(self.root_path)
         tsrc.executor.run_sequence(self.local_manifest.copyfiles, file_copier)
 
-    def sync(self) -> None:
-        syncer = Syncer(self.root_path)
+    def sync(self, *, force: bool = False) -> None:
+        syncer = Syncer(self.root_path, force=force)
         try:
             tsrc.executor.run_sequence(self.get_repos(), syncer)
         finally:

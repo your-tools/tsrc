@@ -173,10 +173,20 @@ class GitServer:
         current_branch = tsrc.git.get_current_branch(src_path)
         tsrc.git.run(src_path, "push", "origin", "--set-upstream", current_branch)
 
-    def tag(self, name: str, tag_name: str) -> None:
+    def tag(self, name: str, tag_name: str, *, force: bool = False) -> None:
+        """ Create a new tag on the given repo. If `force` is True, tag is
+        deleted first so that it can be updated remotely.
+        """
         src_path = self.get_path(name)
+        if force:
+            # Note:  Since we want to delete the previous tag if it exists,
+            # this command is allowed to fail:
+            tsrc.git.run(src_path, "tag", "-d", tag_name, check=False)
         tsrc.git.run(src_path, "tag", tag_name)
-        tsrc.git.run(src_path, "push", "--no-verify", "origin", tag_name)
+        cmd = [src_path, "push", "--no-verify", "origin", tag_name]
+        if force:
+            cmd.append("--force")
+        tsrc.git.run(*cmd)
 
     def get_tags(self, name: str) -> List[str]:
         src_path = self.get_path(name)

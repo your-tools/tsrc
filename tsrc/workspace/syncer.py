@@ -12,9 +12,10 @@ class BadBranches(tsrc.Error):
 
 
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace_path: Path) -> None:
+    def __init__(self, workspace_path: Path, *, force: bool = False) -> None:
         self.workspace_path = workspace_path
         self.bad_branches = list()  # type: List[Tuple[str, str, str]]
+        self.force = force
 
     def on_start(self, *, num_items: int) -> None:
         ui.info_1("Synchronizing workspace")
@@ -60,7 +61,10 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         for remote in repo.remotes:
             try:
                 ui.info_2("Fetching", remote.name)
-                tsrc.git.run(repo_path, "fetch", "--tags", "--prune", remote.name)
+                cmd = ["fetch", "--tags", "--prune", remote.name]
+                if self.force:
+                    cmd.append("--force")
+                tsrc.git.run(repo_path, *cmd)
             except tsrc.Error:
                 raise tsrc.Error("fetch from %s failed" % remote.name)
 
