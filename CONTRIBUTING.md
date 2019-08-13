@@ -35,6 +35,13 @@ See the [.travis.yml file](https://github.com/TankerHQ/tsrc/blob/master/.travis.
 to see what exactly what commands are run and the Python versions we
 support.
 
+Also, if relevant, you will need to:
+
+* update the changelog (in `docs/changelog.md`)
+* update the documentation if required
+
+
+Finally, feel free to add your name in the `THANKS` file ;)
 
 # Checking your changes
 
