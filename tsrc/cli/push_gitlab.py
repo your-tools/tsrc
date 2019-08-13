@@ -3,6 +3,7 @@
 
 import argparse
 import itertools
+import textwrap
 from typing import cast, Any, List, Optional, Set  # noqa
 
 from gitlab import Gitlab
@@ -35,10 +36,25 @@ class AmbiguousUser(tsrc.Error):
         super().__init__("Found more that one user matching query: %s" % self.query)
 
 
+class NoGitLabToken(tsrc.Error):
+    def __init__(self) -> None:
+        message = textwrap.dedent(
+            """\
+            Could not find GitLab token in tsrc config file
+            Please check  https://tankerhq.github.io/tsrc/ref/formats/#tsrcyml_format
+            for details\
+            """
+        )
+        super().__init__(message)
+
+
 def get_token() -> str:
     config = tsrc.parse_tsrc_config()
-    res = config["auth"]["gitlab"]["token"]  # type: str
-    return res
+    try:
+        res = config["auth"]["gitlab"]["token"]
+        return cast(str, res)
+    except KeyError:
+        raise NoGitLabToken() from None
 
 
 def wipify(title: str) -> str:
