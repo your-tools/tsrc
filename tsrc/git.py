@@ -29,6 +29,11 @@ class CommandError(Error):
         super().__init__(message)
 
 
+class WorktreeNotFound(Error):
+    def __init__(self, working_path: Path) -> None:
+        super().__init__("'{}' is not inside a git repository".format(working_path))
+
+
 class Status:
     def __init__(self, working_path: Path) -> None:
         self.working_path = working_path
@@ -94,11 +99,6 @@ class Status:
             if line.startswith("A "):
                 self.added += 1
                 self.dirty = True
-
-
-class WorktreeNotFound(Error):
-    def __init__(self, working_path: Path) -> None:
-        super().__init__("'{}' is not inside a git repository".format(working_path))
 
 
 def run(working_path: Path, *cmd: str, check: bool = True) -> None:
