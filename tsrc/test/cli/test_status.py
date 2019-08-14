@@ -83,3 +83,20 @@ def test_status_on_tag(
 
     assert message_recorder.find(r"\* foo/bar   master")
     assert message_recorder.find(r"\* spam/eggs master on v1.0")
+
+
+def test_status_with_missing_repos(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    git_server.add_repo("foo")
+    git_server.add_repo("bar")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    (workspace_path / "foo").rmtree()
+
+    tsrc_cli.run("status")

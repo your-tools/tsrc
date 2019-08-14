@@ -34,3 +34,8 @@ class InvalidConfig(Error):
 
     def __str__(self) -> str:
         return self.detailed_message
+
+
+class MissingRepo(Error):
+    def __init__(self, src: str):
+        super().__init__("No repo found in %s. Please run `tsrc sync`" % src)
