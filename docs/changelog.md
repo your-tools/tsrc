@@ -1,3 +1,9 @@
+# v0.9.0 - (2019-08-13)
+
+* Add support for GitHub Enterprise: See the [relevant documentation]( guide/review.md#handling_github_github_enterprise_pull_requests) for details - patch by @sdavids13.
+* Improve error message when using creating a merge request in a GitLab repository when the token cannot be found in the `tsrc` configuration file. Fix #158
+* Fix crash when running `tsrc status` on a workspace with missing repositories (#160) - reported by @blastrock
+
 # v0.8.0 - (2019-08-12)
 
 * Implement `tsrc sync --force`. Currently all it does is running `git fetch --force` on all repositories. Use with caution. See #152 for details.
