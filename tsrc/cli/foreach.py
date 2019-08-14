@@ -34,12 +34,14 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Command failed for %s repo(s)" % num_errors)
 
-    def process(self, repo: tsrc.Repo) -> None:
+    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+        ui.info_count(index, count, repo.src)
         # fmt: off
-        ui.info(repo.src, "\n",
-                ui.lightgray, "$ ",
-                ui.reset, ui.bold, self.cmd_as_str,
-                sep="")
+        ui.info(
+            ui.lightgray, "$ ",
+            ui.reset, ui.bold, self.cmd_as_str,
+            sep=""
+        )
         # fmt: on
         full_path = self.workspace_path / repo.src
         rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)

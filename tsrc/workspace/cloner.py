@@ -66,8 +66,8 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
 
-    def process(self, repo: tsrc.Repo) -> None:
-        ui.info(repo.src)
+    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+        ui.info_count(index, count, repo.src)
         self.check_shallow_with_sha1(repo)
         self.clone_repo(repo)
         self.reset_repo(repo)

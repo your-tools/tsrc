@@ -19,8 +19,8 @@ class FakeTask(tsrc.Task[str]):
     def display_item(self, item: str) -> str:
         return item
 
-    def process(self, item: str) -> None:
-        ui.info("frobnicate", item)
+    def process(self, index: int, count: int, item: str) -> None:
+        ui.info_count(index, count, "frobnicate", item)
         if item == "bar":
             print("ko :/")
             raise Kaboom()

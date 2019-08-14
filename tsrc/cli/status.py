@@ -63,7 +63,6 @@ def describe(git_status: tsrc.git.Status) -> List[str]:
 def collect_statuses(workspace: tsrc.Workspace) -> List[Tuple[str, tsrc.git.Status]]:
     result = list()  # type: List[Tuple[str, tsrc.git.Status]]
     repos = workspace.get_repos()
-
     if not repos:
         return result
 

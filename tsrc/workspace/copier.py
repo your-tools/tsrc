@@ -24,9 +24,9 @@ class FileCopier(tsrc.executor.Task[Copy]):
         src, dest = item
         return "%s -> %s" % (src, dest)
 
-    def process(self, item: Copy) -> None:
+    def process(self, index: int, count: int, item: Copy) -> None:
         src, dest = item
-        ui.info(src, "->", dest)
+        ui.info_count(index, count, src, "->", dest)
         try:
             src_path = self.workspace_path / src
             dest_path = self.workspace_path / dest
