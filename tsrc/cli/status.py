@@ -1,17 +1,42 @@
 """ Entry point for tsrc status """
 
+from typing import Dict, List, Union
+
 import argparse
-from typing import List, Tuple
+import collections
 import shutil
 
 import cli_ui as ui
+from path import Path
 
 import tsrc
+import tsrc.errors
 import tsrc.cli
 import tsrc.git
 
 
-def describe_branch(git_status: tsrc.git.Status) -> List[str]:
+StatusOrError = Union[tsrc.git.Status, Exception]
+CollectedStatuses = Dict[str, StatusOrError]
+
+
+def describe_status(status: StatusOrError) -> List[ui.Token]:
+    """ Returns a list of tokens suitable for ui.info() """
+    if isinstance(status, tsrc.errors.MissingRepo):
+        return [ui.red, "error: missing repo"]
+    if isinstance(status, Exception):
+        return [ui.red, "error: ", status]
+    return describe_git_status(status)
+
+
+def describe_git_status(git_status: tsrc.git.Status) -> List[ui.Token]:
+    res = []  # type: List[ui.Token]
+    res += describe_branch(git_status)
+    res += describe_position(git_status)
+    res += describe_dirty(git_status)
+    return res
+
+
+def describe_branch(git_status: tsrc.git.Status) -> List[ui.Token]:
     res = list()  # type: List[ui.Token]
     if git_status.branch:
         res += [ui.green, git_status.branch]
@@ -29,7 +54,7 @@ def commit_string(number: int) -> str:
         return "commits"
 
 
-def describe_position(git_status: tsrc.git.Status) -> List[str]:
+def describe_position(git_status: tsrc.git.Status) -> List[ui.Token]:
     res = []  # type: List[ui.Token]
     if git_status.ahead != 0:
         up = ui.Symbol("↑", "+")
@@ -44,53 +69,60 @@ def describe_position(git_status: tsrc.git.Status) -> List[str]:
     return res
 
 
-def describe_dirty(git_status: tsrc.git.Status) -> List[str]:
+def describe_dirty(git_status: tsrc.git.Status) -> List[ui.Token]:
     res = []  # type: List[ui.Token]
     if git_status.dirty:
         res += [ui.red, "(dirty)"]
     return res
 
 
-def describe(git_status: tsrc.git.Status) -> List[str]:
-    # Return a list of tokens suitable for ui.info()
-    res = []  # type: List[str]
-    res += describe_branch(git_status)
-    res += describe_position(git_status)
-    res += describe_dirty(git_status)
-    return res
-
-
-def collect_statuses(workspace: tsrc.Workspace) -> List[Tuple[str, tsrc.git.Status]]:
-    result = list()  # type: List[Tuple[str, tsrc.git.Status]]
-    repos = workspace.get_repos()
-
-    if not repos:
-        return result
-
-    num_repos = len(repos)
-    max_len = max((len(x.src) for x in repos))
-    for i, repo, full_path in workspace.enumerate_repos():
-        ui.info_count(i, num_repos, "Checking", repo.src.ljust(max_len + 1), end="\r")
-        status = tsrc.git.get_status(full_path)
-        result.append((repo.src, status))
-
+def erase_last_line() -> None:
     terminal_size = shutil.get_terminal_size()
     ui.info(" " * terminal_size.columns, end="\r")
-    return result
 
 
-def display_statuses(statuses: List[Tuple[str, tsrc.git.Status]]) -> None:
-    if not statuses:
-        return
-    max_src = max((len(x[0]) for x in statuses))
-    for src, status in statuses:
-        message = [ui.green, "*", ui.reset, src.ljust(max_src)]
-        message += describe(status)
-        ui.info(*message)
+class StatusCollector(tsrc.Task[tsrc.Repo]):
+    def __init__(self, workspace_path: Path) -> None:
+        self.workspace_path = workspace_path
+        self.statuses = collections.OrderedDict()  # type: CollectedStatuses
+        self.num_repos = 0
+
+    def display_item(self, repo: tsrc.Repo) -> str:
+        return repo.src
+
+    def process(self, index: int, total: int, repo: tsrc.Repo) -> None:
+        ui.info_count(index, total, repo.src, end="\r")
+        full_path = self.workspace_path / repo.src
+
+        if not full_path.exists():
+            self.statuses[repo.src] = tsrc.errors.MissingRepo(repo.src)
+            return
+
+        try:
+            self.statuses[repo.src] = tsrc.git.get_status(full_path)
+        except Exception as e:
+            self.statuses[repo.src] = e
+        erase_last_line()
+
+    def on_start(self, num_items: int) -> None:
+        ui.info_1("Collecting statuses of %d repos" % num_items)
+        self.num_repos = num_items
+
+    def on_success(self) -> None:
+        erase_last_line()
+        if not self.statuses:
+            ui.info_2("Workspace is empty")
+            return
+        ui.info_2("Workspace status:")
+        max_src = max(len(x) for x in self.statuses.keys())
+        for src, status in self.statuses.items():
+            message = [ui.green, "*", ui.reset, src.ljust(max_src)]
+            message += describe_status(status)
+            ui.info(*message)
 
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
+    status_collector = StatusCollector(workspace.root_path)
     workspace.load_manifest()
-    statuses = collect_statuses(workspace)
-    display_statuses(statuses)
+    tsrc.run_sequence(workspace.get_repos(), status_collector)

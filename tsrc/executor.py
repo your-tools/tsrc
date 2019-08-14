@@ -26,15 +26,12 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
     def on_success(self) -> None:
         pass
 
-    def quiet(self) -> bool:
-        return False
-
     @abc.abstractmethod
     def display_item(self, item: T) -> str:
         pass
 
     @abc.abstractmethod
-    def process(self, item: T) -> None:
+    def process(self, index: int, count: int, item: T) -> None:
         pass
 
 
@@ -51,9 +48,7 @@ class SequentialExecutor(Generic[T]):
         self.errors = list()
         num_items = len(items)
         for i, item in enumerate(items):
-            if not self.task.quiet():
-                ui.info_count(i, num_items, end="")
-            self.process_one(item)
+            self.process_one(i, num_items, item)
 
         if self.errors:
             self.handle_errors()
@@ -70,9 +65,9 @@ class SequentialExecutor(Generic[T]):
             ui.info(*message, sep="", fileobj=sys.stderr)
         raise ExecutorFailed()
 
-    def process_one(self, item: T) -> None:
+    def process_one(self, index: int, count: int, item: T) -> None:
         try:
-            self.task.process(item)
+            self.task.process(index, count, item)
         except tsrc.Error as error:
             self.errors.append((item, error))
 

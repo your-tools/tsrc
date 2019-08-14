@@ -26,8 +26,8 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def process(self, repo: tsrc.Repo) -> None:
-        ui.info(repo.src)
+    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+        ui.info_count(index, count, repo.src)
         repo_path = self.workspace_path / repo.src
         self.fetch(repo)
         ref = None

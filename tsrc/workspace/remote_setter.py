@@ -19,10 +19,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.src
 
-    def quiet(self) -> bool:
-        return True
-
-    def process(self, repo: tsrc.Repo) -> None:
+    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
         try:
             self.try_process_repo(repo)
         except Exception as error:
