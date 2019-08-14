@@ -29,9 +29,19 @@ class CommandError(Error):
         super().__init__(message)
 
 
+class NoSuchWorkingPath(Error):
+    def __init__(self, path: Path) -> None:
+        super().__init__("'{}' does not exist".format(path))
+
+
 class WorktreeNotFound(Error):
     def __init__(self, working_path: Path) -> None:
         super().__init__("'{}' is not inside a git repository".format(working_path))
+
+
+def assert_working_path(path: Path) -> None:
+    if not path.exists():
+        raise NoSuchWorkingPath(path)
 
 
 class Status:
@@ -106,6 +116,7 @@ def run(working_path: Path, *cmd: str, check: bool = True) -> None:
 
     Raise GitCommandError if return code is non-zero and `check` is True.
     """
+    assert_working_path(working_path)
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
 
@@ -122,6 +133,7 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
 
     Raise GitCommandError if return code is non-zero and check is True
     """
+    assert_working_path(working_path)
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
     options = dict()  # type: Dict[str, Any]
