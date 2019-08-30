@@ -115,3 +115,10 @@ def test_foreach_groups_warn_skipped(
 
     message_recorder.reset()
     tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", *cmd)
+
+
+def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:
+    git_server.add_repo("foo")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+    tsrc_cli.run("foreach", "no-such", expect_fail=True)
