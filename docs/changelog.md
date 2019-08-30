@@ -1,3 +1,7 @@
+# Next release
+
+* Improve error message when `tsrc foreach` fails to start the process.  Suggeted by @dlewis-ald in #163
+
 # v0.9.0 - (2019-08-13)
 
 * Add support for GitHub Enterprise: See the [relevant documentation]( guide/review.md#handling_github_github_enterprise_pull_requests) for details - patch by @sdavids13.

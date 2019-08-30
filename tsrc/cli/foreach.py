@@ -16,6 +16,10 @@ class CommandFailed(tsrc.Error):
     pass
 
 
+class CouldNotStartProcess(tsrc.Error):
+    pass
+
+
 class CmdRunner(tsrc.Task[tsrc.Repo]):
     def __init__(
         self, workspace_path: Path, cmd: List[str], cmd_as_str: str, shell: bool = False
@@ -44,7 +48,10 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         )
         # fmt: on
         full_path = self.workspace_path / repo.src
-        rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)
+        try:
+            rc = subprocess.call(self.cmd, cwd=full_path, shell=self.shell)
+        except OSError as e:
+            raise CouldNotStartProcess("Error when starting process:", e)
         if rc != 0:
             raise CommandFailed()
 
