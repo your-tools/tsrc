@@ -121,10 +121,12 @@ class PushAction(tsrc.cli.push.PushAction):
         return res
 
     def get_reviewer_by_username(self, username: str) -> User:
-        assert self.group
         assert self.project
         in_project = self.get_users_matching(self.project.members, username)
-        in_group = self.get_users_matching(self.group.members, username)
+        if self.group:
+            in_group = self.get_users_matching(self.group.members, username)
+        else:
+            in_group = list()
         candidates = list()
         seen = set()  # type: Set[int]
         for user in itertools.chain(in_project, in_group):
