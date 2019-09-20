@@ -1,6 +1,7 @@
-# Next release
+# v0.9.1 - (2019-09-20)
 
-* Improve error message when `tsrc foreach` fails to start the process.  Suggeted by @dlewis-ald in #163
+* Improve error message when `tsrc foreach` fails to start the process. Suggested by @dlewis-ald in #163
+* Fix crash when finding reviewers for a GitLab project not in a group. Reported by @irizzant in #165
 
 # v0.9.0 - (2019-08-13)
 
