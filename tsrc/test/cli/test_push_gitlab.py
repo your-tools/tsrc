@@ -14,9 +14,15 @@ from tsrc.cli.push_gitlab import PushAction, FeatureNotAvailable
 
 GITLAB_URL = "http://gitlab.example.com"
 
+# Can't use 'name' in the ctor because it sets the name
+# of the mock, not the 'name' attribute of the returned
+# instance.
 ALICE = mock.Mock(username="alice", id=1)
-BOB = mock.Mock(username="bob", id=2)
+ALICE.name = "Alice Liddell"
+BOB = mock.Mock(username="bob", id=2, name="")
+BOB.name = "Bob SquarePants"
 EVE = mock.Mock(username="eve", id=3)
+EVE.name = "Eve Arden"
 
 
 class UserList:
