@@ -170,7 +170,8 @@ class PushAction(tsrc.cli.push.PushAction):
             merge_request.assignee_id = assignee.id
 
         approvers = self.handle_approvers()
-        merge_request.approvals.set_approvers([x.id for x in approvers])
+        if approvers:
+            merge_request.approvals.set_approvers([x.id for x in approvers])
 
         merge_request.save()
 
