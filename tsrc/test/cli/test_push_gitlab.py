@@ -62,7 +62,7 @@ def execute_push(
     workspace_mock.get_github_enterprise_url.return_value = None
     workspace_mock.get_gitlab_url.return_value = GITLAB_URL
 
-    repository_info = RepositoryInfo(workspace_mock, repo_path)
+    repository_info = RepositoryInfo.read(repo_path, workspace=workspace_mock)
     push_action = PushAction(repository_info, push_args, gitlab_api=gitlab_mock)
     push_action.execute()
 

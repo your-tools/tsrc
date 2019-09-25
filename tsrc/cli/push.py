@@ -7,6 +7,7 @@ import re
 from typing import cast, Iterable, Optional
 from urllib.parse import urlparse
 
+import attr
 from path import Path
 import cli_ui as ui
 
@@ -52,37 +53,51 @@ def project_name_from_url(url: str) -> str:
     return res
 
 
+@attr.s(frozen=True)
 class RepositoryInfo:
-    def __init__(self, workspace: tsrc.Workspace, working_path: Path = None) -> None:
-        self.project_name = None  # type: Optional[str]
-        self.url = None  # type: Optional[str]
-        self.path = None  # type: Optional[Path]
-        self.current_branch = None  # type: Optional[str]
-        self.service = None  # type: Optional[str]
-        self.tracking_ref = None  # type: Optional[str]
-        self.repository_login_url = None  # type: Optional[str]
-        self.read_working_path(workspace=workspace, working_path=working_path)
+    project_name = attr.ib()  # type: str
+    url = attr.ib()  # type: str
+    path = attr.ib()  # type: Path
+    current_branch = attr.ib()  # type: str
+    service = attr.ib()  # type: str
+    tracking_ref = attr.ib()  # type: Optional[str]
+    repository_login_url = attr.ib()  # type: Optional[str]
 
-    def read_working_path(
-        self, workspace: tsrc.Workspace, working_path: Path = None
-    ) -> None:
-        self.path = tsrc.git.get_repo_root(working_path=working_path)
-        self.current_branch = tsrc.git.get_current_branch(self.path)
+    @classmethod
+    def read(cls, working_path: Path, *, workspace: tsrc.Workspace) -> "RepositoryInfo":
+        repo_path = tsrc.git.get_repo_root(working_path=working_path)
+        current_branch = tsrc.git.get_current_branch(repo_path)
+        tracking_ref = tsrc.git.get_tracking_ref(repo_path)
+
+        # TODO: we should know the name of the remote at this point,
+        # no need to hard-code 'origin'!
         rc, out = tsrc.git.run_captured(
-            self.path, "remote", "get-url", "origin", check=False
+            repo_path, "remote", "get-url", "origin", check=False
         )
         if rc == 0:
-            self.url = out
-        if not self.url:
-            return
-        self.tracking_ref = tsrc.git.get_tracking_ref(self.path)
-        self.project_name = project_name_from_url(self.url)
-        self.service = service_from_url(url=self.url, workspace=workspace)
+            url = out
+        if not url:
+            raise NoRemoteConfigured(repo_path, "origin")
 
-        if self.service == "gitlab":
-            self.repository_login_url = workspace.get_gitlab_url()
-        elif self.service == "github_enterprise":
-            self.repository_login_url = workspace.get_github_enterprise_url()
+        project_name = project_name_from_url(url)
+        service = service_from_url(url=url, workspace=workspace)
+
+        if service == "gitlab":
+            repository_login_url = workspace.get_gitlab_url()
+        elif service == "github_enterprise":
+            repository_login_url = workspace.get_github_enterprise_url()
+        else:
+            repository_login_url = None
+
+        return cls(
+            project_name=project_name,
+            url=url,
+            path=repo_path,
+            current_branch=current_branch,
+            service=service,
+            tracking_ref=tracking_ref,
+            repository_login_url=repository_login_url,
+        )
 
 
 class PushAction(metaclass=abc.ABCMeta):
@@ -167,8 +182,14 @@ def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     workspace.load_manifest()
 
-    repository_info = RepositoryInfo(workspace)
+    repository_info = RepositoryInfo.read(Path.getcwd(), workspace=workspace)
     service_name = repository_info.service
     module = importlib.import_module("tsrc.cli.push_%s" % service_name)
     push_action = module.PushAction(repository_info, args)  # type: ignore
     push_action.execute()
+
+
+class NoRemoteConfigured(tsrc.Error):
+    def __init__(self, path: Path, name: str):
+        message = "No remote named %s found in %s" % (name, path)
+        super().__init__(message)
