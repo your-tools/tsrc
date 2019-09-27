@@ -50,11 +50,8 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         except tsrc.Error:
             raise tsrc.Error("Not on any branch")
 
-        # FIXME: is repo.branch allowed to be None ?
         if current_branch and current_branch != repo.branch:
-            self.bad_branches.append(  # type: ignore
-                (repo.src, current_branch, repo.branch)
-            )
+            self.bad_branches.append((repo.src, current_branch, repo.branch))
 
     def fetch(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace_path / repo.src

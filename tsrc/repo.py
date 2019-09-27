@@ -13,7 +13,7 @@ class Remote:
 @attr.s(frozen=True)
 class Repo:
     src = attr.ib()  # type: str
-    branch = attr.ib(default="master")  # type: Optional[str]
+    branch = attr.ib(default="master")  # type: str
     sha1 = attr.ib(default=None)  # type: Optional[str]
     tag = attr.ib(default=None)  # type: Optional[str]
     shallow = attr.ib(default=None)  # type: Optional[bool]
