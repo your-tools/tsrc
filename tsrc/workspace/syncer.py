@@ -1,4 +1,5 @@
 from typing import List, Tuple  # noqa
+import attr
 from path import Path
 import cli_ui as ui
 
@@ -11,10 +12,17 @@ class BadBranches(tsrc.Error):
     pass
 
 
+@attr.s(frozen=True)
+class RepoAtIncorrectBranchDescription:
+    src = attr.ib()  # type: str
+    actual = attr.ib()  # type: str
+    expected = attr.ib()  # type: str
+
+
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace_path: Path, *, force: bool = False) -> None:
         self.workspace_path = workspace_path
-        self.bad_branches = list()  # type: List[Tuple[str, str, str]]
+        self.bad_branches = list()  # type: List[RepoAtIncorrectBranchDescription]
         self.force = force
 
     def on_start(self, *, num_items: int) -> None:
@@ -51,7 +59,11 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             raise tsrc.Error("Not on any branch")
 
         if current_branch and current_branch != repo.branch:
-            self.bad_branches.append((repo.src, current_branch, repo.branch))
+            self.bad_branches.append(
+                RepoAtIncorrectBranchDescription(
+                    src=repo.src, actual=current_branch, expected=repo.branch
+                )
+            )
 
     def fetch(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace_path / repo.src
@@ -90,8 +102,8 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         ui.error("Some projects were not on the correct branch")
         headers = ("project", "actual", "expected")
         data = [
-            ((ui.bold, name), (ui.red, actual), (ui.green, expected))
-            for (name, actual, expected) in self.bad_branches
+            ((ui.bold, x.src), (ui.red, x.actual), (ui.green, x.expected))
+            for x in self.bad_branches
         ]
         ui.info_table(data, headers=headers)
         raise BadBranches()
