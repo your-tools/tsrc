@@ -19,6 +19,7 @@ message_template = "Bump to {new_version}"
 
 [[file]]
 src = "setup.cfg"
+search = "version ="
 
 
 [[before_push]]
