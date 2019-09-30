@@ -48,6 +48,15 @@ class NoGitLabToken(tsrc.Error):
         super().__init__(message)
 
 
+class FeatureNotAvailable(tsrc.Error):
+    def __init__(self, feature: str) -> None:
+        self.name = feature
+        message = (
+            "The '%s' feature is not available on your GitLab installation" % self.name
+        )
+        super().__init__(message)
+
+
 def get_token() -> str:
     config = tsrc.parse_tsrc_config()
     try:
@@ -94,6 +103,15 @@ class PushAction(tsrc.cli.push.PushAction):
             else:
                 raise
 
+    def check_gitlab_feature(self, name: str) -> None:
+        assert self.gitlab_api
+        # Note: don't worry, the http request is cached under the hood by
+        # the python-gitlab library. This should be fine
+        features = self.gitlab_api.features.list()
+        names = [x.name for x in features]
+        if name not in names:
+            raise FeatureNotAvailable(name)
+
     def setup_service(self) -> None:
         if not self.gitlab_api:
             token = get_token()
@@ -110,10 +128,9 @@ class PushAction(tsrc.cli.push.PushAction):
         assert self.requested_assignee
         return self.get_reviewer_by_username(self.requested_assignee)
 
-    def handle_approvers(self) -> List[User]:
-        res = list()  # type: List[User]
-        if not self.args.reviewers:
-            return res
+    def handle_reviewers(self) -> List[User]:
+        self.check_gitlab_feature("multiple_merge_request_assignees")
+        res = list()
         for requested_username in self.args.reviewers:
             username = requested_username.strip()
             approver = self.get_reviewer_by_username(username)
@@ -169,8 +186,13 @@ class PushAction(tsrc.cli.push.PushAction):
         if assignee:
             merge_request.assignee_id = assignee.id
 
-        approvers = self.handle_approvers()
-        merge_request.approvals.set_approvers([x.id for x in approvers])
+        if self.args.reviewers:
+            approvers = self.handle_reviewers()
+            if approvers:
+                ui.info_2(
+                    "Requesting approvals from", ", ".join(x.name for x in approvers)
+                )
+                merge_request.approvals.set_approvers([x.id for x in approvers])
 
         merge_request.save()
 

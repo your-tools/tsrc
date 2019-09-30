@@ -1,3 +1,9 @@
+# v0.9.2 - (2019-09-30)
+
+* Additional bug fix for #165 - the fix in 0.9.1 was incomplete
+* Improve error message when trying to use non-supported GitLab features (like using `tsrc push --reviewer`
+  on GitLab Community Edition)
+
 # v0.9.1 - (2019-09-23)
 
 * Improve error message when `tsrc foreach` fails to start the process. Suggested by @dlewis-ald in #163

@@ -32,9 +32,7 @@ def init_checks():
 
     env = os.environ.copy()
     env["MYPYPATH"] = "stubs/"
-    append_check(
-        "mypy", "mypy", "tsrc", "--strict", "--ignore-missing-imports", env=env
-    )
+    append_check("mypy", "mypy", "tsrc", env=env)
 
     nprocs = multiprocessing.cpu_count()
     pytest_args = ["pytest", "--cov", ".", "--cov-report", "term", "-n", str(nprocs)]

@@ -165,7 +165,8 @@ def main_impl(args: ArgsList = None) -> None:
         "--approver",
         dest="reviewers",
         action="append",
-        help="Request review from the given users",
+        help="Request review from the given users - "
+        "not available for GitLab Community Edition, use --assignee instead",
     )
 
     github_group = push_parser.add_argument_group("github options")

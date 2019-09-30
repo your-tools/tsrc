@@ -4,19 +4,25 @@ from typing import Any, List
 from gitlab import Gitlab
 from path import Path
 import mock
-
+import pytest
 
 import tsrc
 from tsrc.test.helpers.cli import CLI
 from tsrc.cli.push import RepositoryInfo
-from tsrc.cli.push_gitlab import PushAction
+from tsrc.cli.push_gitlab import PushAction, FeatureNotAvailable
 
 
 GITLAB_URL = "http://gitlab.example.com"
 
+# Can't use 'name' in the ctor because it sets the name
+# of the mock, not the 'name' attribute of the returned
+# instance.
 ALICE = mock.Mock(username="alice", id=1)
-BOB = mock.Mock(username="bob", id=2)
+ALICE.name = "Alice Liddell"
+BOB = mock.Mock(username="bob", id=2, name="")
+BOB.name = "Bob SquarePants"
 EVE = mock.Mock(username="eve", id=3)
+EVE.name = "Eve Arden"
 
 
 class UserList:
@@ -52,6 +58,11 @@ def gitlab_mock_with_merge_requests(mock_merge_requests: List[Any]) -> Any:
 
     gitlab_mock.groups.get.return_value = mock_group
 
+    mock_feature = mock.Mock()
+    mock_feature.name = "multiple_merge_request_assignees"
+
+    gitlab_mock.features.list.return_value = [mock_feature]
+
     return gitlab_mock
 
 
@@ -62,9 +73,21 @@ def execute_push(
     workspace_mock.get_github_enterprise_url.return_value = None
     workspace_mock.get_gitlab_url.return_value = GITLAB_URL
 
-    repository_info = RepositoryInfo(workspace_mock, repo_path)
+    repository_info = RepositoryInfo.read(repo_path, workspace=workspace_mock)
     push_action = PushAction(repository_info, push_args, gitlab_api=gitlab_mock)
     push_action.execute()
+
+
+def test_check_for_multiple_assignees_feature(
+    repo_path: Path, tsrc_cli: CLI, push_args: argparse.Namespace
+) -> None:
+    gitlab_mock = gitlab_mock_with_merge_requests([])
+    gitlab_mock.features.list.return_value = []
+    push_args.reviewers = ["alice", "bob"]
+
+    with pytest.raises(FeatureNotAvailable) as e:
+        execute_push(repo_path, push_args, gitlab_mock)
+    assert e.value.name == "multiple_merge_request_assignees"
 
 
 def test_creating_merge_request_explicit_target_branch_with_assignee(
@@ -99,7 +122,6 @@ def test_creating_merge_request_explicit_target_branch_with_assignee(
 def test_creating_merge_request_uses_default_branch(
     repo_path: Path, tsrc_cli: CLI, push_args: argparse.Namespace
 ) -> None:
-
     gitlab_mock = gitlab_mock_with_merge_requests([])
     mock_project = gitlab_mock.projects.get()
     mock_project.default_branch = "devel"
@@ -178,7 +200,6 @@ def test_close_merge_request(
 def test_do_not_change_mr_target(
     repo_path: Path, tsrc_cli: CLI, push_args: argparse.Namespace
 ) -> None:
-
     mock_mr = mock.Mock(iid="42", web_url="http://42", target_branch="old-branch")
     gitlab_mock = gitlab_mock_with_merge_requests([mock_mr])
 

@@ -4,6 +4,7 @@ import mock
 from path import Path
 import tsrc
 from tsrc.cli.push_git import PushAction
+from tsrc.cli.push import RepositoryInfo
 
 
 def test_push_use_tracked_branch(
@@ -12,7 +13,9 @@ def test_push_use_tracked_branch(
     tsrc.git.run(repo_path, "checkout", "-b", "local")
     tsrc.git.run(repo_path, "push", "-u", "origin", "local:remote")
 
-    repository_info = tsrc.cli.push.RepositoryInfo(mock_workspace_git_urls(), repo_path)
+    repository_info = RepositoryInfo.read(
+        repo_path, workspace=mock_workspace_git_urls()
+    )
     dummy_push = PushAction(repository_info, push_args)
     dummy_push.push()
     _, out = tsrc.git.run_captured(repo_path, "ls-remote")
@@ -25,7 +28,9 @@ def test_push_use_given_push_spec(
 ) -> None:
     tsrc.git.run(repo_path, "checkout", "-b", "local")
     push_args.push_spec = "local:remote"
-    repository_info = tsrc.cli.push.RepositoryInfo(mock_workspace_git_urls(), repo_path)
+    repository_info = RepositoryInfo.read(
+        repo_path, workspace=mock_workspace_git_urls()
+    )
     dummy_push = PushAction(repository_info, push_args)
     dummy_push.push()
     _, out = tsrc.git.run_captured(repo_path, "ls-remote")
