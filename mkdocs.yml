@@ -24,7 +24,7 @@ nav:
 
 
 - Reference:
-  - Comand line usage: ref/cli.md
+  - Command line usage: ref/cli.md
   - Configuration files formats: ref/formats.md
 
 - Contributing: contrib.md
