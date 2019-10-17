@@ -130,7 +130,7 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def handle_reviewers(self) -> List[User]:
         self.check_gitlab_feature("multiple_merge_request_assignees")
-        res = list()
+        res = []
         for requested_username in self.args.reviewers:
             username = requested_username.strip()
             approver = self.get_reviewer_by_username(username)
@@ -143,8 +143,8 @@ class PushAction(tsrc.cli.push.PushAction):
         if self.group:
             in_group = self.get_users_matching(self.group.members, username)
         else:
-            in_group = list()
-        candidates = list()
+            in_group = []
+        candidates = []
         seen = set()  # type: Set[int]
         for user in itertools.chain(in_project, in_group):
             if user.id in seen:

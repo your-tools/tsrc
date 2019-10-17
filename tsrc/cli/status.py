@@ -37,7 +37,7 @@ def describe_git_status(git_status: tsrc.git.Status) -> List[ui.Token]:
 
 
 def describe_branch(git_status: tsrc.git.Status) -> List[ui.Token]:
-    res = list()  # type: List[ui.Token]
+    res = []  # type: List[ui.Token]
     if git_status.branch:
         res += [ui.green, git_status.branch]
     elif git_status.sha1:

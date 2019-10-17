@@ -23,17 +23,17 @@ class RepoNotFound(tsrc.Error):
 
 class Manifest:
     def __init__(self) -> None:
-        self._repos = list()  # type: List[tsrc.Repo]
-        self.copyfiles = list()  # type: List[Tuple[str, str]]
+        self._repos = []  # type: List[tsrc.Repo]
+        self.copyfiles = []  # type: List[Tuple[str, str]]
         self.gitlab = None  # type: Optional[GitLabConfig]
         self.github_enterprise = None  # type: Optional[GithubEnterpriseConfig]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
 
     def load(self, config: ManifestConfig) -> None:
-        self.copyfiles = list()
+        self.copyfiles = []
         self.gitlab = config.get("gitlab")
         self.github_enterprise = config.get("github_enterprise")
-        repos = config.get("repos") or list()
+        repos = config.get("repos") or []
         for repo_config in repos:
             self._handle_repo(repo_config)
             self._handle_copies(repo_config)
@@ -56,7 +56,7 @@ class Manifest:
 
     def _handle_remotes(self, repo_config: RepoConfig) -> List[tsrc.Remote]:
         remotes_config = repo_config.get("remotes")
-        res = list()  # type: List[tsrc.Remote]
+        res = []  # type: List[tsrc.Remote]
         if remotes_config:
             for remote_config in remotes_config:
                 remote = tsrc.Remote(
@@ -76,12 +76,12 @@ class Manifest:
             self.copyfiles.append((src_copy, dest_copy))
 
     def _handle_groups(self, config: ManifestConfig) -> None:
-        elements = set(repo.src for repo in self._repos)
+        elements = {repo.src for repo in self._repos}
         self.group_list = tsrc.GroupList(elements=elements)
-        groups_config = config.get("groups", dict())
+        groups_config = config.get("groups", {})
         for name, group_config in groups_config.items():
             elements = group_config["repos"]
-            includes = group_config.get("includes", list())
+            includes = group_config.get("includes", [])
             self.group_list.add(name, elements, includes=includes)
 
     def get_repos(
@@ -105,7 +105,7 @@ class Manifest:
     def _get_repos_in_groups(self, groups: List[str]) -> List[tsrc.Repo]:
         assert self.group_list
         elements = self.group_list.get_elements(groups=groups)
-        res = list()
+        res = []
         for src in elements:
             res.append(self.get_repo(src))
         return sorted(res, key=operator.attrgetter("src"))

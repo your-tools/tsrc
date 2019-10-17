@@ -26,8 +26,8 @@ def get_config_auth_object(auth_system: str) -> Dict[str, Any]:
     config = tsrc.config.parse_tsrc_config()
     auth = config.get("auth")
     if not auth:
-        return dict()
-    return cast(Dict[str, Any], auth.get(auth_system, dict()))
+        return {}
+    return cast(Dict[str, Any], auth.get(auth_system, {}))
 
 
 def get_previous_token(auth_system: str) -> Optional[str]:
@@ -76,12 +76,12 @@ def save_token(token: str, auth_system: str) -> None:
     if cfg_path.exists():
         config = tsrc.config.parse_tsrc_config(roundtrip=True)
     else:
-        config = tsrc.Config(dict())
+        config = tsrc.Config({})
     if "auth" not in config:
-        config["auth"] = dict()
+        config["auth"] = {}
     auth = config["auth"]
     if auth_system not in auth:
-        auth[auth_system] = dict()
+        auth[auth_system] = {}
     auth[auth_system]["token"] = token
     tsrc.config.dump_tsrc_config(config)
 

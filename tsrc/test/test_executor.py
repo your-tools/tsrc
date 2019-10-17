@@ -29,7 +29,7 @@ class FakeTask(tsrc.Task[str]):
 
 def test_doing_nothing() -> None:
     task = FakeTask()
-    tsrc.run_sequence(list(), task)
+    tsrc.run_sequence([], task)
 
 
 def test_happy() -> None:

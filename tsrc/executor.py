@@ -38,14 +38,14 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
 class SequentialExecutor(Generic[T]):
     def __init__(self, task: Task[T]) -> None:
         self.task = task
-        self.errors = list()  # type: List[Tuple[T, tsrc.Error]]
+        self.errors = []  # type: List[Tuple[T, tsrc.Error]]
 
     def process(self, items: List[T]) -> None:
         if not items:
             return
         self.task.on_start(num_items=len(items))
 
-        self.errors = list()
+        self.errors = []
         num_items = len(items)
         for i, item in enumerate(items):
             self.process_one(i, num_items, item)

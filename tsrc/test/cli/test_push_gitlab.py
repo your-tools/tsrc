@@ -37,7 +37,7 @@ class UserList:
 
 
 def execute_query(*, query: str, **kwargs: Any) -> UserList:
-    matches = list()
+    matches = []
     for user in [ALICE, BOB, EVE]:
         if user.username == query:
             matches.append(user)

@@ -41,7 +41,7 @@ def test_create(
     workspace_path: Path,
 ) -> None:
     mock_repo = mock.Mock()
-    mock_repo.pull_requests.return_value = list()
+    mock_repo.pull_requests.return_value = []
     mock_repo.owner = mock.Mock()
     mock_repo.owner.login = "owner"
     mock_repo.name = "project"
@@ -81,7 +81,7 @@ def test_push_custom_tracked_branch(
     repo_path: Path, push_args: argparse.Namespace, github_mock: Any
 ) -> None:
     stub_repo = mock.Mock()
-    stub_repo.pull_requests.return_value = list()
+    stub_repo.pull_requests.return_value = []
     stub_repo.default_branch = "master"
     github_mock.repository.return_value = stub_repo
     tsrc.git.run(repo_path, "checkout", "-b", "local")
