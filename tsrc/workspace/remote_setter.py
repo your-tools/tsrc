@@ -22,7 +22,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
         try:
             self.try_process_repo(repo)
-        except Exception as error:
+        except Exception:
             raise tsrc.Error(repo.src, ":", "Failed to configure remotes")
 
     def try_process_repo(self, repo: tsrc.Repo) -> None:
