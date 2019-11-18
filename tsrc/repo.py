@@ -18,7 +18,7 @@ class Repo:
     tag = attr.ib(default=None)  # type: Optional[str]
     shallow = attr.ib(default=None)  # type: Optional[bool]
 
-    remotes = attr.ib(default=list())  # type: List[Remote]
+    remotes = attr.ib(default=[])  # type: List[Remote]
 
     @property
     def clone_url(self) -> str:

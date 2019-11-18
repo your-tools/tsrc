@@ -23,7 +23,7 @@ class ManifestConfig:
     branch = attr.ib(default="master")  # type: str
     tag = attr.ib(default=None)  # type: Optional[str]
     shallow = attr.ib(default=False)  # type: bool
-    groups = attr.ib(default=list())  # type: List[str]
+    groups = attr.ib(default=[])  # type: List[str]
     file_path = attr.ib(default=None)  # type: Optional[Path]
 
     @classmethod

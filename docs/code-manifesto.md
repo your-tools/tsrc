@@ -131,16 +131,19 @@ list_1.extend(list_2)
 # No
 list_1 += list_2
 ```
-* Use explicit methods to initialize lists and dictionaries. The code is more readable, and you have to use `set()` to initialize sets anyway:
+* Only use `list()` and `dict()` to *convert* a value to a list or dict. Prefer literals when possible
 
 ```python
 # Yes
-my_list = list()
-my_dict = dict()
-
-# No
 my_list = []
 my_dict = {}
+
+# Also yes:
+my_list = list(yield_stuff())
+
+# No
+my_list = list()
+my_dict = dict()
 ```
 
 * Also use explicit call to list() in order to make a copy:

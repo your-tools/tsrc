@@ -20,7 +20,7 @@ class Check:
 
 
 def init_checks():
-    res = list()
+    res = []
 
     def append_check(name, *cmd, env=None):
         res.append(Check(name, cmd, env=env))

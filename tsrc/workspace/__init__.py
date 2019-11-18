@@ -50,7 +50,7 @@ class Workspace:
         return self.local_manifest.shallow
 
     def clone_missing(self) -> None:
-        to_clone = list()
+        to_clone = []
         for repo in self.get_repos():
             repo_path = self.root_path / repo.src
             if not repo_path.exists():

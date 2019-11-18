@@ -15,7 +15,7 @@ RemoteConfig = Tuple[str, str]
 class ManifestHandler:
     def __init__(self, path: Path) -> None:
         self.path = path
-        self.data = {"repos": list()}  # type: Dict[str, Any]
+        self.data = {"repos": []}  # type: Dict[str, Any]
 
     @property
     def yaml_path(self) -> Path:
@@ -38,19 +38,19 @@ class ManifestHandler:
     def configure_group(self, name: str, repos: List[str]) -> None:
         groups = self.data.get("groups")
         if not groups:
-            self.data["groups"] = dict()
+            self.data["groups"] = {}
             groups = self.data["groups"]
-        groups[name] = dict()
+        groups[name] = {}
         groups[name]["repos"] = repos
         self.push(message="add %s group" % name)
 
     def configure_gitlab(self, *, url: str) -> None:
-        self.data["gitlab"] = dict()
+        self.data["gitlab"] = {}
         self.data["gitlab"]["url"] = url
         self.push("Add gitlab URL: %s" % url)
 
     def configure_github_enterprise(self, *, url: str) -> None:
-        self.data["github_enterprise"] = dict()
+        self.data["github_enterprise"] = {}
         self.data["github_enterprise"]["url"] = url
         self.push("Add github_enterprise URL: %s" % url)
 
@@ -79,13 +79,13 @@ class ManifestHandler:
         self.configure_repo(src, "tag", tag)
 
     def set_repo_file_copies(self, src: str, copies: List[CopyConfig]) -> None:
-        copy_dicts = list()
+        copy_dicts = []
         for copy_src, copy_dest in copies:
             copy_dicts.append({"src": copy_src, "dest": copy_dest})
         self.configure_repo(src, "copy", copy_dicts)
 
     def set_repo_remotes(self, src: str, remotes: List[RemoteConfig]) -> None:
-        remote_dicts = list()
+        remote_dicts = []
         for name, url in remotes:
             remote_dicts.append({"name": name, "url": url})
         repo = self.get_repo(src)

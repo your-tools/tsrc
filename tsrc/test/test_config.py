@@ -89,4 +89,4 @@ def test_use_pure_python_types_when_not_roundtripping(tmp_path: Path) -> None:
     # Usually it's bad to compare types directly, and isinstance()
     # should be used instead. But here we want to assert we have
     # a proper dict, and not an OrderedDict or a yaml's CommentedMap
-    assert type(parsed) == type(dict())  # noqa
+    assert type(parsed) == type({})  # noqa

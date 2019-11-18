@@ -136,7 +136,7 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     assert_working_path(working_path)
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
-    options = dict()  # type: Dict[str, Any]
+    options = {}  # type: Dict[str, Any]
     options["stdout"] = subprocess.PIPE
     options["stderr"] = subprocess.STDOUT
 

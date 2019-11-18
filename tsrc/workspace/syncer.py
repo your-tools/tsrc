@@ -22,7 +22,7 @@ class RepoAtIncorrectBranchDescription:
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def __init__(self, workspace_path: Path, *, force: bool = False) -> None:
         self.workspace_path = workspace_path
-        self.bad_branches = list()  # type: List[RepoAtIncorrectBranchDescription]
+        self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
         self.force = force
 
     def on_start(self, *, num_items: int) -> None:
