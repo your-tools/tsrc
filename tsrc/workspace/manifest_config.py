@@ -25,6 +25,7 @@ class ManifestConfig:
     shallow = attr.ib(default=False)  # type: bool
     groups = attr.ib(default=[])  # type: List[str]
     file_path = attr.ib(default=None)  # type: Optional[Path]
+    all_repos = attr.ib(default=False)  # type: bool
 
     @classmethod
     def from_dict(cls, as_dict: Dict[str, Any]) -> "ManifestConfig":

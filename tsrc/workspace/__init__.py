@@ -49,6 +49,10 @@ class Workspace:
     def shallow(self) -> bool:
         return self.local_manifest.shallow
 
+    @property
+    def all_repos(self) -> bool:
+        return self.local_manifest.all_repos
+
     def clone_missing(self) -> None:
         to_clone = []
         for repo in self.get_repos():

@@ -36,9 +36,16 @@ class LocalManifest:
     def active_groups(self) -> List[str]:
         return self.load_config().groups
 
+    @property
+    def all_repos(self) -> bool:
+        return self.load_config().all_repos
+
     def get_repos(self) -> List[tsrc.Repo]:
         assert self.manifest, "manifest is empty. Did you call load()?"
-        return self.manifest.get_repos(groups=self.active_groups)
+        if self.all_repos:
+            return self.manifest.get_repos(all_=True)
+        else:
+            return self.manifest.get_repos(groups=self.active_groups)
 
     def load(self) -> None:
         config = self.load_config()
