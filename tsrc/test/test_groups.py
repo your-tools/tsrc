@@ -11,11 +11,6 @@ def test_happy_grouping() -> None:
     assert actual == {"a", "b", "c"}
 
 
-def test_default_is_all() -> None:
-    group_list = tsrc.GroupList(elements={"a", "b", "c"})
-    assert group_list.get_elements() == {"a", "b", "c"}
-
-
 def test_unknown_element() -> None:
     group_list = tsrc.GroupList(elements={"a", "b", "c"})
     with pytest.raises(tsrc.UnknownGroupElement) as e:
