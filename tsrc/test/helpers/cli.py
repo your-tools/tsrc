@@ -2,6 +2,7 @@ from typing import Any
 import os
 from path import Path
 import pytest
+import cli_ui as ui
 
 import tsrc.cli.main
 
@@ -11,10 +12,13 @@ class CLI:
         self.workspace_path = Path(os.getcwd())
 
     def run(self, *args: str, expect_fail: bool = False) -> None:
+        ui.info(">", ui.bold, "tsrc", *args, end="")
         if expect_fail:
+            ui.info(ui.red, " (expecting failure)")
             with pytest.raises(tsrc.Error):
                 tsrc.cli.main.testable_main(args)
         else:
+            ui.info()
             tsrc.cli.main.testable_main(args)
 
 
