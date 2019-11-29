@@ -58,11 +58,9 @@ class GroupList(Generic[T]):
     def get_group(self, name: str) -> Optional[Group[T]]:
         return self.groups.get(name)
 
-    def get_elements(self, groups: Optional[List[str]] = None) -> Iterable[T]:
+    def get_elements(self, groups: List[str]) -> Iterable[T]:
         self._groups_seen = set()
         res = set()  # type: Set[T]
-        if not groups:
-            return self.all_elements
         self._rec_get_elements(res, groups, parent_group=None)
         return res
 
