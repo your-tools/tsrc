@@ -58,12 +58,10 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
-    workspace.load_manifest()
     cmd_runner = CmdRunner(
         workspace.root_path, args.cmd, args.cmd_as_str, shell=args.shell
     )
-    manifest = workspace.local_manifest.manifest
-    assert manifest
+    manifest = workspace.local_manifest.get_manifest()
     cloned_repos = workspace.get_repos()
     requested_repos = manifest.get_repos(groups=args.groups)
 

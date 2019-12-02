@@ -124,5 +124,4 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     status_collector = StatusCollector(workspace.root_path)
-    workspace.load_manifest()
     tsrc.run_sequence(workspace.get_repos(), status_collector)
