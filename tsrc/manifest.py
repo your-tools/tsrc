@@ -9,12 +9,6 @@ import schema
 
 import tsrc
 
-ManifestConfig = NewType("ManifestConfig", Dict[str, Any])
-RepoConfig = NewType("RepoConfig", Dict[str, Any])
-
-GitLabConfig = NewType("GitLabConfig", Dict[str, Any])
-GithubEnterpriseConfig = NewType("GithubEnterpriseConfig", Dict[str, Any])
-
 
 class RepoNotFound(tsrc.Error):
     def __init__(self, src: str) -> None:
@@ -25,22 +19,31 @@ class Manifest:
     def __init__(self) -> None:
         self._repos = []  # type: List[tsrc.Repo]
         self.copyfiles = []  # type: List[Tuple[str, str]]
-        self.gitlab = None  # type: Optional[GitLabConfig]
-        self.github_enterprise = None  # type: Optional[GithubEnterpriseConfig]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
+        self.gitlab_url = None  # type Optional[str]
+        self.github_enterprise_url = None  # type: Optional[str]
 
-    def load(self, config: ManifestConfig) -> None:
+    def apply_config(self, config: Any) -> None:
+        """ Apply config coming form the yaml file """
+        # Note: we cannot just serialize the yaml file into the class,
+        # because we need to convert the plain old dicts into
+        # higher-level classes.
         self.copyfiles = []
-        self.gitlab = config.get("gitlab")
-        self.github_enterprise = config.get("github_enterprise")
-        repos = config.get("repos") or []
-        for repo_config in repos:
+        repos_config = config["repos"]
+        for repo_config in repos_config:
             self._handle_repo(repo_config)
             self._handle_copies(repo_config)
 
-        self._handle_groups(config)
+        groups_config = config.get("groups")
+        self._handle_groups(groups_config)
 
-    def _handle_repo(self, repo_config: RepoConfig) -> None:
+        for key in ["github_enterprise", "gitlab"]:
+            service_config = config.get(key)
+            if service_config:
+                url = service_config["url"]
+                setattr(self, f"{key}_url", url)
+
+    def _handle_repo(self, repo_config: Any) -> None:
         src = repo_config["src"]
         branch = repo_config.get("branch", "master")
         tag = repo_config.get("tag")
@@ -54,7 +57,7 @@ class Manifest:
         repo = tsrc.Repo(src=src, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
         self._repos.append(repo)
 
-    def _handle_remotes(self, repo_config: RepoConfig) -> List[tsrc.Remote]:
+    def _handle_remotes(self, repo_config: Any) -> List[tsrc.Remote]:
         remotes_config = repo_config.get("remotes")
         res = []  # type: List[tsrc.Remote]
         if remotes_config:
@@ -65,7 +68,7 @@ class Manifest:
                 res.append(remote)
         return res
 
-    def _handle_copies(self, repo_config: RepoConfig) -> None:
+    def _handle_copies(self, repo_config: Any) -> None:
         if "copy" not in repo_config:
             return
         to_cp = repo_config["copy"]
@@ -75,10 +78,11 @@ class Manifest:
             src_copy = os.path.join(repo_config["src"], src_copy)
             self.copyfiles.append((src_copy, dest_copy))
 
-    def _handle_groups(self, config: ManifestConfig) -> None:
+    def _handle_groups(self, groups_config: Any) -> None:
         elements = {repo.src for repo in self._repos}
         self.group_list = tsrc.GroupList(elements=elements)
-        groups_config = config.get("groups", {})
+        if not groups_config:
+            return
         for name, group_config in groups_config.items():
             elements = group_config["repos"]
             includes = group_config.get("includes", [])
@@ -157,8 +161,6 @@ def load(manifest_path: Path) -> Manifest:
         }
     )
     parsed = tsrc.parse_config(manifest_path, manifest_schema)
-    parsed = ManifestConfig(parsed)  # type: ignore
-    as_manifest_config = cast(ManifestConfig, parsed)
     res = Manifest()
-    res.load(as_manifest_config)
+    res.apply_config(parsed)
     return res

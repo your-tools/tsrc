@@ -32,16 +32,14 @@ def test_can_configure_gitlab(tmp_path: Path, git_server: GitServer) -> None:
     test_url = "http://gitlab.example.org"
     git_server.manifest.configure_gitlab(url=test_url)
     manifest = read_remote_manifest(tmp_path, git_server)
-    assert manifest.gitlab
-    assert manifest.gitlab["url"] == test_url
+    assert manifest.gitlab_url == test_url
 
 
 def test_can_configure_github_enterprise(tmp_path: Path, git_server: GitServer) -> None:
     test_url = "http://github.example.com"
     git_server.manifest.configure_github_enterprise(url=test_url)
     manifest = read_remote_manifest(tmp_path, git_server)
-    assert manifest.github_enterprise
-    assert manifest.github_enterprise["url"] == test_url
+    assert manifest.github_enterprise_url == test_url
 
 
 def test_git_server_add_repo_updates_manifest(

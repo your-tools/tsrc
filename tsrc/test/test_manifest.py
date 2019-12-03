@@ -36,11 +36,9 @@ repos:
 """
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
-    manifest.load(parsed)
-    assert manifest.gitlab
-    assert manifest.gitlab["url"] == "http://gitlab.example.com"
-    assert manifest.github_enterprise
-    assert manifest.github_enterprise["url"] == "http://github.example.com"
+    manifest.apply_config(parsed)
+    assert manifest.gitlab_url == "http://gitlab.example.com"
+    assert manifest.github_enterprise_url == "http://github.example.com"
     assert manifest.get_repos() == [
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:foo.git")],
@@ -81,7 +79,7 @@ repos:
 """
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
-    manifest.load(parsed)
+    manifest.apply_config(parsed)
 
     def assert_clone_url(src: str, url: str) -> None:
         repo = manifest.get_repo(src)
@@ -105,7 +103,7 @@ repos:
 """
     manifest = tsrc.manifest.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
-    manifest.load(parsed)
+    manifest.apply_config(parsed)
     one_repo = manifest.get_repo("foo")
     assert len(one_repo.remotes) == 1
 
