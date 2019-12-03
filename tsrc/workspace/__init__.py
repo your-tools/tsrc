@@ -44,9 +44,13 @@ class Workspace:
         self.config = WorkspaceConfig.from_file(root_path / ".tsrc" / "config.yml")
 
     def get_repos(self) -> List[tsrc.Repo]:
+        all_repos = self.config.clone_all_repos
         repo_groups = self.config.repo_groups
         manifest = self.get_manifest()
-        return manifest.get_repos(groups=repo_groups)
+        if all_repos:
+            return manifest.get_repos(all_=True)
+        else:
+            return manifest.get_repos(groups=repo_groups)
 
     def get_manifest(self) -> tsrc.Manifest:
         return self.local_manifest.get_manifest()

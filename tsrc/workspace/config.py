@@ -17,6 +17,7 @@ class WorkspaceConfig:
 
     shallow_clones = attr.ib(default=False)  # type: bool
     repo_groups = attr.ib(default=[])  # type: List[str]
+    clone_all_repos = attr.ib(default=False)  # type: bool
 
     @manifest_url.validator
     def check(self, attribute: str, value: Optional[str] = None) -> None:

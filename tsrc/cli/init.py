@@ -23,6 +23,7 @@ def main(args: argparse.Namespace) -> None:
     workspace_config = WorkspaceConfig(
         manifest_url=args.url,
         manifest_branch=args.branch,
+        clone_all_repos=args.clone_all_repos,
         repo_groups=args.groups,
         shallow_clones=args.shallow,
     )

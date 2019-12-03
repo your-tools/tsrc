@@ -17,7 +17,7 @@ def main(args: argparse.Namespace) -> None:
     if groups and not all_repos:
         ui.info(ui.green, "*", ui.reset, "Using groups from config:", ", ".join(groups))
     if all_repos:
-        ui.info(ui.green, "*", ui.reset, "Cloning all repos")
+        ui.info(ui.green, "*", ui.reset, "Synchronizing all repos")
 
     workspace.clone_missing()
     workspace.set_remotes()
