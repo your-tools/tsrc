@@ -16,7 +16,7 @@ def main(args: argparse.Namespace) -> None:
     cfg_path = workspace_path / ".tsrc" / "config.yml"
 
     if cfg_path.exists():
-        raise tsrc.Error(f"Workspace already configured with file {cfg_path}")
+        raise tsrc.Error("Workspace already configured with file " + cfg_path)
 
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 

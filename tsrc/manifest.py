@@ -41,7 +41,7 @@ class Manifest:
             service_config = config.get(key)
             if service_config:
                 url = service_config["url"]
-                setattr(self, f"{key}_url", url)
+                setattr(self, key + "_url", url)
 
     def _handle_repo(self, repo_config: Any) -> None:
         src = repo_config["src"]
