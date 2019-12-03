@@ -11,9 +11,10 @@ def main(args: argparse.Namespace) -> None:
     ui.info_2("Updating manifest")
     workspace.update_manifest()
 
-    groups = workspace.config.repo_groups
+    config = workspace.config
+    groups = config.repo_groups
     if groups:
-        ui.info(ui.green, "*", ui.reset, "Using groups from config:", ",".join(groups))
+        ui.info(ui.green, "*", ui.reset, "Using groups from config:", ", ".join(groups))
 
     workspace.clone_missing()
     workspace.set_remotes()
