@@ -177,7 +177,7 @@ def test_clone_all_repos(
     assert_cloned(workspace_path, "orphan")
 
 
-def test_use_specific_group(
+def test_use_specific_groups(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     git_server.add_group("foo", ["bar", "baz"])
@@ -185,7 +185,7 @@ def test_use_specific_group(
     git_server.add_repo("other")
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+    tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     assert_cloned(workspace_path, "bar")
     assert_cloned(workspace_path, "eggs")

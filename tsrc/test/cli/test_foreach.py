@@ -88,7 +88,7 @@ def test_foreach_with_explicit_groups(
     git_server.add_repo("other")
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+    tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     cmd = get_cmd_for_foreach_test(shell=False)
 
@@ -109,7 +109,7 @@ def test_foreach_with_groups_from_config(
     git_server.add_repo("other")
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+    tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     cmd = get_cmd_for_foreach_test(shell=False)
 
@@ -145,7 +145,7 @@ def test_foreach_all_cloned_repos_by_default(
     git_server.add_repo("other")
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+    tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     cmd = get_cmd_for_foreach_test(shell=False)
 

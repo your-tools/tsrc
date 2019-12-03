@@ -142,7 +142,7 @@ def main_impl(args: ArgsList = None) -> None:
     init_parser = add_workspace_subparser(subparsers, "init")
     init_parser.add_argument("url")
     init_parser.add_argument("-b", "--branch")
-    init_parser.add_argument("-g", "--group", action="append", dest="groups")
+    init_parser.add_argument("-g", "--group", "--groups", nargs="+", dest="groups")
     init_parser.add_argument(
         "--clone-all-repos",
         action="store_true",
