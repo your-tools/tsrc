@@ -3,7 +3,9 @@
 
 from typing import Iterable, List, Tuple, Optional
 
+import cli_ui as ui
 from path import Path
+import ruamel.yaml
 
 import tsrc
 import tsrc.executor
@@ -17,10 +19,28 @@ from .local_manifest import LocalManifest
 from .config import WorkspaceConfig
 
 
+def copy_cfg_path_if_needed(root_path: Path) -> None:
+    """ Backward compatibility layer with tsrc < 1.0 """
+    old_path = root_path / ".tsrc/manifest.yml"
+    new_path = root_path / ".tsrc/config.yml"
+    if old_path.exists() and not new_path.exists():
+        ui.info("Migrating config to new path:", new_path)
+        yaml = ruamel.yaml.YAML(typ="rt")
+        old_dict = yaml.load(old_path.text())
+        new_config = WorkspaceConfig(
+            manifest_branch=old_dict.get("branch"),
+            manifest_url=old_dict["url"],
+            repo_groups=old_dict.get("groups"),
+            shallow_clones=old_dict.get("shallow"),
+        )
+        new_config.save_to_file(new_path)
+
+
 class Workspace:
     def __init__(self, root_path: Path) -> None:
         self.root_path = root_path
         self.local_manifest = LocalManifest(root_path / ".tsrc" / "manifest")
+        copy_cfg_path_if_needed(root_path)
         self.config = WorkspaceConfig.from_file(root_path / ".tsrc" / "config.yml")
 
     def get_repos(self) -> List[tsrc.Repo]:
