@@ -121,6 +121,12 @@ def main_impl(args: ArgsList = None) -> None:
     foreach_parser.add_argument("cmd", nargs="*")
     foreach_parser.add_argument("-c", dest="shell", action="store_true")
     foreach_parser.add_argument("-g", "--group", action="append", dest="groups")
+    foreach_parser.add_argument(
+        "--groups-from-config",
+        action="store_true",
+        help="Use groups from the workspace configuration",
+        default=False,
+    )
     foreach_parser.epilog = textwrap.dedent(
         """\
     Usage:

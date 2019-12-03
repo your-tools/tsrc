@@ -62,16 +62,34 @@ def main(args: argparse.Namespace) -> None:
         workspace.root_path, args.cmd, args.cmd_as_str, shell=args.shell
     )
     manifest = workspace.local_manifest.get_manifest()
-    cloned_repos = workspace.get_repos()
-    requested_repos = manifest.get_repos(groups=args.groups)
+    workspace_config = workspace.config
+    groups_from_config = workspace_config.repo_groups
+
+    all_remote_repos = manifest.get_repos(all_=True)
+    cloned_repos = [
+        x for x in all_remote_repos if (workspace.root_path / x.src).exists()
+    ]
+
+    if args.groups_from_config:
+        requested_repos = manifest.get_repos(groups=groups_from_config)
+    elif args.groups:
+        requested_repos = manifest.get_repos(groups=args.groups)
+    else:
+        requested_repos = cloned_repos
 
     found = [x for x in requested_repos if x in cloned_repos]
     missing = [x for x in requested_repos if x not in cloned_repos]
 
     tsrc.run_sequence(found, cmd_runner)
     if missing:
-        ui.warning("The following repos were skipped:")
+        ui.warning("The following repos were requested but missing from the workspace:")
         for repo in missing:
             ui.info("*", repo.src, fileobj=sys.stderr)
+        raise MissingRepos(missing)
     else:
         ui.info("OK", ui.check)
+
+
+class MissingRepos(tsrc.Error):
+    def __init__(self, repos: List[tsrc.Repo]):
+        self.repos = repos

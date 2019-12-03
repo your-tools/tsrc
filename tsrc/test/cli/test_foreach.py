@@ -80,7 +80,7 @@ def test_foreach_shell(
     assert message_recorder.find("`%s`" % " ".join(cmd))
 
 
-def test_foreach_groups_happy(
+def test_foreach_with_explicit_groups(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
     git_server.add_group("foo", ["bar", "baz"])
@@ -101,7 +101,7 @@ def test_foreach_groups_happy(
     assert not message_recorder.find("other\n")
 
 
-def test_foreach_groups_warn_skipped(
+def test_foreach_with_groups_from_config(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
     git_server.add_group("foo", ["bar", "baz"])
@@ -109,12 +109,54 @@ def test_foreach_groups_warn_skipped(
     git_server.add_repo("other")
 
     manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+
+    cmd = get_cmd_for_foreach_test(shell=False)
+
+    message_recorder.reset()
+    tsrc_cli.run("foreach", "--groups-from-config", *cmd)
+
+    assert message_recorder.find("bar\n")
+    assert message_recorder.find("baz\n")
+    assert message_recorder.find("eggs\n")
+    assert not message_recorder.find("other\n")
+
+
+def test_foreach_error_when_using_missing_groups(
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_group("spam", ["eggs", "beacon"])
+
+    manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "-g", "foo")
 
     cmd = get_cmd_for_foreach_test(shell=False)
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", *cmd)
+    tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", *cmd, expect_fail=True)
+
+
+def test_foreach_all_cloned_repos_by_default(
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
+    git_server.add_group("foo", ["bar", "baz"])
+    git_server.add_group("spam", ["eggs", "bacon"])
+    git_server.add_repo("other")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "-g", "foo", "-g", "spam")
+
+    cmd = get_cmd_for_foreach_test(shell=False)
+
+    message_recorder.reset()
+    tsrc_cli.run("foreach", *cmd)
+
+    assert message_recorder.find("bar\n")
+    assert message_recorder.find("baz\n")
+    assert message_recorder.find("eggs\n")
+    assert message_recorder.find("bacon\n")
+    assert not message_recorder.find("other\n")
 
 
 def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:
