@@ -1,0 +1,42 @@
+name: tests
+
+on: [push]
+
+jobs:
+  run_tests:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8]
+        # Note: no CI on Windows:
+        # See https://github.com/TankerHQ/tsrc/issues/186
+        # for details
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+
+    - uses: actions/checkout@v1
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dmenv
+      uses: TankerHQ/dmenv-install-action@v1.0.0
+      with:
+        dmenv-version: 0.20.0
+
+    - name: Prepare project for development
+      run: dmenv install
+
+    - name: Run tests
+      run: |
+        # tests run git commands, and they need
+        # a proper git identity for that
+        git config --global user.email "test@tsrc-tests.com"
+        git config --global user.name "Tasty Test"
+        dmenv run -- pytest --cov . --cov-report term --numprocesses auto
+

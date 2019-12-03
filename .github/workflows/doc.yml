@@ -1,0 +1,35 @@
+name: Deploy documentation
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy_documentation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dmenv
+      uses: TankerHQ/dmenv-install-action@v1.0.0
+      with:
+        dmenv-version: 0.20.0
+
+    - name: Prepare project for development
+      run: dmenv install
+
+    - name: Build documentation
+      run: |
+         cd docs
+         dmenv run -- mkdocs build
+
+    - name: Deploy to GitHub pages
+      uses: maxheld83/ghpages@v0.1.1
+      env:
+        BUILD_DIR: docs/site
+        GH_PAT: ${{ secrets.GH_PAT }}
