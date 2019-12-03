@@ -33,14 +33,6 @@ def test_init_simple(
     assert_cloned(workspace_path, "spam/eggs")
 
 
-def test_init_with_manifest_file(
-    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
-) -> None:
-    git_server.add_repo("foo")
-    tsrc_cli.run("init", "--file", git_server.manifest.yaml_path)
-    tsrc_cli.run("sync")
-
-
 def test_init_with_args(
     tsrc_cli: CLI, git_server: GitServer, monkeypatch: Any, tmp_path: Path
 ) -> None:
@@ -50,10 +42,10 @@ def test_init_with_args(
     assert_cloned(work2_path, "foo")
 
 
-def test_init_twice(tsrc_cli: CLI, git_server: GitServer) -> None:
+def test_cannot_init_twice(tsrc_cli: CLI, git_server: GitServer) -> None:
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc_cli.run("init", manifest_url)
+    tsrc_cli.run("init", manifest_url, expect_fail=True)
 
 
 def test_init_maint_manifest_branch(
@@ -200,20 +192,6 @@ def test_use_specific_group(
     assert_not_cloned(workspace_path, "other")
 
 
-def test_change_branch(
-    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
-) -> None:
-    git_server.add_repo("one")
-    git_server.manifest.change_branch("next")
-    git_server.add_repo("two")
-
-    tsrc_cli.run("init", git_server.manifest_url)
-    assert_not_cloned(workspace_path, "two")
-
-    tsrc_cli.run("init", git_server.manifest_url, "--branch", "next")
-    assert_cloned(workspace_path, "two")
-
-
 def test_no_remote_named_origin(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
@@ -223,7 +201,7 @@ def test_no_remote_named_origin(
     foo_path = workspace_path / "foo"
     tsrc.git.run(foo_path, "remote", "rename", "origin", "upstream")
 
-    tsrc_cli.run("init", git_server.manifest_url)
+    tsrc_cli.run("sync")
 
 
 def test_repo_default_branch_not_master(
