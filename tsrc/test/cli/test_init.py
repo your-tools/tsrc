@@ -61,20 +61,6 @@ def test_init_maint_manifest_branch(
     assert_cloned(workspace_path, "foo")
 
 
-def test_change_repo_url(
-    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
-) -> None:
-    git_server.add_repo("foo")
-    tsrc_cli.run("init", git_server.manifest_url)
-    new_url = "git@example.com/foo"
-    git_server.manifest.set_repo_url("foo", new_url)
-    tsrc_cli.run("init", git_server.manifest_url)
-    assert_cloned(workspace_path, "foo")
-    foo_path = workspace_path / "foo"
-    _, actual_url = tsrc.git.run_captured(foo_path, "remote", "get-url", "origin")
-    assert actual_url == new_url
-
-
 def test_copy_files_happy(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
