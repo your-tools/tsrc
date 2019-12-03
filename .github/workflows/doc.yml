@@ -25,7 +25,6 @@ jobs:
 
     - name: Build documentation
       run: |
-         cd docs
          dmenv run -- mkdocs build
 
     - name: Deploy to GitHub pages
