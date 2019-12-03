@@ -13,8 +13,11 @@ def main(args: argparse.Namespace) -> None:
 
     config = workspace.config
     groups = config.repo_groups
-    if groups:
+    all_repos = config.clone_all_repos
+    if groups and not all_repos:
         ui.info(ui.green, "*", ui.reset, "Using groups from config:", ", ".join(groups))
+    if all_repos:
+        ui.info(ui.green, "*", ui.reset, "Cloning all repos")
 
     workspace.clone_missing()
     workspace.set_remotes()
