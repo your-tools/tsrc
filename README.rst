@@ -5,10 +5,11 @@
    :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
 
 .. image:: https://github.com/TankerHQ/tsrc/workflows/tests/badge.svg
+   :target: https://github.com/TankerHQ/tsrc/actions
 
 .. image:: https://github.com/TankerHQ/tsrc/workflows/linters/badge.svg
-
-
+   :target: https://github.com/TankerHQ/tsrc/actions
+   
 .. image:: https://img.shields.io/codecov/c/github/TankerHQ/tsrc.svg?label=Coverage
    :target: https://codecov.io/gh/TankerHQ/tsrc
 
