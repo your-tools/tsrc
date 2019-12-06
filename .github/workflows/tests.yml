@@ -38,5 +38,9 @@ jobs:
         # a proper git identity for that
         git config --global user.email "test@tsrc-tests.com"
         git config --global user.name "Tasty Test"
-        dmenv run -- pytest --cov . --cov-report term --numprocesses auto
+        dmenv run -- pytest --cov . --cov-report xml --numprocesses auto
 
+    - name: Send coverage to codecov.io
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
