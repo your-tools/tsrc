@@ -1,6 +1,8 @@
 .. image::  https://raw.githubusercontent.com/TankerHQ/sdk-js/master/src/public/tanker.png
    :target: #readme
 
+|
+
 .. image:: https://img.shields.io/github/license/TankerHQ/tsrc.svg
    :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
 
