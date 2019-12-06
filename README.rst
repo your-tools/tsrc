@@ -1,14 +1,13 @@
 .. image::  https://raw.githubusercontent.com/TankerHQ/sdk-js/master/src/public/tanker.png
    :target: #readme
 
-|
-
-
 .. image:: https://img.shields.io/github/license/TankerHQ/tsrc.svg
    :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
 
-.. image:: https://img.shields.io/travis/TankerHQ/tsrc.svg?branch=master
-   :target: https://travis-ci.org/TankerHQ/tsrc
+.. image:: https://github.com/TankerHQ/tsrc/workflows/tests/badge.svg
+
+.. image:: https://github.com/TankerHQ/tsrc/workflows/linters/badge.svg
+
 
 .. image:: https://img.shields.io/codecov/c/github/TankerHQ/tsrc.svg?label=Coverage
    :target: https://codecov.io/gh/TankerHQ/tsrc
