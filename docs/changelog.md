@@ -1,3 +1,35 @@
+# Next release
+
+## Revamp group UX
+
+The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
+[corresponding milestone](https://github.com/TankerHQ/tsrc/milestone/1) for the ful list.
+
+## New configuration file
+
+Previously, `tsrc` stored its permanent config in `.tsrc/manifest.yml` and the file was not supposed to be edited by hand. Instead, users could use `tsrc init` to modify it, for instance with the `--branch` argument.
+
+Starting with this release, the command `tsrc init` can only be run once per workspace, and you must edit the `.tsrc/config.yml` file instead.
+
+## Changes in command line syntax
+
+* `tsrc init`: remove `--file` option.
+* `tsrc foreach`: instead of repeating the `--group` option, you can use `--groups` with a list of groups:
+
+```bash
+# before
+tsrc init --group foo --group bar
+
+# after
+tsrc init --groups foo bar
+```
+
+* `tsrc init` learned a `--clone-all-repos` option to clone all repositories from the manifest,
+  regardless of the groups. Fix #181
+
+* `tsrc foreach` learned a `--groups-from-config` option to use the groups configured in the workspace. Fix #178, #179.
+
+
 # v0.9.2 - (2019-09-30)
 
 * Additional bug fix for #165 - the fix in 0.9.1 was incomplete

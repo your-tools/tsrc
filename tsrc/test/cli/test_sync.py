@@ -4,6 +4,7 @@ import os
 from path import Path
 
 import tsrc.cli
+from tsrc.workspace.config import WorkspaceConfig
 
 from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import CLI
@@ -65,7 +66,14 @@ def test_new_repo_added_to_manifest(
     assert (workspace_path / "spam/eggs").exists()
 
 
-def test_switching_manifest_branches(
+def change_workspace_manifest_branch(workspace_path: Path, branch: str) -> None:
+    cfg_path = workspace_path / ".tsrc/config.yml"
+    manifest_config = WorkspaceConfig.from_file(cfg_path)
+    manifest_config.manifest_branch = branch
+    manifest_config.save_to_file(cfg_path)
+
+
+def test_switching_manifest_branch(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     # Init with manifest_url on master
@@ -82,8 +90,10 @@ def test_switching_manifest_branches(
     tsrc_cli.run("sync")
     assert not bar_path.exists()
 
-    # Re-init with --branch=devel, bar should be cloned
-    tsrc_cli.run("init", "--branch", "devel", git_server.manifest_url)
+    # Change manifest branch in workspace config
+    change_workspace_manifest_branch(workspace_path, "devel")
+
+    # Sync on devel branch: bar should be cloned
     tsrc_cli.run("sync")
     assert bar_path.exists()
 

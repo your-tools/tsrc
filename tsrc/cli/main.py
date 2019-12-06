@@ -10,7 +10,6 @@ from typing import Callable, Optional, Sequence
 
 import colored_traceback
 import cli_ui as ui
-from path import Path
 
 import tsrc
 
@@ -122,6 +121,12 @@ def main_impl(args: ArgsList = None) -> None:
     foreach_parser.add_argument("cmd", nargs="*")
     foreach_parser.add_argument("-c", dest="shell", action="store_true")
     foreach_parser.add_argument("-g", "--group", action="append", dest="groups")
+    foreach_parser.add_argument(
+        "--groups-from-config",
+        action="store_true",
+        help="Use groups from the workspace configuration",
+        default=False,
+    )
     foreach_parser.epilog = textwrap.dedent(
         """\
     Usage:
@@ -135,17 +140,17 @@ def main_impl(args: ArgsList = None) -> None:
     foreach_parser.formatter_class = argparse.RawDescriptionHelpFormatter
 
     init_parser = add_workspace_subparser(subparsers, "init")
-    init_parser.add_argument("url", nargs="?")
+    init_parser.add_argument("url")
     init_parser.add_argument("-b", "--branch")
-    init_parser.add_argument("-g", "--group", action="append", dest="groups")
+    init_parser.add_argument("-g", "--group", "--groups", nargs="+", dest="groups")
     init_parser.add_argument(
-        "-s", "--shallow", action="store_true", dest="shallow", default=False
+        "--clone-all-repos",
+        action="store_true",
+        dest="clone_all_repos",
+        help="clone all repos from the manifest, regardless of groups",
     )
     init_parser.add_argument(
-        "--file",
-        help="use manifest from a file instead of a git repository",
-        type=Path,
-        dest="file_path",
+        "-s", "--shallow", action="store_true", dest="shallow", default=False
     )
     init_parser.set_defaults(branch="master")
 

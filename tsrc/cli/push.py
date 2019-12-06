@@ -180,7 +180,6 @@ class PushAction(metaclass=abc.ABCMeta):
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
-    workspace.load_manifest()
 
     repository_info = RepositoryInfo.read(Path.getcwd(), workspace=workspace)
     service_name = repository_info.service

@@ -3,51 +3,70 @@
 
 from typing import Iterable, List, Tuple, Optional
 
+import cli_ui as ui
 from path import Path
+import ruamel.yaml
 
 import tsrc
 import tsrc.executor
 import tsrc.git
-import tsrc.manifest
 
-from .manifest_config import ManifestConfig
 from .cloner import Cloner
 from .copier import FileCopier
 from .syncer import Syncer
 from .remote_setter import RemoteSetter
 from .local_manifest import LocalManifest
+from .config import WorkspaceConfig
+
+
+def copy_cfg_path_if_needed(root_path: Path) -> None:
+    """ Backward compatibility layer with tsrc < 1.0 """
+    old_path = root_path / ".tsrc/manifest.yml"
+    new_path = root_path / ".tsrc/config.yml"
+    if old_path.exists() and not new_path.exists():
+        ui.info("Migrating config to new path:", new_path)
+        yaml = ruamel.yaml.YAML(typ="rt")
+        old_dict = yaml.load(old_path.text())
+        new_config = WorkspaceConfig(
+            manifest_branch=old_dict.get("branch"),
+            manifest_url=old_dict["url"],
+            repo_groups=old_dict.get("groups"),
+            shallow_clones=old_dict.get("shallow"),
+        )
+        new_config.save_to_file(new_path)
 
 
 class Workspace:
     def __init__(self, root_path: Path) -> None:
         self.root_path = root_path
-        self.local_manifest = LocalManifest(root_path)
+        self.local_manifest = LocalManifest(root_path / ".tsrc" / "manifest")
+        copy_cfg_path_if_needed(root_path)
+        self.config = WorkspaceConfig.from_file(root_path / ".tsrc" / "config.yml")
 
     def get_repos(self) -> List[tsrc.Repo]:
-        return self.local_manifest.get_repos()
+        all_repos = self.config.clone_all_repos
+        repo_groups = self.config.repo_groups
+        manifest = self.get_manifest()
+        if all_repos:
+            return manifest.get_repos(all_=True)
+        else:
+            return manifest.get_repos(groups=repo_groups)
 
-    def load_manifest(self) -> None:
-        self.local_manifest.load()
-
-    def get_gitlab_url(self) -> Optional[str]:
-        return self.local_manifest.get_gitlab_url()
+    def get_manifest(self) -> tsrc.Manifest:
+        return self.local_manifest.get_manifest()
 
     def get_github_enterprise_url(self) -> Optional[str]:
-        return self.local_manifest.get_github_enterprise_url()
+        manifest = self.local_manifest.get_manifest()
+        return manifest.github_enterprise_url
 
-    def configure_manifest(self, manifest_config: ManifestConfig) -> None:
-        self.local_manifest.configure(manifest_config)
+    def get_gitlab_url(self) -> Optional[str]:
+        manifest = self.local_manifest.get_manifest()
+        return manifest.gitlab_url
 
     def update_manifest(self) -> None:
-        self.local_manifest.update()
-
-    @property
-    def active_groups(self) -> List[str]:
-        return self.local_manifest.active_groups
-
-    @property
-    def shallow(self) -> bool:
-        return self.local_manifest.shallow
+        manifest_url = self.config.manifest_url
+        manifest_branch = self.config.manifest_branch
+        self.local_manifest.update(url=manifest_url, branch=manifest_branch)
 
     def clone_missing(self) -> None:
         to_clone = []
@@ -55,7 +74,7 @@ class Workspace:
             repo_path = self.root_path / repo.src
             if not repo_path.exists():
                 to_clone.append(repo)
-        cloner = Cloner(self.root_path, shallow=self.shallow)
+        cloner = Cloner(self.root_path, shallow=self.config.shallow_clones)
         tsrc.executor.run_sequence(to_clone, cloner)
 
     def set_remotes(self) -> None:
@@ -64,7 +83,9 @@ class Workspace:
 
     def copy_files(self) -> None:
         file_copier = FileCopier(self.root_path)
-        tsrc.executor.run_sequence(self.local_manifest.copyfiles, file_copier)
+        manifest = self.local_manifest.get_manifest()
+        copyfiles = manifest.copyfiles
+        tsrc.executor.run_sequence(copyfiles, file_copier)
 
     def sync(self, *, force: bool = False) -> None:
         syncer = Syncer(self.root_path, force=force)
