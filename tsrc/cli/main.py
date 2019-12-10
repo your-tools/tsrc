@@ -173,13 +173,17 @@ def main_impl(args: ArgsList = None) -> None:
         help="Request review from the given users - "
         "not available for GitLab Community Edition, use --assignee instead",
     )
+    push_parser.add_argument(
+        "--close",
+        action="store_true",
+        help="Close the merge request without merging it",
+    )
 
     github_group = push_parser.add_argument_group("github options")
     github_group.add_argument("--merge", help="Merge pull request", action="store_true")
 
     gitlab_group = push_parser.add_argument_group("gitlab options")
     gitlab_group.add_argument("--accept", action="store_true")
-    gitlab_group.add_argument("--close", action="store_true")
 
     message_group = gitlab_group.add_mutually_exclusive_group()
     message_group.add_argument("--title", dest="title")
