@@ -35,23 +35,26 @@ class PushAction(tsrc.cli.push.PushAction):
             return
 
         base = None
-        if self.requested_target_branch:
-            base = self.requested_target_branch
+        requested_target_branch = self.args.target_branch
+        if requested_target_branch:
+            base = requested_target_branch
 
         title = None
-        if self.requested_title:
-            title = self.requested_title
+        requested_title = self.args.title
+        if requested_title:
+            title = requested_title
 
         pull_request.update(base=base, title=title)
 
-        if self.requested_reviewers:
-            message = ["Requesting review from", ", ".join(self.requested_reviewers)]
+        requested_reviewers = self.args.reviewers
+        if requested_reviewers:
             message = ["Requesting review from", ", ".join(requested_reviewers)]
             ui.info_2(*message)
-            pull_request.request_reviewers(self.requested_reviewers)
+            pull_request.request_reviewers(requested_reviewers)
 
-        if self.requested_assignee:
-            ui.info_2("Assigning to", self.requested_assignee)
+        requested_assignee = self.args.assignee
+        if requested_assignee:
+            ui.info_2("Assigning to", requested_assignee)
             pull_request.assign(requested_assignee)
 
         if self.args.merge:
