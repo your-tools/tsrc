@@ -175,6 +175,13 @@ def main_impl(args: ArgsList = None) -> None:
         "defaults to the default branch of the project",
     )
     push_parser.add_argument(
+        "-o",
+        "--origin",
+        dest="origin",
+        default="origin",
+        help="Force the git remote to use - defauls to 'origin'",
+    )
+    push_parser.add_argument(
         "push_spec",
         nargs="?",
         metavar="LOCAL:REMOT",

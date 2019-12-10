@@ -60,24 +60,26 @@ class RepositoryInfo:
     path = attr.ib()  # type: Path
     current_branch = attr.ib()  # type: str
     service = attr.ib()  # type: Optional[str]
+    remote_name = attr.ib()  # type: str
     tracking_ref = attr.ib()  # type: Optional[str]
     login_url = attr.ib()  # type: Optional[str]
 
     @classmethod
-    def read(cls, working_path: Path, *, manifest: tsrc.Manifest) -> "RepositoryInfo":
+    def read(
+        cls, working_path: Path, *, manifest: tsrc.Manifest, remote_name: str = "origin"
+    ) -> "RepositoryInfo":
         repo_path = tsrc.git.get_repo_root(working_path=working_path)
         current_branch = tsrc.git.get_current_branch(repo_path)
         tracking_ref = tsrc.git.get_tracking_ref(repo_path)
 
-        # TODO: we should know the name of the remote at this point,
-        # no need to hard-code 'origin'!
+        url = None
         rc, out = tsrc.git.run_captured(
-            repo_path, "remote", "get-url", "origin", check=False
+            repo_path, "remote", "get-url", remote_name, check=False
         )
         if rc == 0:
             url = out
         if not url:
-            raise NoRemoteConfigured(repo_path, "origin")
+            raise NoRemoteConfigured(repo_path, remote_name)
 
         project_name = project_name_from_url(url)
         service = service_from_url(url=url, manifest=manifest)
@@ -91,6 +93,7 @@ class RepositoryInfo:
 
         return cls(
             project_name=project_name,
+            remote_name=remote_name,
             url=url,
             path=repo_path,
             current_branch=current_branch,
@@ -128,7 +131,7 @@ def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
 
     repository_info = RepositoryInfo.read(
-        Path.getcwd(), manifest=workspace.get_manifest()
+        Path.getcwd(), manifest=workspace.get_manifest(), remote_name=args.origin
     )
     push(repository_info, args)
     service_name = repository_info.service

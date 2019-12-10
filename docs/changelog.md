@@ -29,6 +29,7 @@ tsrc init --groups foo bar
 
 * `tsrc foreach` learned a `--groups-from-config` option to use the groups configured in the workspace. Fix #178, #179.
 
+* `tsrc push` learned a `-o, --origin` option to specify a remote name different from "origin". Fix #170
 
 # v0.9.2 - (2019-09-30)
 
