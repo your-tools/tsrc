@@ -1,14 +1,92 @@
-""" Helpers for github web API """
-
+from typing import cast, Any, Optional, Dict, List
 import getpass
 import uuid
-from typing import cast, List, Optional, Dict, Any
 
-import github3
-from github3.repos.repo import Repository
 import cli_ui as ui
+import github3
 
 import tsrc
+from .interface import PullRequest, Repository, Client
+
+
+class GitHubPullRequest(PullRequest):
+    # We need gh_repository to access 'issues' that are really
+    # pull requests
+    def __init__(self, gh_repository: Any, gh_pull_request: Any):
+        self.gh_repository = gh_repository
+        self.gh_pull_request = gh_pull_request
+
+    def get_number(self) -> int:
+        return self.gh_pull_request.number  # type: ignore
+
+    def get_html_url(self) -> str:
+        return self.gh_pull_request.html_url  # type: ignore
+
+    def update(self, *, base: Optional[str], title: Optional[str]) -> None:
+        params = {}  # type: Dict[str, str]
+        if base is not None:
+            params["base"] = base
+        if title is not None:
+            params["title"] = title
+        self.gh_pull_request.update(**params)
+
+    def assign(self, assignee: str) -> None:
+        issue = self.gh_repository.issue(self.get_number())
+        issue.assign(assignee)
+
+    def request_reviewers(self, reviewers: List[str]) -> None:
+        # github3.py does not provide any way to request reviewers, so
+        # we have to use private members here
+        owner_name = self.gh_repository.owner.login
+        repo_name = self.gh_repository.name
+        url = self.gh_repository._build_url(
+            "repos",
+            owner_name,
+            repo_name,
+            "pulls",
+            self.get_number(),
+            "requested_reviewers",
+        )
+        ret = self.gh_repository._post(url, data={"reviewers": reviewers})
+        if not 200 <= ret.status_code < 300:
+            raise GitHubAPIError(url, ret.status_code, ret.json().get("message"))
+
+    def merge(self) -> None:
+        self.gh_pull_request.merge()
+
+    def close(self) -> None:
+        self.gh_pull_request.close()
+
+
+class GitHubRepository(Repository):
+    def __init__(self, gh_repository: Any):
+        self.gh_repository = gh_repository
+
+    def find_pull_requests(self, *, state: str, head: str) -> List[GitHubPullRequest]:
+        gh_pull_requests = self.gh_repository.pull_requests()
+        return [
+            GitHubPullRequest(self, x)
+            for x in gh_pull_requests
+            if x.state == state and x.head.ref == head
+        ]
+
+    def get_default_branch(self) -> str:
+        return self.gh_repository.default_branch  # type: ignore
+
+    def create_pull_request(
+        self, *, head: str, base: str, title: str
+    ) -> GitHubPullRequest:
+        gh_pull_request = self.gh_repository.create_pull(title, base, head)
+        return GitHubPullRequest(self, gh_pull_request)
+
+
+class GitHubApiClient(Client):
+    def __init__(self, *, enterprise_url: Optional[str] = None) -> None:
+        self.gh_api = login(enterprise_url=enterprise_url)
+
+    def get_repository(self, owner: str, name: str) -> GitHubRepository:
+        gl_repository = self.gh_api.repository(owner, name)
+        return GitHubRepository(gl_repository)
 
 
 class GitHubAPIError(tsrc.Error):
@@ -94,23 +172,10 @@ def ensure_token(github_client: github3.GitHub, auth_system: str) -> str:
     return token
 
 
-def request_reviewers(repo: Repository, pr_number: int, reviewers: List[str]) -> None:
-    owner_name = repo.owner.login
-    repo_name = repo.name
-    # github3.py does not provide any way to request reviewers, so
-    # we have to use private members here
-    url = repo._build_url(
-        "repos", owner_name, repo_name, "pulls", pr_number, "requested_reviewers"
-    )
-    ret = repo._post(url, data={"reviewers": reviewers})
-    if not 200 <= ret.status_code < 300:
-        raise GitHubAPIError(url, ret.status_code, ret.json().get("message"))
-
-
-def login(github_enterprise_url: Optional[str] = None) -> github3.GitHub:
-    if github_enterprise_url:
+def login(enterprise_url: Optional[str] = None) -> github3.GitHub:
+    if enterprise_url:
         verify = get_verify_tls_setting(auth_system="github_enterprise")
-        gh_api = github3.GitHubEnterprise(url=github_enterprise_url, verify=verify)
+        gh_api = github3.GitHubEnterprise(url=enterprise_url, verify=verify)
         token = ensure_token(github_client=gh_api, auth_system="github_enterprise")
     else:
         gh_api = github3.GitHub()
