@@ -1,5 +1,6 @@
 """ Common code for push to GitHub or GitLab """
 
+from typing import Optional
 import abc
 import argparse
 import importlib
@@ -16,7 +17,7 @@ import tsrc.git
 import tsrc.cli
 
 
-def service_from_url(url: str, workspace: tsrc.Workspace) -> str:
+def service_from_url(url: str, workspace: tsrc.Workspace) -> Optional[str]:
     if url.startswith("git@github.com"):
         return "github"
 
@@ -32,7 +33,7 @@ def service_from_url(url: str, workspace: tsrc.Workspace) -> str:
         if url.startswith("git@%s" % gitlab_domain):
             return "gitlab"
 
-    return "git"
+    return None
 
 
 def project_name_from_url(url: str) -> str:
@@ -59,7 +60,7 @@ class RepositoryInfo:
     url = attr.ib()  # type: str
     path = attr.ib()  # type: Path
     current_branch = attr.ib()  # type: str
-    service = attr.ib()  # type: str
+    service = attr.ib()  # type: Optional[str]
     tracking_ref = attr.ib()  # type: Optional[str]
     repository_login_url = attr.ib()  # type: Optional[str]
 
@@ -80,7 +81,7 @@ class RepositoryInfo:
             raise NoRemoteConfigured(repo_path, "origin")
 
         project_name = project_name_from_url(url)
-        service = service_from_url(url=url, workspace=workspace)
+        service = service_from_url(url, manifest=manifest)
 
         if service == "gitlab":
             repository_login_url = workspace.get_gitlab_url()
