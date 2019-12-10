@@ -4,7 +4,6 @@ from typing import Optional
 import argparse
 import importlib
 import re
-from typing import cast, Iterable, Optional
 from urllib.parse import urlparse
 
 import attr
@@ -58,9 +57,9 @@ class RepositoryInfo:
     project_name = attr.ib()  # type: str
     url = attr.ib()  # type: str
     path = attr.ib()  # type: Path
+    remote_name = attr.ib()  # type: str
     current_branch = attr.ib()  # type: str
     service = attr.ib()  # type: Optional[str]
-    remote_name = attr.ib()  # type: str
     tracking_ref = attr.ib()  # type: Optional[str]
     login_url = attr.ib()  # type: Optional[str]
 
@@ -82,7 +81,7 @@ class RepositoryInfo:
             raise NoRemoteConfigured(repo_path, remote_name)
 
         project_name = project_name_from_url(url)
-        service = service_from_url(url=url, manifest=manifest)
+        service = service_from_url(url, manifest=manifest)
 
         if service == "gitlab":
             login_url = manifest.gitlab_url
@@ -133,9 +132,9 @@ def push(repository_info: RepositoryInfo, args: argparse.Namespace) -> None:
     # to be updated
     repository_info.update_tracking_ref(push_spec)
 
+
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
-
     repository_info = RepositoryInfo.read(
         Path.getcwd(), manifest=workspace.get_manifest(), remote_name=args.origin
     )
