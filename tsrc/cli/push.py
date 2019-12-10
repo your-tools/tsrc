@@ -53,7 +53,7 @@ def project_name_from_url(url: str) -> str:
     return res
 
 
-@attr.s(frozen=True)
+@attr.s
 class RepositoryInfo:
     project_name = attr.ib()  # type: str
     url = attr.ib()  # type: str
@@ -109,6 +109,9 @@ class RepositoryInfo:
         else:
             return self.tracking_ref.split("/", maxsplit=1)[1]
 
+    def update_tracking_ref(self, push_spec: str) -> None:
+        self.tracking_ref = "{}/{}".format(self.remote_name, push_spec.split(":")[1])
+
 
 def push(repository_info: RepositoryInfo, args: argparse.Namespace) -> None:
     remote_name = repository_info.remote_name
@@ -126,6 +129,9 @@ def push(repository_info: RepositoryInfo, args: argparse.Namespace) -> None:
     ui.info_2("Running git", *cmd)
     tsrc.git.run(repo_path, *cmd)
 
+    # We just used push with a "-u" so the repository_info needs
+    # to be updated
+    repository_info.update_tracking_ref(push_spec)
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
