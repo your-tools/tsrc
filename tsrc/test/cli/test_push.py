@@ -1,40 +1,54 @@
+from typing import Optional
 import argparse
 
 from path import Path
 import tsrc
-from tsrc.cli.push_git import PushAction
-from tsrc.cli.push import RepositoryInfo
+from tsrc.workspace import Workspace
+from tsrc.cli.push import RepositoryInfo, service_from_url, push
 
 
 def test_push_use_tracked_branch(
-    repo_path: Path, push_args: argparse.Namespace
+    workspace_path: Path, repo_path: Path, push_args: argparse.Namespace
 ) -> None:
     tsrc.git.run(repo_path, "checkout", "-b", "local")
     tsrc.git.run(repo_path, "push", "-u", "origin", "local:remote")
-
-    repository_info = RepositoryInfo.read(
-        repo_path, workspace=mock_workspace_git_urls()
-    )
-    dummy_push = PushAction(repository_info, push_args)
-    dummy_push.push()
+    workspace = Workspace(workspace_path)
+    repository_info = RepositoryInfo.read(repo_path, manifest=workspace.get_manifest())
+    push(repository_info, push_args)
     _, out = tsrc.git.run_captured(repo_path, "ls-remote")
     assert "local" not in out
     assert "heads/remote" in out
 
 
 def test_push_use_given_push_spec(
-    repo_path: Path, push_args: argparse.Namespace
+    workspace_path: Path, repo_path: Path, push_args: argparse.Namespace
 ) -> None:
     tsrc.git.run(repo_path, "checkout", "-b", "local")
     push_args.push_spec = "local:remote"
-    repository_info = RepositoryInfo.read(
-        repo_path, workspace=mock_workspace_git_urls()
-    )
-    dummy_push = PushAction(repository_info, push_args)
-    dummy_push.push()
+    workspace = Workspace(workspace_path)
+    repository_info = RepositoryInfo.read(repo_path, manifest=workspace.get_manifest())
+    assert repository_info.tracking_ref is None
+
+    push(repository_info, push_args)
     _, out = tsrc.git.run_captured(repo_path, "ls-remote")
     assert "local" not in out
     assert "heads/remote" in out
+    assert repository_info.tracking_ref == "origin/remote"
+
+
+def test_push_use_given_origin(
+    workspace_path: Path, repo_path: Path, push_args: argparse.Namespace
+) -> None:
+    tsrc.git.run(repo_path, "checkout", "-b", "devel")
+    tsrc.git.run(repo_path, "remote", "rename", "origin", "upstream")
+    push_args.origin = "upstream"
+    workspace = Workspace(workspace_path)
+    repository_info = RepositoryInfo.read(
+        repo_path, manifest=workspace.get_manifest(), remote_name="upstream"
+    )
+    push(repository_info, push_args)
+    _, out = tsrc.git.run_captured(repo_path, "ls-remote", "upstream")
+    assert "refs/heads/devel" in out
 
 
 def get_service(url: str, manifest: tsrc.Manifest) -> Optional[str]:
