@@ -68,9 +68,9 @@ def test_new_repo_added_to_manifest(
 
 def change_workspace_manifest_branch(workspace_path: Path, branch: str) -> None:
     cfg_path = workspace_path / ".tsrc/config.yml"
-    manifest_config = WorkspaceConfig.from_file(cfg_path)
-    manifest_config.manifest_branch = branch
-    manifest_config.save_to_file(cfg_path)
+    workspace_config = WorkspaceConfig.from_file(cfg_path)
+    workspace_config.manifest_branch = branch
+    workspace_config.save_to_file(cfg_path)
 
 
 def test_switching_manifest_branch(
