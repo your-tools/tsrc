@@ -70,7 +70,7 @@ def unwipify(title: str) -> str:
         return title
 
 
-class PushAction(tsrc.cli.push.PushAction):
+class MergeRequestProcessor:
     def __init__(
         self,
         repository_info: RepositoryInfo,
