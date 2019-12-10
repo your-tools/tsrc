@@ -98,3 +98,11 @@ class PullRequestProcessor:
             return pull_request
         else:
             return self.create_pull_request()
+
+
+def post_push(args: argparse.Namespace, repository_info: RepositoryInfo) -> None:
+    from tsrc.github_client.api_client import GitHubApiClient
+
+    client = GitHubApiClient()
+    review_proccessor = PullRequestProcessor(repository_info, args, client)
+    review_proccessor.process()
