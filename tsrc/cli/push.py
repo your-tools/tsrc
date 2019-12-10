@@ -62,7 +62,7 @@ class RepositoryInfo:
     current_branch = attr.ib()  # type: str
     service = attr.ib()  # type: Optional[str]
     tracking_ref = attr.ib()  # type: Optional[str]
-    repository_login_url = attr.ib()  # type: Optional[str]
+    login_url = attr.ib()  # type: Optional[str]
 
     @classmethod
     def read(cls, working_path: Path, *, workspace: tsrc.Workspace) -> "RepositoryInfo":
@@ -84,11 +84,11 @@ class RepositoryInfo:
         service = service_from_url(url, manifest=manifest)
 
         if service == "gitlab":
-            repository_login_url = workspace.get_gitlab_url()
+            login_url = workspace.get_gitlab_url()
         elif service == "github_enterprise":
-            repository_login_url = workspace.get_github_enterprise_url()
+            login_url = workspace.get_github_enterprise_url()
         else:
-            repository_login_url = None
+            login_url = None
 
         return cls(
             project_name=project_name,
@@ -97,7 +97,7 @@ class RepositoryInfo:
             current_branch=current_branch,
             service=service,
             tracking_ref=tracking_ref,
-            repository_login_url=repository_login_url,
+            login_url=login_url,
         )
 
 

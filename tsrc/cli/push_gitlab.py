@@ -116,7 +116,7 @@ class PushAction(tsrc.cli.push.PushAction):
         if not self.gitlab_api:
             token = get_token()
             self.gitlab_api = Gitlab(
-                self.repository_info.repository_login_url, private_token=token
+                self.repository_info.login_url, private_token=token
             )
 
         assert self.project_name
