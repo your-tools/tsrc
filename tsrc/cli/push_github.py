@@ -14,7 +14,7 @@ from tsrc.cli.push import RepositoryInfo
 from tsrc.github_client.interface import Client, PullRequest
 
 
-class PushAction(tsrc.cli.push.PushAction):
+class PullRequestProcessor:
     def __init__(
         self, repository_info: RepositoryInfo, args: argparse.Namespace, client: Client
     ) -> None:
