@@ -1,24 +1,13 @@
-import tsrc.cli.push_github
 import argparse
-from typing import Optional
 
-from github3 import GitHub
-
-import tsrc
-from tsrc.github_client.api_client import login as github_login
 from tsrc.cli.push import RepositoryInfo
+from tsrc.cli.push_github import PullRequestProcessor
 
 
-class PushAction(tsrc.cli.push_github.PushAction):
-    def __init__(
-        self,
-        repository_info: RepositoryInfo,
-        args: argparse.Namespace,
-        github_api: Optional[GitHub] = None,
-    ) -> None:
-        if not github_api:
-            github_api = github_login(
-                github_enterprise_url=repository_info.login_url
-            )
+def post_push(args: argparse.Namespace, repository_info: RepositoryInfo) -> None:
+    from tsrc.github_client.api_client import GitHubApiClient
 
-        super().__init__(repository_info, args, github_api)
+    client = GitHubApiClient(enterprise_url=repository_info.login_url)
+
+    review_proccessor = PullRequestProcessor(repository_info, args, client)
+    review_proccessor.process()
