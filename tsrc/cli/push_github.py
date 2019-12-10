@@ -1,15 +1,10 @@
 """ Entry point for tsrc push """
 
 import argparse
-import sys
 from typing import Optional
 
-import github3
-from github3 import GitHub
-from github3.pulls import PullRequest
 import cli_ui as ui
 
-import tsrc
 from tsrc.cli.push import RepositoryInfo
 from tsrc.github_client.interface import Client, PullRequest
 
@@ -38,11 +33,13 @@ class PullRequestProcessor:
         requested_target_branch = self.args.target_branch
         if requested_target_branch:
             base = requested_target_branch
+            ui.info_3("Updating pull request with base:", ui.bold, base)
 
         title = None
         requested_title = self.args.title
         if requested_title:
             title = requested_title
+            ui.info_3("Updating pull request with title", ui.bold, title)
 
         pull_request.update(base=base, title=title)
 
@@ -58,6 +55,7 @@ class PullRequestProcessor:
             pull_request.assign(requested_assignee)
 
         if self.args.merge:
+            ui.info_2("Merging", ui.bold, pull_request.get_short_description())
             pull_request.merge()
 
         ui.info(
