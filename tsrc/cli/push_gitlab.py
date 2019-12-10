@@ -1,17 +1,13 @@
 """ Entry point for tsrc push """
 
-
 import argparse
 import itertools
 import textwrap
-from typing import cast, Any, List, Optional, Set  # noqa
-
-from gitlab import Gitlab
-from gitlab.v4.objects import Group, User, Project, ProjectMergeRequest  # noqa
-from gitlab.exceptions import GitlabGetError
+from typing import cast, List, Optional, Set  # noqa
 import cli_ui as ui
 
 import tsrc
+from tsrc.gitlab_client.interface import Client, User, MergeRequest
 from tsrc.cli.push import RepositoryInfo
 
 
@@ -22,12 +18,6 @@ class UserNotFound(tsrc.Error):
     def __init__(self, username: str) -> None:
         self.username = username
         super().__init__("No user found with this username : %s" % self.username)
-
-
-class TooManyUsers(tsrc.Error):
-    def __init__(self, max_users: int) -> None:
-        self.max_users = max_users
-        super().__init__("More than %s users found" % self.max_users)
 
 
 class AmbiguousUser(tsrc.Error):
@@ -80,53 +70,29 @@ def unwipify(title: str) -> str:
         return title
 
 
-class PushAction(tsrc.cli.push.PushAction):
+class MergeRequestProcessor:
     def __init__(
         self,
         repository_info: RepositoryInfo,
         args: argparse.Namespace,
-        gitlab_api: Optional[Gitlab] = None,
+        gitlab_client: Client,
     ) -> None:
-        super().__init__(repository_info, args)
-        self.gitlab_api = gitlab_api
-        self.group = None  # type: Optional[Group]
-        self.project = None  # type: Optional[Project]
+        self.repository_info = repository_info
+        self.gitlab_client = gitlab_client
+        self.args = args
+
+        project_name = repository_info.project_name
+
+        self.project = self.gitlab_client.get_project(project_name)
+        group_name = project_name.split("/")[0]
+
+        self.group = self.gitlab_client.get_group(group_name)
         self.review_candidates = []  # type: List[User]
 
-    def _get_group(self, group_name: str) -> Optional[Group]:
-        assert self.gitlab_api
-        try:
-            return self.gitlab_api.groups.get(group_name)
-        except GitlabGetError as e:
-            if e.response_code == 404:
-                return None
-            else:
-                raise
-
     def check_gitlab_feature(self, name: str) -> None:
-        assert self.gitlab_api
-        # Note: don't worry, the http request is cached under the hood by
-        # the python-gitlab library. This should be fine
-        features = self.gitlab_api.features.list()
-        names = [x.name for x in features]
-        if name not in names:
+        features = self.gitlab_client.get_features_list()
+        if name not in features:
             raise FeatureNotAvailable(name)
-
-    def setup_service(self) -> None:
-        if not self.gitlab_api:
-            token = get_token()
-            self.gitlab_api = Gitlab(
-                self.repository_info.repository_login_url, private_token=token
-            )
-
-        assert self.project_name
-        self.project = self.gitlab_api.projects.get(self.project_name)
-        group_name = self.project_name.split("/")[0]
-        self.group = self._get_group(group_name)
-
-    def handle_assignee(self) -> User:
-        assert self.requested_assignee
-        return self.get_reviewer_by_username(self.requested_assignee)
 
     def handle_reviewers(self) -> List[User]:
         self.check_gitlab_feature("multiple_merge_request_assignees")
@@ -138,87 +104,102 @@ class PushAction(tsrc.cli.push.PushAction):
         return res
 
     def get_reviewer_by_username(self, username: str) -> User:
-        assert self.project
-        in_project = self.get_users_matching(self.project.members, username)
+        in_project = self.project.search_members(username)
         if self.group:
-            in_group = self.get_users_matching(self.group.members, username)
+            in_group = self.group.search_members(username)
         else:
             in_group = []
         candidates = []
         seen = set()  # type: Set[int]
         for user in itertools.chain(in_project, in_group):
-            if user.id in seen:
+            user_id = user.get_id()
+            if user_id in seen:
                 continue
             candidates.append(user)
-            seen.add(user.id)
+            seen.add(user_id)
         if not candidates:
             raise UserNotFound(username)
         if len(candidates) > 1:
             raise AmbiguousUser(username)
         return candidates[0]
 
-    def get_users_matching(self, members: Any, query: str) -> List[User]:
-        res = members.list(active=True, query=query, per_page=100, as_list=False)
-        if res.next_page:
-            raise TooManyUsers(100)
-        return cast(List[User], res)
-
-    def post_push(self) -> None:
+    def process(self) -> None:
         merge_request = self.ensure_merge_request()
-        assert self.gitlab_api
         if self.args.close:
-            ui.info_2("Closing merge request #%s" % merge_request.iid)
-            merge_request.state_event = "close"
+            ui.info_2(
+                "Closing merge request", ui.bold, merge_request.get_short_description()
+            )
+            merge_request.close()
             merge_request.save()
             return
 
-        assignee = None
-        if self.requested_assignee:
-            assignee = self.handle_assignee()
-            if assignee:
-                ui.info_2("Assigning to", assignee.username)
+        merge_request.remove_source_branch()
 
+        previous_title = merge_request.get_title()
         title = self.handle_title(merge_request)
-        merge_request.title = title
-        merge_request.remove_source_branch = True
-        if self.requested_target_branch:
-            merge_request.target_branch = self.requested_target_branch
-        if assignee:
-            merge_request.assignee_id = assignee.id
+        if title != previous_title:
+            ui.info_3("Setting title to", ui.bold, title)
+        merge_request.set_title(title)
+
+        requested_target_branch = self.args.target_branch
+        if requested_target_branch:
+            ui.info_3("Setting target branch to", ui.bold, requested_target_branch)
+            merge_request.set_target_branch(requested_target_branch)
+
+        requested_assignee = self.args.assignee
+        if requested_assignee:
+            assignee = self.get_reviewer_by_username(requested_assignee)
+            if assignee:
+                ui.info_3("Assigning to", assignee.get_name())
+                merge_request.set_assignee(assignee)
 
         if self.args.reviewers:
             approvers = self.handle_reviewers()
             if approvers:
-                ui.info_2(
-                    "Requesting approvals from", ", ".join(x.name for x in approvers)
+                ui.info_3(
+                    "Requesting approvals from",
+                    ui.bold,
+                    ", ".join(x.get_name() for x in approvers),
                 )
-                merge_request.approvals.set_approvers([x.id for x in approvers])
+                merge_request.set_approvers(approvers)
 
         merge_request.save()
 
         if self.args.accept:
-            merge_request.merge(merge_when_pipeline_succeeds=True)
+            ui.info_3(
+                "Accepting merge request",
+                ui.bold,
+                merge_request.get_short_description(),
+            )
+            merge_request.accept()
 
-        ui.info(ui.green, "::", ui.reset, "See merge request at", merge_request.web_url)
+        ui.info(
+            ui.green,
+            "::",
+            ui.reset,
+            "See merge request at",
+            ui.bold,
+            merge_request.get_web_url(),
+        )
 
-    def handle_title(self, merge_request: ProjectMergeRequest) -> str:
+    def handle_title(self, merge_request: MergeRequest) -> str:
         # If explicitely set, use it
-        if self.requested_title:
-            return self.requested_title
+        requested_title = self.args.title
+        if requested_title:
+            return requested_title  # type: ignore
         else:
             # Else change the title if we need to
-            title = merge_request.title  # type: str
+            title = merge_request.get_title()  # type: str
             if self.args.ready:
                 return unwipify(title)
             if self.args.wip:
                 return wipify(title)
             return title
 
-    def find_merge_request(self) -> Optional[ProjectMergeRequest]:
-        assert self.remote_branch
-        assert self.project
-        res = self.project.mergerequests.list(
-            state="opened", source_branch=self.remote_branch, all=True
+    def find_merge_request(self) -> Optional[MergeRequest]:
+        remote_branch = self.repository_info.remote_branch
+        res = self.project.find_merge_requests(
+            state="opened", source_branch=remote_branch
         )
         if len(res) >= 2:
             raise tsrc.Error(
@@ -228,25 +209,42 @@ class PushAction(tsrc.cli.push.PushAction):
             return None
         return res[0]
 
-    def create_merge_request(self) -> ProjectMergeRequest:
-        assert self.project
-        if self.requested_target_branch:
-            target_branch = self.requested_target_branch
+    def create_merge_request(self) -> MergeRequest:
+        requested_target_branch = self.args.target_branch
+        if requested_target_branch:
+            target_branch = requested_target_branch
         else:
-            target_branch = self.project.default_branch
-        assert self.remote_branch
-        return self.project.mergerequests.create(
-            {
-                "source_branch": self.remote_branch,
-                "target_branch": target_branch,
-                "title": self.remote_branch,
-            }
+            target_branch = self.project.get_default_branch()
+        ui.info_2("Creating new merge request")
+        remote_branch = self.repository_info.remote_branch
+        return self.project.create_merge_request(
+            source_branch=remote_branch,
+            target_branch=target_branch,
+            title=remote_branch,
         )
 
-    def ensure_merge_request(self) -> ProjectMergeRequest:
+    def ensure_merge_request(self) -> MergeRequest:
         merge_request = self.find_merge_request()
         if merge_request:
-            ui.info_2("Found existing merge request: !%s" % merge_request.iid)
+            ui.info_2(
+                "Found existing merge request",
+                ui.bold,
+                merge_request.get_short_description(),
+            )
             return merge_request
         else:
             return self.create_merge_request()
+
+
+def post_push(args: argparse.Namespace, repository_info: RepositoryInfo) -> None:
+    from tsrc.gitlab_client.api_client import ApiClient
+
+    token = get_token()
+    login_url = repository_info.login_url
+    # This will fail only if repository_info.login_url is None but we
+    # somehowe detect the repository was using GitLab
+    assert login_url
+
+    client = ApiClient(login_url, token)
+    processor = MergeRequestProcessor(repository_info, args, client)
+    processor.process()

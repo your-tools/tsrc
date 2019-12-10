@@ -20,7 +20,7 @@ class Manifest:
         self._repos = []  # type: List[tsrc.Repo]
         self.copyfiles = []  # type: List[Tuple[str, str]]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
-        self.gitlab_url = None  # type Optional[str]
+        self.gitlab_url = None  # type: Optional[str]
         self.github_enterprise_url = None  # type: Optional[str]
 
     def apply_config(self, config: Any) -> None:

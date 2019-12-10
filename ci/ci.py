@@ -35,7 +35,15 @@ def init_checks():
     append_check("mypy", "mypy", "tsrc", env=env)
 
     nprocs = multiprocessing.cpu_count()
-    pytest_args = ["pytest", "--cov", ".", "--cov-report", "term", "-n", str(nprocs)]
+    # fmt: off
+    pytest_args = [
+        "pytest",
+        "--cov", ".",
+        "--cov-report", "term",
+        "--cov-report", "html",
+        "-n", str(nprocs),
+    ]
+    # fmt: on
     if os.environ.get("CI"):
         pytest_args.extend(["-p", "no:sugar"])
     append_check("pytest", *pytest_args)

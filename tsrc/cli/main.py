@@ -160,10 +160,36 @@ def main_impl(args: ArgsList = None) -> None:
     log_parser.set_defaults(to="HEAD")
 
     push_parser = add_workspace_subparser(subparsers, "push")
-    push_parser.add_argument("-f", "--force", action="store_true", default=False)
-    push_parser.add_argument("-t", "--target", dest="target_branch")
-    push_parser.add_argument("push_spec", nargs="?")
-    push_parser.add_argument("-a", "--assignee", dest="assignee")
+    push_parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        default=False,
+        help="Run git push with --force",
+    )
+    push_parser.add_argument(
+        "-t",
+        "--target",
+        dest="target_branch",
+        help="Force the target branch of the request - "
+        "defaults to the default branch of the project",
+    )
+    push_parser.add_argument(
+        "-o",
+        "--origin",
+        dest="origin",
+        default="origin",
+        help="Force the git remote to use - defauls to 'origin'",
+    )
+    push_parser.add_argument(
+        "push_spec",
+        nargs="?",
+        metavar="LOCAL:REMOT",
+        help="Force the local and remote branches",
+    )
+    push_parser.add_argument(
+        "-a", "--assignee", dest="assignee", help="Assing to one user"
+    )
     push_parser.add_argument(
         "-r",
         "--reviewer",
@@ -173,16 +199,24 @@ def main_impl(args: ArgsList = None) -> None:
         help="Request review from the given users - "
         "not available for GitLab Community Edition, use --assignee instead",
     )
+    push_parser.add_argument(
+        "--close",
+        action="store_true",
+        help="Close the merge request without merging it",
+    )
+    push_parser.add_argument("--title", dest="title", help="Update title")
 
-    github_group = push_parser.add_argument_group("github options")
+    github_group = push_parser.add_argument_group("GitHub options")
     github_group.add_argument("--merge", help="Merge pull request", action="store_true")
 
-    gitlab_group = push_parser.add_argument_group("gitlab options")
-    gitlab_group.add_argument("--accept", action="store_true")
-    gitlab_group.add_argument("--close", action="store_true")
+    gitlab_group = push_parser.add_argument_group("GitLab options")
+    gitlab_group.add_argument(
+        "--accept",
+        action="store_true",
+        help="Accept merge request and merge it when the pipeline succeeds",
+    )
 
     message_group = gitlab_group.add_mutually_exclusive_group()
-    message_group.add_argument("--title", dest="title")
     message_group.add_argument(
         "--wip", action="store_true", help="Mark merge request as WIP"
     )
