@@ -17,17 +17,17 @@ import tsrc.git
 import tsrc.cli
 
 
-def service_from_url(url: str, workspace: tsrc.Workspace) -> Optional[str]:
+def service_from_url(url: str, *, manifest: tsrc.Manifest) -> Optional[str]:
     if url.startswith("git@github.com"):
         return "github"
 
-    github_enterprise_url = workspace.get_github_enterprise_url()
+    github_enterprise_url = manifest.github_enterprise_url
     if github_enterprise_url:
         github_domain = urlparse(github_enterprise_url).hostname
         if url.startswith("git@%s" % github_domain):
             return "github_enterprise"
 
-    gitlab_url = workspace.get_gitlab_url()
+    gitlab_url = manifest.gitlab_url
     if gitlab_url:
         gitlab_domain = urlparse(gitlab_url).hostname
         if url.startswith("git@%s" % gitlab_domain):
@@ -65,7 +65,7 @@ class RepositoryInfo:
     login_url = attr.ib()  # type: Optional[str]
 
     @classmethod
-    def read(cls, working_path: Path, *, workspace: tsrc.Workspace) -> "RepositoryInfo":
+    def read(cls, working_path: Path, *, manifest: tsrc.Manifest) -> "RepositoryInfo":
         repo_path = tsrc.git.get_repo_root(working_path=working_path)
         current_branch = tsrc.git.get_current_branch(repo_path)
         tracking_ref = tsrc.git.get_tracking_ref(repo_path)
@@ -81,12 +81,12 @@ class RepositoryInfo:
             raise NoRemoteConfigured(repo_path, "origin")
 
         project_name = project_name_from_url(url)
-        service = service_from_url(url, manifest=manifest)
+        service = service_from_url(url=url, manifest=manifest)
 
         if service == "gitlab":
-            login_url = workspace.get_gitlab_url()
+            login_url = manifest.gitlab_url
         elif service == "github_enterprise":
-            login_url = workspace.get_github_enterprise_url()
+            login_url = manifest.github_enterprise_url
         else:
             login_url = None
 
@@ -182,7 +182,7 @@ class PushAction(metaclass=abc.ABCMeta):
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
 
-    repository_info = RepositoryInfo.read(Path.getcwd(), workspace=workspace)
+    repository_info = RepositoryInfo.read(Path.getcwd(), manifest=workspace.get_manifest())
     service_name = repository_info.service
     module = importlib.import_module("tsrc.cli.push_%s" % service_name)
     push_action = module.PushAction(repository_info, args)  # type: ignore
