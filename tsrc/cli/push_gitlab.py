@@ -234,3 +234,17 @@ class MergeRequestProcessor:
             return merge_request
         else:
             return self.create_merge_request()
+
+
+def post_push(args: argparse.Namespace, repository_info: RepositoryInfo) -> None:
+    from tsrc.gitlab_client.api_client import ApiClient
+
+    token = get_token()
+    login_url = repository_info.login_url
+    # This will fail only if repository_info.login_url is None but we
+    # somehowe detect the repository was using GitLab
+    assert login_url
+
+    client = ApiClient(login_url, token)
+    processor = MergeRequestProcessor(repository_info, args, client)
+    processor.process()
