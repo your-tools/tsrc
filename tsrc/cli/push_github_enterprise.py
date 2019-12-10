@@ -5,7 +5,7 @@ from typing import Optional
 from github3 import GitHub
 
 import tsrc
-import tsrc.github
+from tsrc.github_client.api_client import login as github_login
 from tsrc.cli.push import RepositoryInfo
 
 
@@ -17,7 +17,7 @@ class PushAction(tsrc.cli.push_github.PushAction):
         github_api: Optional[GitHub] = None,
     ) -> None:
         if not github_api:
-            github_api = tsrc.github.login(
+            github_api = github_login(
                 github_enterprise_url=repository_info.repository_login_url
             )
 

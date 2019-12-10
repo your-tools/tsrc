@@ -10,7 +10,7 @@ from github3.pulls import PullRequest
 import cli_ui as ui
 
 import tsrc
-import tsrc.github
+from tsrc.github_client.api_client import login as github_login
 from tsrc.cli.push import RepositoryInfo
 
 
@@ -28,7 +28,7 @@ class PushAction(tsrc.cli.push.PushAction):
 
     def setup_service(self) -> None:
         if not self.github_api:
-            self.github_api = tsrc.github.login()
+            self.github_api = github_login()
         assert self.project_name
         owner, name = self.project_name.split("/")
         self.repository = self.github_api.repository(owner, name)
