@@ -44,6 +44,27 @@ def test_status_dirty(
     assert message_recorder.find(r"\* foo/bar master \(dirty\)")
 
 
+def test_status_incorrect_branch(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    git_server.add_repo("bar")
+    git_server.add_repo("foo")
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    foo_path = workspace_path / "foo"
+    tsrc.git.run(foo_path, "checkout", "-b", "other")
+    tsrc.git.run(foo_path, "push", "--set-upstream", "origin", "other:other")
+
+    tsrc_cli.run("status")
+
+    assert message_recorder.find(r"\* foo\s+other\s+\(expected: master\)")
+
+
 def test_status_not_on_any_branch(
     tsrc_cli: CLI,
     git_server: GitServer,

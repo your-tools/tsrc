@@ -1,13 +1,12 @@
 """ Entry point for tsrc status """
 
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional, Tuple
 
 import argparse
 import collections
 import shutil
 
 import cli_ui as ui
-from path import Path
 
 import tsrc
 import tsrc.errors
@@ -15,7 +14,26 @@ import tsrc.cli
 import tsrc.git
 
 
-StatusOrError = Union[tsrc.git.Status, Exception]
+class ManifestStatus:
+    def __init__(self, repo: tsrc.Repo, *, manifest: tsrc.Manifest):
+        self.repo = repo
+        self.manifest = manifest
+        self.incorrect_branch = None  # type: Optional[Tuple[str,str]]
+
+    def update(self, git_status: tsrc.git.Status) -> None:
+        expected_branch = self.repo.branch
+        actual_branch = git_status.branch
+        if actual_branch and actual_branch != expected_branch:
+            self.incorrect_branch = (actual_branch, expected_branch)
+
+
+class Status:
+    def __init__(self, *, git: tsrc.git.Status, manifest: ManifestStatus):
+        self.git = git
+        self.manifest = manifest
+
+
+StatusOrError = Union[Status, Exception]
 CollectedStatuses = Dict[str, StatusOrError]
 
 
@@ -25,7 +43,7 @@ def describe_status(status: StatusOrError) -> List[ui.Token]:
         return [ui.red, "error: missing repo"]
     if isinstance(status, Exception):
         return [ui.red, "error: ", status]
-    return describe_git_status(status)
+    return describe_git_status(status.git) + describe_manifest_status(status.manifest)
 
 
 def describe_git_status(git_status: tsrc.git.Status) -> List[ui.Token]:
@@ -33,6 +51,16 @@ def describe_git_status(git_status: tsrc.git.Status) -> List[ui.Token]:
     res += describe_branch(git_status)
     res += describe_position(git_status)
     res += describe_dirty(git_status)
+    return res
+
+
+def describe_manifest_status(manifest_status: ManifestStatus) -> List[ui.Token]:
+    res = []  # type: List[ui.Token]
+    incorrect_branch = manifest_status.incorrect_branch
+    if incorrect_branch:
+        actual, expected = incorrect_branch
+        res += [ui.red, "(expected: " + expected + ")"]
+
     return res
 
 
@@ -82,8 +110,9 @@ def erase_last_line() -> None:
 
 
 class StatusCollector(tsrc.Task[tsrc.Repo]):
-    def __init__(self, workspace_path: Path) -> None:
-        self.workspace_path = workspace_path
+    def __init__(self, workspace: tsrc.Workspace) -> None:
+        self.workspace = workspace
+        self.manifest = workspace.get_manifest()
         self.statuses = collections.OrderedDict()  # type: CollectedStatuses
         self.num_repos = 0
 
@@ -92,14 +121,18 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
 
     def process(self, index: int, total: int, repo: tsrc.Repo) -> None:
         ui.info_count(index, total, repo.src, end="\r")
-        full_path = self.workspace_path / repo.src
+        full_path = self.workspace.root_path / repo.src
 
         if not full_path.exists():
             self.statuses[repo.src] = tsrc.errors.MissingRepo(repo.src)
             return
 
         try:
-            self.statuses[repo.src] = tsrc.git.get_status(full_path)
+            git_status = tsrc.git.get_status(full_path)
+            manifest_status = ManifestStatus(repo, manifest=self.manifest)
+            manifest_status.update(git_status)
+            status = Status(git=git_status, manifest=manifest_status)
+            self.statuses[repo.src] = status
         except Exception as e:
             self.statuses[repo.src] = e
         erase_last_line()
@@ -123,5 +156,5 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
-    status_collector = StatusCollector(workspace.root_path)
+    status_collector = StatusCollector(workspace)
     tsrc.run_sequence(workspace.get_repos(), status_collector)
