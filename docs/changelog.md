@@ -1,4 +1,6 @@
-# Next release
+# v1.0.0 - (2020-01-09)
+
+Starting the new year with a stable release, at last!
 
 ## Revamp group UX
 
