@@ -125,8 +125,12 @@ class ApiClient(Client):
             else:
                 raise
 
-    def get_features_list(self) -> Sequence[str]:
-        gl_features = self.gl_api.features.list()
+    def get_features_list(self) -> Optional[Sequence[str]]:
+        try:
+            gl_features = self.gl_api.features.list()
+        except GitlabGetError as e:
+            if e.response_code == 403:
+                return None
         return [x.name for x in gl_features]
 
     def get_project(self, name: str) -> Project:

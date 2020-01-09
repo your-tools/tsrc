@@ -91,6 +91,12 @@ class MergeRequestProcessor:
 
     def check_gitlab_feature(self, name: str) -> None:
         features = self.gitlab_client.get_features_list()
+        if features is None:
+            # Could not get the list of features for some reason,
+            # (maybe current user is not a GitLab admin?)
+            # so hope for the best
+            return
+
         if name not in features:
             raise FeatureNotAvailable(name)
 

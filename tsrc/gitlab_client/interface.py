@@ -96,7 +96,7 @@ class Client(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_features_list(self) -> Sequence[str]:
+    def get_features_list(self) -> Optional[Sequence[str]]:
         pass
 
     @abc.abstractmethod
