@@ -5,11 +5,11 @@ Starting the new year with a stable release, at last!
 ## Revamp group UX
 
 The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
-[corresponding milestone](https://github.com/TankerHQ/tsrc/milestone/1) for the ful list.
+[corresponding milestone](https://github.com/TankerHQ/tsrc/milestone/1) for the full list.
 
 ## New configuration file
 
-Previously, `tsrc` stored its permanent config in `.tsrc/manifest.yml` and the file was not supposed to be edited by hand. Instead, users could use `tsrc init` to modify it, for instance with the `--branch` argument.
+Previously, `tsrc` stored its permanent configuration in `.tsrc/manifest.yml` and the file was not supposed to be edited by hand. Instead, users could use `tsrc init` to modify it, for instance with the `--branch` argument.
 
 Starting with this release, the command `tsrc init` can only be run once per workspace, and you must edit the `.tsrc/config.yml` file instead.
 
@@ -32,6 +32,17 @@ tsrc init --groups foo bar
 * `tsrc foreach` learned a `--groups-from-config` option to use the groups configured in the workspace. Fix #178, #179.
 
 * `tsrc push` learned a `-o, --origin` option to specify a remote name different from "origin". Fix #170
+
+## Other fixes
+
+* Try and check that GitLab installation support required features before using them -
+  typically, using `tsrc push --approvers` on GitLab Community Edition. (#165)
+  - reported by @irizzant.
+* Switch to GitHub actions for running tests and linters. Also, publish documentation automatically
+  when something is pushed to the `master` branch.
+* `tsrc status` : add information when local branch does not match manifest
+  configuration. (#190). Feature suggested by @janjachnick
+
 
 # v0.9.2 - (2019-09-30)
 
