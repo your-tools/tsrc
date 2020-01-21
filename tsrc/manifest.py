@@ -1,8 +1,7 @@
 """ manifests for tsrc """
 
 import operator
-import os
-from typing import cast, Any, Dict, List, NewType, Optional, Tuple  # noqa
+from typing import cast, Any, Dict, List, Optional  # noqa
 
 from path import Path
 import schema
@@ -18,7 +17,6 @@ class RepoNotFound(tsrc.Error):
 class Manifest:
     def __init__(self) -> None:
         self._repos = []  # type: List[tsrc.Repo]
-        self.copyfiles = []  # type: List[Tuple[str, str]]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
         self.gitlab_url = None  # type: Optional[str]
         self.github_enterprise_url = None  # type: Optional[str]
@@ -28,7 +26,7 @@ class Manifest:
         # Note: we cannot just serialize the yaml file into the class,
         # because we need to convert the plain old dicts into
         # higher-level classes.
-        self.copyfiles = []
+        self.copyfiles = []  # type: List[tsrc.Copy]
         repos_config = config["repos"]
         for repo_config in repos_config:
             self._handle_repo(repo_config)
@@ -73,10 +71,10 @@ class Manifest:
             return
         to_cp = repo_config["copy"]
         for item in to_cp:
-            src_copy = item["src"]
-            dest_copy = item.get("dest", src_copy)
-            src_copy = os.path.join(repo_config["src"], src_copy)
-            self.copyfiles.append((src_copy, dest_copy))
+            src = item["src"]
+            dest = item.get("dest", src)
+            copy = tsrc.Copy(repo_config["src"], src, dest)
+            self.copyfiles.append(copy)
 
     def _handle_groups(self, groups_config: Any) -> None:
         elements = {repo.src for repo in self._repos}

@@ -87,7 +87,8 @@ class Workspace:
         tsrc.executor.run_sequence(self.get_repos(), remote_setter)
 
     def copy_files(self) -> None:
-        file_copier = FileCopier(self.root_path)
+        repos = self.get_repos()
+        file_copier = FileCopier(self.root_path, repos)
         manifest = self.local_manifest.get_manifest()
         copyfiles = manifest.copyfiles
         tsrc.executor.run_sequence(copyfiles, file_copier)

@@ -1,3 +1,7 @@
+# v1.0.1 - (2020-01-21)
+
+* Fix #196: Do not attempt file copies for non-cloned repos when using `tsrc init` with a list of groups.
+
 # v1.0.0 - (2020-01-09)
 
 Starting the new year with a stable release, at last!
