@@ -11,7 +11,7 @@
 
 .. image:: https://github.com/TankerHQ/tsrc/workflows/linters/badge.svg
    :target: https://github.com/TankerHQ/tsrc/actions
-   
+
 .. image:: https://img.shields.io/codecov/c/github/TankerHQ/tsrc.svg?label=Coverage
    :target: https://codecov.io/gh/TankerHQ/tsrc
 
@@ -35,7 +35,7 @@ In can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
 Installation
 -------------
 
-`tsrc` is `available on pypi <https://pypi.org/project/tsrc>`_ an can be installed via ``pip``. It requires **Python 3.4** or later.
+`tsrc` is `available on pypi <https://pypi.org/project/tsrc>`_ an can be installed via ``pip``. It requires **Python 3.5** or later.
 
 
 Usage Example
