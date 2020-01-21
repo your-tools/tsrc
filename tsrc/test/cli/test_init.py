@@ -180,9 +180,21 @@ def test_clone_all_repos(
 def test_use_specific_groups(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * the manifest contains two groups, 'foo' and 'spam'
+    * the manifest contains one repo 'other'
+    * the 'other' repo is configured with a file copy
+
+    * the user runs `init --group foo, spam`
+
+    * we don't want 'other' to be cloned
+    * we don't want the file copy to be attempted
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
+    git_server.push_file("other", "THANKS")
+    git_server.manifest.set_repo_file_copies("other", [("THANKS", "THANKS.copy")])
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")

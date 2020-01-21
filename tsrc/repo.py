@@ -11,6 +11,13 @@ class Remote:
 
 
 @attr.s(frozen=True)
+class Copy:
+    repo = attr.ib()  # type: str
+    src = attr.ib()  # type: str
+    dest = attr.ib()  # type: str
+
+
+@attr.s(frozen=True)
 class Repo:
     src = attr.ib()  # type: str
     branch = attr.ib(default="master")  # type: str

@@ -1,6 +1,5 @@
 from typing import List, Optional
 import textwrap
-import os.path
 
 import ruamel.yaml
 
@@ -63,8 +62,8 @@ repos:
         ),
     ]
     assert manifest.copyfiles == [
-        (os.path.join("master", "top.cmake"), "CMakeLists.txt"),
-        (os.path.join("master", ".clang-format"), ".clang-format"),
+        tsrc.Copy("master", "top.cmake", "CMakeLists.txt"),
+        tsrc.Copy("master", ".clang-format", ".clang-format"),
     ]
 
 
