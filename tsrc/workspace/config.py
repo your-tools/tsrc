@@ -6,17 +6,13 @@ import ruamel.yaml
 
 @attr.s
 class WorkspaceConfig:
-    """ Persistent configuration of the workspace
+    """ Persistent configuration of the workspace """
 
-    """
-
-    # Note: always use a default value so the ctor only
-    # takes named arguments
-    manifest_url = attr.ib(default=None)  # type: str
-    manifest_branch = attr.ib(default=None)  # type: str
+    manifest_url = attr.ib()  # type: str
+    manifest_branch = attr.ib()  # type: str
+    repo_groups = attr.ib()  # type: List[str]
 
     shallow_clones = attr.ib(default=False)  # type: bool
-    repo_groups = attr.ib(default=[])  # type: List[str]
     clone_all_repos = attr.ib(default=False)  # type: bool
 
     @manifest_url.validator
