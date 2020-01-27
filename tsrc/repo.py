@@ -20,12 +20,11 @@ class Copy:
 @attr.s(frozen=True)
 class Repo:
     src = attr.ib()  # type: str
+    remotes = attr.ib()  # type: List[Remote]
     branch = attr.ib(default="master")  # type: str
     sha1 = attr.ib(default=None)  # type: Optional[str]
     tag = attr.ib(default=None)  # type: Optional[str]
-    shallow = attr.ib(default=None)  # type: Optional[bool]
-
-    remotes = attr.ib(default=[])  # type: List[Remote]
+    shallow = attr.ib(default=False)  # type: bool
 
     @property
     def clone_url(self) -> str:
