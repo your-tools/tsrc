@@ -1,3 +1,7 @@
+# v1.0.2 - (2020-01-29)
+
+* Fix `python_requires` value in project metadata
+
 # v1.0.1 - (2020-01-21)
 
 * Fix #196: Do not attempt file copies for non-cloned repos when using `tsrc init` with a list of groups.
