@@ -45,18 +45,17 @@ Finally, feel free to add your name in the `THANKS` file ;)
 
 # Checking your changes
 
-* Install latest [dmenv](https://github.com/TankerHQ/dmenv) version.
+* Install latest [poetry](https://python-poetry.org) version.
 * Install development and documentation dependencies:
 
 ```console
-$ dmenv install
+$ poetry install
 ```
 
 * Finally, run:
 
 ```console
-$ source "$(dmenv show:venv_path)/bin/activate"
-$ python ci/ci.py
+$ poetry run python ci/ci.py
 ```
 
 
@@ -66,7 +65,7 @@ $ python ci/ci.py
 * Launch the development server locally:
 
 ```bash
-$ dmenv run mkdocs serve
+$ poetry run mkdocs serve
 ```
 
 * Edit the markdown files from the `docs/` folder and review the changes in your browser

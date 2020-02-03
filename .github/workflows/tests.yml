@@ -24,13 +24,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dmenv
-      uses: TankerHQ/dmenv-install-action@v1.0.0
-      with:
-        dmenv-version: 0.20.0
-
     - name: Prepare project for development
-      run: dmenv install
+      run: |
+        python -m pip install poetry
+        python -m poetry config virtualenvs.create false
+        python -m poetry install
 
     - name: Run tests
       run: |
@@ -38,7 +36,7 @@ jobs:
         # a proper git identity for that
         git config --global user.email "test@tsrc-tests.com"
         git config --global user.name "Tasty Test"
-        dmenv run -- pytest --cov . --cov-report xml --numprocesses auto
+        poetry run pytest --cov . --cov-report xml --numprocesses auto
 
     - name: Send coverage to codecov.io
       uses: codecov/codecov-action@v1

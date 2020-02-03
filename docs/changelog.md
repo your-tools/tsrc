@@ -1,3 +1,7 @@
+# Next release
+
+* We now use [poetry](https://python-poetry.org) for dependency management and packaging.
+
 # v1.0.2 - (2020-01-29)
 
 * Fix `python_requires` value in project metadata

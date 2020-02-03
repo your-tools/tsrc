@@ -106,6 +106,9 @@ def main(args: ArgsList = None) -> None:
 
 def main_impl(args: ArgsList = None) -> None:
     parser = argparse.ArgumentParser(prog="tsrc")
+    parser.add_argument(
+        "--version", action="version", version="tsrc " + tsrc.__version__
+    )
 
     parser.add_argument("--verbose", help="Show debug messages", action="store_true")
     parser.add_argument(
