@@ -1,5 +1,6 @@
 """ Common tools """
 
+__version__ = "1.0.2"
 
 from .config import parse_config, dump_config  # noqa
 from .config import (  # noqa
