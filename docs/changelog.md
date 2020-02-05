@@ -1,6 +1,6 @@
-# Next release
+# v1.0.3 (2020-02-05)
 
-* We now use [poetry](https://python-poetry.org) for dependency management and packaging.
+* Use [poetry](https://python-poetry.org) for dependency management and packaging.
 
 # v1.0.2 - (2020-01-29)
 
