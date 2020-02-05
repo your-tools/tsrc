@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tsrc"
-version = "1.0.2"
+version = "1.0.3"
 description = "Manage multiple repositories git repositories - review automation"
 authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
 readme = "README.rst"
