@@ -8,7 +8,7 @@
 
 # v1.0.1 - (2020-01-21)
 
-* Fix #196: Do not attempt file copies for non-cloned repos when using `tsrc init` with a list of groups.
+* Fix #196: Do not attempt file copies for non-cloned repositories when using `tsrc init` with a list of groups.
 
 # v1.0.0 - (2020-01-09)
 
@@ -40,6 +40,8 @@ tsrc init --groups foo bar
 
 * `tsrc init` learned a `--clone-all-repos` option to clone all repositories from the manifest,
   regardless of the groups. Fix #181
+
+* Remove `--file` option from `tsrc init`.
 
 * `tsrc foreach` learned a `--groups-from-config` option to use the groups configured in the workspace. Fix #178, #179.
 

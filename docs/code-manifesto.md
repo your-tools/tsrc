@@ -17,7 +17,7 @@ def bar():
 
 # No
 def bar():
-   ''' bar stuf '''
+   ''' bar stuff '''
    a = 'foo'
 
 # Exception
@@ -85,7 +85,7 @@ class Foo:
     self.bar, self.baz = None, True
 ```
 
-* Do not use conditional expressions. The order is not the same as the ternary operator in C++ and Javascript, so it should be avoided:
+* Do not use conditional expressions. The order is not the same as the ternary operator in C++ and JavaScript, so it should be avoided:
 
 ```python
 # Yes
@@ -184,10 +184,10 @@ even_nums = filter(is_even, nums)
 
 ```python
 # Yes
-max(len(x) for x in myiterable)
+max(len(x) for x in my_iterable)
 
 # No
-max([len(x) for x in myiterable])
+max([len(x) for x in my_iterable])
 ```
 
 * Use plural names for collections. This has the nice benefit of allowing you to have meaningful loop names:
@@ -241,7 +241,7 @@ import required_module
 
 HAS_NICE_FEATURE = True
 try:
-    import nicelib
+    import nice_lib
 except ImportError:
     HAS_NICE_FEATURE = False
 
@@ -266,13 +266,13 @@ my_bar = bar.Bar()
 ```
 
 !!! note
-    We allow a few exceptions like `from path import Path` or importing classes directory in tests. Use your best judgement.
+    We allow a few exceptions like `from path import Path` or importing classes directory in tests. Use your best judgment.
 
 # Classes
 
 * When you want to make sure a class follows an interface, use `abc.ABCMeta` instead of raising `NotImplementedError`. This way you get the error when the class is instantiated instead of when the method is called.
 
-```ppython
+```python
 # Yes
 class AbstractFoo(metaclass=abc.ABCMeta):
     @abc.abstractmethod

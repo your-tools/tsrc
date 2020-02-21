@@ -13,7 +13,7 @@ found that tsrc had both a better command line API and a nicer output.
 
 On a less subjective level:
 
-* Good support for Windows (no need for CygWin or anything like that)
+* Good support for Windows (no need for Cygwin or anything like that)
 
 * **GitLab** support (automate working with merge requests)
 
@@ -21,7 +21,7 @@ On a less subjective level:
   actions.
 
     For instance, `tsrc` never puts you in a "detached HEAD" state,
-    nor does automatic rebases. It also never touches dirty repos.
+    nor does automatic rebase. It also never touches dirty repositories.
 
     This is achieved by using mostly 'porcelain' commands from git, instead of
     relying on plumbings internals.
@@ -33,7 +33,7 @@ Also (and this matters a lot if you think about contribution):
 * Uses PEP8 coding style
 * Written in Python 3, not Python 2
 
-Here are a few features present in repo that are missing from `tsrc`
+Here are a few features present in `repo` that are missing from `tsrc`
 (but may be implemented in the future)
 
 * Cloning several repositories in parallel

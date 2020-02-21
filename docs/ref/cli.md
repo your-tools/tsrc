@@ -1,5 +1,3 @@
-# Command line usage
-
 ## Important note
 
 We use the [argparse](https://docs.python.org/3/library/argparse.html) library to
@@ -21,6 +19,10 @@ $ tsrc --verbose sync
 $ tsrc init MANIFEST_URL
 ```
 
+Finally, note that like `git`, tsrc will walk up the folders hierarchy looking for a `.tsrc`
+folder, which means you can run tsrc commands anywhere in your workspace, not
+just at the top.
+
 ## Global options
 
 --verbose
@@ -35,19 +37,19 @@ $ tsrc init MANIFEST_URL
 ## Usage
 
 
-tsrc init MANIFEST_URL [--group GROUP]
+tsrc init MANIFEST_URL [--group GROUP1, GROUP2]
 :   Initializes a new workspace.
 
     MANIFEST_URL should be a git URL containing a valid
     `manifest.yml` file.
 
-    The `-g,-group` can be used several times to specify which groups
+    The `-g,--groups`  option can be used to specify a list of groups
     to use when cloning repositories.
 
-    The `-s,--shallow` can be used to make shallow clone of all repositories.
+    The `-s,--shallow` option can be used to make shallow clone of all repositories.
 
     If you want to add or remove a group in your workspace, you can
-    re-run `tsrc init`.
+    edit the configuration file in `<workspace>/.tsrc/config.yml`
 
 
 tsrc foreach -- command --opt1 arg1
@@ -103,11 +105,15 @@ tsrc push [--reviewer REVIEWER  ...] (GitHub only):
 tsrc status
 :   Displays a summary of the status of your workspace:
 
-    * Shows dirty repos
-    * Shows repos not on the expected branch
+    * Shows dirty repositories
+    * Shows repositories not on the expected branch
 
 tsrc sync
 :   Updates all the repositories and shows a summary at the end.
 
 tsrc version
 :   Displays `tsrc` version number, along additional data if run from a git clone.
+
+tsrc apply-manifest PATH
+:   Apply changes from the manifest file located at `PATH`. Useful to check changes
+    in the manifest before publishing them to the manifest repository.
