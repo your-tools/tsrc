@@ -1,9 +1,6 @@
-# Configuration files formats
+All configuration files use [YAML](http://www.yaml.org/) syntax.
 
-Unless otherwise noted, all configuration files use [YAML](http://www.yaml.org/)
-syntax.
-
-## Manifest format
+## manifest.yml
 
 The manifest is always parsed as a dictionary.
 
@@ -117,8 +114,32 @@ $ tsrc init <manifest_url> --group foo
 
 Note that `tsrc init` records the names of the groups it was invoked with, so that `tsrc sync` re-uses them later on. This means that if you want to change the groups used, you must re-run `tsrc init` with the new group list.
 
+## Workspace configuration file
 
-## tsrc.yml format
+
+The workspace configuration lies in `<workspace>/.tsrc/config.yml`.  It is
+created by `tsrc init` then read by `tsrc sync` and other commands. It can
+be freely edited by hand.
+
+Here's an example:
+
+```yaml
+manifest_url: git@acme.corp:manifest.git
+manifest_branch: master
+shallow_clones: false
+repo_groups:
+- default
+clone_all_repos: false
+```
+
+
+* `manifest_url`: an git URL containing a `manifest.yml` file
+* `manifest_branch`: the branch to use when updating the local manifest (e.g, the first step of `tsrc sync`)
+* `shallow_clones`: whether to use only shallow clones when cloning missing repositories
+* `repo_groups`: the list of groups to use - every mentioned group must be present in the `manifest.yml` file (see above)
+* `clone_all_repos`: whether to ignore groups entirely and clone every repository from the manifest instead
+
+## Global tsrc configuration file
 
 `tsrc.yml` must be written in `XDG_CONFIG_HOME` (or `~/.config/`).
 

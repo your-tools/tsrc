@@ -19,7 +19,7 @@ auth:
 !!! note
     The full config file format is described in the [reference](../ref/formats.md).
 
-The second step is to tell `tsrc` about the HTTP url of your GitLab instance, which is needed to call the [GitLab HTTP API](https://docs.gitlab.com/ce/api/) (currently using version *4*).
+The second step is to tell `tsrc` about the HTTP URL of your GitLab instance, which is needed to call the [GitLab HTTP API](https://docs.gitlab.com/ce/api/) (currently using version *4*).
 
 This is done in the *manifest* file:
 
@@ -63,9 +63,11 @@ github_enterprise:
 repos:
  - ...
 ```
-and there is a remote named `origin` which starts with `git@github.local` (hostname of `github_enterprise.url` configuration) , `tsrc` will assume you want to use GitHub Enterprise.
+and there is a remote named `origin` which starts with `git@github.local`
+(hostname of `github_enterprise.url` configuration) , `tsrc` will assume
+you want to use GitHub Enterprise.
 
-Then, the first time you need access to GitHub API, it will ask for your credentials, generate a token and store it in the `~/.config/tsrc.yml` file.
+Then the first time you need access to GitHub API, it will ask for your credentials, generate a token and store it in the `~/.config/tsrc.yml` file.
 In the event your GitHub Enterprise instance has a self-signed certificate the trust store can be configured in the `~/.config/tsrc.yml` file via:
 ```yaml
 auth:
@@ -105,5 +107,5 @@ $ tsrc push --merge
 
 # Handling standard Git repositories
 
-If `tsrc` can't determine to use GitLab, GitHub, or GitHub Enterprise it will push the changes to the remote repository 
+If `tsrc` can't determine to use GitLab, GitHub, or GitHub Enterprise it will push the changes to the remote repository
 without creating any pull requests on the user's behalf.
