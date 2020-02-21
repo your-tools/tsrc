@@ -41,8 +41,6 @@ class SequentialExecutor(Generic[T]):
         self.errors = []  # type: List[Tuple[T, tsrc.Error]]
 
     def process(self, items: List[T]) -> None:
-        if not items:
-            return
         self.task.on_start(num_items=len(items))
 
         self.errors = []
