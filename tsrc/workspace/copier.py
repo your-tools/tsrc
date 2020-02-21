@@ -14,7 +14,7 @@ class FileCopier(tsrc.executor.Task[tsrc.Copy]):
         self.repos = repos
 
     def on_start(self, *, num_items: int) -> None:
-        ui.info_1("Copying files")
+        ui.info_2("Copying files")
 
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to perform the following copies:")
