@@ -57,7 +57,7 @@ class Manifest:
 
     def _handle_remotes(self, repo_config: Any) -> List[tsrc.Remote]:
         remotes_config = repo_config.get("remotes")
-        res = []  # type: List[tsrc.Remote]
+        res = []
         if remotes_config:
             for remote_config in remotes_config:
                 remote = tsrc.Remote(

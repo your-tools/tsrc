@@ -4,7 +4,7 @@ from path import Path
 import ruamel.yaml
 import schema
 from typing import Any, Dict, NewType, Optional
-import xdg.BaseDirectory
+import xdg.BaseDirectory  # type: ignore
 
 import tsrc
 
