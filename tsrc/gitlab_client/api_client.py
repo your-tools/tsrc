@@ -1,7 +1,7 @@
 from typing import Any, Optional, Sequence
 
 from gitlab import Gitlab
-from gitlab.exceptions import GitlabGetError
+from gitlab.exceptions import GitlabGetError  # type: ignore
 
 from .interface import User, MergeRequest, Project, Group, Client
 import tsrc
