@@ -73,7 +73,11 @@ class GitLabProject(Project):
         self, *, state: str, source_branch: str
     ) -> Sequence[MergeRequest]:
         gl_merge_requests = self.gl_project.mergerequests.list(
-            state="opened", source_branch=source_branch, all=True
+            state="opened",
+            source_branch=source_branch,
+            all=True,
+            order_by="created_at",
+            sort="desc",
         )
         return [GitLabMergeRequest(x) for x in gl_merge_requests]
 
