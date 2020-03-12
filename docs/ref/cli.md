@@ -70,38 +70,6 @@ tsrc log --from FROM [--to TO]
     Note that if no changes are found, the repository will not be displayed at
     all.
 
-tsrc push [--assignee ASSIGNEE]
-:   You should run this from a repository with the correct branch checked out.
-
-    (The command will fail if you run this while on the `master` branch or in
-    "detached HEAD" mode.)
-
-    `ASSIGNEE` is optional and should match the name of an active GitLab user, or
-    a member of your GitHub team.
-
-    The merge request (or pull request on GitHub) will get created if no other
-    opened merge request with the same branch exists. Otherwise, the existing
-    merge request will be updated.
-
-
-tsrc push [--ready|--wip] (GitLab only)
-:   Toggle the `WIP: ` ("Work In Progress") prefix for the merge request.
-
-tsrc push --accept (GitLab only)
-:   Tell GitLab to merge the merge request after the CI has passed.
-
-    Note that the source branch will get automatically removed. (It should
-    not matter since all the information about the source branch will
-    be found in the merge commit.)
-
-tsrc push --merge (GitHub only):
-:    Tell GitHub to merge the pull request.
-
-tsrc push [--reviewer REVIEWER  ...] (GitHub only):
-:    Request a reviewer from `REVIEWER`. Can be specified multiple times. Should
-     be a member of your organization.
-
-
 tsrc status
 :   Displays a summary of the status of your workspace:
 

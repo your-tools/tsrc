@@ -8,11 +8,6 @@ The manifest is always parsed as a dictionary.
 
 
 * `repos` (required): list of repositories to clone
-
-* `gitlab.url` (optional): HTTP URL of the GitLab instance
-
-* `github_enterprise.url` (optional): HTTP URL of the Github Enterprise instance
-
 * `groups` (optional): list of groups
 
 ### repos
@@ -138,15 +133,3 @@ clone_all_repos: false
 * `shallow_clones`: whether to use only shallow clones when cloning missing repositories
 * `repo_groups`: the list of groups to use - every mentioned group must be present in the `manifest.yml` file (see above)
 * `clone_all_repos`: whether to ignore groups entirely and clone every repository from the manifest instead
-
-## Global tsrc configuration file
-
-`tsrc.yml` must be written in `XDG_CONFIG_HOME` (or `~/.config/`).
-
-We use GitLab authentication with token, like so:
-
-```
-auth:
-  gitlab:
-    token: <your token>
-```

@@ -1,7 +1,7 @@
 """ Implementation of the tsrc Workspace: a collection of git repositories
 """
 
-from typing import Iterable, List, Tuple, Optional
+from typing import Iterable, List, Tuple
 
 import cli_ui as ui
 from path import Path
@@ -59,14 +59,6 @@ class Workspace:
 
     def get_manifest(self) -> tsrc.Manifest:
         return self.local_manifest.get_manifest()
-
-    def get_github_enterprise_url(self) -> Optional[str]:
-        manifest = self.local_manifest.get_manifest()
-        return manifest.github_enterprise_url
-
-    def get_gitlab_url(self) -> Optional[str]:
-        manifest = self.local_manifest.get_manifest()
-        return manifest.gitlab_url
 
     def update_manifest(self) -> None:
         manifest_url = self.config.manifest_url

@@ -2,7 +2,13 @@ from tsrc.workspace.config import WorkspaceConfig
 from path import Path
 
 
-def test_can_roundtrip(tmp_path: Path) -> None:
+def test_save(tmp_path: Path) -> None:
+    """ Check that workspace config can be written
+    and read.
+
+    Note: the writing is done by `tsrc init`, all other
+    commands simply read the file.
+    """
     config = WorkspaceConfig(
         manifest_url="https://gitlab.example",
         manifest_branch="stable",
