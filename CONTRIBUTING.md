@@ -52,10 +52,11 @@ Finally, feel free to add your name in the `THANKS` file ;)
 $ poetry install
 ```
 
-* Finally, run:
+* Run linters and tests:
 
 ```console
-$ poetry run python ci/ci.py
+$ ./lint.sh
+$ poetry run pytest -n auto
 ```
 
 
