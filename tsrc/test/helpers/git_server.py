@@ -44,16 +44,6 @@ class ManifestHandler:
         groups[name]["repos"] = repos
         self.push(message="add %s group" % name)
 
-    def configure_gitlab(self, *, url: str) -> None:
-        self.data["gitlab"] = {}
-        self.data["gitlab"]["url"] = url
-        self.push("Add gitlab URL: %s" % url)
-
-    def configure_github_enterprise(self, *, url: str) -> None:
-        self.data["github_enterprise"] = {}
-        self.data["github_enterprise"]["url"] = url
-        self.push("Add github_enterprise URL: %s" % url)
-
     def get_repo(self, src: str) -> RepoConfig:
         for repo in self.data["repos"]:
             if repo["src"] == src:

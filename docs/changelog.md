@@ -1,4 +1,12 @@
-# v1.0.3 (2020-02-05)
+# Next release
+
+* Remove the `tsrc push` command and all review automation features. Please
+  use [hub](https://github.com/github/hub), [lab](https://github.com/zaquestion/lab),
+  or [repo](https://github.com/guyzmo/git-repo) instead.
+  See [#207](https://github.com/TankerHQ/tsrc/issues/207) for the discussion leading
+  to this removal.
+
+# v1.0.3 - (2020-02-05)
 
 * Use [poetry](https://python-poetry.org) for dependency management and packaging.
 
@@ -71,7 +79,7 @@ tsrc init --groups foo bar
 
 # v0.9.0 - (2019-08-13)
 
-* Add support for GitHub Enterprise: See the [relevant documentation]( guide/review.md#handling_github_github_enterprise_pull_requests) for details - patch by @sdavids13.
+* Add support for GitHub Enterprise: patch by @sdavids13.
 * Improve error message when using creating a merge request in a GitLab repository when the token cannot be found in the `tsrc` configuration file. Fix #158
 * Fix crash when running `tsrc status` on a workspace with missing repositories (#160) - reported by @blastrock
 

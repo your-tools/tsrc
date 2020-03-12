@@ -19,17 +19,17 @@
    :target: https://pypi.org/project/tsrc/
 
 
-tsrc: manage multiple repos / review automation
-===============================================
+tsrc: manage groups of git repositories
+========================================
 
 `Overview`_ · `Installation`_ · `Usage example`_ · `Documentation`_ · `Release notes`_ · `Contributing`_ · `License`_
 
 Overview
 ---------
 
-tsrc is a command-line tool that helps you manage groups of several git repositories. It also provides some code review automation.
+tsrc is a command-line tool that helps you manage groups of several git repositories.
 
-In can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
+It can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
 
 
 Installation
@@ -94,21 +94,6 @@ Usage Example
      1 file changed, 1 insertion(+)
      create mode 100644 bar.txt
     Done ✓
-
-
-* Push current branch for review:
-
-.. code-block:: console
-
-    $ cd bar
-    $ git checkout new-feature
-    # hackity hack
-    $ tsrc push
-    => Running git push
-    Branch 'new-feature' set up to track remote branch 'new-feature' from 'origin'.
-    Everything up-to-date
-    => Creating merge request
-    :: See merge request at https://github.com/foo/bar/pull/42
 
 
 Documentation

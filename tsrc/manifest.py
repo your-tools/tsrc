@@ -18,8 +18,6 @@ class Manifest:
     def __init__(self) -> None:
         self._repos = []  # type: List[tsrc.Repo]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
-        self.gitlab_url = None  # type: Optional[str]
-        self.github_enterprise_url = None  # type: Optional[str]
 
     def apply_config(self, config: Any) -> None:
         """ Apply config coming form the yaml file """
@@ -34,12 +32,6 @@ class Manifest:
 
         groups_config = config.get("groups")
         self._handle_groups(groups_config)
-
-        for key in ["github_enterprise", "gitlab"]:
-            service_config = config.get(key)
-            if service_config:
-                url = service_config["url"]
-                setattr(self, key + "_url", url)
 
     def _handle_repo(self, repo_config: Any) -> None:
         src = repo_config["src"]
@@ -150,6 +142,8 @@ def load(manifest_path: Path) -> Manifest:
     remote_git_server_schema = {"url": str}
     repo_schema = schema.Use(validate_repo)
     group_schema = {"repos": [str], schema.Optional("includes"): [str]}
+    # Note: gitlab and github_enterprise_url keys are ignored,
+    # and kept here only for backward compatibility reasons
     manifest_schema = schema.Schema(
         {
             "repos": [repo_schema],

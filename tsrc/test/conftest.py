@@ -9,7 +9,6 @@ import tsrc
 from cli_ui.tests import MessageRecorder
 from .helpers.git_server import git_server  # noqa
 from .helpers.cli import tsrc_cli  # noqa
-from .helpers.push import repo_path, push_args  # noqa
 
 
 @pytest.fixture()

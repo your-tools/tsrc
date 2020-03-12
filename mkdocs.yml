@@ -21,9 +21,7 @@ nav:
 
 - Usage:
   - Basic usage: guide/basics.md
-  - Automating code review: guide/review.md
   - Using groups: guide/groups.md
-
 
 - Reference:
   - Command line usage: ref/cli.md

@@ -11,10 +11,6 @@ import pytest
 
 def test_load() -> None:
     contents = """
-gitlab:
-  url: http://gitlab.example.com
-github_enterprise:
-  url: http://github.example.com
 repos:
   - src: foo
     url: git@example.com:foo.git
@@ -36,8 +32,6 @@ repos:
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.apply_config(parsed)
-    assert manifest.gitlab_url == "http://gitlab.example.com"
-    assert manifest.github_enterprise_url == "http://github.example.com"
     assert manifest.get_repos() == [
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:foo.git")],
@@ -146,8 +140,6 @@ def test_validates(tmp_path: Path) -> None:
             copy:
               - src: foo
                 dest: bar
-        gitlab:
-          url: foo
         """,
     )
 

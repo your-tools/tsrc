@@ -2,13 +2,7 @@
 
 __version__ = "1.0.3"
 
-from .config import parse_config, dump_config  # noqa
-from .config import (  # noqa
-    Config,
-    parse_tsrc_config,
-    dump_tsrc_config,
-    get_tsrc_config_path,
-)
+from .config import Config, parse_config  # noqa
 from .errors import Error, InvalidConfig  # noqa
 from .executor import Task, run_sequence, ExecutorFailed  # noqa
 from .groups import GroupList, Group  # noqa

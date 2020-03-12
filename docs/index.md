@@ -1,8 +1,8 @@
-# tsrc - managing multiple git repositories
+# tsrc - managing groups of git repositories
 
 ## What it is
 
-`tsrc` is a command-line tool that helps you manage several git repositories.
+`tsrc` is a command-line tool that helps you manage groups of git repositories.
 
 We use it at [tanker.io](https://tanker.io) because:
 
