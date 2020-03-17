@@ -39,14 +39,14 @@ def copy_cfg_path_if_needed(root_path: Path) -> None:
 class Workspace:
     def __init__(self, root_path: Path) -> None:
         local_manifest_path = root_path / ".tsrc" / "manifest"
-        cfg_path = root_path / ".tsrc" / "config.yml"
+        self.cfg_path = root_path / ".tsrc" / "config.yml"
         self.root_path = root_path
         self.local_manifest = LocalManifest(local_manifest_path)
         copy_cfg_path_if_needed(root_path)
-        if not cfg_path.exists():
+        if not self.cfg_path.exists():
             raise WorkspaceNotConfigured(root_path)
 
-        self.config = WorkspaceConfig.from_file(cfg_path)
+        self.config = WorkspaceConfig.from_file(self.cfg_path)
 
     def get_repos(self) -> List[tsrc.Repo]:
         all_repos = self.config.clone_all_repos
