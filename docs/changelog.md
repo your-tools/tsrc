@@ -6,6 +6,10 @@
   See [#207](https://github.com/TankerHQ/tsrc/issues/207) for the discussion leading
   to this removal.
 
+* Implement small improvements on `tsrc` output messages.
+* Add `tsrc apply-manifest`, to apply changes in a manifest file locally, without
+  having to make a commit and push to a server first.
+
 # v1.0.3 - (2020-02-05)
 
 * Use [poetry](https://python-poetry.org) for dependency management and packaging.
