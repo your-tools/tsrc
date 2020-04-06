@@ -1,4 +1,4 @@
-# Next release
+# v2.0.0 - (2020-04-06)
 
 * Remove the `tsrc push` command and all review automation features. Please
   use [hub](https://github.com/github/hub), [lab](https://github.com/zaquestion/lab),
