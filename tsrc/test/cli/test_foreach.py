@@ -7,27 +7,6 @@ from tsrc.test.helpers.git_server import GitServer
 from cli_ui.tests import MessageRecorder
 
 
-def get_cmd_for_foreach_test(shell: bool = False) -> List[str]:
-    """ We need a cmd that:
-     * can fail if not called with the correct 'shell'
-       argument
-       (to check `foreach -c` option)
-     * can fail if a directory does not exist
-       (to check `foreach` error handling)
-    """
-    if os.name == "nt":
-        if shell:
-            cmd = ["dir"]
-        else:
-            cmd = ["cmd.exe", "/c", "dir"]
-    else:
-        if shell:
-            cmd = ["cd"]
-        else:
-            cmd = ["ls"]
-    return cmd
-
-
 def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
@@ -38,46 +17,54 @@ def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
 def test_foreach_with_errors(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """ Scenario:
+    * Create a repo 'foo'
+    * Create a repo 'bar' containing 'stuff.txt'
+
+    Check that tsr foreach -- ls stuff.txt fails, and prints
+    the failing repo in the list of error
+    """
     git_server.add_repo("foo")
-    git_server.add_repo("spam")
-    git_server.push_file("foo", "foo/bar.txt", contents="this is bar")
+    git_server.add_repo("bar")
+    git_server.push_file("bar", "stuff.txt", contents="some stuff")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    cmd = get_cmd_for_foreach_test(shell=False)
-    cmd.append("foo")
-    tsrc_cli.run("foreach", *cmd, expect_fail=True)
+    tsrc_cli.run("foreach", "ls", "stuff.txt", expect_fail=True)
     assert message_recorder.find("Command failed")
-    assert message_recorder.find(r"\* spam")
+    assert message_recorder.find(r"\* foo")
 
 
 def test_foreach_happy(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """ Scenario:
+    * Create two repos
+    * Check that `tsrc foreach ls` works
+    * Check that the string `ls` is printed
+    """
     git_server.add_repo("foo")
     git_server.add_repo("spam")
-    git_server.push_file("foo", "doc/index.html")
-    git_server.push_file("spam", "doc/index.html")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    cmd = get_cmd_for_foreach_test(shell=False)
-    cmd.append("doc")
-    tsrc_cli.run("foreach", *cmd)
-    assert message_recorder.find("`%s`" % " ".join(cmd))
+    tsrc_cli.run("foreach", "ls")
+    assert message_recorder.find("`ls`")
 
 
 def test_foreach_shell(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """ Scenario
+    * Create two repos containing README.rst and README.md
+    * Check that `tsrc foreach -c 'ls README*'` works
+    """
     git_server.add_repo("foo")
-    git_server.add_repo("spam")
-    git_server.push_file("foo", "doc/index.html")
-    git_server.push_file("spam", "doc/index.html")
+    git_server.add_repo("bar")
+    git_server.push_file("foo", "README.html")
+    git_server.push_file("bar", "README.rst")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    cmd = get_cmd_for_foreach_test(shell=True)
-    cmd.append("doc")
-    tsrc_cli.run("foreach", "-c", " ".join(cmd))
-    assert message_recorder.find("`%s`" % " ".join(cmd))
+
+    tsrc_cli.run("foreach", "-c", "ls README*")
 
 
 def test_foreach_with_explicit_groups(
@@ -90,10 +77,8 @@ def test_foreach_with_explicit_groups(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
-    cmd = get_cmd_for_foreach_test(shell=False)
-
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", *cmd)
+    tsrc_cli.run("foreach", "-g", "foo", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -111,10 +96,8 @@ def test_foreach_with_groups_from_config(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
-    cmd = get_cmd_for_foreach_test(shell=False)
-
     message_recorder.reset()
-    tsrc_cli.run("foreach", "--groups-from-config", *cmd)
+    tsrc_cli.run("foreach", "--groups-from-config", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -131,10 +114,8 @@ def test_foreach_error_when_using_missing_groups(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "-g", "foo")
 
-    cmd = get_cmd_for_foreach_test(shell=False)
-
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", *cmd, expect_fail=True)
+    tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", "ls", expect_fail=True)
 
 
 def test_foreach_all_cloned_repos_by_default(
@@ -147,10 +128,8 @@ def test_foreach_all_cloned_repos_by_default(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
-    cmd = get_cmd_for_foreach_test(shell=False)
-
     message_recorder.reset()
-    tsrc_cli.run("foreach", *cmd)
+    tsrc_cli.run("foreach", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
