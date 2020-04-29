@@ -165,12 +165,20 @@ def test_changing_branch(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
+    """ Scenario:
+    * Create a manifest with a foo repo
+    * Initialize the workspace
+    * Create a new branch named `next` on the foo repo
+    * Update foo branch in the manifest
+    * Run `tsrc sync`
+    * Check that the command fails because `foo` is no
+      longer on the expected branch
+    """
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    git_server.change_repo_branch("foo", "next")
-    git_server.push_file("foo", "next.txt")
+    git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
     tsrc_cli.run("sync", expect_fail=True)

@@ -96,9 +96,15 @@ def test_copy_files_source_does_not_exist(
 def test_uses_correct_branch_for_repo(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a foo repo with two branches `master` and `next`
+    * Set the branch to `next` in the manifest
+    * Init the repository
+    * Check that the cloned project is on the `next` branch
+
+    """
     git_server.add_repo("foo")
-    git_server.change_repo_branch("foo", "next")
-    git_server.push_file("foo", "next.txt")
+    git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
     manifest_url = git_server.manifest_url
@@ -109,16 +115,28 @@ def test_uses_correct_branch_for_repo(
 
 
 def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
+    """ Scenario:
+    * Create a manifest containing an empty repo
+    * Check that `tsrc init` fails but does not crash
+    """
     git_server.add_repo("foo", empty=True)
     git_server.add_repo("bar")
 
     manifest_url = git_server.manifest_url
+
     tsrc_cli.run("init", manifest_url, expect_fail=True)
 
 
 def test_resets_to_tag(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a repository containing a v1.0 tag
+    * Add a commit on top of the v1.0 tag
+    * Configure the manifest to specify the v1.0
+    * Run `tsrc init`
+    * Check the repo was cloned at the correct revision
+    """
     git_server.add_repo("foo")
     git_server.tag("foo", "v1.0")
     git_server.push_file("foo", "2.txt", message="Working on v2")
