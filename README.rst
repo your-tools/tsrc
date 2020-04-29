@@ -37,7 +37,7 @@ It can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
 Installation
 -------------
 
-`tsrc` is `available on pypi <https://pypi.org/project/tsrc>`_ an can be installed via ``pip``. It requires **Python 3.5** or later.
+`tsrc` is `available on pypi <https://pypi.org/project/tsrc>`_ and can be installed via ``pip``. It requires **Python 3.5** or later.
 
 
 Usage Example
