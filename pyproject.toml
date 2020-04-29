@@ -10,7 +10,7 @@ documentation = "https://tankerhq.github.io/tsrc"
 
 [tool.poetry.dependencies]
 # Note: keep this in sync with .github/workflows/tests.yml
-python = "^3.5"
+python = "^3.6"
 
 attrs = "^19.3.0"
 cli-ui = "^0.10.3"

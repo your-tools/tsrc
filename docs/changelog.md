@@ -1,3 +1,7 @@
+# Next release
+
+* Drop Python 3.5 support
+
 # v2.0.0 - (2020-04-06)
 
 * Remove the `tsrc push` command and all review automation features. Please
