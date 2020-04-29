@@ -145,18 +145,17 @@ def test_copies_are_up_to_date(
     assert (workspace_path / "top.txt").read_text() == "v2"
 
 
-def test_copies_are_readonly(
+def test_copies_preserve_stat(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
-    git_server.push_file("foo", "foo.txt", contents="v1")
-    git_server.manifest.set_repo_file_copies("foo", [("foo.txt", "top.txt")])
+    git_server.push_file("foo", "foo.exe", contents="v1", executable=True)
+    git_server.manifest.set_repo_file_copies("foo", [("foo.exe", "top.exe")])
 
     tsrc_cli.run("init", manifest_url)
-
-    foo_txt = workspace_path / "top.txt"
-    assert not os.access(foo_txt, os.W_OK)
+    top_exe = workspace_path / "top.exe"
+    assert os.access(top_exe, os.X_OK)
 
 
 def test_changing_branch(

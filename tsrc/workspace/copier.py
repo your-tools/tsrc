@@ -1,5 +1,4 @@
 from typing import List
-import stat
 
 import cli_ui as ui
 from path import Path
@@ -30,11 +29,6 @@ class FileCopier(tsrc.executor.Task[tsrc.Copy]):
         try:
             src_path = self.workspace_path / item.repo / item.src
             dest_path = self.workspace_path / item.dest
-            if dest_path.exists():
-                # Re-set the write permissions on the file:
-                dest_path.chmod(stat.S_IWRITE)
             src_path.copy(dest_path)
-            # Make sure perms are read only for everyone
-            dest_path.chmod(0o10444)
         except Exception as e:
             raise tsrc.Error(str(e))

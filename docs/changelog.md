@@ -1,6 +1,7 @@
 # Next release
 
 * Drop Python 3.5 support
+* Fix #217: Preserves file attributes during the `copy` statements in `repos`
 
 # v2.0.0 - (2020-04-06)
 
