@@ -13,7 +13,7 @@ documentation = "https://tankerhq.github.io/tsrc"
 python = "^3.5"
 
 attrs = "^19.3.0"
-cli-ui = "^0.10.0"
+cli-ui = "^0.10.3"
 colored_traceback = "^0.3.0"
 path = "^13.1.0"
 requests = "^2.22.0"
