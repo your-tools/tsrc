@@ -47,7 +47,13 @@ class TestRepo:
         return ref
 
     def commit_file(
-        self, name: str, *, branch: str, contents: str, message: str
+        self,
+        name: str,
+        *,
+        branch: str,
+        contents: str,
+        message: str,
+        mode: int = pygit2.GIT_FILEMODE_BLOB
     ) -> pygit2.Tree:
         assert "/" not in name, "creating subtrees is not supported"
 
@@ -59,7 +65,7 @@ class TestRepo:
         old_tree = last_commit.tree
         tree_builder = self._repo.TreeBuilder(old_tree)
         blob_oid = self._repo.create_blob(contents.encode())
-        tree_builder.insert(name, blob_oid, pygit2.GIT_FILEMODE_BLOB)
+        tree_builder.insert(name, blob_oid, mode)
         new_tree = tree_builder.write()
 
         author = self.user
@@ -195,11 +201,22 @@ class GitServer:
         contents: str = "",
         message: str = "",
         branch: str = "master",
+        executable: bool = False
     ) -> None:
+        if executable:
+            file_mode = pygit2.GIT_FILEMODE_BLOB_EXECUTABLE
+        else:
+            file_mode = pygit2.GIT_FILEMODE_BLOB
         repo = self._get_repo(name)
         if not message:
             message = "add/update " + file_path
-        repo.commit_file(file_path, contents=contents, message=message, branch=branch)
+        repo.commit_file(
+            file_path,
+            contents=contents,
+            message=message,
+            branch=branch,
+            mode=file_mode
+        )
 
     def tag(
         self, name: str, tag_name: str, *, branch: str = "master", force: bool = False
