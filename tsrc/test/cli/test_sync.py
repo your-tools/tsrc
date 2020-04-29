@@ -21,7 +21,7 @@ def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
     tsrc_cli.run("sync")
 
     bar_txt_path = workspace_path / "foo/bar/bar.txt"
-    assert bar_txt_path.text() == "this is bar"
+    assert bar_txt_path.read_text() == "this is bar"
 
 
 def test_sync_with_errors(
@@ -142,7 +142,7 @@ def test_copies_are_up_to_date(
 
     tsrc_cli.run("sync")
 
-    assert (workspace_path / "top.txt").text() == "v2"
+    assert (workspace_path / "top.txt").read_text() == "v2"
 
 
 def test_copies_are_readonly(

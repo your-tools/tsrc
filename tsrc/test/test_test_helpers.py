@@ -70,7 +70,7 @@ def test_git_server_push_to_other_branch(
     git_server.push_file("foo", "devel.txt", contents="this is devel\n", branch="devel")
     tsrc.git.run(workspace_path, "clone", foo_url, "--branch", "devel")
     foo_path = workspace_path / "foo"
-    assert (foo_path / "devel.txt").text() == "this is devel\n"
+    assert (foo_path / "devel.txt").read_text() == "this is devel\n"
 
 
 def test_git_server_tag(workspace_path: Path, git_server: GitServer) -> None:

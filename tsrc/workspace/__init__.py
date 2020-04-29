@@ -26,7 +26,7 @@ def copy_cfg_path_if_needed(root_path: Path) -> None:
     if old_path.exists() and not new_path.exists():
         ui.info("Migrating config to new path:", new_path)
         yaml = ruamel.yaml.YAML(typ="rt")
-        old_dict = yaml.load(old_path.text())
+        old_dict = yaml.load(old_path.read_text())
         new_config = WorkspaceConfig(
             manifest_branch=old_dict.get("branch"),
             manifest_url=old_dict["url"],

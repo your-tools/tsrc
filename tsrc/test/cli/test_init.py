@@ -74,7 +74,7 @@ def test_copy_files_happy(
 
     tsrc_cli.run("init", manifest_url)
 
-    assert (workspace_path / "CMakeLists.txt").text() == top_cmake_contents
+    assert (workspace_path / "CMakeLists.txt").read_text() == top_cmake_contents
 
 
 def test_copy_files_source_does_not_exist(
