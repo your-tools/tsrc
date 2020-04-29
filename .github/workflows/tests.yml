@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
         # Note: no CI on Windows:
         # See https://github.com/TankerHQ/tsrc/issues/186
         # for details
