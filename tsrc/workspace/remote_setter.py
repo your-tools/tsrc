@@ -47,7 +47,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def set_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
         full_path = self.workspace_path / repo.src
         # fmt: off
-        ui.info_2(repo.src + ":", "Update remote", ui.reset,
+        ui.info_3(repo.src + ":", "Update remote", ui.reset,
                   ui.bold, remote.name, ui.reset,
                   "to new url:", ui.bold, remote.url)
         # fmt: on
@@ -56,7 +56,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def add_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
         full_path = self.workspace_path / repo.src
         # fmt: off
-        ui.info_2(repo.src + ":", "Add remote",
+        ui.info_3(repo.src + ":", "Add remote",
                   ui.bold, remote.name, ui.reset,
                   ui.brown, "(%s)" % remote.url)
         # fmt: on
