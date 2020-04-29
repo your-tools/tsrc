@@ -133,7 +133,8 @@ def test_resets_to_tag(
     """ Scenario:
     * Create a repository containing a v1.0 tag
     * Add a commit on top of the v1.0 tag
-    * Configure the manifest to specify the v1.0
+    * Configure the manifest to specify that the repo
+      should be reset at the v1.0 tag
     * Run `tsrc init`
     * Check the repo was cloned at the correct revision
     """
