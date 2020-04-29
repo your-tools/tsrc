@@ -23,7 +23,7 @@ class WorkspaceConfig:
     @classmethod
     def from_file(cls, cfg_path: Path) -> "WorkspaceConfig":
         yaml = ruamel.yaml.YAML(typ="rt")
-        parsed = yaml.load(cfg_path.text())
+        parsed = yaml.load(cfg_path.read_text())
         return cls(**parsed)
 
     def save_to_file(self, cfg_path: Path) -> None:

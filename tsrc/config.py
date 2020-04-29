@@ -14,7 +14,7 @@ def parse_config(
     file_path: Path, config_schema: Optional[schema.Schema] = None
 ) -> Config:
     try:
-        contents = file_path.text()
+        contents = file_path.read_text()
     except OSError as os_error:
         raise tsrc.InvalidConfig(file_path, os_error)
     try:

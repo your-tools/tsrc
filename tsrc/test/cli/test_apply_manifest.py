@@ -35,7 +35,7 @@ def test_apply_manifest_adds_new_repo(
 
 def add_repo_to_manifest(manifest_path: Path, src: str, url: str) -> None:
     yaml = ruamel.yaml.YAML()
-    data = yaml.load(manifest_path.text())
+    data = yaml.load(manifest_path.read_text())
     repos = data["repos"]
     to_add = {"src": src, "url": url}
     repos.append(to_add)
