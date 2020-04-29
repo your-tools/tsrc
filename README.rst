@@ -19,7 +19,7 @@
    :target: https://pypi.org/project/tsrc/
 
 .. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
-     :target: https://github.com/TankerHQ/tsrc/workflows/safety/
+     :target: https://github.com/TankerHQ/tsrc/actions
 
 tsrc: manage groups of git repositories
 ========================================
