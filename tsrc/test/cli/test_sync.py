@@ -1,4 +1,5 @@
 from typing import Any
+import os
 
 from path import Path
 
@@ -11,16 +12,23 @@ from tsrc.test.helpers.git_server import GitServer
 
 
 def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
-    git_server.add_repo("foo/bar")
-    git_server.add_repo("spam/eggs")
+    """" Scenario:
+    * Create a manifest with two repos (foo and bar)
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Run `tsrc sync`
+    * Check that the foo clone has been updated
+    """
+    git_server.add_repo("foo")
+    git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.push_file("foo/bar", "bar.txt", contents="this is bar")
+    git_server.push_file("foo", "new.txt", contents="new file")
 
     tsrc_cli.run("sync")
 
-    bar_txt_path = workspace_path / "foo/bar/bar.txt"
-    assert bar_txt_path.read_text() == "this is bar"
+    new_txt_path = workspace_path / "foo/new.txt"
+    assert new_txt_path.exists(), "foo should have been updated"
 
 
 def test_sync_with_errors(
@@ -29,23 +37,37 @@ def test_sync_with_errors(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    git_server.add_repo("foo/bar")
-    git_server.add_repo("spam/eggs")
+    """" Scenario:
+    * Create a manifest with two repos (foo and bar)
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Create a merge conflict in the foo repo
+    * Run `tsrc sync`
+    * Check that it fails and contains the proper
+      error message
+    """
+    git_server.add_repo("foo")
+    git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.push_file("foo/bar", "bar.txt", contents="Bar is true")
-    bar_src = workspace_path / "foo/bar"
-    (bar_src / "bar.txt").write_text("Bar is false")
+    git_server.push_file("foo", "conflict.txt", contents="this is red")
+
+    foo_src = workspace_path / "foo"
+    (foo_src / "conflict.txt").write_text("this is green")
 
     tsrc_cli.run_and_fail("sync")
 
     assert message_recorder.find("Failed to synchronize workspace")
-    assert message_recorder.find(r"\* foo/bar")
+    assert message_recorder.find(r"\* foo")
 
 
 def test_sync_finds_root(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path, monkeypatch: Any
 ) -> None:
+    """ Check that you can run `tsrc sync` from inside a cloned
+    repository
+
+    """
     git_server.add_repo("foo/bar")
     tsrc_cli.run("init", git_server.manifest_url)
     monkeypatch.chdir(workspace_path / "foo/bar")
@@ -55,14 +77,22 @@ def test_sync_finds_root(
 def test_new_repo_added_to_manifest(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    git_server.add_repo("foo/bar")
+    """
+    Scenario:
+    * Create a manifest containing the foo repo
+    * Initialize a workspace from this manifest
+    * Add a bar repo to the manifest
+    * Run `tsrc sync`
+    * Check that bar is cloned
+    """
+    git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    git_server.add_repo("spam/eggs")
 
+    git_server.add_repo("bar")
     tsrc_cli.run("sync")
 
-    assert (workspace_path / "spam/eggs").exists()
+    assert (workspace_path / "bar").exists()
 
 
 def change_workspace_manifest_branch(workspace_path: Path, branch: str) -> None:
@@ -75,26 +105,29 @@ def change_workspace_manifest_branch(workspace_path: Path, branch: str) -> None:
 def test_switching_manifest_branch(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    # Init with manifest_url on master
+    """ Scenario:
+    * Initialize aw workspace with a manifest on the master branch
+    * Create a new repo bar, on the 'devel' branch of the manifest
+    * Run `tsrc sync`: bar should not get cloned
+    * Configure the workspace to use the `devel` branch of the manifest
+    * Run `tsrc sync` again
+    * Check that bar is cloned
+    """
+
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
 
-    # Create a new repo, bar, but only on the 'devel'
-    # branch of the manifest
     git_server.manifest.change_branch("devel")
     git_server.add_repo("bar")
     bar_path = workspace_path / "bar"
 
-    # Sync on master branch: bar should not be cloned
     tsrc_cli.run("sync")
-    assert not bar_path.exists()
+    assert not bar_path.exists(), "bar should not have been cloned"
 
-    # Change manifest branch in workspace config
     change_workspace_manifest_branch(workspace_path, "devel")
 
-    # Sync on devel branch: bar should be cloned
     tsrc_cli.run("sync")
-    assert bar_path.exists()
+    assert bar_path.exists(), "bar should have been cloned"
 
 
 def test_sync_not_on_master(
@@ -103,35 +136,74 @@ def test_sync_not_on_master(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
+    """"
+   Scenario:
+   * Create a manifest with two repos, foo and bar
+   * Initialize a workspace from this manifest
+   * Checkout a different branch on foo, tracking an existing remote
+   * Run `tsrc sync`
+   * Check that:
+      * foo is updated
+      * but the command fails because foo was not an the expected branch
+    """
     git_server.add_repo("foo")
     git_server.add_repo("bar")
+
+    git_server.push_file("foo", "devel.txt", branch="devel")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
+
     foo_path = workspace_path / "foo"
     tsrc.git.run(foo_path, "checkout", "-B", "devel")
-    # push so that sync still works
-    tsrc.git.run(foo_path, "push", "-u", "origin", "devel", "--no-verify")
+    tsrc.git.run(foo_path, "branch", "--set-upstream-to", "origin/devel")
 
     tsrc_cli.run_and_fail("sync")
 
+    assert (foo_path / "devel.txt").exists(), "foo should have been updated"
     assert message_recorder.find("not on the correct branch")
 
 
 def test_sync_with_force(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """
+    Scenario:
+    * Create a manifest with one repo, foo
+    * Create a tag `latest` on foo
+    * Initialize a workspace from this manifest
+    * Delete and re-create the `latest` tag
+    * Run tsrc sync --force
+    * Check that the clone was reset to the correct revision
+      (aka, `git fetch --force` was called).
+    """
     git_server.add_repo("foo")
     git_server.push_file("foo", "latest.txt", contents="1")
     git_server.tag("foo", "latest")
     tsrc_cli.run("init", git_server.manifest_url)
+
     git_server.push_file("foo", "latest.txt", contents="2")
     git_server.tag("foo", "latest", force=True)
     tsrc_cli.run("sync", "--force")
+
+    foo_path = workspace_path / "foo"
+    assert (
+        foo_path / "latest.txt"
+    ).read_text() == "2", "foo should have been reset to the latest tag"
 
 
 def test_copies_are_up_to_date(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """
+    Scenario:
+    * Create a manifest with one repo, foo
+    * Configure a copy from foo/foo.txt to top.txt
+    * Initialize a workspace from this manifest
+    * Push a new version of `foo.txt` to the foo repo
+    * Run `tsrc sync`
+    * Check that `top.txt` has been updated
+
+    """
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
@@ -141,12 +213,23 @@ def test_copies_are_up_to_date(
 
     tsrc_cli.run("sync")
 
+    assert (
+        workspace_path / "top.txt"
+    ).read_text() == "v2", "copy should have been updated"
     assert (workspace_path / "top.txt").read_text() == "v2"
 
 
 def test_copies_preserve_stat(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """
+    Scenario:
+    * Create a manifest with one repo, foo
+    * Push a foo.exe executable file in the foo repo
+    * Configure a copy from foo/foo.exe to top.exe
+    * Check that `top.exe` is executable
+
+    """
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.exe", contents="v1", executable=True)
@@ -165,7 +248,7 @@ def test_changing_branch(
 ) -> None:
     """ Scenario:
     * Create a manifest with a foo repo
-    * Initialize the workspace
+    * Initialize a workspace from this manifest
     * Create a new branch named `next` on the foo repo
     * Update foo branch in the manifest
     * Run `tsrc sync`
@@ -186,6 +269,13 @@ def test_changing_branch(
 def test_tags_are_not_updated(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest with a foo repo, frozen at the `v0.1` tag
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Run `tsrc sync`
+    * Check that foo was not updated
+    """
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
     git_server.manifest.set_repo_tag("foo", "v0.1")
@@ -197,12 +287,21 @@ def test_tags_are_not_updated(
     tsrc_cli.run("sync")
 
     foo_path = workspace_path / "foo"
-    assert not (foo_path / "new.txt").exists()
+    assert not (
+        foo_path / "new.txt"
+    ).exists(), "foo should not have been updated (frozen at v0.1 tag)"
 
 
 def test_sha1s_are_not_updated(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest with a foo repo, frozen at a given revision
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Run `tsrc sync`
+    * Check that foo was not updated
+    """
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -214,13 +313,23 @@ def test_sha1s_are_not_updated(
     tsrc_cli.run("sync")
 
     foo_path = workspace_path / "foo"
-    assert not (foo_path / "new.txt").exists()
+    assert not (
+        foo_path / "new.txt"
+    ).exists(), f"foo should not have been updated (frozen at {initial_sha1})"
 
 
 def test_tags_are_updated_when_clean(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-
+    """ Scenario:
+    * Create a manifest with a foo repo, frozen at the v0.1 tag
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Create a new v0.2 tag on the foo repo
+    * Configure the manifest so that `foo` is frozen at the v0.2 tag
+    * Run `tsrc sync`
+    * Check that foo has been updated to the `v0.2` tag
+    """
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
     git_server.manifest.set_repo_tag("foo", "v0.1")
@@ -234,12 +343,22 @@ def test_tags_are_updated_when_clean(
     tsrc_cli.run("sync")
 
     foo_path = workspace_path / "foo"
-    assert (foo_path / "new.txt").exists()
+    assert (
+        foo_path / "new.txt"
+    ).exists(), "foo should have been updated to the v0.2 tag"
 
 
 def test_sha1s_are_updated_when_clean(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest with a foo repo, frozen at an initial revision
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Configure the manifest so that `foo` is frozen at the new revision
+    * Run `tsrc sync`
+    * Check that foo has been updated to the new revision
+    """
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -253,12 +372,23 @@ def test_sha1s_are_updated_when_clean(
     tsrc_cli.run("sync")
 
     foo_path = workspace_path / "foo"
-    assert (foo_path / "new.txt").exists()
+    assert (
+        foo_path / "new.txt"
+    ).exists(), f"foo should have been updated to the {new_sha1} revision"
 
 
 def test_tags_are_skipped_when_not_clean_tags(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest with a foo repo, frozen at the v0.1 tag
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Create a new v0.2 tag on the foo repo
+    * Configure the manifest so that foo is frozen at the v0.2 tag
+    * Create an untracked file in the foo repo
+    * Check that `tsrc sync` fails and that foo is not updated
+    """
     git_server.add_repo("foo")
     git_server.tag("foo", "v0.1")
     git_server.manifest.set_repo_tag("foo", "v0.1")
@@ -273,12 +403,23 @@ def test_tags_are_skipped_when_not_clean_tags(
     tsrc_cli.run_and_fail("sync")
 
     foo_path = workspace_path / "foo"
-    assert not (foo_path / "new.txt").exists()
+    assert not (
+        foo_path / "new.txt"
+    ).exists(), "foo should not have been updated (untracked files)"
 
 
 def test_sha1s_are_skipped_when_not_clean(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest with a foo repo, frozen at an initial revision
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Configure the manifest so that foo is frozen at the new revision
+    * Create an untracked file in the foo repo
+    * Run `tsrc sync`
+    * Check that `tsrc sync` fails and that foo is not updated
+    """
     git_server.add_repo("foo")
     initial_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
@@ -293,26 +434,50 @@ def test_sha1s_are_skipped_when_not_clean(
     tsrc_cli.run_and_fail("sync")
 
     foo_path = workspace_path / "foo"
-    assert not (foo_path / "new.txt").exists()
+    assert not (
+        foo_path / "new.txt"
+    ).exists(), "foo should not have been updated (untracked files)"
 
 
-def test_custom_group(
-    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+def test_sync_uses_group_from_config_by_default(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest containing:
+      * a group named 'foo'  containing the repos 'bar'  and 'baz'
+      * a repo named 'other' not in any group
+    * Initialize a workspace from this manifest using the `foo` group
+    * Check that bar and baz are cloned
+    * Check that `other` is not cloned
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_repo("other")
 
     tsrc_cli.run("init", git_server.manifest_url, "--group", "foo")
 
-    message_recorder.reset()
     tsrc_cli.run("sync")
-    assert message_recorder.find("bar")
-    assert not message_recorder.find("other")
+
+    assert (
+        workspace_path / "bar"
+    ).exists(), "bar should have been cloned (in foo group)"
+    assert (
+        workspace_path / "baz"
+    ).exists(), "baz should have been cloned (in foo group)"
+    assert not (
+        workspace_path / "other"
+    ).exists(), "other should not have been cloned (not in foo group)"
 
 
 def test_fetch_additional_remotes(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Create a manifest containing a foo repo with two remotes
+    * Initialize a workspace from this manifest
+    * Update the second remote
+    * Run `tsrc sync`
+    * Check that the second remote was fetched
+    """
     git_server.add_repo("foo")
     foo2_url = git_server.add_repo("foo2")
     git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])
@@ -331,22 +496,23 @@ def test_fetch_additional_remotes(
 def test_sync_with_singular_remote(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    Scenario:
+     * Create a manifest that contains one repo with two remotes
+       ('origin' and 'vpn')
+     * Marke sure that the 'origin' URL is valid but the 'vpn'
+       URL is not.
+     * Run 'tsrc init -r origin'
+     * Check that 'tsrc sync' does not try and fetch the 'vpn' remote
+    """
     foo_url = git_server.add_repo("foo")
-    bar_url = git_server.add_repo("bar")
-
+    vpn_url = "/does/not/exist"
+    # fmt: off
     git_server.manifest.set_repo_remotes(
-        "foo", [("origin", foo_url), ("upstream", bar_url)]
-    )
-
-    # only use "origin" remote
+        "foo",
+        [("origin", foo_url),
+         ("vpn", vpn_url)])
+    # fmt: on
     tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
-    foo_path = workspace_path / "foo"
-
-    first_sha1 = tsrc.git.get_sha1(foo_path)
-    git_server.push_file("bar", "new.txt")
 
     tsrc_cli.run("sync")
-    second_sha1 = tsrc.git.get_sha1(foo_path)
-
-    # the hash must remain unchanged, even though we pushed to bar and sync'd foo
-    assert first_sha1 == second_sha1, "remote 'upstream' was erroneously fetched"
