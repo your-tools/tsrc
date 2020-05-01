@@ -25,7 +25,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         workspace_path: Path,
         *,
         force: bool = False,
-        remote_name: Optional[str] = None
+        remote_name: Optional[str] = None,
     ) -> None:
         self.workspace_path = workspace_path
         self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
@@ -77,8 +77,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             for remote in repo.remotes:
                 if remote.name == self.remote_name:
                     return [remote]
-            message = "Remote {name} not found for repository {source}!"
-            message.format(name=self.remote_name, source=repo.dest)
+            message = f"Remote {self.remote_name} not found for repository {repo.dest}"
             raise tsrc.Error(message)
 
         return repo.remotes
@@ -93,14 +92,14 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
                     cmd.append("--force")
                 tsrc.git.run(repo_path, *cmd)
             except tsrc.Error:
-                raise tsrc.Error("fetch from %s failed" % remote.name)
+                raise tsrc.Error(f"fetch from '{remote.name}' failed")
 
     @staticmethod
     def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
-            raise tsrc.Error("%s is dirty, skipping" % repo_path)
+            raise tsrc.Error(f"{repo_path} is dirty, skipping")
         try:
             tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:

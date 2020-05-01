@@ -16,7 +16,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         workspace_path: Path,
         *,
         shallow: bool = False,
-        remote_name: Optional[str] = None
+        remote_name: Optional[str] = None,
     ) -> None:
         self.workspace_path = workspace_path
         self.shallow = shallow
@@ -36,10 +36,9 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             return
         if self.shallow:
             message = textwrap.dedent(
-                "Cannot use --shallow with a fixed sha1 ({repo.sha1})\n"
+                f"Cannot use --shallow with a fixed sha1 ({repo.sha1})\n"
                 "Consider using a tag instead"
             )
-            message = message.format(repo=repo)
             raise tsrc.Error(message)
 
     def _choose_remote(self, repo: tsrc.Repo) -> tsrc.Remote:
@@ -47,8 +46,9 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             for remote in repo.remotes:
                 if remote.name == self.remote_name:
                     return remote
-            message = "Remote {name} not found for repository {source}!"
-            message.format(name=self.remote_name, source=repo.dest)
+            message = (
+                f"Remote '{self.remote_name}' not found for repository '{repo.dest}'"
+            )
             raise tsrc.Error(message)
 
         return repo.remotes[0]

@@ -19,7 +19,7 @@ class FileCopier(tsrc.executor.Task[tsrc.Copy]):
         ui.error("Failed to perform the following copies:")
 
     def display_item(self, item: tsrc.Copy) -> str:
-        return "%s/%s -> %s" % (item.repo, item.dest, item.dest)
+        return f"{item.repo}/{item.src} -> {item.dest}"
 
     def process(self, index: int, count: int, item: tsrc.Copy) -> None:
         known_sources = {x.dest for x in self.repos}
