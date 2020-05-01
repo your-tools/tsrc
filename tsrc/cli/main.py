@@ -163,11 +163,13 @@ def main_impl(args: ArgsList = None) -> None:
     init_parser.set_defaults(branch="master")
 
     log_parser = add_workspace_subparser(subparsers, "log")
+    add_group_option(log_parser)
     log_parser.add_argument("--from", required=True, dest="from_", metavar="FROM")
     log_parser.add_argument("--to")
     log_parser.set_defaults(to="HEAD")
 
-    add_workspace_subparser(subparsers, "status")
+    status_parser = add_workspace_subparser(subparsers, "status")
+    add_group_option(status_parser)
 
     sync_parser = add_workspace_subparser(subparsers, "sync")
     add_group_option(sync_parser)

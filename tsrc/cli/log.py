@@ -11,6 +11,8 @@ import tsrc.cli
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
     all_ok = True
+    if args.groups:
+        workspace.set_groups(args.groups)
     for unused_index, repo, full_path in workspace.enumerate_repos():
         colors = ["green", "reset", "yellow", "reset", "bold blue", "reset"]
         log_format = "%m {}%h{} - {}%d{} %s {}<%an>{}"
