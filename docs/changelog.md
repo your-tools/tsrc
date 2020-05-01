@@ -1,7 +1,25 @@
 # Next release
 
 * Drop Python 3.5 support
+
 * Fix #217: Preserves file attributes during the `copy` statements in `repos`
+
+* **Breaking change**: Fix `tsrc foreach` `--group` syntax to match the one used
+  by `tsrc init`:
+
+```
+# Old:
+$ tsrc foreach -g g1 -g g2 cmd
+$ tsrc foreach --group g1 cmd # ok
+$ tsrc foreach --groups g1 cmd # error
+
+# New:
+$ tsrc foreach -g g1 g2 -- cmd
+$ tsrc foreach --group g1 g2 -- cmd
+$ tsrc foreach --groups g1 g2 -- cmd
+```
+* Add `-g,--group,--groups` option to `sync`, `log` and `status`. Fix #134, #223
+
 
 # v2.0.0 - (2020-04-06)
 
