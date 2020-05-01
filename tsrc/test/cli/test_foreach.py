@@ -1,6 +1,9 @@
 import pytest
+from path import Path
 
+import tsrc.git
 from tsrc.test.helpers.cli import CLI
+from tsrc.cli.foreach import MissingRepos
 from tsrc.test.helpers.git_server import GitServer
 from cli_ui.tests import MessageRecorder
 
@@ -68,6 +71,16 @@ def test_foreach_shell(
 def test_foreach_with_explicit_groups(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """ Scenario
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+       * a repo named `other`, not part of any group
+    * Initialize a workspace from this manifest, using the `foo`
+      group
+    * Check that `tsrc foreach ---group "foo" --ls README` works and
+      runs ls only on `bar` and `baz`
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
@@ -76,7 +89,7 @@ def test_foreach_with_explicit_groups(
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", "--", "ls")
+    tsrc_cli.run("foreach", "--groups", "foo", "--", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -87,6 +100,16 @@ def test_foreach_with_explicit_groups(
 def test_foreach_with_groups_from_config(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+       * a repo named `other`, not part of any group
+    * Initialize a workspace from this manifest, using the `foo`
+      and `spam` groups
+    * Check that `tsrc foreach ---group "foo" --ls README` works and
+      runs `ls` only on everything but `other`
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
@@ -106,6 +129,13 @@ def test_foreach_with_groups_from_config(
 def test_foreach_error_when_using_missing_groups(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+    * Initialize a workspace from this manifest, using the `foo` group
+    * Check that `tsrc foreach ---groups foo spam --ls` fails
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
 
@@ -113,18 +143,33 @@ def test_foreach_error_when_using_missing_groups(
     tsrc_cli.run("init", manifest_url, "-g", "foo")
 
     message_recorder.reset()
-    tsrc_cli.run_and_fail("foreach", "-g", "foo", "spam", "--", "ls")
+    tsrc_cli.run_and_fail_with(
+        MissingRepos, "foreach", "--groups", "foo", "spam", "--", "ls"
+    )
 
 
 def test_foreach_all_cloned_repos_by_default(
-    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+    tsrc_cli: CLI,
+    workspace_path: Path,
+    git_server: GitServer,
+    message_recorder: MessageRecorder,
 ) -> None:
+    """
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+       * a repo named `other`, not part of any group
+    * Initialize a workspace from this manifest, using the `foo` group
+    * Force the clone of the `other` repo
+    * Check that `tsrc foreach ---groups foo spam --ls` fails
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "bacon"])
-    git_server.add_repo("other")
+    other_url = git_server.add_repo("other")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
+    tsrc.git.run(workspace_path, "clone", other_url)
 
     message_recorder.reset()
     tsrc_cli.run("foreach", "ls")
@@ -133,7 +178,7 @@ def test_foreach_all_cloned_repos_by_default(
     assert message_recorder.find("baz\n")
     assert message_recorder.find("eggs\n")
     assert message_recorder.find("bacon\n")
-    assert not message_recorder.find("other\n")
+    assert message_recorder.find("other\n")
 
 
 def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:
