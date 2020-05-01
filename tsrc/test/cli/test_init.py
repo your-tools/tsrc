@@ -200,7 +200,6 @@ def test_use_specific_groups(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """ Scenario:
-    * the manifest contains two groups, 'foo' and 'spam'
     * the manifest contains one repo 'other'
     * the 'other' repo is configured with a file copy
 
@@ -270,20 +269,28 @@ def test_several_remotes(
 def test_singular_remote(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """
+    Scenario:
+     * Create a manifest that contains one repo with two remotes
+       ('origin' and 'vpn')
+     * Marke sure that the `origin` URL is valid but the `vpn`
+       URL is not.
+     * Run `tsrc init --remote origin`
+     * Check that foo is cloned
+    """
     foo_url = git_server.add_repo("foo")
+    vpn_url = "/does/not/exist"
     # fmt: off
     git_server.manifest.set_repo_remotes(
         "foo",
         [("origin", foo_url),
-         ("vpn", "foocrop.vpn/foo")])
+         ("vpn", vpn_url)])
     # fmt: on
 
     # only use "origin" remote
     tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
 
     foo_path = workspace_path / "foo"
-    _, output = tsrc.git.run_captured(
-        foo_path, "remote", "show", check=True
-    )
+    _, output = tsrc.git.run_captured(foo_path, "remote", "show", check=True)
 
     assert output == "origin"

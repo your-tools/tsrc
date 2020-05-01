@@ -68,6 +68,16 @@ def test_foreach_shell(
 def test_foreach_with_explicit_groups(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """ Scenario
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+       * a repo named `other`, not part of any group
+    * Initialize a workspace from this manifest, using the `foo`
+      group
+    * Check that `tsrc foreach ---group "foo" --ls README` works and
+      runs ls only on `bar` and `baz`
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
@@ -87,6 +97,16 @@ def test_foreach_with_explicit_groups(
 def test_foreach_with_groups_from_config(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+       * a repo named `other`, not part of any group
+    * Initialize a workspace from this manifest, using the `foo`
+      and `spam` groups
+    * Check that `tsrc foreach ---group "foo" --ls README` works and
+      runs `ls` only on everything but `other`
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
@@ -106,6 +126,13 @@ def test_foreach_with_groups_from_config(
 def test_foreach_error_when_using_missing_groups(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+    * Initialize a workspace from this manifest, using the `foo` group
+    * Check that `tsrc foreach ---groups foo spam --ls` fails
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "beacon"])
 
@@ -119,6 +146,15 @@ def test_foreach_error_when_using_missing_groups(
 def test_foreach_all_cloned_repos_by_default(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
+    """
+    * Create a manifest containing:
+       * a group named `foo` with repos `bar` and `baz`,
+       * a group named `spam` with repos `eggs` and `beacon`
+       * a repo named `other`, not part of any group
+    * Initialize a workspace from this manifest, using the `foo` group
+    * Force the clone of the `other` repo
+    * Check that `tsrc foreach ---groups foo spam --ls` fails
+    """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "bacon"])
     git_server.add_repo("other")
