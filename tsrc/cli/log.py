@@ -9,9 +9,15 @@ import tsrc.cli
 
 
 def main(args: argparse.Namespace) -> None:
-    workspace = tsrc.cli.get_workspace(args)
+    workspace = tsrc.cli.get_workspace_with_repos(args)
     all_ok = True
-    for unused_index, repo, full_path in workspace.enumerate_repos():
+    for repo in workspace.repos:
+        full_path = workspace.root_path / repo.dest
+        if not full_path.exists():
+            ui.info(ui.bold, repo.dest, ": ", ui.red, "error: missing repo", sep="")
+            all_ok = False
+            continue
+
         colors = ["green", "reset", "yellow", "reset", "bold blue", "reset"]
         log_format = "%m {}%h{} - {}%d{} %s {}<%an>{}"
         log_format = log_format.format(*("%C({})".format(x) for x in colors))

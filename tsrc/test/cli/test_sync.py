@@ -5,6 +5,7 @@ from path import Path
 
 import tsrc.cli
 from tsrc.workspace.config import WorkspaceConfig
+from tsrc.groups import GroupNotFound
 
 from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import CLI
@@ -571,7 +572,6 @@ def test_sync_with_singular_remote(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """ Scenario:
-    Scenario:
      * Create a manifest that contains one repo with two remotes
        ('origin' and 'vpn')
      * Marke sure that the 'origin' URL is valid but the 'vpn'
@@ -590,3 +590,150 @@ def test_sync_with_singular_remote(
     tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
 
     tsrc_cli.run("sync")
+
+
+class TestSyncWithGroups:
+    @staticmethod
+    def test_ignore_other_groups(
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+    ) -> None:
+        """ Scenario:
+        * Create a manifest containing:
+          * a group named 'group1' containing the repos 'foo'  and 'bar'
+          * a group named 'group2' containing the repo 'baz'
+        * Initialize a workspace from this manifest using the `group1` and 'group2' groups
+        * Push a new file to all three repos
+        * Run `tsrc sync --group group1`
+        * Add `quux` in `group2`
+        * Add a copy from `baz/baz.txt` to `top.txt`
+        * Check that `foo` and `bar` have been updated, but not `baz`
+        * Check that `quux` has not been cloned
+        * Check that `top` has not been created
+        """
+        git_server.add_group("group1", ["foo", "bar"])
+        git_server.add_group("group2", ["baz"])
+
+        tsrc_cli.run("init", git_server.manifest_url, "--groups", "group1", "group2")
+
+        git_server.push_file("foo", "foo.txt")
+        git_server.push_file("bar", "bar.txt")
+        git_server.push_file("baz", "baz.txt")
+        git_server.add_repo("quux")
+        git_server.manifest.set_file_copy("baz", "baz.txt", "top.txt")
+        git_server.manifest.configure_group("group2", ["baz", "quux"])
+
+        tsrc_cli.run("sync", "--group", "group1")
+
+        assert (
+            workspace_path / "foo/foo.txt"
+        ).exists(), "foo should have been updated (in group1 group)"
+        assert (
+            workspace_path / "bar/bar.txt"
+        ).exists(), "bar  should have been updated (in group1 group)"
+        assert not (
+            workspace_path / "baz/baz.txt"
+        ).exists(), "baz should not have been updated (not in group1 group)"
+        assert not (
+            workspace_path / "top.txt"
+        ).exists(), "top.txt should not have been copied (not in group1 group)"
+        assert not (
+            workspace_path / "quux"
+        ).exists(), "quux should not have been cloned (not in group1 group)"
+
+    @staticmethod
+    def test_honors_new_included_groups(
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+    ) -> None:
+        """ Scenario:
+       * Create a manifest containing:
+         * a group named 'group1'  containing the repos 'foo'  and 'bar'
+         * a group named 'group2' containing the repo 'baz'
+       * Initialize a workspace from this manifest using the 'group1' and 'group2' groups
+       * Create a new group 'inc' containing the repo 'quux'
+       * Update 'group1' group to include 'inc'
+       * Run `tsrc sync --group 'group1'
+       * Check that `quux` is cloned
+       """
+        git_server.add_group("group1", ["foo", "bar"])
+        git_server.add_group("group2", ["baz"])
+        tsrc_cli.run("init", git_server.manifest_url, "--groups", "group1", "group2")
+        git_server.add_group("inc", ["quux"])
+        git_server.manifest.configure_group("group1", ["foo", "bar"], includes=["inc"])
+
+        tsrc_cli.run("sync", "--group", "group1")
+        assert (
+            workspace_path / "quux"
+        ).exists(), "quux should have been cloned - included in the 'group1 group"
+
+    @staticmethod
+    def test_can_use_new_group(
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+    ) -> None:
+        """ Scenario:
+        * Create a manifest containing:
+          * a group named 'default'  containing the repos 'foo'  and 'bar'
+        * Initialize a workspace from this manifest using the default group
+        * Create a new group 'group1' containing just 'foo'
+        * Push a new file to 'foo' and 'bar'
+        * Run `tsrc sync --group 'group1'
+        * Check only `foo` is updated
+        """
+        git_server.add_group("default", ["foo", "bar"])
+
+        tsrc_cli.run("init", git_server.manifest_url)
+
+        git_server.manifest.configure_group("group1", ["foo"])
+        git_server.push_file("foo", "foo.txt")
+        git_server.push_file("bar", "bar.txt")
+
+        tsrc_cli.run("sync", "--group", "group1")
+
+        assert (
+            workspace_path / "foo/foo.txt"
+        ).exists(), "foo should have been updated - included in the 'group1 group"
+
+        assert not (
+            workspace_path / "bar/bar.txt"
+        ).exists(), (
+            "bar should not have been updated - not included in the 'group1 group"
+        )
+
+    @staticmethod
+    def test_non_existing_group(
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+    ) -> None:
+        """ Scenario:
+        * Create a manifest contaning :
+          * a group named 'group1'  containing the repo 'foo'
+          * a group named 'group2'  containing the repo 'bar'
+        * Initialize a workspace from this manifest using the 'group1' and 'group2' groups
+        * Check that `tsrc sync --group no-such-group` fails
+        """
+        git_server.add_group("group1", ["foo"])
+        git_server.add_group("group2", ["bar"])
+
+        tsrc_cli.run("init", git_server.manifest_url)
+
+        tsrc_cli.run_and_fail_with(GroupNotFound, "sync", "--group", "no-such-group")
+
+    @staticmethod
+    def test_group_not_cloned(
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+    ) -> None:
+        """ Scenario:
+        * Create a manifest contaning :
+          * a group named 'group1'  containing the repo 'foo'
+          * a group named 'group2'  containing the repo 'bar'
+        * Initialize a workspace from this manifest using the 'group1'
+        * Check that `tsrc sync --group group2` adds the 'bar' repo
+        """
+        git_server.add_group("group1", ["foo"])
+        git_server.add_group("group2", ["bar"])
+
+        tsrc_cli.run("init", git_server.manifest_url, "--group", "group1")
+
+        tsrc_cli.run("sync", "--group", "group2")
+
+        assert (
+            workspace_path / "bar"
+        ).exists(), "bar should have been cloned when syncing group2"

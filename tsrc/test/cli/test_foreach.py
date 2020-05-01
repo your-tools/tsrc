@@ -1,5 +1,8 @@
 import pytest
 
+from path import Path
+
+import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 from cli_ui.tests import MessageRecorder
@@ -86,7 +89,7 @@ def test_foreach_with_explicit_groups(
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", "ls")
+    tsrc_cli.run("foreach", "-g", "foo", "--", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -115,7 +118,7 @@ def test_foreach_with_groups_from_config(
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "--groups-from-config", "ls")
+    tsrc_cli.run("foreach", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -137,39 +140,44 @@ def test_foreach_error_when_using_missing_groups(
     git_server.add_group("spam", ["eggs", "beacon"])
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", manifest_url, "-g", "foo")
+    tsrc_cli.run("init", manifest_url, "--group", "foo")
 
     message_recorder.reset()
-    tsrc_cli.run_and_fail("foreach", "-g", "foo", "-g", "spam", "ls")
+    tsrc_cli.run_and_fail("foreach", "--groups", "foo", "spam", "--", "ls")
 
 
-def test_foreach_all_cloned_repos_by_default(
-    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+def test_foreach_with_all_cloned_repos_requested(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
 ) -> None:
     """
     * Create a manifest containing:
        * a group named `foo` with repos `bar` and `baz`,
        * a group named `spam` with repos `eggs` and `beacon`
-       * a repo named `other`, not part of any group
+       * a repo named `quux`, not part of any group
     * Initialize a workspace from this manifest, using the `foo` group
     * Force the clone of the `other` repo
-    * Check that `tsrc foreach ---groups foo spam --ls` fails
+    * Check that `tsrc foreach --all-cloned` visits all repos
     """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "bacon"])
-    git_server.add_repo("other")
+    quux_url = git_server.add_repo("quux")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
+    tsrc.git.run(workspace_path, "clone", quux_url)
     message_recorder.reset()
-    tsrc_cli.run("foreach", "ls")
+
+    tsrc_cli.run("foreach", "--all-cloned", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
     assert message_recorder.find("eggs\n")
     assert message_recorder.find("bacon\n")
-    assert not message_recorder.find("other\n")
+    assert message_recorder.find("quux\n")
 
 
 def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:

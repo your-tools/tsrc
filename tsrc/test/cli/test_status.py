@@ -161,3 +161,54 @@ def test_status_with_missing_repos(
     (workspace_path / "foo").rmtree(ignore_errors=True)
 
     tsrc_cli.run("status")
+
+
+def test_use_given_group(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """ Scenario:
+    * Create a manifest with two disjoint groups,
+      group1 and group2
+    * Initialize a workspace from this manifest using
+      the two groups
+    * Run `tsrc status --group group1`
+    * Check that the output contains repos from group1, but not
+      from group2
+    """
+    git_server.add_group("group1", ["foo"])
+    git_server.add_group("group2", ["bar"])
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "--groups", "group1", "group2")
+
+    message_recorder.reset()
+    tsrc_cli.run("status", "--group", "group1")
+    assert message_recorder.find(r"\* foo"), "foo status have been read"
+    assert not message_recorder.find(r"\* bar"), "bar should have been skipped"
+
+
+def test_use_non_cloned_group(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """ Scenario:
+    * Create a manifest with two disjoint groups,
+      group1 and group2
+    * Initialize a workspace from this manifest using
+      the group 'group1'
+    * Run `tsrc status --group group2`
+    * Check that it does not crash
+    """
+    git_server.add_group("group1", ["foo"])
+    git_server.add_group("group2", ["bar"])
+
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "--groups", "group1")
+
+    message_recorder.reset()
+    tsrc_cli.run("status", "--group", "group2")
