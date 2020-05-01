@@ -482,9 +482,9 @@ def test_fetch_additional_remotes(
     git_server.add_repo("foo")
     foo2_url = git_server.add_repo("foo2")
     git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])
+
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path / "foo"
-    tsrc.git.run(foo_path, "fetch", "other")
     first_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
     git_server.push_file("foo2", "new.txt")
 
@@ -492,6 +492,51 @@ def test_fetch_additional_remotes(
     second_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
 
     assert first_sha1 != second_sha1, "remote 'other' was not fetched"
+
+
+def test_adding_remotes(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """ Scenario:
+    * Create a manifest containing a foo repo with one remote
+    * Initialize a workspace from this manifest
+    * Add an 'other' remote to the foo repo in the manifest
+    * Run `tsrc sync`
+    * Check that the second remote was fetched
+    """
+    git_server.add_repo("foo")
+    tsrc_cli.run("init", git_server.manifest_url)
+    foo2_url = git_server.add_repo("foo2")
+    git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])
+
+    tsrc_cli.run("sync")
+
+    foo_path = workspace_path / "foo"
+    assert tsrc.git.get_sha1(
+        foo_path, ref="other/master"
+    ), "remote 'other' was not added"
+
+
+def test_changing_remote_url(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """ Scenario:
+    * Create a manifest containing a foo repo with one remote
+    * Initialize a workspace from this manifest
+    * Change the url in the manifest
+    * Run `tsrc sync`
+    * Check that the remote was updated
+    """
+    git_server.add_repo("foo")
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    foo2_url = git_server.add_repo("foo2")
+    git_server.manifest.set_repo_url("foo", foo2_url)
+    tsrc_cli.run("sync")
+
+    foo_path = workspace_path / "foo"
+    _, actual_url = tsrc.git.run_captured(foo_path, "remote", "get-url", "origin")
+    assert actual_url == foo2_url, "remote was not updated"
 
 
 class TestSyncWithGivenGroups:
