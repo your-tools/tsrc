@@ -1,4 +1,4 @@
-from typing import cast, Any, Dict, List, Tuple
+from typing import cast, Any, Dict, List, Tuple, Optional
 import ruamel.yaml
 import pytest
 
@@ -101,14 +101,18 @@ class ManifestHandler:
         self.data["repos"].append(repo_config)
         self.write_changes(message="add %s" % dest)
 
-    def configure_group(self, name: str, repos: List[str]) -> None:
+    def configure_group(
+        self, name: str, repos: List[str], includes: Optional[List[str]] = None
+    ) -> None:
         groups = self.data.get("groups")
         if not groups:
             self.data["groups"] = {}
             groups = self.data["groups"]
         groups[name] = {}
         groups[name]["repos"] = repos
-        self.write_changes(message="add %s group" % name)
+        if includes:
+            groups[name]["includes"] = includes
+        self.write_changes(message="add/update %s group" % name)
 
     def get_repo(self, dest: str) -> RepoConfig:
         for repo in self.data["repos"]:
