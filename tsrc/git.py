@@ -147,7 +147,7 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     if out.endswith("\n"):
         out = out.strip("\n")
     returncode = process.returncode
-    ui.debug(ui.lightgray, "[%i]" % returncode, ui.reset, out)
+    ui.debug(ui.lightgray, "[", returncode, "]", ui.reset, out)
     if check and returncode != 0:
         raise CommandError(working_path, cmd, output=out)
     return returncode, out

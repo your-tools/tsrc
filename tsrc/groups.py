@@ -26,10 +26,10 @@ class GroupNotFound(GroupError):
         self.group_name = group_name
         self.parent_group = parent_group
         if self.parent_group:
-            message = "Invalid include detected for %s:\n" % self.parent_group.name
+            message = f"Invalid include detected for '{self.parent_group.name}':\n"
         else:
             message = ""
-        message += "No such group: %s" % self.group_name
+        message += f"No such group: '{self.group_name}'"
         super().__init__(message)
 
 
@@ -37,7 +37,7 @@ class UnknownElement(GroupError):
     def __init__(self, group_name: str, element: T) -> None:
         self.group_name = group_name
         self.element = element
-        message = "%s: unknown element: %s" % (group_name, element)
+        message = f"'{group_name}: unknown element: '{element}"
         super().__init__(message)
 
 

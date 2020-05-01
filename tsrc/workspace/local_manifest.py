@@ -31,10 +31,10 @@ class LocalManifest:
         # fmt: off
         tsrc.git.run(
             self.clone_path, "branch", branch,
-            "--set-upstream-to", "origin/%s" % branch
+            "--set-upstream-to", f"origin/{branch}"
         )
         # fmt: on
-        ref = "origin/%s" % branch
+        ref = f"origin/{branch}"
         tsrc.git.run(self.clone_path, "reset", "--hard", ref)
 
     def _clone_manifest(self, url: str, *, branch: str) -> None:

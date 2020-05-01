@@ -99,7 +99,7 @@ class ManifestHandler:
         if branch != "master":
             repo_config["branch"] = branch
         self.data["repos"].append(repo_config)
-        self.write_changes(message="add %s" % src)
+        self.write_changes(message=f"add {src}")
 
     def configure_group(
         self, name: str, repos: List[str], includes: Optional[List[str]] = None
@@ -112,18 +112,18 @@ class ManifestHandler:
         groups[name]["repos"] = repos
         if includes:
             groups[name]["includes"] = includes
-        self.write_changes(message="add/update %s group" % name)
+        self.write_changes(message=f"add/update {name} group")
 
     def get_repo(self, src: str) -> RepoConfig:
         for repo in self.data["repos"]:
             if repo["src"] == src:
                 return cast(RepoConfig, repo)
-        assert False, "repo '%s' not found in manifest" % src
+        assert False, f"repo '{src}' not found in manifest"
 
     def configure_repo(self, src: str, key: str, value: Any) -> None:
         repo = self.get_repo(src)
         repo[key] = value
-        message = "Change %s %s: %s" % (src, key, value)
+        message = f"Change {src} {key}: {value}"
         self.write_changes(message)
 
     def set_repo_url(self, src: str, url: str) -> None:
@@ -151,7 +151,7 @@ class ManifestHandler:
         repo = self.get_repo(src)
         repo["remotes"] = remote_dicts
         del repo["url"]
-        message = "%s: remotes: %s" % (src, remote_dicts)
+        message = f"{src}: remotes: {remote_dicts}"
         self.write_changes(message)
 
 

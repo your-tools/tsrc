@@ -75,14 +75,14 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
                     cmd.append("--force")
                 tsrc.git.run(repo_path, *cmd)
             except tsrc.Error:
-                raise tsrc.Error("fetch from %s failed" % remote.name)
+                raise tsrc.Error(f"fetch from '{remote.name}' failed")
 
     @staticmethod
     def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
         ui.info_2("Resetting to", ref)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
-            raise tsrc.Error("%s is dirty, skipping" % repo_path)
+            raise tsrc.Error(f"{repo_path} is dirty, skipping")
         try:
             tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:

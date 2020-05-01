@@ -33,10 +33,10 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         return repo.src
 
     def on_start(self, *, num_items: int) -> None:
-        ui.info_1("Running `%s` on %d repos" % (self.cmd_as_str, num_items))
+        ui.info_1(f"Running `{self.cmd_as_str}` on {num_items} repos")
 
     def on_failure(self, *, num_errors: int) -> None:
-        ui.error("Command failed for %s repo(s)" % num_errors)
+        ui.error(f"Command failed for {num_errors} repo(s)")
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
         ui.info_count(index, count, repo.src)

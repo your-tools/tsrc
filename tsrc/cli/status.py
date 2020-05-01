@@ -138,7 +138,7 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
         erase_last_line()
 
     def on_start(self, num_items: int) -> None:
-        ui.info_1("Collecting statuses of %d repos" % num_items)
+        ui.info_1(f"Collecting statuses of {num_items} repo(s)")
         self.num_repos = num_items
 
     def on_success(self) -> None:

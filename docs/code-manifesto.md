@@ -34,8 +34,7 @@ if len(errors) == 0:
     ...
 ```
 
-* Do not use `+` to build strings. Use `format()`, `%` instead, or
-  "f-strings" if you only want the code to work with Python >= 3.6:
+* Prefer using  "f-strings" if possible, `+` may also work in some contexts.
 
 ```python
 # Yes

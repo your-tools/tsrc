@@ -20,8 +20,8 @@ def main(args: argparse.Namespace) -> None:
         cmd = [
             "log",
             "--color=always",
-            "--pretty=format:%s" % log_format,
-            "%s...%s" % (args.from_, args.to),
+            f"--pretty=format:{log_format}",
+            f"{args.from_}...{args.to}",
         ]
         rc, out = tsrc.git.run_captured(full_path, *cmd, check=False)
         if rc != 0:

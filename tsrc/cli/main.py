@@ -185,7 +185,7 @@ def main_impl(args: ArgsList = None) -> None:
     if not command:
         parser.print_help()
         sys.exit(1)
-    module = importlib.import_module("tsrc.cli.%s" % command.replace("-", "_"))
+    module = importlib.import_module("tsrc.cli." + command.replace("-", "_"))
     if command == "foreach":
         fix_cmd_args_for_foreach(args_ns, foreach_parser)
 

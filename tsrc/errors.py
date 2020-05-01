@@ -27,9 +27,9 @@ class InvalidConfig(Error):
 
     @property
     def detailed_message(self) -> str:
-        res = "%s: %s" % (self.config_path, self.cause)
+        res = f"{self.config_path}: {self.cause}"
         res += "\n"
-        res += "See %s for details" % DOC_URL
+        res += f"See {DOC_URL} for details"
         return res
 
     def __str__(self) -> str:
@@ -38,4 +38,4 @@ class InvalidConfig(Error):
 
 class MissingRepo(Error):
     def __init__(self, src: str):
-        super().__init__("No repo found in %s. Please run `tsrc sync`" % src)
+        super().__init__(f"No repo found in {src}. Please run `tsrc sync`")
