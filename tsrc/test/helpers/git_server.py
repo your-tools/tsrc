@@ -175,7 +175,10 @@ class GitServer:
         self, name: str, empty: bool = False, branch: str = "master"
     ) -> TestRepo:
         repo_path = self.bare_path / name
-        repo_path.makedirs_p()
+        assert (
+            not repo_path.exists()
+        ), f"cannot create repo in {repo_path}: this folder already exits"
+        repo_path.makedirs()
         repo = TestRepo.create_bare(repo_path, initial_branch=branch, empty=empty)
         return repo
 
