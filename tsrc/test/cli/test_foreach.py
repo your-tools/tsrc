@@ -76,7 +76,7 @@ def test_foreach_with_explicit_groups(
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", "ls")
+    tsrc_cli.run("foreach", "-g", "foo", "--", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -113,7 +113,7 @@ def test_foreach_error_when_using_missing_groups(
     tsrc_cli.run("init", manifest_url, "-g", "foo")
 
     message_recorder.reset()
-    tsrc_cli.run_and_fail("foreach", "-g", "foo", "-g", "spam", "ls")
+    tsrc_cli.run_and_fail("foreach", "-g", "foo", "spam", "--", "ls")
 
 
 def test_foreach_all_cloned_repos_by_default(
