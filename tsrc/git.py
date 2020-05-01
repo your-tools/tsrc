@@ -22,8 +22,8 @@ class CommandError(Error):
         self.cmd = cmd
         self.working_path = working_path
         self.output = output
-        message = "`git {cmd}` from {working_path} failed"
-        message = message.format(cmd=" ".join(cmd), working_path=working_path)
+        cmd_str = " ".join(cmd)
+        message = f"`git {cmd_str}` from {working_path} failed"
         if output:
             message += "\n" + output
         super().__init__(message)
@@ -31,12 +31,12 @@ class CommandError(Error):
 
 class NoSuchWorkingPath(Error):
     def __init__(self, path: Path) -> None:
-        super().__init__("'{}' does not exist".format(path))
+        super().__init__(f"'{path}' does not exist")
 
 
 class WorktreeNotFound(Error):
     def __init__(self, working_path: Path) -> None:
-        super().__init__("'{}' is not inside a git repository".format(working_path))
+        super().__init__(f"'{working_path}' is not inside a git repository")
 
 
 def assert_working_path(path: Path) -> None:
@@ -147,7 +147,7 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     if out.endswith("\n"):
         out = out.strip("\n")
     returncode = process.returncode
-    ui.debug(ui.lightgray, "[%i]" % returncode, ui.reset, out)
+    ui.debug(ui.lightgray, "[", returncode, "]", ui.reset, out)
     if check and returncode != 0:
         raise CommandError(working_path, cmd, output=out)
     return returncode, out

@@ -11,7 +11,7 @@ import tsrc
 
 class RepoNotFound(tsrc.Error):
     def __init__(self, dest: str) -> None:
-        super().__init__("No repo found in '%s'" % dest)
+        super().__init__(f"No repo found in '{dest}'")
 
 
 class Manifest:

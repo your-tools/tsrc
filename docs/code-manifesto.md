@@ -34,16 +34,15 @@ if len(errors) == 0:
     ...
 ```
 
-* Do not use `+` to build strings. Use `format()`, `%` instead, or
-  "f-strings" if you only want the code to work with Python >= 3.6:
+* Prefer using  "f-strings" if possible, `+` may also work in some contexts.
 
 ```python
 # Yes
-message = "Welcome, {}!".format(name)
-message = "Welcome, %s!" % name
 message = f"Welcome {name}!"
 
 # No
+message = "Welcome, {}!".format(name)
+message = "Welcome, %s!" % name
 message = "Welcome, " + name + "!"
 
 # Okayish
@@ -298,7 +297,7 @@ class Person:
 
       @property
       def full_name(self):
-          return "{} {}".format(self.first_name, self.last_name)
+          return f"{self.first_name} {self.last_name}"
 
 
 # No:
@@ -306,7 +305,7 @@ class Foo:
       def __init__(self, first_name, last_name):
             self.first_name = first_name
             self.last_name = last_name
-            self.full_name = "{} {}".format(self.first_name, self.last_name)
+            self.full_name = f"{self.first_name} {self.last_name}"
 ```
 
 For instance, here:

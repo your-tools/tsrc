@@ -108,5 +108,6 @@ class Workspace:
 
 class WorkspaceNotConfigured(tsrc.Error):
     def __init__(self, root_path: Path):
-        message = "Workspace in {} is not configured. Please run `tsrc init`"
-        super().__init__(message.format(root_path))
+        super().__init__(
+            f"Workspace in '{root_path}' is not configured. Please run `tsrc init`"
+        )
