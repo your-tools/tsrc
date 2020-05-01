@@ -27,7 +27,7 @@ def test_foreach_with_errors(
     git_server.push_file("bar", "stuff.txt", contents="some stuff")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc_cli.run("foreach", "ls", "stuff.txt", expect_fail=True)
+    tsrc_cli.run_and_fail("foreach", "ls", "stuff.txt")
     assert message_recorder.find("Command failed")
     assert message_recorder.find(r"\* foo")
 
@@ -113,7 +113,7 @@ def test_foreach_error_when_using_missing_groups(
     tsrc_cli.run("init", manifest_url, "-g", "foo")
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "-g", "foo", "-g", "spam", "ls", expect_fail=True)
+    tsrc_cli.run_and_fail("foreach", "-g", "foo", "-g", "spam", "ls")
 
 
 def test_foreach_all_cloned_repos_by_default(
@@ -140,4 +140,4 @@ def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc_cli.run("foreach", "no-such", expect_fail=True)
+    tsrc_cli.run_and_fail("foreach", "no-such")
