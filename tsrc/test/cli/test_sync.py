@@ -1,5 +1,4 @@
 from typing import Any
-import os
 
 from path import Path
 
@@ -38,7 +37,7 @@ def test_sync_with_errors(
     bar_src = workspace_path / "foo/bar"
     (bar_src / "bar.txt").write_text("Bar is false")
 
-    tsrc_cli.run("sync", expect_fail=True)
+    tsrc_cli.run_and_fail("sync")
 
     assert message_recorder.find("Failed to synchronize workspace")
     assert message_recorder.find(r"\* foo/bar")
@@ -113,7 +112,7 @@ def test_sync_not_on_master(
     # push so that sync still works
     tsrc.git.run(foo_path, "push", "-u", "origin", "devel", "--no-verify")
 
-    tsrc_cli.run("sync", expect_fail=True)
+    tsrc_cli.run_and_fail("sync")
 
     assert message_recorder.find("not on the correct branch")
 
@@ -180,7 +179,7 @@ def test_changing_branch(
     git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
-    tsrc_cli.run("sync", expect_fail=True)
+    tsrc_cli.run_and_fail("sync")
     assert message_recorder.find("not on the correct branch")
 
 
@@ -271,7 +270,7 @@ def test_tags_are_skipped_when_not_clean_tags(
     git_server.tag("foo", "v0.2")
     git_server.manifest.set_repo_tag("foo", "v0.2")
 
-    tsrc_cli.run("sync", expect_fail=True)
+    tsrc_cli.run_and_fail("sync")
 
     foo_path = workspace_path / "foo"
     assert not (foo_path / "new.txt").exists()
@@ -291,7 +290,7 @@ def test_sha1s_are_skipped_when_not_clean(
     new_sha1 = git_server.get_sha1("foo")
     git_server.manifest.set_repo_sha1("foo", new_sha1)
 
-    tsrc_cli.run("sync", expect_fail=True)
+    tsrc_cli.run_and_fail("sync")
 
     foo_path = workspace_path / "foo"
     assert not (foo_path / "new.txt").exists()

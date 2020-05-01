@@ -42,5 +42,5 @@ def test_shallow_with_fix_ref(
     git_server.manifest.set_repo_sha1("foo", initial_sha1)
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", "--shallow", manifest_url, expect_fail=True)
+    tsrc_cli.run_and_fail("init", "--shallow", manifest_url)
     assert message_recorder.find("Cannot use --shallow with a fixed sha1")
