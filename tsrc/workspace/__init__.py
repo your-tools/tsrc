@@ -1,7 +1,7 @@
 """ Implementation of the tsrc Workspace: a collection of git repositories
 """
 
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Optional
 
 import cli_ui as ui
 from path import Path
@@ -47,15 +47,26 @@ class Workspace:
             raise WorkspaceNotConfigured(root_path)
 
         self.config = WorkspaceConfig.from_file(self.cfg_path)
+        self.given_groups: Optional[List[str]] = None
+
+    def set_groups(self, groups: List[str]) -> None:
+        """ Called when the `--groups` option was used on the command
+        line - overwrites the list of groups from the workspace
+        configuration
+        """
+        self.given_groups = groups
 
     def get_repos(self) -> List[tsrc.Repo]:
         all_repos = self.config.clone_all_repos
-        repo_groups = self.config.repo_groups
+        groups_from_config = self.config.repo_groups
         manifest = self.get_manifest()
+
         if all_repos:
             return manifest.get_repos(all_=True)
+        elif self.given_groups:
+            return manifest.get_repos(groups=self.given_groups)
         else:
-            return manifest.get_repos(groups=repo_groups)
+            return manifest.get_repos(groups=groups_from_config)
 
     def get_manifest(self) -> tsrc.Manifest:
         return self.local_manifest.get_manifest()
@@ -86,9 +97,10 @@ class Workspace:
         tsrc.executor.run_sequence(copyfiles, file_copier)
 
     def sync(self, *, force: bool = False) -> None:
+        repos = self.get_repos()
         syncer = Syncer(self.root_path, force=force)
         try:
-            tsrc.executor.run_sequence(self.get_repos(), syncer)
+            tsrc.executor.run_sequence(repos, syncer)
         finally:
             syncer.display_bad_branches()
 

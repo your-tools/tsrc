@@ -14,11 +14,14 @@ def main(args: argparse.Namespace) -> None:
     config = workspace.config
     groups = config.repo_groups
     all_repos = config.clone_all_repos
-    if groups and not all_repos:
+    given_groups = args.groups
+    if groups and not all_repos and not given_groups:
         ui.info(ui.green, "*", ui.reset, "Using groups from config:", ", ".join(groups))
-    if all_repos:
+    if all_repos and not given_groups:
         ui.info(ui.green, "*", ui.reset, "Synchronizing all repos")
 
+    if given_groups:
+        workspace.set_groups(given_groups)
     workspace.clone_missing()
     workspace.set_remotes()
     workspace.sync(force=args.force)

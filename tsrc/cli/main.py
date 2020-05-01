@@ -170,6 +170,7 @@ def main_impl(args: ArgsList = None) -> None:
     add_workspace_subparser(subparsers, "status")
 
     sync_parser = add_workspace_subparser(subparsers, "sync")
+    add_group_option(sync_parser)
     sync_parser.add_argument("--force", action="store_true")
 
     apply_manifest = add_workspace_subparser(subparsers, "apply-manifest")
