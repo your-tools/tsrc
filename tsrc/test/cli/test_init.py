@@ -45,7 +45,7 @@ def test_init_with_args(
 def test_cannot_init_twice(tsrc_cli: CLI, git_server: GitServer) -> None:
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc_cli.run("init", manifest_url, expect_fail=True)
+    tsrc_cli.run_and_fail("init", manifest_url)
 
 
 def test_init_maint_manifest_branch(
@@ -89,7 +89,7 @@ def test_copy_files_source_does_not_exist(
         "master", [("top.cmake", "CMakeLists.txt")]
     )
 
-    tsrc_cli.run("init", manifest_url, expect_fail=True)
+    tsrc_cli.run_and_fail("init", manifest_url)
     assert message_recorder.find("Failed to perform the following copies")
 
 
@@ -124,7 +124,7 @@ def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
 
     manifest_url = git_server.manifest_url
 
-    tsrc_cli.run("init", manifest_url, expect_fail=True)
+    tsrc_cli.run_and_fail("init", manifest_url)
 
 
 def test_resets_to_tag(

@@ -31,4 +31,4 @@ def test_error(tsrc_cli: CLI, git_server: GitServer) -> None:
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    tsrc_cli.run("log", "--from", "v0.1", expect_fail=True)
+    tsrc_cli.run_and_fail("log", "--from", "v0.1")
