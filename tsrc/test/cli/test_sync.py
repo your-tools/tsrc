@@ -662,3 +662,23 @@ class TestSyncWithGivenGroups:
         tsrc_cli.run("init", git_server.manifest_url)
 
         tsrc_cli.run_and_fail_with(GroupNotFound, "sync", "--group", "no-such-group")
+
+    @staticmethod
+    def test_group_not_cloned(
+        tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+    ) -> None:
+        """ Scenario:
+        * Create a manifest contaning :
+          * a group named 'group1'  containing the repo 'foo'
+          * a group named 'group2'  containing the repo 'bar'
+        * Initialize a workspace from this manifest using the 'group1'
+        * Check that `tsrc sync --group group2` fails
+        """
+        git_server.add_group("group1", ["foo"])
+        git_server.add_group("group2", ["bar"])
+
+        tsrc_cli.run("init", git_server.manifest_url, "--group", "group1")
+
+        tsrc_cli.run("sync", "--group", "group2")
+
+        tsrc_cli.run("sync")
