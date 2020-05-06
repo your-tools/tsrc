@@ -23,7 +23,7 @@ def test_apply_manifest_adds_new_repo(
     tsrc_cli.run("init", git_server.manifest_url)
 
     cloned_manifest_path = workspace_path / ".tsrc/manifest/manifest.yml"
-    copied_manifest_path = cloned_manifest_path.copy(workspace_path)
+    copied_manifest_path = Path(cloned_manifest_path.copy(workspace_path))
 
     bar_url = git_server.add_repo("bar", add_to_manifest=False)
     add_repo_to_manifest(copied_manifest_path, "bar", bar_url)
