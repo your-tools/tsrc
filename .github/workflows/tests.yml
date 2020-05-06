@@ -10,10 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        # Note: no CI on Windows:
-        # See https://github.com/TankerHQ/tsrc/issues/186
-        # for details
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
 
