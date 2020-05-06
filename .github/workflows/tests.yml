@@ -27,15 +27,24 @@ jobs:
         python -m poetry config virtualenvs.create false
         python -m poetry install
 
-    - name: Run tests
+    - name: Setup tests
       run: |
         # tests run git commands, and they need
         # a proper git identity for that
         git config --global user.email "test@tsrc-tests.com"
         git config --global user.name "Tasty Test"
-        poetry run pytest --cov . --cov-report xml --numprocesses auto
 
-    - name: Send coverage to codecov.io
+    # Note: for some reason pytest --cov fails on Windows
+    - name: Run tests (unix)
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: poetry run pytest --cov . --cov-report xml --numprocesses auto
+
+    - name: Run tests (windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: poetry run pytest --numprocesses auto
+
+    - name: Send coverage to codecov.io (unix)
+      if: ${{ matrix.os != 'windows-latest' }}
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
