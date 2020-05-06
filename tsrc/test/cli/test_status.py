@@ -118,6 +118,9 @@ def test_status_with_missing_repos(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
 
-    (workspace_path / "foo").rmtree()
+    # shutil.rmtree has trouble removing read-only
+    # files in the .git repo, but this won't affect
+    # the outcome of the test anyway
+    (workspace_path / "foo").rmtree(ignore_errors=True)
 
     tsrc_cli.run("status")
