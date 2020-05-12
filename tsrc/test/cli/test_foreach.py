@@ -3,7 +3,6 @@ from path import Path
 
 import tsrc.git
 from tsrc.test.helpers.cli import CLI
-from tsrc.cli.foreach import MissingRepos
 from tsrc.test.helpers.git_server import GitServer
 from cli_ui.tests import MessageRecorder
 
@@ -118,7 +117,7 @@ def test_foreach_with_groups_from_config(
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "--groups-from-config", "ls")
+    tsrc_cli.run("foreach", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")
@@ -140,15 +139,13 @@ def test_foreach_error_when_using_missing_groups(
     git_server.add_group("spam", ["eggs", "beacon"])
 
     manifest_url = git_server.manifest_url
-    tsrc_cli.run("init", manifest_url, "-g", "foo")
+    tsrc_cli.run("init", manifest_url, "--group", "foo")
 
     message_recorder.reset()
-    tsrc_cli.run_and_fail_with(
-        MissingRepos, "foreach", "--groups", "foo", "spam", "--", "ls"
-    )
+    tsrc_cli.run_and_fail("foreach", "--groups", "foo", "spam", "--", "ls")
 
 
-def test_foreach_all_cloned_repos_by_default(
+def test_foreach_with_all_repos_requested(
     tsrc_cli: CLI,
     workspace_path: Path,
     git_server: GitServer,
@@ -161,7 +158,7 @@ def test_foreach_all_cloned_repos_by_default(
        * a repo named `other`, not part of any group
     * Initialize a workspace from this manifest, using the `foo` group
     * Force the clone of the `other` repo
-    * Check that `tsrc foreach ---groups foo spam --ls` fails
+    * Check that `tsrc foreach --all` works
     """
     git_server.add_group("foo", ["bar", "baz"])
     git_server.add_group("spam", ["eggs", "bacon"])
@@ -172,7 +169,7 @@ def test_foreach_all_cloned_repos_by_default(
     tsrc.git.run(workspace_path, "clone", other_url)
 
     message_recorder.reset()
-    tsrc_cli.run("foreach", "ls")
+    tsrc_cli.run("foreach", "--all", "ls")
 
     assert message_recorder.find("bar\n")
     assert message_recorder.find("baz\n")

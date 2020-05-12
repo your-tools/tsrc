@@ -6,6 +6,7 @@ from path import Path
 import cli_ui as ui
 
 import tsrc
+from tsrc.cli import repos_from_config
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
@@ -32,6 +33,8 @@ def main(args: argparse.Namespace) -> None:
 
     workspace = Workspace(workspace_path)
     workspace.update_manifest()
+    manifest = workspace.get_manifest()
+    workspace.repos = repos_from_config(manifest, workspace_config)
     workspace.clone_missing()
     workspace.set_remotes()
     workspace.copy_files()

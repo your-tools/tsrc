@@ -105,8 +105,9 @@ def main(args: ArgsList = None) -> None:
     main_impl(args=args)
 
 
-def add_group_option(parser: argparse.ArgumentParser) -> None:
+def add_group_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-g", "--group", "--groups", nargs="+", dest="groups")
+    parser.add_argument("--all", action="store_true", dest="all_repos")
 
 
 def main_impl(args: ArgsList = None) -> None:
@@ -126,15 +127,9 @@ def main_impl(args: ArgsList = None) -> None:
     subparsers.add_parser("version")
 
     foreach_parser = add_workspace_subparser(subparsers, "foreach")
-    add_group_option(foreach_parser)
+    add_group_options(foreach_parser)
     foreach_parser.add_argument("cmd", nargs="*")
     foreach_parser.add_argument("-c", dest="shell", action="store_true")
-    foreach_parser.add_argument(
-        "--groups-from-config",
-        action="store_true",
-        help="Use groups from the workspace configuration",
-        default=False,
-    )
     foreach_parser.epilog = textwrap.dedent(
         """\
     Usage:
@@ -148,7 +143,7 @@ def main_impl(args: ArgsList = None) -> None:
     foreach_parser.formatter_class = argparse.RawDescriptionHelpFormatter
 
     init_parser = add_workspace_subparser(subparsers, "init")
-    add_group_option(init_parser)
+    add_group_options(init_parser)
     init_parser.add_argument("url")
     init_parser.add_argument("-b", "--branch")
     init_parser.add_argument(
@@ -163,16 +158,16 @@ def main_impl(args: ArgsList = None) -> None:
     init_parser.set_defaults(branch="master")
 
     log_parser = add_workspace_subparser(subparsers, "log")
-    add_group_option(log_parser)
+    add_group_options(log_parser)
     log_parser.add_argument("--from", required=True, dest="from_", metavar="FROM")
     log_parser.add_argument("--to")
     log_parser.set_defaults(to="HEAD")
 
     status_parser = add_workspace_subparser(subparsers, "status")
-    add_group_option(status_parser)
+    add_group_options(status_parser)
 
     sync_parser = add_workspace_subparser(subparsers, "sync")
-    add_group_option(sync_parser)
+    add_group_options(sync_parser)
     sync_parser.add_argument("--force", action="store_true")
 
     apply_manifest = add_workspace_subparser(subparsers, "apply-manifest")

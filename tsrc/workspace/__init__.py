@@ -1,7 +1,7 @@
 """ Implementation of the tsrc Workspace: a collection of git repositories
 """
 
-from typing import Iterable, List, Tuple, Optional
+from typing import Iterable, List, Tuple
 
 import cli_ui as ui
 from path import Path
@@ -47,26 +47,19 @@ class Workspace:
             raise WorkspaceNotConfigured(root_path)
 
         self.config = WorkspaceConfig.from_file(self.cfg_path)
-        self.given_groups: Optional[List[str]] = None
-
-    def set_groups(self, groups: List[str]) -> None:
-        """ Called when the `--groups` option was used on the command
-        line - overwrites the list of groups from the workspace
-        configuration
-        """
-        self.given_groups = groups
-
-    def get_repos(self) -> List[tsrc.Repo]:
-        all_repos = self.config.clone_all_repos
-        groups_from_config = self.config.repo_groups
-        manifest = self.get_manifest()
-
-        if all_repos:
-            return manifest.get_repos(all_=True)
-        elif self.given_groups:
-            return manifest.get_repos(groups=self.given_groups)
-        else:
-            return manifest.get_repos(groups=groups_from_config)
+        # Note: at the repositories on which the user wishes to
+        # execute an action is unknown. It will be set
+        # this list after processing the command line arguments
+        # (like `--group` or `--all`)
+        #
+        # Note: you _cannot assume_ that every repo in this list was
+        # cloned (in other words, don't use `workspace.root_path / repo.src`
+        # without checking that the path exists)!
+        # This is because there can be a mismatch between the state of
+        # the workspace and the requested repos - for instance, the user could
+        # have configured a workspace with a `backend` group, but using
+        # a disjoint `front-end` group on the command line.
+        self.repos: List[tsrc.Repo] = []
 
     def get_manifest(self) -> tsrc.Manifest:
         return self.local_manifest.get_manifest()
@@ -78,7 +71,7 @@ class Workspace:
 
     def clone_missing(self) -> None:
         to_clone = []
-        for repo in self.get_repos():
+        for repo in self.repos:
             repo_path = self.root_path / repo.src
             if not repo_path.exists():
                 to_clone.append(repo)
@@ -87,17 +80,17 @@ class Workspace:
 
     def set_remotes(self) -> None:
         remote_setter = RemoteSetter(self.root_path)
-        tsrc.executor.run_sequence(self.get_repos(), remote_setter)
+        tsrc.executor.run_sequence(self.repos, remote_setter)
 
     def copy_files(self) -> None:
-        repos = self.get_repos()
+        repos = self.repos
         file_copier = FileCopier(self.root_path, repos)
         manifest = self.local_manifest.get_manifest()
         copyfiles = manifest.copyfiles
         tsrc.executor.run_sequence(copyfiles, file_copier)
 
     def sync(self, *, force: bool = False) -> None:
-        repos = self.get_repos()
+        repos = self.repos
         syncer = Syncer(self.root_path, force=force)
         try:
             tsrc.executor.run_sequence(repos, syncer)
@@ -106,7 +99,7 @@ class Workspace:
 
     def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
         """ Yield (index, repo, full_path) for all the repos """
-        for i, repo in enumerate(self.get_repos()):
+        for i, repo in enumerate(self.repos):
             full_path = self.root_path / repo.src
             yield (i, repo, full_path)
 

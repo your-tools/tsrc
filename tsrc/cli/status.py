@@ -155,8 +155,6 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
 
 
 def main(args: argparse.Namespace) -> None:
-    workspace = tsrc.cli.get_workspace(args)
-    if args.groups:
-        workspace.set_groups(args.groups)
+    workspace = tsrc.cli.get_workspace_with_repos(args)
     status_collector = StatusCollector(workspace)
-    tsrc.run_sequence(workspace.get_repos(), status_collector)
+    tsrc.run_sequence(workspace.repos, status_collector)

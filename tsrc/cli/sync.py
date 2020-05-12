@@ -8,20 +8,14 @@ import tsrc.cli
 
 def main(args: argparse.Namespace) -> None:
     workspace = tsrc.cli.get_workspace(args)
+
     ui.info_2("Updating manifest")
     workspace.update_manifest()
 
-    config = workspace.config
-    groups = config.repo_groups
-    all_repos = config.clone_all_repos
-    given_groups = args.groups
-    if groups and not all_repos and not given_groups:
-        ui.info(ui.green, "*", ui.reset, "Using groups from config:", ", ".join(groups))
-    if all_repos and not given_groups:
-        ui.info(ui.green, "*", ui.reset, "Synchronizing all repos")
-
-    if given_groups:
-        workspace.set_groups(given_groups)
+    manifest = workspace.get_manifest()
+    workspace.repos = tsrc.cli.resolve_repos(
+        manifest, args=args, workspace_config=workspace.config
+    )
     workspace.clone_missing()
     workspace.set_remotes()
     workspace.sync(force=args.force)

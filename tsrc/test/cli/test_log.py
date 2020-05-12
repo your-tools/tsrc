@@ -33,7 +33,7 @@ def test_happy(
     assert not message_recorder.find("new foo!")
 
 
-def test_error(tsrc_cli: CLI, git_server: GitServer) -> None:
+def test_log_error(tsrc_cli: CLI, git_server: GitServer) -> None:
     """
     Scenario:
     * Create a manifest with one repo, foo
@@ -68,3 +68,24 @@ def test_use_given_group(tsrc_cli: CLI, git_server: GitServer) -> None:
 
     tsrc_cli.run("init", manifest_url, "--groups", "group1", "group2")
     tsrc_cli.run("log", "--from", "v0.1", "--group", "group1")
+
+
+def test_missing_repos_from_given_group(
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
+    """
+    Scenario:
+    * Create a manifest with two disjoint groups, group1 and group2
+    * For each repo, create  v0.1 tag
+    * Initialize a workspace from this manifest using group1
+    * Run `tsrc log --from v0.1 --groups group1 group2`
+    """
+    git_server.add_group("group1", ["foo"])
+    git_server.add_group("group2", ["bar"])
+    git_server.tag("foo", "v0.1")
+    git_server.tag("bar", "v0.1")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url, "--group", "group1")
+
+    message_recorder.reset()
+    tsrc_cli.run_and_fail("log", "--from", "v0.1", "--groups", "group1", "group2")
