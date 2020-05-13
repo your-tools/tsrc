@@ -42,6 +42,10 @@ def get_workspace_with_repos(args: argparse.Namespace) -> tsrc.Workspace:
     manifest = workspace.get_manifest()
     config = workspace.config
     workspace.repos = resolve_repos(manifest, args=args, workspace_config=config)
+    if args.all_repos:
+        workspace.repos = [
+            x for x in workspace.repos if (workspace.root_path / x.src).exists()
+        ]
     return workspace
 
 
