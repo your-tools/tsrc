@@ -12,22 +12,22 @@ import pytest
 def test_load() -> None:
     contents = """
 repos:
-  - src: foo
+  - dest: foo
     url: git@example.com:foo.git
     branch: next
 
-  - src: bar
+  - dest: bar
     url: git@example.com:bar.git
     branch: master
     sha1: ad2b68539c78e749a372414165acdf2a1bb68203
 
-  - src: master
+  - dest: master
     url: git@example.com:master.git
     tag: v0.1
     copy:
-      - src: top.cmake
+      - file: top.cmake
         dest: CMakeLists.txt
-      - src: .clang-format
+      - file: .clang-format
 """
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
@@ -35,21 +35,21 @@ repos:
     assert manifest.get_repos() == [
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:foo.git")],
-            src="foo",
+            dest="foo",
             branch="next",
             sha1=None,
             tag=None,
         ),
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:bar.git")],
-            src="bar",
+            dest="bar",
             branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
             tag=None,
         ),
         tsrc.Repo(
             remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:master.git")],
-            src="master",
+            dest="master",
             branch="master",
             sha1=None,
             tag="v0.1",
@@ -64,18 +64,18 @@ repos:
 def test_get_repo() -> None:
     contents = """
 repos:
-  - src: foo
+  - dest: foo
     url: git@example.com:proj_one/foo
 
-  - src: bar
+  - dest: bar
     url: git@example.com:proj_two/bar
 """
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.apply_config(parsed)
 
-    def assert_clone_url(src: str, url: str) -> None:
-        repo = manifest.get_repo(src)
+    def assert_clone_url(dest: str, url: str) -> None:
+        repo = manifest.get_repo(dest)
         assert repo.clone_url == url
 
     assert_clone_url("foo", "git@example.com:proj_one/foo")
@@ -88,7 +88,7 @@ repos:
 def test_remotes() -> None:
     contents = """
 repos:
-  - src: foo
+  - dest: foo
     url: git@example.com/foo
     remotes:
       - name: upstream
@@ -104,7 +104,7 @@ repos:
 def test_no_url_and_no_remote(tmp_path: Path) -> None:
     contents = """
 repos:
-  - src: foo
+  - dest: foo
     remotes: []
 """
     manifest_path = tmp_path / "manifest.yml"
@@ -135,10 +135,10 @@ def test_validates(tmp_path: Path) -> None:
         tmp_path,
         """
         repos:
-          - src: bar
+          - dest: bar
             url: baz
             copy:
-              - src: foo
+              - file: foo
                 dest: bar
         """,
     )
@@ -149,7 +149,7 @@ def test_allow_url(tmp_path: Path) -> None:
         tmp_path,
         """
           repos:
-            - { src: bar, url: git@example.com/bar }
+            - { dest: bar, url: git@example.com/bar }
          """,
     )
 
@@ -159,7 +159,7 @@ def test_allow_several_remotes(tmp_path: Path) -> None:
         tmp_path,
         """
           repos:
-            - { src: bar, url: git@example.com/bar }
+            - { dest: bar, url: git@example.com/bar }
           """,
     )
 
@@ -169,7 +169,7 @@ def test_disallow_url_and_remotes(tmp_path: Path) -> None:
         tmp_path,
         """
         repos:
-          - src: bar
+          - dest: bar
             url: git@example.com/bar
             remotes:
             - { name: upstream, url: git@upstream.com/bar }
@@ -190,7 +190,7 @@ class ReposGetter:
         manifest_path = self.tmp_path / "manifest.yml"
         manifest_path.write_text(self.contents)
         manifest = tsrc.manifest.load(manifest_path)
-        return [repo.src for repo in manifest.get_repos(groups=groups, all_=all_)]
+        return [repo.dest for repo in manifest.get_repos(groups=groups, all_=all_)]
 
 
 @pytest.fixture
@@ -201,9 +201,9 @@ def repos_getter(tmp_path: Path) -> ReposGetter:
 def test_default_group(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
-  - { src: one, url: one.com }
-  - { src: two, url: two.com }
-  - { src: three, url: three.com }
+  - { dest: one, url: one.com }
+  - { dest: two, url: two.com }
+  - { dest: three, url: three.com }
 
 groups:
   default:
@@ -216,9 +216,9 @@ groups:
 def test_specific_group(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
-  - { src: any, url: any.com }
-  - { src: linux1, url: linux1.com }
-  - { src: linux2, url: linux2.com }
+  - { dest: any, url: any.com }
+  - { dest: linux1, url: linux1.com }
+  - { dest: linux2, url: linux2.com }
 
 groups:
   default:
@@ -237,9 +237,9 @@ groups:
 def test_inclusion(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
-  - { src: a, url: a.com }
-  - { src: b, url: b.com }
-  - { src: c, url: c.com }
+  - { dest: a, url: a.com }
+  - { dest: b, url: b.com }
+  - { dest: c, url: c.com }
 
 groups:
   a_group:
@@ -258,8 +258,8 @@ groups:
 def test_all_repos(repos_getter: ReposGetter) -> None:
     contents = """
 repos:
-  - { src: one, url: one.com }
-  - { src: two, url: two.com }
+  - { dest: one, url: one.com }
+  - { dest: two, url: two.com }
 
 groups:
   default:

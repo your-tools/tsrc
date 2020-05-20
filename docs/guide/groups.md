@@ -8,9 +8,9 @@ example.
 
 ```yaml
 repos:
-  - { src: one, url: git@gitlab.local:acme/one }
-  - { src: two, url: git@gitlab.local:acme/two }
-  - { src: three, url: git@gitlab.local:acme/three }
+  - {url: git@gitlab.local:acme/one,   dest: one}
+  - {url: git@gitlab.local:acme/two,   dest: two}
+  - {url: git@gitlab.local:acme/three, dest: three}
 
 groups:
   default:

@@ -12,7 +12,11 @@ import tsrc.executor
 
 class Cloner(tsrc.executor.Task[tsrc.Repo]):
     def __init__(
-        self, workspace_path: Path, *, shallow: bool = False, remote_name: Optional[str] = None
+        self,
+        workspace_path: Path,
+        *,
+        shallow: bool = False,
+        remote_name: Optional[str] = None
     ) -> None:
         self.workspace_path = workspace_path
         self.shallow = shallow
@@ -25,7 +29,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         ui.error("Failed to clone missing repos")
 
     def display_item(self, repo: tsrc.Repo) -> str:
-        return repo.src
+        return repo.dest
 
     def check_shallow_with_sha1(self, repo: tsrc.Repo) -> None:
         if not repo.sha1:
@@ -44,13 +48,13 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
                 if remote.name == self.remote_name:
                     return remote
             message = "Remote {name} not found for repository {source}!"
-            message.format(name=self.remote_name, source=repo.src)
+            message.format(name=self.remote_name, source=repo.dest)
             raise tsrc.Error(message)
 
         return repo.remotes[0]
 
     def clone_repo(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace_path / repo.src
+        repo_path = self.workspace_path / repo.dest
         parent, name = repo_path.splitpath()
         parent.makedirs_p()
         remote = self._choose_remote(repo)
@@ -73,17 +77,17 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             raise tsrc.Error("Cloning failed")
 
     def reset_repo(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace_path / repo.src
+        repo_path = self.workspace_path / repo.dest
         ref = repo.sha1
         if ref:
-            ui.info_2("Resetting", repo.src, "to", ref)
+            ui.info_2("Resetting", repo.dest, "to", ref)
             try:
                 tsrc.git.run(repo_path, "reset", "--hard", ref)
             except tsrc.Error:
                 raise tsrc.Error("Resetting to", ref, "failed")
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
-        ui.info_count(index, count, repo.src)
+        ui.info_count(index, count, repo.dest)
         self.check_shallow_with_sha1(repo)
         self.clone_repo(repo)
         self.reset_repo(repo)

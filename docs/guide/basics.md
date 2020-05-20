@@ -6,11 +6,11 @@ It is a YAML file that looks like this:
 
 ```yaml
 repos:
-  - src: foo
-    url: git@gitlab.local:acme/foo
+  - url: git@gitlab.local:acme/foo
+    dest: foo
 
-  - src: bar
-    url: git@gitlab.local:acme/bar
+  - url: git@gitlab.local:acme/bar
+    dest: bar
 ```
 
 !!! note

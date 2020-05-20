@@ -10,8 +10,8 @@ import tsrc
 
 
 class RepoNotFound(tsrc.Error):
-    def __init__(self, src: str) -> None:
-        super().__init__("No repo found in '%s'" % src)
+    def __init__(self, dest: str) -> None:
+        super().__init__("No repo found in '%s'" % dest)
 
 
 class Manifest:
@@ -34,7 +34,7 @@ class Manifest:
         self._handle_groups(groups_config)
 
     def _handle_repo(self, repo_config: Any) -> None:
-        src = repo_config["src"]
+        dest = repo_config["dest"]
         branch = repo_config.get("branch", "master")
         tag = repo_config.get("tag")
         sha1 = repo_config.get("sha1")
@@ -44,7 +44,7 @@ class Manifest:
             remotes = [origin]
         else:
             remotes = self._handle_remotes(repo_config)
-        repo = tsrc.Repo(src=src, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
+        repo = tsrc.Repo(dest=dest, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
         self._repos.append(repo)
 
     def _handle_remotes(self, repo_config: Any) -> List[tsrc.Remote]:
@@ -63,13 +63,13 @@ class Manifest:
             return
         to_cp = repo_config["copy"]
         for item in to_cp:
-            src = item["src"]
+            src = item["file"]
             dest = item.get("dest", src)
-            copy = tsrc.Copy(repo_config["src"], src, dest)
+            copy = tsrc.Copy(repo_config["dest"], src, dest)
             self.copyfiles.append(copy)
 
     def _handle_groups(self, groups_config: Any) -> None:
-        elements = {repo.src for repo in self._repos}
+        elements = {repo.dest for repo in self._repos}
         self.group_list = tsrc.GroupList(elements=elements)
         if not groups_config:
             return
@@ -100,23 +100,23 @@ class Manifest:
         assert self.group_list
         elements = self.group_list.get_elements(groups=groups)
         res = []
-        for src in elements:
-            res.append(self.get_repo(src))
-        return sorted(res, key=operator.attrgetter("src"))
+        for dest in elements:
+            res.append(self.get_repo(dest))
+        return sorted(res, key=operator.attrgetter("dest"))
 
-    def get_repo(self, src: str) -> tsrc.Repo:
+    def get_repo(self, dest: str) -> tsrc.Repo:
         for repo in self._repos:
-            if repo.src == src:
+            if repo.dest == dest:
                 return repo
-        raise RepoNotFound(src)
+        raise RepoNotFound(dest)
 
 
 def validate_repo(data: Any) -> None:
-    copy_schema = {"src": str, schema.Optional("dest"): str}
+    copy_schema = {"file": str, schema.Optional("dest"): str}
     remote_schema = {"name": str, "url": str}
     repo_schema = schema.Schema(
         {
-            "src": str,
+            "dest": str,
             schema.Optional("branch"): str,
             schema.Optional("copy"): [copy_schema],
             schema.Optional("sha1"): str,

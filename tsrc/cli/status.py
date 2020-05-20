@@ -117,14 +117,14 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
         self.num_repos = 0
 
     def display_item(self, repo: tsrc.Repo) -> str:
-        return repo.src
+        return repo.dest
 
     def process(self, index: int, total: int, repo: tsrc.Repo) -> None:
-        ui.info_count(index, total, repo.src, end="\r")
-        full_path = self.workspace.root_path / repo.src
+        ui.info_count(index, total, repo.dest, end="\r")
+        full_path = self.workspace.root_path / repo.dest
 
         if not full_path.exists():
-            self.statuses[repo.src] = tsrc.errors.MissingRepo(repo.src)
+            self.statuses[repo.dest] = tsrc.errors.MissingRepo(repo.dest)
             return
 
         try:
@@ -132,9 +132,9 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
             manifest_status = ManifestStatus(repo, manifest=self.manifest)
             manifest_status.update(git_status)
             status = Status(git=git_status, manifest=manifest_status)
-            self.statuses[repo.src] = status
+            self.statuses[repo.dest] = status
         except Exception as e:
-            self.statuses[repo.src] = e
+            self.statuses[repo.dest] = e
         erase_last_line()
 
     def on_start(self, num_items: int) -> None:
@@ -147,9 +147,9 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
             ui.info_2("Workspace is empty")
             return
         ui.info_2("Workspace status:")
-        max_src = max(len(x) for x in self.statuses.keys())
-        for src, status in self.statuses.items():
-            message = [ui.green, "*", ui.reset, src.ljust(max_src)]
+        max_dest = max(len(x) for x in self.statuses.keys())
+        for dest, status in self.statuses.items():
+            message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
             message += describe_status(status)
             ui.info(*message)
 

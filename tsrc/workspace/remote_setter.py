@@ -17,13 +17,13 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         ui.error("Failed to configure remotes")
 
     def display_item(self, repo: tsrc.Repo) -> str:
-        return repo.src
+        return repo.dest
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
         try:
             self.try_process_repo(repo)
         except Exception:
-            raise tsrc.Error(repo.src, ":", "Failed to configure remotes")
+            raise tsrc.Error(repo.dest, ":", "Failed to configure remotes")
 
     def try_process_repo(self, repo: tsrc.Repo) -> None:
         for remote in repo.remotes:
@@ -35,7 +35,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
                 self.add_remote(repo, remote)
 
     def get_remote(self, repo: tsrc.Repo, name: str) -> Optional[tsrc.Remote]:
-        full_path = self.workspace_path / repo.src
+        full_path = self.workspace_path / repo.dest
         rc, url = tsrc.git.run_captured(
             full_path, "remote", "get-url", name, check=False
         )
@@ -45,18 +45,18 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
             return tsrc.Remote(name=name, url=url)
 
     def set_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
-        full_path = self.workspace_path / repo.src
+        full_path = self.workspace_path / repo.dest
         # fmt: off
-        ui.info_3(repo.src + ":", "Update remote", ui.reset,
+        ui.info_3(repo.dest + ":", "Update remote", ui.reset,
                   ui.bold, remote.name, ui.reset,
                   "to new url:", ui.bold, remote.url)
         # fmt: on
         tsrc.git.run(full_path, "remote", "set-url", remote.name, remote.url)
 
     def add_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
-        full_path = self.workspace_path / repo.src
+        full_path = self.workspace_path / repo.dest
         # fmt: off
-        ui.info_3(repo.src + ":", "Add remote",
+        ui.info_3(repo.dest + ":", "Add remote",
                   ui.bold, remote.name, ui.reset,
                   ui.brown, "(%s)" % remote.url)
         # fmt: on

@@ -25,8 +25,8 @@ def main(args: argparse.Namespace) -> None:
         if rc != 0:
             all_ok = False
         if out:
-            ui.info(ui.bold, repo.src)
-            ui.info(ui.bold, "-" * len(repo.src))
+            ui.info(ui.bold, repo.dest)
+            ui.info(ui.bold, "-" * len(repo.dest))
             ui.info(out)
     if not all_ok:
         raise tsrc.Error()
