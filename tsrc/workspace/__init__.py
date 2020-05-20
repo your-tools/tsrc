@@ -68,7 +68,7 @@ class Workspace:
     def clone_missing(self) -> None:
         to_clone = []
         for repo in self.get_repos():
-            repo_path = self.root_path / repo.src
+            repo_path = self.root_path / repo.dest
             if not repo_path.exists():
                 to_clone.append(repo)
         cloner = Cloner(
@@ -102,7 +102,7 @@ class Workspace:
     def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
         """ Yield (index, repo, full_path) for all the repos """
         for i, repo in enumerate(self.get_repos()):
-            full_path = self.root_path / repo.src
+            full_path = self.root_path / repo.dest
             yield (i, repo, full_path)
 
 

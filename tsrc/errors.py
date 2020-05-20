@@ -37,5 +37,5 @@ class InvalidConfig(Error):
 
 
 class MissingRepo(Error):
-    def __init__(self, src: str):
-        super().__init__("No repo found in %s. Please run `tsrc sync`" % src)
+    def __init__(self, dest: str):
+        super().__init__("No repo found in %s. Please run `tsrc sync`" % dest)

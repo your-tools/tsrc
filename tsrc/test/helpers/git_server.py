@@ -94,12 +94,12 @@ class ManifestHandler:
             "manifest.yml", contents=to_write, message=message, branch=self.branch
         )
 
-    def add_repo(self, src: str, url: str, branch: str = "master") -> None:
-        repo_config = {"url": str(url), "src": src}
+    def add_repo(self, dest: str, url: str, branch: str = "master") -> None:
+        repo_config = {"url": str(url), "dest": dest}
         if branch != "master":
             repo_config["branch"] = branch
         self.data["repos"].append(repo_config)
-        self.write_changes(message="add %s" % src)
+        self.write_changes(message="add %s" % dest)
 
     def configure_group(self, name: str, repos: List[str]) -> None:
         groups = self.data.get("groups")
@@ -110,44 +110,44 @@ class ManifestHandler:
         groups[name]["repos"] = repos
         self.write_changes(message="add %s group" % name)
 
-    def get_repo(self, src: str) -> RepoConfig:
+    def get_repo(self, dest: str) -> RepoConfig:
         for repo in self.data["repos"]:
-            if repo["src"] == src:
+            if repo["dest"] == dest:
                 return cast(RepoConfig, repo)
-        assert False, "repo '%s' not found in manifest" % src
+        assert False, "repo '%s' not found in manifest" % dest
 
-    def configure_repo(self, src: str, key: str, value: Any) -> None:
-        repo = self.get_repo(src)
+    def configure_repo(self, dest: str, key: str, value: Any) -> None:
+        repo = self.get_repo(dest)
         repo[key] = value
-        message = "Change %s %s: %s" % (src, key, value)
+        message = "Change %s %s: %s" % (dest, key, value)
         self.write_changes(message)
 
-    def set_repo_url(self, src: str, url: str) -> None:
-        self.configure_repo(src, "url", url)
+    def set_repo_url(self, dest: str, url: str) -> None:
+        self.configure_repo(dest, "url", url)
 
-    def set_repo_branch(self, src: str, branch: str) -> None:
-        self.configure_repo(src, "branch", branch)
+    def set_repo_branch(self, dest: str, branch: str) -> None:
+        self.configure_repo(dest, "branch", branch)
 
-    def set_repo_sha1(self, src: str, ref: str) -> None:
-        self.configure_repo(src, "sha1", ref)
+    def set_repo_sha1(self, dest: str, ref: str) -> None:
+        self.configure_repo(dest, "sha1", ref)
 
-    def set_repo_tag(self, src: str, tag: str) -> None:
-        self.configure_repo(src, "tag", tag)
+    def set_repo_tag(self, dest: str, tag: str) -> None:
+        self.configure_repo(dest, "tag", tag)
 
-    def set_repo_file_copies(self, src: str, copies: List[CopyConfig]) -> None:
+    def set_repo_file_copies(self, dest: str, copies: List[CopyConfig]) -> None:
         copy_dicts = []
         for copy_src, copy_dest in copies:
-            copy_dicts.append({"src": copy_src, "dest": copy_dest})
-        self.configure_repo(src, "copy", copy_dicts)
+            copy_dicts.append({"file": copy_src, "dest": copy_dest})
+        self.configure_repo(dest, "copy", copy_dicts)
 
-    def set_repo_remotes(self, src: str, remotes: List[RemoteConfig]) -> None:
+    def set_repo_remotes(self, dest: str, remotes: List[RemoteConfig]) -> None:
         remote_dicts = []
         for name, url in remotes:
             remote_dicts.append({"name": name, "url": url})
-        repo = self.get_repo(src)
+        repo = self.get_repo(dest)
         repo["remotes"] = remote_dicts
         del repo["url"]
-        message = "%s: remotes: %s" % (src, remote_dicts)
+        message = "%s: remotes: %s" % (dest, remote_dicts)
         self.write_changes(message)
 
 

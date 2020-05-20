@@ -14,14 +14,18 @@ class BadBranches(tsrc.Error):
 
 @attr.s(frozen=True)
 class RepoAtIncorrectBranchDescription:
-    src = attr.ib()  # type: str
+    dest = attr.ib()  # type: str
     actual = attr.ib()  # type: str
     expected = attr.ib()  # type: str
 
 
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def __init__(
-        self, workspace_path: Path, *, force: bool = False, remote_name: Optional[str] = None
+        self,
+        workspace_path: Path,
+        *,
+        force: bool = False,
+        remote_name: Optional[str] = None
     ) -> None:
         self.workspace_path = workspace_path
         self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
@@ -35,11 +39,11 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         ui.error("Failed to synchronize workspace")
 
     def display_item(self, repo: tsrc.Repo) -> str:
-        return repo.src
+        return repo.dest
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
-        ui.info_count(index, count, repo.src)
-        repo_path = self.workspace_path / repo.src
+        ui.info_count(index, count, repo.dest)
+        repo_path = self.workspace_path / repo.dest
         self.fetch(repo)
         ref = None
 
@@ -64,7 +68,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         if current_branch and current_branch != repo.branch:
             self.bad_branches.append(
                 RepoAtIncorrectBranchDescription(
-                    src=repo.src, actual=current_branch, expected=repo.branch
+                    dest=repo.dest, actual=current_branch, expected=repo.branch
                 )
             )
 
@@ -74,13 +78,13 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
                 if remote.name == self.remote_name:
                     return [remote]
             message = "Remote {name} not found for repository {source}!"
-            message.format(name=self.remote_name, source=repo.src)
+            message.format(name=self.remote_name, source=repo.dest)
             raise tsrc.Error(message)
 
         return repo.remotes
 
     def fetch(self, repo: tsrc.Repo) -> None:
-        repo_path = self.workspace_path / repo.src
+        repo_path = self.workspace_path / repo.dest
         for remote in self._pick_remotes(repo):
             try:
                 ui.info_2("Fetching", remote.name)
@@ -116,7 +120,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         ui.error("Some projects were not on the correct branch")
         headers = ("project", "actual", "expected")
         data = [
-            ((ui.bold, x.src), (ui.red, x.actual), (ui.green, x.expected))
+            ((ui.bold, x.dest), (ui.red, x.actual), (ui.green, x.expected))
             for x in self.bad_branches
         ]
         ui.info_table(data, headers=headers)

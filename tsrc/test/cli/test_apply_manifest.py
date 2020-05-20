@@ -33,11 +33,11 @@ def test_apply_manifest_adds_new_repo(
     assert (workspace_path / "bar").exists(), "bar repo should have been cloned"
 
 
-def add_repo_to_manifest(manifest_path: Path, src: str, url: str) -> None:
+def add_repo_to_manifest(manifest_path: Path, dest: str, url: str) -> None:
     yaml = ruamel.yaml.YAML()
     data = yaml.load(manifest_path.read_text())
     repos = data["repos"]
-    to_add = {"src": src, "url": url}
+    to_add = {"dest": dest, "url": url}
     repos.append(to_add)
     with manifest_path.open("w") as fileobj:
         yaml.dump(data, fileobj)

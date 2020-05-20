@@ -54,11 +54,11 @@ Usage Example
 .. code-block:: yaml
 
     repos:
-      - src: foo
-        url: git@example.com/foo.git
+      - url: git@example.com/foo.git
+        dest: foo
 
-      - src: bar
-        url: git@example.com/bar.git
+     -  url: git@example.com/bar.git
+        dest: bar
 
 
 * Create a new workspace with all the repositories listed in the manifest:

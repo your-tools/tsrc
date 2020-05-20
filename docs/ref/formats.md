@@ -14,11 +14,11 @@ The manifest is always parsed as a dictionary.
 
 Each repository is also a dictionary, containing:
 
-* `src` (required): relative path of the repository in the workspace
 * Either:
     * `url` if you just need one remote named `origin`
     * A list of remotes with a `name` and `url`. In that case, the first remote
       will be used for cloning the repository.
+* `dest` (required): relative path of the repository in the workspace
 * `branch` (optional): The branch to use when cloning the repository (defaults
   to `master`)
 * `tag` (optional):
@@ -29,32 +29,32 @@ Each repository is also a dictionary, containing:
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
         to the given sha1, else a warning message will be printed.
-* `copy` (optional): A list of dictionaries with `src` and `dest` key.
+* `copy` (optional): A list of dictionaries with `file` and `dest` keys.
 
 Here's a full example:
 
 ```yaml
 repos:
-  - src: foo
-    url: git@gitlab.local:proj1/foo
+  - url: git@gitlab.local:proj1/foo
+    dest: foo
     branch: next
 
-  - src: bar
-    remotes:
+  - remotes:
       - name: origin
         url: git@gitlab.local:proj1/bar
       - name: upstream
         url: git@github.com:user/bar
+    dest: bar
     branch: master
     sha1: ad2b68539c78e749a372414165acdf2a1bb68203
 
-  - src: app
-    url: git@gitlab.local:proj1/app
+  - url: git@gitlab.local:proj1/app
+    dest: app
     tag: v0.1
     copy:
-      - src: top.cmake
+      - file: top.cmake
         dest: CMakeLists.txt
-      - src: .clang-format
+      - file: .clangformat
 ```
 
 In this example:
@@ -83,13 +83,13 @@ Example:
 
 ```yaml
 repos:
-  - src: a
+  - dest: a
     url: ..
-  - src: b
+  - dest: b
     url: ..
-  - src: bar
+  - dest: bar
     url: ..
-  - src: baz
+  - dest: baz
     url: ..
 
 groups:

@@ -19,7 +19,7 @@ class Copy:
 
 @attr.s(frozen=True)
 class Repo:
-    src = attr.ib()  # type: str
+    dest = attr.ib()  # type: str
     remotes = attr.ib()  # type: List[Remote]
     branch = attr.ib(default="master")  # type: str
     sha1 = attr.ib(default=None)  # type: Optional[str]
