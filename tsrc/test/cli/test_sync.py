@@ -327,3 +327,27 @@ def test_fetch_additional_remotes(
     second_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
 
     assert first_sha1 != second_sha1, "remote 'other' was not fetched"
+
+
+def test_sync_with_singular_remote(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    foo_url = git_server.add_repo("foo")
+    bar_url = git_server.add_repo("bar")
+
+    git_server.manifest.set_repo_remotes(
+        "foo", [("origin", foo_url), ("upstream", bar_url)]
+    )
+
+    # only use "origin" remote
+    tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
+    foo_path = workspace_path / "foo"
+
+    first_sha1 = tsrc.git.get_sha1(foo_path)
+    git_server.push_file("bar", "new.txt")
+
+    tsrc_cli.run("sync")
+    second_sha1 = tsrc.git.get_sha1(foo_path)
+
+    # the hash must remain unchanged, even though we pushed to bar and sync'd foo
+    assert first_sha1 == second_sha1, "remote 'upstream' was erroneously fetched"
