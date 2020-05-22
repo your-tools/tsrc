@@ -71,12 +71,17 @@ class Workspace:
             repo_path = self.root_path / repo.src
             if not repo_path.exists():
                 to_clone.append(repo)
-        cloner = Cloner(self.root_path, shallow=self.config.shallow_clones)
+        cloner = Cloner(
+            self.root_path,
+            shallow=self.config.shallow_clones,
+            remote_name=self.config.singular_remote,
+        )
         tsrc.executor.run_sequence(to_clone, cloner)
 
     def set_remotes(self) -> None:
-        remote_setter = RemoteSetter(self.root_path)
-        tsrc.executor.run_sequence(self.get_repos(), remote_setter)
+        if not self.config.singular_remote:
+            remote_setter = RemoteSetter(self.root_path)
+            tsrc.executor.run_sequence(self.get_repos(), remote_setter)
 
     def copy_files(self) -> None:
         repos = self.get_repos()
@@ -86,7 +91,9 @@ class Workspace:
         tsrc.executor.run_sequence(copyfiles, file_copier)
 
     def sync(self, *, force: bool = False) -> None:
-        syncer = Syncer(self.root_path, force=force)
+        syncer = Syncer(
+            self.root_path, force=force, remote_name=self.config.singular_remote
+        )
         try:
             tsrc.executor.run_sequence(self.get_repos(), syncer)
         finally:
