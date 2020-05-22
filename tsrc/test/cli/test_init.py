@@ -265,3 +265,25 @@ def test_several_remotes(
     )
     assert rc == 0, output
     assert output == "git@upstream.com"
+
+
+def test_singular_remote(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    foo_url = git_server.add_repo("foo")
+    # fmt: off
+    git_server.manifest.set_repo_remotes(
+        "foo",
+        [("origin", foo_url),
+         ("vpn", "foocrop.vpn/foo")])
+    # fmt: on
+
+    # only use "origin" remote
+    tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
+
+    foo_path = workspace_path / "foo"
+    _, output = tsrc.git.run_captured(
+        foo_path, "remote", "show", check=True
+    )
+
+    assert output == "origin"
