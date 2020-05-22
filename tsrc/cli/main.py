@@ -156,6 +156,12 @@ def main_impl(args: ArgsList = None) -> None:
     init_parser.add_argument(
         "-s", "--shallow", action="store_true", dest="shallow", default=False
     )
+    init_parser.add_argument(
+        "-r",
+        "--remote",
+        dest="remote",
+        help="Use only the remote with this name to clone repositories",
+    )
     init_parser.set_defaults(branch="master")
 
     log_parser = add_workspace_subparser(subparsers, "log")
