@@ -1,4 +1,4 @@
-from typing import List, Tuple  # noqa
+from typing import List, Optional, Tuple  # noqa
 import attr
 from path import Path
 import cli_ui as ui
@@ -20,10 +20,13 @@ class RepoAtIncorrectBranchDescription:
 
 
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace_path: Path, *, force: bool = False) -> None:
+    def __init__(
+        self, workspace_path: Path, *, force: bool = False, remote_name: Optional[str] = None
+    ) -> None:
         self.workspace_path = workspace_path
         self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
         self.force = force
+        self.remote_name = remote_name
 
     def on_start(self, *, num_items: int) -> None:
         ui.info_1("Synchronizing workspace")
@@ -65,9 +68,20 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
                 )
             )
 
+    def _pick_remotes(self, repo: tsrc.Repo) -> List[tsrc.Remote]:
+        if self.remote_name:
+            for remote in repo.remotes:
+                if remote.name == self.remote_name:
+                    return [remote]
+            message = "Remote {name} not found for repository {source}!"
+            message.format(name=self.remote_name, source=repo.src)
+            raise tsrc.Error(message)
+
+        return repo.remotes
+
     def fetch(self, repo: tsrc.Repo) -> None:
         repo_path = self.workspace_path / repo.src
-        for remote in repo.remotes:
+        for remote in self._pick_remotes(repo):
             try:
                 ui.info_2("Fetching", remote.name)
                 cmd = ["fetch", "--tags", "--prune", remote.name]
