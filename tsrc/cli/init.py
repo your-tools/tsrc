@@ -26,6 +26,7 @@ def main(args: argparse.Namespace) -> None:
         clone_all_repos=args.clone_all_repos,
         repo_groups=args.groups,
         shallow_clones=args.shallow,
+        singular_remote=args.remote,
     )
 
     workspace_config.save_to_file(cfg_path)

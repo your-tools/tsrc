@@ -15,6 +15,8 @@ class WorkspaceConfig:
     shallow_clones = attr.ib(default=False)  # type: bool
     clone_all_repos = attr.ib(default=False)  # type: bool
 
+    singular_remote = attr.ib(default=None)  # type: Optional[str]
+
     @manifest_url.validator
     def check(self, attribute: str, value: Optional[str] = None) -> None:
         if value is None:
