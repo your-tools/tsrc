@@ -37,7 +37,7 @@ just at the top.
 ## Usage
 
 
-tsrc init MANIFEST_URL [--group GROUP1, GROUP2]
+tsrc init MANIFEST_URL [--group GROUP1, GROUP2] [--remote REMOTE]
 :   Initializes a new workspace.
 
     MANIFEST_URL should be a git URL containing a valid
@@ -50,6 +50,11 @@ tsrc init MANIFEST_URL [--group GROUP1, GROUP2]
 
     If you want to add or remove a group in your workspace, you can
     edit the configuration file in `<workspace>/.tsrc/config.yml`
+
+    The `-r,--remote` option can be used to set a fix remote to use when cloning
+    and syncing the repositories. If this flag is set, the remote from the manifest
+    with the given name will be used for all repos. It is an error if a repo
+    does not have this remote specified.
 
 
 tsrc foreach -- command --opt1 arg1
