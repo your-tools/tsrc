@@ -2,6 +2,8 @@
 
 * Drop Python 3.5 support
 * Fix #217: Preserves file attributes during the `copy` statements in `repos`
+* `tsrc init` learned a `-r, --remote` option that pins the remote with the given name as the only remote to be used for cloning and syncing.
+  `tsrc` expects this remote to be present in the manifest for all repositories.
 
 # v2.0.0 - (2020-04-06)
 
