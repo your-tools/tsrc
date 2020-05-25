@@ -1,9 +1,72 @@
-# Next release
+# 2.1.0
 
-* Drop Python 3.5 support
-* Fix #217: Preserves file attributes during the `copy` statements in `repos`
-* `tsrc init` learned a `-r, --remote` option that pins the remote with the given name as the only remote to be used for cloning and syncing.
-  `tsrc` expects this remote to be present in the manifest for all repositories.
+## Breaking changes
+
+### Change in manifest syntax
+
+It was discovered that the manifest syntax was confusing for newcomers, so
+we decided to update it.
+
+In particular, the `src` key meant both a relative path in the workspace when
+used in the `repo` config, and a relative path in the a repository when
+using in the `repo.copy` config.
+
+Starting with this release, `repo.src` becomes `repo.dest` and `repo.copy.src` becomes
+`repo.copy.file`.
+
+```yaml
+# Before (tsrc < 2.1.0)
+repos:
+  url: "https://acme.corp/foo"
+  src: foo
+  copy:
+     src: some-file
+     dest: some-file
+```
+
+```yaml
+# After (tsrc >= 2.1.0)
+repos:
+  url: "https://acme.corp/foo"
+  dest : foo
+  copy:
+     file: some-file
+     dest: some-file
+```
+
+This should make it clearer what `tsrc` does because:
+
+* `dest` now always refers to a relative path in the workspace (both in `repo`
+and `copy`).
+* By using `repo.copy.file` it's obvious that `tsrc` only supports copying
+  files, not directories.
+
+### Supported Python versions
+
+Drop support for Python 3.5
+
+
+## New features
+
+*  `tsrc init` learned a `-r, --remote` option that pins the remote with the
+   given name as the only remote to be used for cloning and syncing.
+   `tsrc` expects this remote to be present in the manifest for all repositories.
+   This is useful if you use the same workspace in different physical locations,
+   and one of the remotes is behind a VPN for instance. Patch by @tronje.
+
+## Bug fixes
+
+* Fix [#217](https://github.com/TankerHQ/tsrc/issues/217): Preserves file attributes during the `copy` statements in `repos`
+
+## Other
+
+* The whole test suite now runs without errors on Windows - and Windows support is
+  now part of the GitHub actions checks.
+* The tests now run faster and with more readable output (this was done by using `libgit2`
+  instead of running git commands in the tests helpers).
+* Add a scheduled GitHub action to run `safety`
+* Remove usage of deprecated API of the `path` library.
+* Run tests and linters for external pull requests too.
 
 # v2.0.0 - (2020-04-06)
 
