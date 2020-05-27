@@ -1,11 +1,3 @@
-# Why not Python2 support?
-
-We believe Python2 is an inferior language than Python3, and we use many
-Python3 features to make the code more readable and robust.
-
-Plus [Python2.7 supports ends in 2020](
-https://www.python.org/dev/peps/pep-0373/#id2).
-
 # Why not repo?
 
 We used [repo](https://android.googlesource.com/tools/repo/) for a while, but
@@ -15,9 +7,7 @@ On a less subjective level:
 
 * Good support for Windows (no need for Cygwin or anything like that)
 
-* **GitLab** support (automate working with merge requests)
-
-* Lastly, tsrc tries hard to never do any destructive operation or unexpected
+* Also, tsrc tries hard to never do any destructive operation or unexpected
   actions.
 
     For instance, `tsrc` never puts you in a "detached HEAD" state,
@@ -29,15 +19,13 @@ On a less subjective level:
 
 Also (and this matters a lot if you think about contribution):
 
+* Uses PEP8 coding style, enforced with `black`
 * Comprehensive test suite
-* Uses PEP8 coding style
-* Written in Python 3, not Python 2
+* Fully type-checked with `mypy`
 
-Here are a few features present in `repo` that are missing from `tsrc`
-(but may be implemented in the future)
-
-* Cloning several repositories in parallel
-* Support for other hosting services such as `gerrit` or `github`
+Note that there are a few features present in `repo` that are missing from `tsrc`
+(but may be implemented in the future). Feel free to open a feature request
+if needed!
 
 # Why not git-subrepo, mu-repo, or gr?
 
@@ -75,21 +63,23 @@ Or if you want to go back to the state of the '0.42' release, you will run:
 Note that since `tsrc 0.2` you can also freeze the commits of some of the
 repositories.
 
-Last but not least, with `tsrc` you do everything with `tsrc init` and `tsrc
-sync`, which is a simpler command line API than `git submodule`.
+Last but not least, with `tsrc` you do everything with commands like `tsrc
+init` and `tsrc sync`, or simple `yaml` files,  which is much easier than
+using the `git submodule` CLI.
 
 
-# Why not using libgit2 or similar?
+# Why not using pygit2 or similar instead of running git commands?
 
-`pygit2` now has pre-built wheels for Windows, but not for macOS and Linux.
+First off, we do use `pygit2`, but only for tests.
 
-We prefer to _not_ require compiling `libgit2`.
+Second, the `pygit2` package depends on a 3rd party C library (`libgit2`) -
+and that can cause problems in certain cases. If we can, we prefer
+using pure-Python libraries for the production code.
 
-Also, we prefer calling git "porcelain" commands, both for readability of the
-source code and ease of debugging.
+Finally, we prefer calling git "porcelain" commands, both for readability
+of the source code and ease of debugging (see below).
 
 # Why do you hide which git commands are run?
-
 
 It's mainly a matter of not cluttering the output.
 We take care of keeping the output of `tsrc` both concise, readable and
@@ -113,4 +103,13 @@ See [docopt v argparse](https://dmerej.info/blog/post/docopt-v-argparse/), and
 It's nice to read and write, and we use the excellent [ruamel.yaml](
 https://yaml.readthedocs.io/en/latest/) which even has round-trip support.
 
-Also, being Python fans, we don't mind the whitespace constraints :P
+Also, being Python fans, we don't mind that white space is part of the syntax.
+
+# Why do I have to create a separate git repo with just one file in it?
+
+See [#235](https://github.com/TankerHQ/tsrc/issues/235) for why you can't
+have multiple manifest files in the same repository.
+
+Also, note that you can put other files in the repo - for instance,
+add a CI script that verifies the yaml syntax and checks that all the repos
+in the manifest can be cloned.
