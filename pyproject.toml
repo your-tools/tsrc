@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tsrc"
-version = "2.0.0"
+version = "2.1.0"
 description = "Manage groups of git repositories"
 authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
 readme = "README.rst"
