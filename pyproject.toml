@@ -22,15 +22,14 @@ schema = "^0.7.1"
 tabulate = "^0.8.6"
 unidecode = "^1.1.1"
 
-
 [tool.poetry.dev-dependencies]
-
 # Tests
 codecov = "^2.0.15"
 coverage = "^5.1"
 pytest = "^5.4.1"
 pytest-cov = "^2.8.1"
 pytest-xdist = "^1.32.0"
+pygit2 = "^1.2.0"  # for GitSever test helpers
 mock = "^3.0.5"
 
 # Linters
@@ -44,7 +43,6 @@ mkdocs = "1.0.4"
 
 # Deps scanning
 safety = "^1.9.0"
-pygit2 = "^1.2.0"
 
 [tool.poetry.scripts]
 tsrc = "tsrc.cli.main:main"
