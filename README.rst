@@ -22,7 +22,7 @@
      :target: https://github.com/TankerHQ/tsrc/actions
 
 tsrc: manage groups of git repositories
-========================================
+=======================================
 
 `Overview`_ · `Installation`_ · `Usage example`_ · `Documentation`_ · `Release notes`_ · `Contributing`_ · `License`_
 
@@ -33,6 +33,10 @@ tsrc is a command-line tool that helps you manage groups of several git reposito
 
 It can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
 
+Note
+-----
+
+`tsrc` does not adhere strictly to the `semver specification <https://semver.org/>`_. So before upgrading to a new version, please take the time to read the `Changelog <https://tankerhq.github.io/tsrc/changelog/>`_ first!
 
 Installation
 -------------
