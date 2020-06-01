@@ -110,13 +110,15 @@ if value == "option1" or value == "option2"
   ...
 ```
 
-# Doc strings and comments
+# Doc strings and comments in production code
 
 First off, bad comments are worse that no comments.
 
 Also note that you should use comments to explain **why**, never **what**. If the **what** is no clear, it means the behavior of the function or method cannot be easily understood by reading implementation, and so you should fix the implementation instead.
 
 In conclusion, use comments and doc strings sparingly: that way, they will not rot and they will stay useful.
+
+Note: this does not apply for tests (see below).
 
 # Collections
 
@@ -346,6 +348,27 @@ Do not use `print`, use [python-cli-ui functions](https://TankerHQ.github.io/pyt
 Also, using "high-level" methods such as `ui.info_1()` or `ui.warning()` will make it easier to have a consistent user interface.
 
 # Tests
+
+## Docstrings
+
+If you think the test implementation is complex, add a human-readable description
+of the test scenario in the doc string.
+
+For instance:
+
+```python
+def test_sync_with_errors(...):
+    """" Scenario:
+    * Create a manifest with two repos (foo and bar)
+    * Initialize a workspace from this manifest
+    * Push a new file to the foo repo
+    * Create a merge conflict in the foo repo
+    * Run `tsrc sync`
+    * Check that the command fails and produces the proper error message
+    """
+```
+
+## Assertion order
 
 When writing assertions, use the form `assert <actual> == <expected>`:
 
