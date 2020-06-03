@@ -37,7 +37,7 @@ class UnknownElement(GroupError):
     def __init__(self, group_name: str, element: T) -> None:
         self.group_name = group_name
         self.element = element
-        message = f"'{group_name}: unknown element: '{element}"
+        message = f"group '{group_name}': unknown element: '{element}'"
         super().__init__(message)
 
 

@@ -49,7 +49,7 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         # fmt: off
         ui.info_3(repo.dest + ":", "Update remote", ui.reset,
                   ui.bold, remote.name, ui.reset,
-                  "to new url:", ui.brown, "(", remote.url, ")")
+                  "to new url:", ui.brown, f"({remote.url})")
         # fmt: on
         tsrc.git.run(full_path, "remote", "set-url", remote.name, remote.url)
 
@@ -58,6 +58,6 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         # fmt: off
         ui.info_3(repo.dest + ":", "Add remote",
                   ui.bold, remote.name, ui.reset,
-                  ui.brown, "(", remote.url, ")")
+                  ui.brown, f"({remote.url})")
         # fmt: on
         tsrc.git.run(full_path, "remote", "add", remote.name, remote.url)
