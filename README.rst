@@ -1,4 +1,4 @@
-.. image::  https://raw.githubusercontent.com/TankerHQ/sdk-js/master/src/public/tanker.png
+.. image::  https://tanker.io/images/github-logo.png
    :target: #readme
 
 |
