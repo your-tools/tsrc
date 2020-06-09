@@ -25,6 +25,7 @@ class Manifest:
         # because we need to convert the plain old dicts into
         # higher-level classes.
         self.copyfiles = []  # type: List[tsrc.Copy]
+        self.symlinks = []  # type: List[tsrc.Link]
         repos_config = config["repos"]
         for repo_config in repos_config:
             self._handle_repo(repo_config)
@@ -63,10 +64,16 @@ class Manifest:
             return
         to_cp = repo_config["copy"]
         for item in to_cp:
-            src = item["file"]
-            dest = item.get("dest", src)
-            copy = tsrc.Copy(repo_config["dest"], src, dest)
-            self.copyfiles.append(copy)
+            if "file" in item:
+                src = item["file"]
+                dest = item.get("dest", src)
+                copy = tsrc.Copy(repo_config["dest"], src, dest)
+                self.copyfiles.append(copy)
+            elif "symlink" in item:
+                src = item["symlink"]
+                dest = item.get("dest", src)
+                link = tsrc.Link(src, dest)
+                self.symlinks.append(link)
 
     def _handle_groups(self, groups_config: Any) -> None:
         elements = {repo.dest for repo in self._repos}
@@ -112,7 +119,10 @@ class Manifest:
 
 
 def validate_repo(data: Any) -> None:
-    copy_schema = {"file": str, schema.Optional("dest"): str}
+    copy_schema = {
+        schema.Or("file", "symlink", only_one=True): str,
+        schema.Optional("dest"): str,
+    }
     remote_schema = {"name": str, "url": str}
     repo_schema = schema.Schema(
         {
