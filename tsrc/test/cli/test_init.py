@@ -100,7 +100,29 @@ def test_copy_files_source_does_not_exist(
     git_server.manifest.set_file_copy("top", "top.cmake", "CMakeLists.txt")
 
     tsrc_cli.run_and_fail("init", manifest_url)
-    assert message_recorder.find("Failed to perform the following copies")
+    assert message_recorder.find("Failed to perform")
+
+
+def test_create_symlink(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """ Scenario:
+    * Crate a manifest with a 'foo' repo
+    * Push 'foo.txt' to the 'foo' repo
+    * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
+    * Run `tsrc init`
+    * Check that a link exists in <workspace>/foo.link pointing to foo/foo.txt
+    """
+    manifest_url = git_server.manifest_url
+    git_server.add_repo("foo")
+    git_server.push_file("foo", "foo.txt")
+    git_server.manifest.set_symlink("foo", "foo.link", "foo/foo.txt")
+
+    tsrc_cli.run("init", manifest_url)
+
+    actual_link = workspace_path / "foo.link"
+    assert actual_link.exists()
+    assert actual_link.readlink() == "foo/foo.txt"
 
 
 def test_uses_correct_branch_for_repo(

@@ -142,6 +142,10 @@ class ManifestHandler:
         copies = [{"file": src, "dest": dest}]
         self.configure_repo(repo_name, "copy", copies)
 
+    def set_symlink(self, repo_name: str, source: str, target: str) -> None:
+        symlinks = [{"source": source, "target": target}]
+        self.configure_repo(repo_name, "symlink", symlinks)
+
     def set_repo_remotes(self, name: str, remotes: List[RemoteConfig]) -> None:
         remote_dicts = []
         for remote_name, remote_url in remotes:
