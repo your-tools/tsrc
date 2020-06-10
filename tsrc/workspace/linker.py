@@ -7,6 +7,7 @@ import tsrc
 import tsrc.executor
 import os
 
+
 class FileLinker(tsrc.executor.Task[tsrc.Link]):
     def __init__(self, workspace_path: Path, repos: List[tsrc.Repo]) -> None:
         self.workspace_path = workspace_path
