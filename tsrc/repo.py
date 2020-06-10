@@ -18,6 +18,19 @@ class Copy:
 
 
 @attr.s(frozen=True)
+class Link:
+    src = attr.ib()  # type: str
+    tgt = attr.ib()  # type: str
+
+
+@attr.s(frozen=True)
+class CopyDir:
+    repo = attr.ib()  # type: str
+    src = attr.ib()  # type: str
+    dest = attr.ib()  # type: str
+
+
+@attr.s(frozen=True)
 class Repo:
     dest = attr.ib()  # type: str
     remotes = attr.ib()  # type: List[Remote]

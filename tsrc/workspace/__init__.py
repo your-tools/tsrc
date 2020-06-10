@@ -13,6 +13,7 @@ import tsrc.git
 
 from .cloner import Cloner
 from .copier import FileCopier
+from .linker import FileLinker
 from .syncer import Syncer
 from .remote_setter import RemoteSetter
 from .local_manifest import LocalManifest
@@ -86,9 +87,12 @@ class Workspace:
     def copy_files(self) -> None:
         repos = self.get_repos()
         file_copier = FileCopier(self.root_path, repos)
+        file_linker = FileLinker(self.root_path, repos)
         manifest = self.local_manifest.get_manifest()
         copyfiles = manifest.copyfiles
         tsrc.executor.run_sequence(copyfiles, file_copier)
+        symlinks = manifest.symlinks
+        tsrc.executor.run_sequence(symlinks, file_linker)
 
     def sync(self, *, force: bool = False) -> None:
         syncer = Syncer(

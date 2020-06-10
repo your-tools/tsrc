@@ -24,12 +24,13 @@ Each repository is also a dictionary, containing:
 * `tag` (optional):
     * When running `tsrc init`: Project will be cloned at the provided tag.
     * When running `tsrc sync`:  If the project is clean, project will be reset
-        to the given tag, else a warning message will be printed.
+	to the given tag, else a warning message will be printed.
 * `sha1` (optional):
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
-        to the given sha1, else a warning message will be printed.
+	to the given sha1, else a warning message will be printed.
 * `copy` (optional): A list of dictionaries with `file` and `dest` keys.
+* `symlink` (optional): A list of dictionaries with `source` and `target` keys.
 
 Here's a full example:
 
@@ -41,9 +42,9 @@ repos:
 
   - remotes:
       - name: origin
-        url: git@gitlab.local:proj1/bar
+	url: git@gitlab.local:proj1/bar
       - name: upstream
-        url: git@github.com:user/bar
+	url: git@github.com:user/bar
     dest: bar
     branch: master
     sha1: ad2b68539c78e749a372414165acdf2a1bb68203
@@ -53,8 +54,11 @@ repos:
     tag: v0.1
     copy:
       - file: top.cmake
-        dest: CMakeLists.txt
+	dest: CMakeLists.txt
       - file: .clangformat
+    symlink:
+      - source: app/some_file
+	target: ../foo/some_file
 ```
 
 In this example:
@@ -63,10 +67,14 @@ In this example:
 * Then, `proj1/bar` will be cloned into `<workspace>/bar` using the `master` branch, and reset to `ad2b68539c78e749a372414165acdf2a1bb68203`.
 * Finally:
     * `proj1/app` will be cloned into `<workspace>/app` using the `v0.1` tag,
-    * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`, and
-    * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`.
+    * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`,
+    * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`, and
+    * a symlink is created from `<workspace>/app/some_file` to `<workspace>/foo/some_file`.
 
 Note that `copy` only works with files, not directories.
+
+The source and target paths for symbolic links are both relative to the top-level `<workspace>`.
+Multiple symlinks can be specified; each must specify a source and target.
 
 ## groups
 
