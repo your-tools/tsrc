@@ -20,18 +20,18 @@ class FileLinker(tsrc.executor.Task[tsrc.Link]):
         ui.error("Failed to create the following symlinks:")
 
     def display_item(self, item: tsrc.Link) -> str:
-        return f"{item.dest} linking to {item.src}"
+        return f"{item.src} linking to {item.tgt}"
 
     def process(self, index: int, count: int, item: tsrc.Link) -> None:
-        ui.info_count(index, count, "Linking", item.dest, "->", item.src)
+        ui.info_count(index, count, "Linking", item.src, "->", item.tgt)
         # Both paths are assumed to already be workspace-relative
         src_path = Path(item.src)
-        dest_path = Path(item.dest)
-        if dest_path.isabs():
-            ui.error("Absolute path specified as symlink dest:", dest_path)
+        tgt_path = Path(item.tgt)
+        if src_path.isabs():
+            ui.error("Absolute path specified as symlink name:", src_path)
             return
         try:
-            final_dest = self.workspace_path / item.dest
-            os.symlink(src_path, final_dest, src_path.isdir())
+            full_src = self.workspace_path / item.src
+            os.symlink(tgt_path, full_src, tgt_path.isdir())
         except Exception as e:
             raise tsrc.Error(str(e))

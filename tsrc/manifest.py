@@ -30,6 +30,7 @@ class Manifest:
         for repo_config in repos_config:
             self._handle_repo(repo_config)
             self._handle_copies(repo_config)
+            self._handle_links(repo_config)
 
         groups_config = config.get("groups")
         self._handle_groups(groups_config)
@@ -64,16 +65,20 @@ class Manifest:
             return
         to_cp = repo_config["copy"]
         for item in to_cp:
-            if "file" in item:
-                src = item["file"]
-                dest = item.get("dest", src)
-                copy = tsrc.Copy(repo_config["dest"], src, dest)
-                self.copyfiles.append(copy)
-            elif "symlink" in item:
-                src = item["symlink"]
-                dest = item.get("dest", src)
-                link = tsrc.Link(src, dest)
-                self.symlinks.append(link)
+            src = item["file"]
+            dest = item.get("dest", src)
+            copy = tsrc.Copy(repo_config["dest"], src, dest)
+            self.copyfiles.append(copy)
+
+    def _handle_links(self, repo_config: Any) -> None:
+        if "symlink" not in repo_config:
+            return
+        to_link = repo_config["symlink"]
+        for item in to_link:
+            src = item["source"]
+            tgt = item.get("target", src)
+            link = tsrc.Link(src, tgt)
+            self.symlinks.append(link)
 
     def _handle_groups(self, groups_config: Any) -> None:
         elements = {repo.dest for repo in self._repos}
@@ -119,16 +124,15 @@ class Manifest:
 
 
 def validate_repo(data: Any) -> None:
-    copy_schema = {
-        schema.Or("file", "symlink", only_one=True): str,
-        schema.Optional("dest"): str,
-    }
+    copy_schema = {"file": str, schema.Optional("dest"): str}
+    symlink_schema = {"source": str, "target": str}
     remote_schema = {"name": str, "url": str}
     repo_schema = schema.Schema(
         {
             "dest": str,
             schema.Optional("branch"): str,
             schema.Optional("copy"): [copy_schema],
+            schema.Optional("symlink"): [symlink_schema],
             schema.Optional("sha1"): str,
             schema.Optional("tag"): str,
             schema.Optional("remotes"): [remote_schema],

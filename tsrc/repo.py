@@ -20,7 +20,7 @@ class Copy:
 @attr.s(frozen=True)
 class Link:
     src = attr.ib()  # type: str
-    dest = attr.ib()  # type: str
+    tgt = attr.ib()  # type: str
 
 
 @attr.s(frozen=True)
