@@ -24,12 +24,13 @@ Each repository is also a dictionary, containing:
 * `tag` (optional):
     * When running `tsrc init`: Project will be cloned at the provided tag.
     * When running `tsrc sync`:  If the project is clean, project will be reset
-        to the given tag, else a warning message will be printed.
+    to the given tag, else a warning message will be printed.
 * `sha1` (optional):
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
-        to the given sha1, else a warning message will be printed.
+    to the given sha1, else a warning message will be printed.
 * `copy` (optional): A list of dictionaries with `file` and `dest` keys.
+* `symlink` (optional): A list of dictionaries with `source` and `target` keys.
 
 Here's a full example:
 
@@ -55,6 +56,9 @@ repos:
       - file: top.cmake
         dest: CMakeLists.txt
       - file: .clangformat
+    symlink:
+      - source: app/some_file
+        target: ../foo/some_file
 ```
 
 In this example:
@@ -63,10 +67,23 @@ In this example:
 * Then, `proj1/bar` will be cloned into `<workspace>/bar` using the `master` branch, and reset to `ad2b68539c78e749a372414165acdf2a1bb68203`.
 * Finally:
     * `proj1/app` will be cloned into `<workspace>/app` using the `v0.1` tag,
-    * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`, and
-    * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`.
+    * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`,
+    * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`, and
+    * a symlink will be created from `<workspace>/app/some_file` to `<workspace>/foo/some_file`.
 
 Note that `copy` only works with files, not directories.
+
+The source and target paths for symbolic links are both relative to the top-level `<workspace>`.
+Multiple symlinks can be specified; each must specify a source and target.
+
+Symlink creation is supported on all operating systems, but creation of NTFS symlinks on
+Windows requires that the current user have appropriate security policy permission
+(SeCreateSymbolicLinkPrivilege).  By default, only administrators have that privilege set,
+although newer versions of Windows 10 support a Developer Mode that permits unprivileged
+accounts to create symlinks.  Note that Cygwin running on Windows defaults to creating
+links via Windows shortcuts, which do *not* require any special privileges.
+(Cygwin's symlink behavior can be user controlled with the `winsymlinks` setting
+in the `CYGWIN` environment variable.)
 
 ## groups
 

@@ -35,6 +35,6 @@ def main(args: argparse.Namespace) -> None:
     workspace.update_manifest()
     workspace.clone_missing()
     workspace.set_remotes()
-    workspace.copy_files()
+    workspace.perform_filesystem_operations()
     ui.info_2("Workspace initialized")
     ui.info_2("Configuration written in", ui.bold, workspace.cfg_path)

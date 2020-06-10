@@ -1,5 +1,7 @@
 """ manifests for tsrc """
 
+# TODO: check for absolute paths in _handle_copies, _handle_links
+
 import operator
 from typing import cast, Any, Dict, List, Optional  # noqa
 
@@ -24,11 +26,13 @@ class Manifest:
         # Note: we cannot just serialize the yaml file into the class,
         # because we need to convert the plain old dicts into
         # higher-level classes.
-        self.copyfiles = []  # type: List[tsrc.Copy]
+        self.file_system_operations = []  # type: List[tsrc.FileSystemOperation]
+        self.symlinks = []  # type: List[tsrc.Link]
         repos_config = config["repos"]
         for repo_config in repos_config:
             self._handle_repo(repo_config)
             self._handle_copies(repo_config)
+            self._handle_links(repo_config)
 
         groups_config = config.get("groups")
         self._handle_groups(groups_config)
@@ -66,7 +70,17 @@ class Manifest:
             src = item["file"]
             dest = item.get("dest", src)
             copy = tsrc.Copy(repo_config["dest"], src, dest)
-            self.copyfiles.append(copy)
+            self.file_system_operations.append(copy)
+
+    def _handle_links(self, repo_config: Any) -> None:
+        if "symlink" not in repo_config:
+            return
+        to_link = repo_config["symlink"]
+        for item in to_link:
+            source = item["source"]
+            target = item["target"]
+            link = tsrc.Link(repo_config["dest"], source, target)
+            self.file_system_operations.append(link)
 
     def _handle_groups(self, groups_config: Any) -> None:
         elements = {repo.dest for repo in self._repos}
@@ -113,12 +127,14 @@ class Manifest:
 
 def validate_repo(data: Any) -> None:
     copy_schema = {"file": str, schema.Optional("dest"): str}
+    symlink_schema = {"source": str, "target": str}
     remote_schema = {"name": str, "url": str}
     repo_schema = schema.Schema(
         {
             "dest": str,
             schema.Optional("branch"): str,
             schema.Optional("copy"): [copy_schema],
+            schema.Optional("symlink"): [symlink_schema],
             schema.Optional("sha1"): str,
             schema.Optional("tag"): str,
             schema.Optional("remotes"): [remote_schema],

@@ -28,6 +28,9 @@ repos:
       - file: top.cmake
         dest: CMakeLists.txt
       - file: .clang-format
+    symlink:
+      - source: some_source
+        target: some_target
 """
     manifest = tsrc.Manifest()
     parsed = ruamel.yaml.safe_load(contents)
@@ -55,9 +58,10 @@ repos:
             tag="v0.1",
         ),
     ]
-    assert manifest.copyfiles == [
+    assert manifest.file_system_operations == [
         tsrc.Copy("master", "top.cmake", "CMakeLists.txt"),
         tsrc.Copy("master", ".clang-format", ".clang-format"),
+        tsrc.Link("master", "some_source", "some_target"),
     ]
 
 

@@ -15,4 +15,4 @@ def main(args: argparse.Namespace) -> None:
     workspace.local_manifest = LocalManifest(manifest_path.parent)
     workspace.clone_missing()
     workspace.set_remotes()
-    workspace.copy_files()
+    workspace.perform_filesystem_operations()

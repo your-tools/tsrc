@@ -22,5 +22,5 @@ def main(args: argparse.Namespace) -> None:
     workspace.clone_missing()
     workspace.set_remotes()
     workspace.sync(force=args.force)
-    workspace.copy_files()
+    workspace.perform_filesystem_operations()
     ui.info("Done", ui.check)

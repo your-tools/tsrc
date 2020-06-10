@@ -240,6 +240,35 @@ def test_copies_preserve_stat(
     assert os.access(top_exe, os.X_OK)
 
 
+def test_update_symlink(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """ Scenario:
+    * Crate a manifest with a 'foo' repo
+    * Push 'foo.txt' to the 'foo' repo
+    * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
+    * Run `tsrc init`
+    * Update the link in the manifest
+    * Push 'bar.txt' to the 'foo' repo
+    * Run `tsrc sync`
+    * Update the 'foo' repo with a symlink from 'foo.link' to 'foo/bar.txt'
+    * Check that the link in <workspace>/foo.link was updated to point to foo/bar.txt
+    """
+    manifest_url = git_server.manifest_url
+    git_server.add_repo("foo")
+    git_server.push_file("foo", "foo.txt")
+    git_server.manifest.set_symlink("foo", "foo.link", "foo/foo.txt")
+    tsrc_cli.run("init", manifest_url)
+    git_server.push_file("foo", "bar.txt")
+    git_server.manifest.set_symlink("foo", "foo.link", "foo/bar.txt")
+
+    tsrc_cli.run("sync")
+
+    actual_link = workspace_path / "foo.link"
+    assert actual_link.exists()
+    assert actual_link.readlink() == "foo/bar.txt"
+
+
 def test_changing_branch(
     tsrc_cli: CLI,
     git_server: GitServer,

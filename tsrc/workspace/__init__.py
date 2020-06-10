@@ -12,11 +12,11 @@ import tsrc.executor
 import tsrc.git
 
 from .cloner import Cloner
-from .copier import FileCopier
-from .syncer import Syncer
-from .remote_setter import RemoteSetter
-from .local_manifest import LocalManifest
 from .config import WorkspaceConfig
+from .file_system_operator import FileSystemOperator
+from .local_manifest import LocalManifest
+from .remote_setter import RemoteSetter
+from .syncer import Syncer
 
 
 def copy_cfg_path_if_needed(root_path: Path) -> None:
@@ -83,12 +83,14 @@ class Workspace:
             remote_setter = RemoteSetter(self.root_path)
             tsrc.executor.run_sequence(self.get_repos(), remote_setter)
 
-    def copy_files(self) -> None:
+    def perform_filesystem_operations(self) -> None:
         repos = self.get_repos()
-        file_copier = FileCopier(self.root_path, repos)
+        file_system_operator = FileSystemOperator(self.root_path, repos)
         manifest = self.local_manifest.get_manifest()
-        copyfiles = manifest.copyfiles
-        tsrc.executor.run_sequence(copyfiles, file_copier)
+        operations = manifest.file_system_operations
+        known_repos = [x.dest for x in repos]
+        operations = [x for x in operations if x.repo in known_repos]  # type: ignore
+        tsrc.executor.run_sequence(operations, file_system_operator)
 
     def sync(self, *, force: bool = False) -> None:
         syncer = Syncer(
