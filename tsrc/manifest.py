@@ -75,9 +75,9 @@ class Manifest:
             return
         to_link = repo_config["symlink"]
         for item in to_link:
-            src = item["source"]
-            tgt = item.get("target", src)
-            link = tsrc.Link(src, tgt)
+            source = item["source"]
+            target = item["target"]
+            link = tsrc.Link(source, target)
             self.symlinks.append(link)
 
     def _handle_groups(self, groups_config: Any) -> None:

@@ -58,7 +58,7 @@ repos:
       - file: .clangformat
     symlink:
       - source: app/some_file
-	target: ../foo/some_file
+        target: ../foo/some_file
 ```
 
 In this example:
