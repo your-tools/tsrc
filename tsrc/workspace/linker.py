@@ -30,8 +30,25 @@ class FileLinker(tsrc.executor.Task[tsrc.Link]):
         if source_path.isabs():
             ui.error("Absolute path specified as symlink name:", source_path)
             return
+        full_source = self.workspace_path / item.source
+        # Source exists but is not actually a symlink
+        if full_source.exists() and not full_source.islink():
+            ui.error("Specified symlink name exists but is not a link:", source_path)
+            return
+        # If source exists as a symlink, check the target
+        if full_source.islink():
+            if not full_source.exists():
+                ui.info_3("Replacing broken link")
+                os.unlink(full_source)
+            if full_source.exists():
+                existing_target = full_source.readlink()
+                if (existing_target == target_path):
+                    ui.info_3("Leaving existing link")
+                    return
+                else:
+                    ui.info_3("Replacing existing link")
+                    os.unlink(full_source)
         try:
-            full_source = self.workspace_path / item.source
             os.symlink(target_path, full_source, target_path.isdir())
         except Exception as e:
             raise tsrc.Error(str(e))

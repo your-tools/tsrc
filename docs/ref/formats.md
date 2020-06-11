@@ -69,7 +69,7 @@ In this example:
     * `proj1/app` will be cloned into `<workspace>/app` using the `v0.1` tag,
     * `top.cmake` will be copied from `proj1/app/top.cmake` to `<workspace>/CMakeLists.txt`,
     * `.clang-format` will be copied from `proj1/app/` to `<workspace>/`, and
-    * a symlink is created from `<workspace>/app/some_file` to `<workspace>/foo/some_file`.
+    * a symlink will be created from `<workspace>/app/some_file` to `<workspace>/foo/some_file`.
 
 Note that `copy` only works with files, not directories.
 
