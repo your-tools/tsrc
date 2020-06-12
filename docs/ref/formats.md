@@ -76,6 +76,15 @@ Note that `copy` only works with files, not directories.
 The source and target paths for symbolic links are both relative to the top-level `<workspace>`.
 Multiple symlinks can be specified; each must specify a source and target.
 
+Symlink creation is supported on all operating systems, but creation of NTFS symlinks on
+Windows requires that the current user have appropriate security policy permission
+(SeCreateSymbolicLinkPrivilege).  By default, only administrators have that privilege set,
+although newer versions of Windows 10 support a Developer Mode that permits unprivileged
+accounts to create symlinks.  Note that Cygwin running on Windows defaults to creating
+links via Windows shortcuts, which do *not* require any special privileges.
+(Cygwin's symlink behavior can be user controlled with the `winsymlinks` setting
+in the `CYGWIN` environment variable.)
+
 ## groups
 
 The `groups` section lists the groups by name. Each group should have a `repos` field

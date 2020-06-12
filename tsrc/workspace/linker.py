@@ -22,33 +22,59 @@ class FileLinker(tsrc.executor.Task[tsrc.Link]):
     def display_item(self, item: tsrc.Link) -> str:
         return f"{item.source} linking to {item.target}"
 
+    # Experiments on symlinks showed the Path status functions
+    # of interest behaving as follows:
+    #
+    #    islink()  exists()    Description
+    #    ----------------------------------------------------------
+    #    False     False       link_name doesn't currently exist
+    #    False     True        link_name corresponds to a file or dir!
+    #    True      False       broken symlink, need to remove
+    #    True      True        symlink to a valid target, check target name
+    #    ----------------------------------------------------------
+    #
+    # This function returns a boolean indicating whether symlink
+    # creation should proceed.
+    #
+    def check_link(self, link_name: Path, link_target: Path) -> bool:
+        remove_link = False
+        if link_name.exists() and not link_name.islink():
+            raise tsrc.Error("Specified symlink name exists but is not a link")
+            return False
+        if link_name.islink():
+            if not link_name.exists():
+                # symlink exists, but points to a non-existent target
+                ui.info_3("Replacing broken link")
+                remove_link = True
+            if link_name.exists():
+                # symlink exists and points to some target
+                current_target = link_name.readlink()
+                if (current_target == link_target):
+                    ui.info_3("Leaving existing link")
+                    return False
+                else:
+                    ui.info_3("Replacing existing link")
+                    remove_link = True
+        if remove_link:
+            try:
+                os.unlink(link_name)
+            except OSError as e:
+                raise tsrc.Error(str(e))
+        return True
+
     def process(self, index: int, count: int, item: tsrc.Link) -> None:
         ui.info_count(index, count, "Linking", item.source, "->", item.target)
         # Both paths are assumed to already be workspace-relative
         source_path = Path(item.source)
         target_path = Path(item.target)
         if source_path.isabs():
-            ui.error("Absolute path specified as symlink name:", source_path)
-            return
+            raise tsrc.Error("Absolute path specified as symlink name")
+        if target_path.isabs():
+            raise tsrc.Error("Absolute path specified as symlink target")
         full_source = self.workspace_path / item.source
-        # Source exists but is not actually a symlink
-        if full_source.exists() and not full_source.islink():
-            ui.error("Specified symlink name exists but is not a link:", source_path)
-            return
-        # If source exists as a symlink, check the target
-        if full_source.islink():
-            if not full_source.exists():
-                ui.info_3("Replacing broken link")
-                os.unlink(full_source)
-            if full_source.exists():
-                existing_target = full_source.readlink()
-                if (existing_target == target_path):
-                    ui.info_3("Leaving existing link")
-                    return
-                else:
-                    ui.info_3("Replacing existing link")
-                    os.unlink(full_source)
-        try:
-            os.symlink(target_path, full_source, target_path.isdir())
-        except Exception as e:
-            raise tsrc.Error(str(e))
+        make_link = self.check_link(full_source, target_path)
+        if make_link:
+            try:
+                os.symlink(target_path, full_source, target_path.isdir())
+            except OSError as e:
+                raise tsrc.Error(str(e))
