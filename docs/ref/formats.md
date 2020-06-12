@@ -42,9 +42,9 @@ repos:
 
   - remotes:
       - name: origin
-	url: git@gitlab.local:proj1/bar
+        url: git@gitlab.local:proj1/bar
       - name: upstream
-	url: git@github.com:user/bar
+        url: git@github.com:user/bar
     dest: bar
     branch: master
     sha1: ad2b68539c78e749a372414165acdf2a1bb68203
@@ -54,7 +54,7 @@ repos:
     tag: v0.1
     copy:
       - file: top.cmake
-	dest: CMakeLists.txt
+        dest: CMakeLists.txt
       - file: .clangformat
     symlink:
       - source: app/some_file
