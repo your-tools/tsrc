@@ -30,5 +30,5 @@ class FileCopier(tsrc.executor.Task[tsrc.Copy]):
             src_path = self.workspace_path / item.repo / item.src
             dest_path = self.workspace_path / item.dest
             src_path.copy(dest_path)
-        except Exception as e:
+        except OSError as e:
             raise tsrc.Error(str(e))
