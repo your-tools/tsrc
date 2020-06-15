@@ -207,7 +207,7 @@ def test_copies_are_up_to_date(
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.txt", contents="v1")
-    git_server.manifest.set_repo_file_copies("foo", [("foo.txt", "top.txt")])
+    git_server.manifest.set_file_copy("foo", "foo.txt", "top.txt")
     tsrc_cli.run("init", manifest_url)
     git_server.push_file("foo", "foo.txt", contents="v2")
 
@@ -233,7 +233,7 @@ def test_copies_preserve_stat(
     manifest_url = git_server.manifest_url
     git_server.add_repo("foo")
     git_server.push_file("foo", "foo.exe", contents="v1", executable=True)
-    git_server.manifest.set_repo_file_copies("foo", [("foo.exe", "top.exe")])
+    git_server.manifest.set_file_copy("foo", "foo.exe", "top.exe")
 
     tsrc_cli.run("init", manifest_url)
     top_exe = workspace_path / "top.exe"

@@ -138,11 +138,9 @@ class ManifestHandler:
     def set_repo_tag(self, name: str, tag: str) -> None:
         self.configure_repo(name, "tag", tag)
 
-    def set_repo_file_copies(self, name: str, copies: List[CopyConfig]) -> None:
-        copy_dicts = []
-        for copy_src, copy_dest in copies:
-            copy_dicts.append({"file": copy_src, "dest": copy_dest})
-        self.configure_repo(name, "copy", copy_dicts)
+    def set_file_copy(self, repo_name: str, src: str, dest: str) -> None:
+        copies = [{"file": src, "dest": dest}]
+        self.configure_repo(repo_name, "copy", copies)
 
     def set_repo_remotes(self, name: str, remotes: List[RemoteConfig]) -> None:
         remote_dicts = []

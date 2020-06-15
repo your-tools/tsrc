@@ -64,13 +64,19 @@ def test_init_maint_manifest_branch(
 def test_copy_files_happy(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
+    """ Scenario:
+    * Crate a manifest with a 'top' repo
+    * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
+    * Push `top.cmake` to the `top` repo
+    * Run `tsrc init`
+    * Check that a `CMakeLists.txt` file was created at the root of the
+      workspace
+    """
     manifest_url = git_server.manifest_url
-    git_server.add_repo("master")
+    git_server.add_repo("top")
     top_cmake_contents = "# Top CMakeLists.txt"
-    git_server.push_file("master", "top.cmake", contents=top_cmake_contents)
-    git_server.manifest.set_repo_file_copies(
-        "master", [("top.cmake", "CMakeLists.txt")]
-    )
+    git_server.push_file("top", "top.cmake", contents=top_cmake_contents)
+    git_server.manifest.set_file_copy("top", "top.cmake", "CMakeLists.txt")
 
     tsrc_cli.run("init", manifest_url)
 
@@ -83,11 +89,15 @@ def test_copy_files_source_does_not_exist(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
+    """ Scenario:
+    * Crate a manifest with a 'top' repo
+    * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
+    * Check that `tsrc init` fails (the `top.cmake` file is missing from the
+      'top' repo)
+    """
     manifest_url = git_server.manifest_url
-    git_server.add_repo("master")
-    git_server.manifest.set_repo_file_copies(
-        "master", [("top.cmake", "CMakeLists.txt")]
-    )
+    git_server.add_repo("top")
+    git_server.manifest.set_file_copy("top", "top.cmake", "CMakeLists.txt")
 
     tsrc_cli.run_and_fail("init", manifest_url)
     assert message_recorder.find("Failed to perform the following copies")
@@ -212,7 +222,7 @@ def test_use_specific_groups(
     git_server.add_group("spam", ["eggs", "beacon"])
     git_server.add_repo("other")
     git_server.push_file("other", "THANKS")
-    git_server.manifest.set_repo_file_copies("other", [("THANKS", "THANKS.copy")])
+    git_server.manifest.set_file_copy("other", "THANKS", "THANKS.copy")
 
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
