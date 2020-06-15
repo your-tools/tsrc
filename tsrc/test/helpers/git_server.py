@@ -53,7 +53,7 @@ class TestRepo:
         branch: str,
         contents: str,
         message: str,
-        mode: int = pygit2.GIT_FILEMODE_BLOB
+        mode: int = pygit2.GIT_FILEMODE_BLOB,
     ) -> pygit2.Tree:
         assert "/" not in name, "creating subtrees is not supported"
 
@@ -94,12 +94,12 @@ class ManifestHandler:
             "manifest.yml", contents=to_write, message=message, branch=self.branch
         )
 
-    def add_repo(self, dest: str, url: str, branch: str = "master") -> None:
-        repo_config = {"url": str(url), "dest": dest}
+    def add_repo(self, name: str, url: str, branch: str = "master") -> None:
+        repo_config = {"url": str(url), "dest": name}
         if branch != "master":
             repo_config["branch"] = branch
         self.data["repos"].append(repo_config)
-        self.write_changes(message=f"add {dest}")
+        self.write_changes(message=f"add {name}")
 
     def configure_group(
         self, name: str, repos: List[str], includes: Optional[List[str]] = None
@@ -114,44 +114,44 @@ class ManifestHandler:
             groups[name]["includes"] = includes
         self.write_changes(message=f"add/update {name} group")
 
-    def get_repo(self, dest: str) -> RepoConfig:
+    def get_repo(self, name: str) -> RepoConfig:
         for repo in self.data["repos"]:
-            if repo["dest"] == dest:
+            if repo["dest"] == name:
                 return cast(RepoConfig, repo)
-        assert False, f"repo '{dest}' not found in manifest"
+        assert False, f"repo '{name}' not found in manifest"
 
-    def configure_repo(self, dest: str, key: str, value: Any) -> None:
-        repo = self.get_repo(dest)
+    def configure_repo(self, name: str, key: str, value: Any) -> None:
+        repo = self.get_repo(name)
         repo[key] = value
-        message = f"Change {dest} {key}: {value}"
+        message = f"Change {name} {key}: {value}"
         self.write_changes(message)
 
-    def set_repo_url(self, dest: str, url: str) -> None:
-        self.configure_repo(dest, "url", url)
+    def set_repo_url(self, name: str, url: str) -> None:
+        self.configure_repo(name, "url", url)
 
-    def set_repo_branch(self, dest: str, branch: str) -> None:
-        self.configure_repo(dest, "branch", branch)
+    def set_repo_branch(self, name: str, branch: str) -> None:
+        self.configure_repo(name, "branch", branch)
 
-    def set_repo_sha1(self, dest: str, ref: str) -> None:
-        self.configure_repo(dest, "sha1", ref)
+    def set_repo_sha1(self, name: str, ref: str) -> None:
+        self.configure_repo(name, "sha1", ref)
 
-    def set_repo_tag(self, dest: str, tag: str) -> None:
-        self.configure_repo(dest, "tag", tag)
+    def set_repo_tag(self, name: str, tag: str) -> None:
+        self.configure_repo(name, "tag", tag)
 
-    def set_repo_file_copies(self, dest: str, copies: List[CopyConfig]) -> None:
+    def set_repo_file_copies(self, name: str, copies: List[CopyConfig]) -> None:
         copy_dicts = []
         for copy_src, copy_dest in copies:
             copy_dicts.append({"file": copy_src, "dest": copy_dest})
-        self.configure_repo(dest, "copy", copy_dicts)
+        self.configure_repo(name, "copy", copy_dicts)
 
-    def set_repo_remotes(self, dest: str, remotes: List[RemoteConfig]) -> None:
+    def set_repo_remotes(self, name: str, remotes: List[RemoteConfig]) -> None:
         remote_dicts = []
-        for name, url in remotes:
-            remote_dicts.append({"name": name, "url": url})
-        repo = self.get_repo(dest)
+        for remote_name, remote_url in remotes:
+            remote_dicts.append({"name": remote_name, "url": remote_url})
+        repo = self.get_repo(name)
         repo["remotes"] = remote_dicts
         del repo["url"]
-        message = f"{dest}: remotes: {remote_dicts}"
+        message = f"{name}: remotes: {remote_dicts}"
         self.write_changes(message)
 
 
@@ -208,7 +208,7 @@ class GitServer:
         contents: str = "",
         message: str = "",
         branch: str = "master",
-        executable: bool = False
+        executable: bool = False,
     ) -> None:
         if executable:
             file_mode = pygit2.GIT_FILEMODE_BLOB_EXECUTABLE
@@ -218,11 +218,7 @@ class GitServer:
         if not message:
             message = "add/update " + file_path
         repo.commit_file(
-            file_path,
-            contents=contents,
-            message=message,
-            branch=branch,
-            mode=file_mode
+            file_path, contents=contents, message=message, branch=branch, mode=file_mode
         )
 
     def tag(
