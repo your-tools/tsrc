@@ -27,7 +27,7 @@ def test_git_server_add_repo_can_clone(
 
 def test_git_server_can_add_copies(workspace_path: Path, git_server: GitServer) -> None:
     git_server.add_repo("foo")
-    git_server.manifest.set_repo_file_copies("foo", [("foo.txt", "top.txt")])
+    git_server.manifest.set_file_copy("foo", "foo.txt", "top.txt")
     manifest = read_remote_manifest(workspace_path, git_server)
     assert manifest.copyfiles == [tsrc.Copy("foo", "foo.txt", "top.txt")]
 
