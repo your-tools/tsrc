@@ -7,6 +7,7 @@ from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
 from path import Path
+import os
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
@@ -122,7 +123,7 @@ def test_create_symlink(
 
     actual_link = workspace_path / "foo.link"
     assert actual_link.exists()
-    assert actual_link.readlink() == "foo/foo.txt"
+    assert actual_link.readlink() == os.path.normpath("foo/foo.txt")
 
 
 def test_uses_correct_branch_for_repo(

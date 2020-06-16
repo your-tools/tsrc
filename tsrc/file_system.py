@@ -21,7 +21,7 @@ def safe_link(*, source: Path, target: Path) -> None:
     make_link = check_link(source=source, target=target)
     if make_link:
         ui.info_3("Creating link", source, "->", target)
-        os.symlink(target, source, target_is_directory=target.isdir())
+        os.symlink(target.normpath(), source.normpath(), target_is_directory=target.isdir())
 
 
 def check_link(*, source: Path, target: Path) -> bool:
@@ -33,7 +33,7 @@ def check_link(*, source: Path, target: Path) -> bool:
         if source.exists():
             # symlink exists and points to some target
             current_target = source.readlink()
-            if current_target == target:
+            if current_target.realpath() == target.realpath():
                 ui.info_3("Leaving existing link")
                 return False
             else:

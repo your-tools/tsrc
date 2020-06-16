@@ -266,7 +266,7 @@ def test_update_symlink(
 
     actual_link = workspace_path / "foo.link"
     assert actual_link.exists()
-    assert actual_link.readlink() == "foo/bar.txt"
+    assert actual_link.readlink() == os.path.normpath("foo/bar.txt")
 
 
 def test_changing_branch(
