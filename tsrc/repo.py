@@ -37,7 +37,7 @@ class Copy(FileSystemOperation):
         src_path.copy(dest_path)
 
     def __str__(self) -> str:
-        return f"copy from '{self.repo}/{self.src}' to '{self.dest}"
+        return f"copy from '{self.repo}/{self.src}' to '{self.dest}'"
 
 
 @attr.s(frozen=True)
@@ -52,7 +52,7 @@ class Link(FileSystemOperation):
         tsrc.file_system.safe_link(source=source, target=target)
 
     def __str__(self) -> str:
-        return f"link from '{self.source}' to '{self.target}"
+        return f"link from '{self.source}' to '{self.target}'"
 
 
 @attr.s(frozen=True)
