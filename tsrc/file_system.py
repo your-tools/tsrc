@@ -21,7 +21,9 @@ def safe_link(*, source: Path, target: Path) -> None:
     make_link = check_link(source=source, target=target)
     if make_link:
         ui.info_3("Creating link", source, "->", target)
-        os.symlink(target.normpath(), source.normpath(), target_is_directory=target.isdir())
+        os.symlink(
+            target.normpath(), source.normpath(), target_is_directory=target.isdir()
+        )
 
 
 def check_link(*, source: Path, target: Path) -> bool:
