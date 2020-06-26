@@ -73,9 +73,9 @@ In this example:
 
 Note that `copy` only works with files, not directories.
 
-The source path for a symbolic link is relative to the top-level `<workspace>`, whereas 
-each target path is then relative to the associated source.  (This path relationship 
-is essentially identical to how `ln -s` works on the command line in Unix-like 
+The source path for a symbolic link is relative to the top-level `<workspace>`, whereas
+each target path is then relative to the associated source.  (This path relationship
+is essentially identical to how `ln -s` works on the command line in Unix-like
 environments.)  Multiple symlinks can be specified; each must specify a source and target.
 
 Symlink creation is supported on all operating systems, but creation of NTFS symlinks on
