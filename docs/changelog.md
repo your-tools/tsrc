@@ -1,3 +1,34 @@
+# 2.2.0 (2020-07-17)
+
+## Add symlink support
+
+`tsrc sync` and `tsrc init` can now create symlinks as specified in the manifest file:
+
+```yaml
+repos:
+
+  - url: git@gitlab.local:proj1/app
+    dest: app
+    symlink:
+      - source: app/some_file
+        target: ../some_file
+```
+
+In this case, a symlink will be created from `<workspace>/app/some_file` to `<workspace>/some_file`.
+(both `source` and `target` keys are relative to the repository's destination).
+
+## Changes related to groups
+
+* log, status, and sync all learned about the `--group` option and the `--all-cloned` options
+* foreach: remove the `--groups-from-config` options since this is now the default behavior
+
+## Misc
+
+* Rework FAQ
+* Run black in `lint.sh`
+* Fix formatting of some messages
+* Update code manifesto to suggest using docstrings in tests
+
 # 2.1.0 (2020-05-27)
 
 ## Breaking changes
