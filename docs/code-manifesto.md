@@ -34,6 +34,19 @@ if len(errors) == 0:
     ...
 ```
 
+* Avoid using double negatives:
+```python
+# Yes
+def make_coffe(sugar=False):
+    if sugar:
+        print("with sugar")
+
+# No
+def make_coffe(without_sugar=True):
+    if not without_sugar:
+        print("with sugar")
+```
+
 * Prefer using  "f-strings" if possible, `+` may also work in some contexts.
 
 ```python
