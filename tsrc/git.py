@@ -3,12 +3,15 @@
 
 import os
 import subprocess
-from typing import Any, Dict, Iterable, Tuple, Optional  # noqa
+from typing import Any, Dict, List, Iterable, Tuple, Optional  # noqa
 
 from path import Path
 import cli_ui as ui
 
 import tsrc
+
+UP = ui.Symbol("↑", "+").as_string
+DOWN = ui.Symbol("↓", "-").as_string
 
 
 class Error(tsrc.Error):
@@ -46,6 +49,7 @@ def assert_working_path(path: Path) -> None:
 
 class Status:
     def __init__(self, working_path: Path) -> None:
+        self.empty = False
         self.working_path = working_path
         self.untracked = 0
         self.staged = 0
@@ -59,7 +63,11 @@ class Status:
         self.sha1 = None  # type: Optional[str]
 
     def update(self) -> None:
-        self.update_sha1()
+        try:
+            self.update_sha1()
+        except CommandError:
+            self.empty = True
+            return
         self.update_branch()
         self.update_tag()
         self.update_remote_status()
@@ -109,6 +117,50 @@ class Status:
             if line.startswith("A "):
                 self.added += 1
                 self.dirty = True
+
+    def describe(self) -> List[ui.Token]:
+        res = []  # type: List[ui.Token]
+        if self.empty:
+            return [ui.red, "empty"]
+        res += self.describe_branch()
+        res += self.describe_position()
+        res += self.describe_dirty()
+        return res
+
+    def describe_branch(self) -> List[ui.Token]:
+        res = []  # type: List[ui.Token]
+        if self.branch:
+            res += [ui.green, self.branch, ui.reset]
+        elif self.sha1:
+            res += [ui.red, self.sha1, ui.reset]
+        if self.tag:
+            res += [ui.brown, "on", self.tag, ui.reset]
+        return res
+
+    @staticmethod
+    def commit_string(number: int) -> str:
+        if number == 1:
+            return "commit"
+        else:
+            return "commits"
+
+    def describe_position(self) -> List[ui.Token]:
+        res = []  # type: List[ui.Token]
+        if self.ahead != 0:
+            n_commits = Status.commit_string(self.ahead)
+            ahead_desc = f"{UP}{self.ahead} {n_commits}"
+            res += [ui.blue, ahead_desc, ui.reset]
+        if self.behind != 0:
+            n_commits = Status.commit_string(self.behind)
+            behind_desc = f"{DOWN}{self.behind} {n_commits}"
+            res += [ui.blue, behind_desc, ui.reset]
+        return res
+
+    def describe_dirty(self) -> List[ui.Token]:
+        res = []  # type: List[ui.Token]
+        if self.dirty:
+            res += [ui.red, "(dirty)", ui.reset]
+        return res
 
 
 def run(working_path: Path, *cmd: str, check: bool = True) -> None:
