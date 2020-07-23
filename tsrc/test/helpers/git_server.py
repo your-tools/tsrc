@@ -10,16 +10,15 @@ CopyConfig = Tuple[str, str]
 RemoteConfig = Tuple[str, str]
 
 
-class TestRepo:
+class BareRepo:
     user = pygit2.Signature("Tasty Test", "test@tsrc.io")
 
     def __init__(self, path: Path) -> None:
         self._repo = pygit2.Repository(str(path))
+        self.path = path
 
     @classmethod
-    def create_bare(
-        cls, path: Path, initial_branch: str, empty: bool = False
-    ) -> "TestRepo":
+    def create(cls, path: Path, initial_branch: str, empty: bool = False) -> "BareRepo":
         repo = pygit2.init_repository(str(path), bare=True, initial_head=initial_branch)
         if empty:
             return cls(path)
@@ -77,7 +76,7 @@ class TestRepo:
 
 
 class ManifestHandler:
-    def __init__(self, repo: TestRepo) -> None:
+    def __init__(self, repo: BareRepo) -> None:
         self.repo = repo
         self.data = {"repos": []}  # type: Dict[str, Any]
         self.branch = "master"
@@ -169,19 +168,19 @@ class GitServer:
     def get_url(self, name: str) -> str:
         return str("file://" + (self.bare_path / name))
 
-    def _get_repo(self, name: str) -> TestRepo:
+    def _get_repo(self, name: str) -> BareRepo:
         repo_path = self.bare_path / name
-        return TestRepo(repo_path)
+        return BareRepo(repo_path)
 
     def _create_repo(
         self, name: str, empty: bool = False, branch: str = "master"
-    ) -> TestRepo:
+    ) -> BareRepo:
         repo_path = self.bare_path / name
         assert (
             not repo_path.exists()
         ), f"cannot create repo in {repo_path}: this folder already exits"
         repo_path.makedirs()
-        repo = TestRepo.create_bare(repo_path, initial_branch=branch, empty=empty)
+        repo = BareRepo.create(repo_path, initial_branch=branch, empty=empty)
         return repo
 
     def add_repo(
