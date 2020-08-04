@@ -381,6 +381,26 @@ def test_sync_with_errors(...):
     """
 ```
 
+## Assertions with lists
+
+* Use tuple unpacking to write shorter assertions:
+
+```python
+# Yes
+actual_list = function_that_returns_list()
+(first, second) = actual_list
+assert first == something
+assert second == something_else
+
+# NO
+actual_list = function_that_returns_list()
+assert len(actual_list) == 2
+first = actual_list[0]
+second = actual_list[1]
+assert first == something
+assert second == something_else
+```
+
 ## Assertion order
 
 When writing assertions, use the form `assert <actual> == <expected>`:
