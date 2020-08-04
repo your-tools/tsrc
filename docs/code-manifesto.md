@@ -37,12 +37,12 @@ if len(errors) == 0:
 * Avoid using double negatives:
 ```python
 # Yes
-def make_coffe(sugar=False):
+def make_coffee(sugar=False):
     if sugar:
         print("with sugar")
 
 # No
-def make_coffe(without_sugar=True):
+def make_coffee(without_sugar=True):
     if not without_sugar:
         print("with sugar")
 ```
