@@ -23,6 +23,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install pygit2
+    - name: Install pygit2 in a venv
       run: |
-        python -m pip install pygit2
+        python -m venv scratch/
+        ./scratch/bin/pip install pygit2
