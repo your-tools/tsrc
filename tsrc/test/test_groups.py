@@ -25,6 +25,7 @@ def test_unknown_include() -> None:
     group_list.add("invalid-group", {"c"}, includes=["no-such-group"])
     with pytest.raises(tsrc.GroupNotFound) as e:
         group_list.get_elements(groups=["invalid-group"])
+    assert e.value.parent_group is not None
     assert e.value.parent_group.name == "invalid-group"
     assert e.value.group_name == "no-such-group"
 
