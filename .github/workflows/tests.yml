@@ -26,4 +26,5 @@ jobs:
     - name: Install pygit2 in a venv
       run: |
         python -m venv scratch/
+        ./sratch/bin/pip install -U pip
         ./scratch/bin/pip install pygit2
