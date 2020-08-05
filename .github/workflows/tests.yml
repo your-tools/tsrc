@@ -28,6 +28,11 @@ jobs:
     - name: Prepare project for development
       run: |
         python -m pip install poetry
+        # Note: makes sure we have a recent enough pip in the created virtualenv
+        # - this allows us to use the manylinux wheel package for pygit2 on
+        # pypi.org, instead of having to recompile the pygit2 extension (which
+        # won't work since libgit2-dev is too old on ubuntu latest ...)
+        python -m poetry run pip install --upgrade pip
         python -m poetry install
 
     - name: Setup tests
