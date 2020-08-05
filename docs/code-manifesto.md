@@ -37,12 +37,12 @@ if len(errors) == 0:
 * Avoid using double negatives:
 ```python
 # Yes
-def make_coffe(sugar=False):
+def make_coffee(sugar=False):
     if sugar:
         print("with sugar")
 
 # No
-def make_coffe(without_sugar=True):
+def make_coffee(without_sugar=True):
     if not without_sugar:
         print("with sugar")
 ```
@@ -379,6 +379,26 @@ def test_sync_with_errors(...):
     * Run `tsrc sync`
     * Check that the command fails and produces the proper error message
     """
+```
+
+## Assertions with lists
+
+* Use tuple unpacking to write shorter assertions:
+
+```python
+# Yes
+actual_list = function_that_returns_list()
+(first, second) = actual_list
+assert first == something
+assert second == something_else
+
+# NO
+actual_list = function_that_returns_list()
+assert len(actual_list) == 2
+first = actual_list[0]
+second = actual_list[1]
+assert first == something
+assert second == something_else
 ```
 
 ## Assertion order
