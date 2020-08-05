@@ -26,6 +26,14 @@ class ManifestStatus:
         if actual_branch and actual_branch != expected_branch:
             self.incorrect_branch = (actual_branch, expected_branch)
 
+    def describe(self) -> List[ui.Token]:
+        res = []  # type: List[ui.Token]
+        incorrect_branch = self.incorrect_branch
+        if incorrect_branch:
+            actual, expected = incorrect_branch
+            res += [ui.red, "(expected: " + expected + ")"]
+        return res
+
 
 class Status:
     def __init__(self, *, git: tsrc.git.Status, manifest: ManifestStatus):
@@ -43,65 +51,9 @@ def describe_status(status: StatusOrError) -> List[ui.Token]:
         return [ui.red, "error: missing repo"]
     if isinstance(status, Exception):
         return [ui.red, "error: ", status]
-    return describe_git_status(status.git) + describe_manifest_status(status.manifest)
-
-
-def describe_git_status(git_status: tsrc.git.Status) -> List[ui.Token]:
-    res = []  # type: List[ui.Token]
-    res += describe_branch(git_status)
-    res += describe_position(git_status)
-    res += describe_dirty(git_status)
-    return res
-
-
-def describe_manifest_status(manifest_status: ManifestStatus) -> List[ui.Token]:
-    res = []  # type: List[ui.Token]
-    incorrect_branch = manifest_status.incorrect_branch
-    if incorrect_branch:
-        actual, expected = incorrect_branch
-        res += [ui.red, "(expected: " + expected + ")"]
-
-    return res
-
-
-def describe_branch(git_status: tsrc.git.Status) -> List[ui.Token]:
-    res = []  # type: List[ui.Token]
-    if git_status.branch:
-        res += [ui.green, git_status.branch]
-    elif git_status.sha1:
-        res += [ui.red, git_status.sha1]
-    if git_status.tag:
-        res += [ui.reset, ui.brown, "on", git_status.tag]
-    return res
-
-
-def commit_string(number: int) -> str:
-    if number == 1:
-        return "commit"
-    else:
-        return "commits"
-
-
-def describe_position(git_status: tsrc.git.Status) -> List[ui.Token]:
-    res = []  # type: List[ui.Token]
-    if git_status.ahead != 0:
-        up = ui.Symbol("↑", "+")
-        n_commits = commit_string(git_status.ahead)
-        ahead_desc = f"{up.as_string}{git_status.ahead} {n_commits}"
-        res += [ui.blue, ahead_desc, ui.reset]
-    if git_status.behind != 0:
-        down = ui.Symbol("↓", "-")
-        n_commits = commit_string(git_status.behind)
-        behind_desc = f"{down.as_string}{git_status.behind} {n_commits}"
-        res += [ui.blue, behind_desc, ui.reset]
-    return res
-
-
-def describe_dirty(git_status: tsrc.git.Status) -> List[ui.Token]:
-    res = []  # type: List[ui.Token]
-    if git_status.dirty:
-        res += [ui.red, "(dirty)"]
-    return res
+    git_status = status.git.describe()
+    manifest_status = status.manifest.describe()
+    return git_status + manifest_status
 
 
 def erase_last_line() -> None:

@@ -13,7 +13,7 @@ documentation = "https://tankerhq.github.io/tsrc"
 python = "^3.6"
 
 attrs = "^19.3.0"
-cli-ui = "^0.10.3"
+cli-ui = "^0.11.0"
 colored_traceback = "^0.3.0"
 path = "^13.1.0"
 requests = "^2.22.0"
@@ -33,7 +33,7 @@ pygit2 = "^1.2.0"  # for GitSever test helpers
 mock = "^3.0.5"
 
 # Linters
-black = { version = "19.10b0", python = '^3.6' }
+black = "19.10b0"
 flake8 = "3.7.8"
 flake8-comprehensions = "1.4.1"
 mypy = "0.760"
