@@ -8,45 +8,5 @@ license = "BSD-3-Clause"
 repository = "https://github.com/TankerHQ/tsrc"
 documentation = "https://tankerhq.github.io/tsrc"
 
-[tool.poetry.dependencies]
-# Note: keep this in sync with .github/workflows/tests.yml
-python = "^3.6"
-
-attrs = "^19.3.0"
-cli-ui = "^0.11.0"
-colored_traceback = "^0.3.0"
-path = "^13.1.0"
-requests = "^2.22.0"
-"ruamel.yaml" = "^0.16.7"
-schema = "^0.7.1"
-tabulate = "^0.8.6"
-unidecode = "^1.1.1"
-
 [tool.poetry.dev-dependencies]
-# Tests
-codecov = "^2.0.15"
-coverage = "^5.1"
-pytest = "^6.0.1"
-pytest-cov = "^2.8.1"
-pytest-xdist = "^1.32.0"
 pygit2 = "^1.2.0"  # for GitSever test helpers
-mock = "^3.0.5"
-
-# Linters
-black = "19.10b0"
-flake8 = "3.7.8"
-flake8-comprehensions = "1.4.1"
-mypy = "0.760"
-
-# Docs
-mkdocs = "1.0.4"
-
-# Deps scanning
-safety = "^1.9.0"
-
-[tool.poetry.scripts]
-tsrc = "tsrc.cli.main:main"
-
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
