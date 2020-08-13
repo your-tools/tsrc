@@ -7,15 +7,15 @@ import cli_ui as ui
 from path import Path
 
 import tsrc
-from tsrc.cli import repos_from_config, with_workspace, with_groups
+from tsrc.cli import repos_from_config, workspace_arg, groups_arg
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
 remote_help = "only use this remote when cloning repositories"
 
 
-@with_workspace  # type: ignore
-@with_groups  # type: ignore
+@workspace_arg  # type: ignore
+@groups_arg  # type: ignore
 @arg("-r", "--singular-remote", help=remote_help)  # type: ignore
 def init(
     url: str,

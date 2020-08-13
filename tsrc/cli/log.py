@@ -1,37 +1,27 @@
 """ Entry point for tsrc log """
 
-from typing import List, Optional
+from typing import Any
 
 from argh import arg
-from path import Path
 import cli_ui as ui
 
 import tsrc
 
 from tsrc.cli import (
-    with_workspace,
-    with_groups,
-    with_all_cloned,
-    get_workspace,
-    resolve_repos,
+    repos_arg,
+    repos_action,
 )
 
 
-@with_workspace  # type: ignore
-@with_groups  # type: ignore
-@with_all_cloned  # type: ignore
-@arg("--from", dest="from_", metavar="FROM", help="from ref")  # type: ignore
+@repos_arg
+@repos_action
+@arg("--from", dest="from", metavar="FROM", help="from ref")  # type: ignore
 @arg("--to", help="to ref")  # type: ignore
-def log(
-    workspace_path: Optional[Path] = None,
-    groups: Optional[List[str]] = None,
-    all_cloned: bool = False,
-    to: str = "",
-    from_: str = "",
-) -> None:
+def log(workspace: tsrc.Workspace, **kwargs: Any) -> None:
     """ show a combine git log for several repositories """
-    workspace = get_workspace(workspace_path)
-    workspace.repos = resolve_repos(workspace, groups=groups, all_cloned=all_cloned)
+    from_: str = kwargs["from"]
+    to: str = kwargs["to"] or "HEAD"
+
     all_ok = True
     for repo in workspace.repos:
         full_path = workspace.root_path / repo.dest

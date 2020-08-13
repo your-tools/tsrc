@@ -1,6 +1,6 @@
 """ Entry point for tsrc foreach """
 
-from typing import List, Union, Optional
+from typing import Any, List, Union
 from argh import arg
 import subprocess
 import textwrap
@@ -11,11 +11,8 @@ import cli_ui as ui
 
 import tsrc
 from tsrc.cli import (
-    with_workspace,
-    with_groups,
-    with_all_cloned,
-    get_workspace,
-    resolve_repos,
+    repos_arg,
+    repos_action,
 )
 
 EPILOG = textwrap.dedent(
@@ -90,19 +87,13 @@ def die(message: str) -> None:
     sys.exit(1)
 
 
-@with_workspace  # type: ignore
-@with_groups  # type: ignore
-@with_all_cloned  # type: ignore
-@arg("cmd", help="command to run", nargs="*")  # type: ignore
-@arg("-c", help="use a shell to run the command", dest="shell")  # type: ignore
-def foreach(
-    cmd: List[str],
-    workspace_path: Optional[Path] = None,
-    groups: Optional[List[str]] = None,
-    all_cloned: bool = False,
-    shell: bool = False,
-) -> None:
-    """ run the same command on several repositories """
+@repos_arg
+@repos_action
+@arg("cmd", help="command to run", nargs="*", default=None)  # type: ignore
+@arg("-c", help="use a shell to run the command", dest="shell", default=False)  # type: ignore
+def foreach(workspace: tsrc.Workspace, *args: Any, **kwargs: Any) -> None:
+    cmd: List[str] = args  # type: ignore
+    shell: bool = kwargs["shell"]
     # Note:
     # we want to support both:
     #  $ tsrc foreach -c 'shell command'
@@ -126,8 +117,6 @@ def foreach(
             die("needs a command to run")
         command = cmd
         description = " ".join(cmd)
-    workspace = get_workspace(workspace_path)
-    workspace.repos = resolve_repos(workspace, groups=groups, all_cloned=all_cloned)
     cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
     tsrc.run_sequence(workspace.repos, cmd_runner)
     ui.info("OK", ui.check)

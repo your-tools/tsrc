@@ -5,17 +5,13 @@ import cli_ui as ui
 from path import Path
 
 from tsrc.cli import (
-    with_workspace,
-    with_groups,
-    with_all_cloned,
     get_workspace,
+    repos_arg,
     resolve_repos,
 )
 
 
-@with_workspace  # type: ignore
-@with_groups  # type: ignore
-@with_all_cloned  # type: ignore
+@repos_arg
 def sync(
     workspace_path: Optional[Path] = None,
     groups: Optional[List[str]] = None,

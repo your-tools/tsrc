@@ -1,6 +1,7 @@
 """ Common tools for tsrc commands """
 
-from typing import List, Optional
+import functools
+from typing import Any, Callable, List, Optional
 import os
 
 from argh import arg
@@ -13,22 +14,66 @@ from tsrc.workspace import Workspace
 from tsrc.manifest import Manifest
 
 
-with_workspace = arg(
+def composed(*decorators: Callable) -> Callable:
+    """ Build a decorator by composing a list of decorator """
+
+    def inner(f: Callable) -> Callable:
+        for decorator in reversed(decorators):
+            f = decorator(f)
+        return f
+
+    return inner
+
+
+workspace_arg = arg(
     "-w",
     "--workspace",
     dest="workspace_path",
     help="path to the current workspace",
     type=Path,
 )
-with_groups = arg(
+groups_arg = arg(
     "-g", "--group", "--groups", nargs="+", dest="groups", help="groups to use"
 )
-with_all_cloned = arg(
+all_cloned_arg = arg(
     "--all-cloned",
     action="store_true",
     dest="all_cloned",
     help="run on all cloned repos",
 )
+
+
+def repos_arg(f: Callable) -> Callable:
+    return composed(workspace_arg, groups_arg, all_cloned_arg)(f)  # type: ignore
+
+
+def workspace_action(f: Callable) -> Callable:
+    @functools.wraps(f)
+    def res(*args: Any, workspace_path: Optional[Path] = None, **kwargs: Any) -> Any:
+        if not workspace_path:
+            workspace_path = find_workspace_path()
+        workspace = tsrc.Workspace(workspace_path)
+        return f(workspace, *args, **kwargs)
+
+    return res
+
+
+def repos_action(f: Callable) -> Callable:
+    @functools.wraps(f)
+    def res(
+        *args: Any,
+        workspace_path: Optional[Path] = None,
+        groups: Optional[List[str]] = None,
+        all_cloned: bool = False,
+        **kwargs: Any
+    ) -> Any:
+        if not workspace_path:
+            workspace_path = find_workspace_path()
+        workspace = tsrc.Workspace(workspace_path)
+        workspace.repos = resolve_repos(workspace, groups, all_cloned)
+        return f(workspace, *args, **kwargs)
+
+    return res
 
 
 def find_workspace_path() -> Path:
