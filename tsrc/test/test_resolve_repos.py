@@ -1,7 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-import argparse
-
 from path import Path
 import ruamel.yaml
 
@@ -42,12 +40,6 @@ def create_workspace(
     return Workspace(tmp_path)
 
 
-def new_args(
-    *, all_cloned: bool = False, groups: Optional[List[str]] = None
-) -> argparse.Namespace:
-    return argparse.Namespace(all_cloned=all_cloned, groups=groups)
-
-
 def repo_names(repos: List[Repo]) -> List[str]:
     return [repo.dest for repo in repos]
 
@@ -62,9 +54,7 @@ def test_no_args_no_config_no_default_group(tmp_path: Path) -> None:
         """
     create_manifest(tmp_path, repos=["foo", "bar"])
     workspace = create_workspace(tmp_path)
-    args = new_args()
-
-    actual = resolve_repos(workspace, args=args)
+    actual = resolve_repos(workspace, groups=None, all_cloned=False)
     assert repo_names(actual) == ["foo", "bar"]
 
 
@@ -82,9 +72,8 @@ def test_no_args_no_config_default_group(tmp_path: Path) -> None:
     }
     create_manifest(tmp_path, repos=["foo", "outside"], groups=groups)
     workspace = create_workspace(tmp_path)
-    args = new_args()
 
-    actual = resolve_repos(workspace, args=args)
+    actual = resolve_repos(workspace, groups=None, all_cloned=False)
     assert repo_names(actual) == ["foo"]
 
 
@@ -102,9 +91,8 @@ def test_no_args_workspace_configured_with_all_repos(tmp_path: Path) -> None:
     }
     create_manifest(tmp_path, repos=["foo", "outside"], groups=groups)
     workspace = create_workspace(tmp_path, clone_all_repos=True)
-    args = new_args()
 
-    actual = resolve_repos(workspace, args=args)
+    actual = resolve_repos(workspace, groups=None, all_cloned=False)
     assert repo_names(actual) == ["foo", "outside"]
 
 
@@ -123,9 +111,8 @@ def test_no_args_workspace_configured_with_some_groups(tmp_path: Path) -> None:
     }
     create_manifest(tmp_path, repos=["foo", "bar"], groups=groups)
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
-    args = new_args()
 
-    actual = resolve_repos(workspace, args=args)
+    actual = resolve_repos(workspace, groups=None, all_cloned=False)
     assert repo_names(actual) == ["foo"]
 
 
@@ -144,9 +131,8 @@ def test_groups_requested(tmp_path: Path) -> None:
     }
     create_manifest(tmp_path, repos=["foo", "bar"], groups=groups)
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
-    args = new_args(groups=["group1"])
 
-    actual = resolve_repos(workspace, args=args)
+    actual = resolve_repos(workspace, groups=["group1"], all_cloned=False)
     assert repo_names(actual) == ["foo"]
 
 
@@ -165,10 +151,9 @@ def test_all_cloned_requested(tmp_path: Path) -> None:
     }
     create_manifest(tmp_path, repos=["foo", "bar", "other"], groups=groups)
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
-    args = new_args(all_cloned=True)
 
     (tmp_path / "foo").makedirs_p()
     (tmp_path / "other").makedirs_p()
 
-    actual = resolve_repos(workspace, args=args)
+    actual = resolve_repos(workspace, groups=None, all_cloned=True)
     assert repo_names(actual) == ["foo", "other"]

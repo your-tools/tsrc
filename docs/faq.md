@@ -92,10 +92,10 @@ That being said:
   `--verbose` flag, like so: `tsrc --verbose sync`
 
 
-# Why argparse?
+# Why argh?
 
-See [docopt v argparse](https://dmerej.info/blog/post/docopt-v-argparse/), and
-[please don't use click](http://xion.io/post/programming/python-dont-use-click.html).
+Because we need (almost) all of `argparse` features, but still want to keep the
+code DRY.
 
 
 # Why YAML?

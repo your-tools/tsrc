@@ -2,16 +2,23 @@
 
 from typing import Dict, List, Union, Optional, Tuple
 
-import argparse
 import collections
 import shutil
 
 import cli_ui as ui
+from path import Path
 
 import tsrc
 import tsrc.errors
-import tsrc.cli
 import tsrc.git
+
+from tsrc.cli import (
+    with_workspace,
+    with_groups,
+    with_all_cloned,
+    get_workspace,
+    resolve_repos,
+)
 
 
 class ManifestStatus:
@@ -106,7 +113,16 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
             ui.info(*message)
 
 
-def main(args: argparse.Namespace) -> None:
-    workspace = tsrc.cli.get_workspace_with_repos(args)
+@with_workspace  # type: ignore
+@with_groups  # type: ignore
+@with_all_cloned  # type: ignore
+def status(
+    workspace_path: Optional[Path] = None,
+    groups: Optional[List[str]] = None,
+    all_cloned: bool = False,
+) -> None:
+    """ display workspace status summary """
+    workspace = get_workspace(workspace_path)
+    workspace.repos = resolve_repos(workspace, groups=groups, all_cloned=all_cloned)
     status_collector = StatusCollector(workspace)
     tsrc.run_sequence(workspace.repos, status_collector)

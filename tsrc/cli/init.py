@@ -1,18 +1,33 @@
 """ Entry point for `tsrc init` """
-import argparse
+from typing import List, Optional
 import os
 
-from path import Path
+from argh import arg
 import cli_ui as ui
+from path import Path
 
 import tsrc
-from tsrc.cli import repos_from_config
+from tsrc.cli import repos_from_config, with_workspace, with_groups
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
+remote_help = "only use this remote when cloning repositories"
 
-def main(args: argparse.Namespace) -> None:
-    path_as_str = args.workspace_path or os.getcwd()
+
+@with_workspace  # type: ignore
+@with_groups  # type: ignore
+@arg("-r", "--singular-remote", help=remote_help)  # type: ignore
+def init(
+    url: str,
+    workspace_path: Optional[Path] = None,
+    groups: Optional[List[str]] = None,
+    branch: str = "master",
+    clone_all_repos: bool = False,
+    shallow: bool = False,
+    singular_remote: Optional[str] = None,
+) -> None:
+    """ initialize a new workspace"""
+    path_as_str = workspace_path or os.getcwd()
     workspace_path = Path(path_as_str)
     cfg_path = workspace_path / ".tsrc" / "config.yml"
 
@@ -22,12 +37,12 @@ def main(args: argparse.Namespace) -> None:
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 
     workspace_config = WorkspaceConfig(
-        manifest_url=args.url,
-        manifest_branch=args.branch,
-        clone_all_repos=args.clone_all_repos,
-        repo_groups=args.groups,
-        shallow_clones=args.shallow,
-        singular_remote=args.remote,
+        manifest_url=url,
+        manifest_branch=branch,
+        clone_all_repos=clone_all_repos,
+        repo_groups=groups or [],
+        shallow_clones=shallow,
+        singular_remote=singular_remote,
     )
 
     workspace_config.save_to_file(cfg_path)
