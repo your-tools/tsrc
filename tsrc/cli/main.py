@@ -1,66 +1,27 @@
 """ Main tsrc entry point """
 
 import argparse
+import argh
 import functools
-import importlib
 import os
 import sys
-import textwrap
 from typing import Callable, Optional, Sequence
 
 import colored_traceback
 import cli_ui as ui
-from path import Path
 
 import tsrc
 
+from .apply_manifest import apply_manifest
+from .foreach import foreach
+from .init import init
+from .log import log
+from .status import status
+from .sync import sync
+from .version import version
+
 ArgsList = Optional[Sequence[str]]
 MainFunc = Callable[..., None]
-
-
-def fix_cmd_args_for_foreach(
-    args: argparse.Namespace, foreach_parser: argparse.ArgumentParser
-) -> None:
-    """ We want to support both:
-      $ tsrc foreach -c 'shell command'
-     and
-      $ tsrc foreach -- some-cmd --some-opts
-
-    Due to argparse limitations, args.cmd will always be
-    a list, but we nee a *string* when using 'shell=True'
-
-    So transform the argparse.Namespace object to have
-    * args.cmd suitable  to pass to subprocess later
-    * args.cmd_as_str suitable for display purposes
-
-    """
-
-    def die(message: str) -> None:
-        ui.error(message)
-        print(foreach_parser.epilog, end="")
-        sys.exit(1)
-
-    if args.shell:
-        if len(args.cmd) != 1:
-            die("foreach -c must be followed by exactly one argument")
-        cmd = args.cmd[0]
-        cmd_as_str = cmd
-    else:
-        cmd = args.cmd
-        if not cmd:
-            die("needs a command to run")
-        cmd_as_str = " ".join(cmd)
-
-    args.cmd = cmd
-    args.cmd_as_str = cmd_as_str
-
-
-def add_workspace_subparser(
-    subparser: argparse._SubParsersAction, name: str
-) -> argparse.ArgumentParser:
-    parser = subparser.add_parser(name)
-    parser.add_argument("-w", "--workspace", dest="workspace_path")
-    return parser
 
 
 def main_wrapper(main_func: MainFunc) -> MainFunc:
@@ -105,89 +66,21 @@ def main(args: ArgsList = None) -> None:
     main_impl(args=args)
 
 
-def add_group_options(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-g", "--group", "--groups", nargs="+", dest="groups")
-    parser.add_argument("--all-cloned", action="store_true", dest="all_cloned")
-
-
 def main_impl(args: ArgsList = None) -> None:
-    parser = argparse.ArgumentParser(prog="tsrc")
+    parser = argh.ArghParser(prog="tsrc")
     parser.add_argument(
         "--version", action="version", version="tsrc " + tsrc.__version__
     )
 
-    parser.add_argument("--verbose", help="Show debug messages", action="store_true")
+    parser.add_argument("--verbose", help="show debug messages", action="store_true")
     parser.add_argument(
-        "-q", "--quiet", help="Only display warnings and errors", action="store_true"
+        "-q", "--quiet", help="only display warnings and errors", action="store_true"
     )
     parser.add_argument("--color", choices=["auto", "always", "never"])
 
-    subparsers = parser.add_subparsers(title="subcommands", dest="command")
+    parser.add_commands([apply_manifest, init, foreach, version, log, sync, status])
 
-    subparsers.add_parser("version")
+    ui_args = parser.parse_args(args=args)
+    setup_ui(ui_args)
 
-    foreach_parser = add_workspace_subparser(subparsers, "foreach")
-    add_group_options(foreach_parser)
-    foreach_parser.add_argument("cmd", nargs="*")
-    foreach_parser.add_argument("-c", dest="shell", action="store_true")
-    foreach_parser.epilog = textwrap.dedent(
-        """\
-    Usage:
-       # Run command directly
-       tsrc foreach -- some-cmd --with-option
-    Or:
-       # Run command through the shell
-       tsrc foreach -c 'some cmd'
-    """
-    )
-    foreach_parser.formatter_class = argparse.RawDescriptionHelpFormatter
-
-    init_parser = add_workspace_subparser(subparsers, "init")
-    add_group_options(init_parser)
-    init_parser.add_argument("url")
-    init_parser.add_argument("-b", "--branch")
-    init_parser.add_argument(
-        "--clone-all-repos",
-        action="store_true",
-        dest="clone_all_repos",
-        help="clone all repos from the manifest, regardless of groups",
-    )
-    init_parser.add_argument(
-        "-s", "--shallow", action="store_true", dest="shallow", default=False
-    )
-    init_parser.add_argument(
-        "-r",
-        "--remote",
-        dest="remote",
-        help="Use only the remote with this name to clone repositories",
-    )
-    init_parser.set_defaults(branch="master")
-
-    log_parser = add_workspace_subparser(subparsers, "log")
-    add_group_options(log_parser)
-    log_parser.add_argument("--from", required=True, dest="from_", metavar="FROM")
-    log_parser.add_argument("--to")
-    log_parser.set_defaults(to="HEAD")
-
-    status_parser = add_workspace_subparser(subparsers, "status")
-    add_group_options(status_parser)
-
-    sync_parser = add_workspace_subparser(subparsers, "sync")
-    add_group_options(sync_parser)
-    sync_parser.add_argument("--force", action="store_true")
-
-    apply_manifest = add_workspace_subparser(subparsers, "apply-manifest")
-    apply_manifest.add_argument("manifest_path", type=Path)
-
-    args_ns = parser.parse_args(args=args)  # type: argparse.Namespace
-    setup_ui(args_ns)
-
-    command = args_ns.command
-    if not command:
-        parser.print_help()
-        sys.exit(1)
-    module = importlib.import_module("tsrc.cli." + command.replace("-", "_"))
-    if command == "foreach":
-        fix_cmd_args_for_foreach(args_ns, foreach_parser)
-
-    return module.main(args_ns)  # type: ignore
+    parser.dispatch(argv=args)

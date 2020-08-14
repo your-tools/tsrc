@@ -1,15 +1,27 @@
 """ Entry point for tsrc log """
 
-import argparse
+from typing import Any
 
+from argh import arg
 import cli_ui as ui
 
 import tsrc
-import tsrc.cli
+
+from tsrc.cli import (
+    repos_arg,
+    repos_action,
+)
 
 
-def main(args: argparse.Namespace) -> None:
-    workspace = tsrc.cli.get_workspace_with_repos(args)
+@repos_arg
+@repos_action
+@arg("--from", dest="from", metavar="FROM", help="from ref")  # type: ignore
+@arg("--to", help="to ref")  # type: ignore
+def log(workspace: tsrc.Workspace, **kwargs: Any) -> None:
+    """ show a combine git log for several repositories """
+    from_: str = kwargs["from"]
+    to: str = kwargs["to"] or "HEAD"
+
     all_ok = True
     for repo in workspace.repos:
         full_path = workspace.root_path / repo.dest
@@ -25,7 +37,7 @@ def main(args: argparse.Namespace) -> None:
             "log",
             "--color=always",
             f"--pretty=format:{log_format}",
-            f"{args.from_}...{args.to}",
+            f"{from_}...{to}",
         ]
         rc, out = tsrc.git.run_captured(full_path, *cmd, check=False)
         if rc != 0:

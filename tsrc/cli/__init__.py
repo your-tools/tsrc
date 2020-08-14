@@ -1,9 +1,10 @@
 """ Common tools for tsrc commands """
 
-from typing import List
-import argparse
+import functools
+from typing import Any, Callable, List, Optional
 import os
 
+from argh import arg
 import cli_ui as ui
 from path import Path
 
@@ -11,6 +12,68 @@ import tsrc
 from tsrc.workspace.config import WorkspaceConfig
 from tsrc.workspace import Workspace
 from tsrc.manifest import Manifest
+
+
+def composed(*decorators: Callable) -> Callable:
+    """ Build a decorator by composing a list of decorator """
+
+    def inner(f: Callable) -> Callable:
+        for decorator in reversed(decorators):
+            f = decorator(f)
+        return f
+
+    return inner
+
+
+workspace_arg = arg(
+    "-w",
+    "--workspace",
+    dest="workspace_path",
+    help="path to the current workspace",
+    type=Path,
+)
+groups_arg = arg(
+    "-g", "--group", "--groups", nargs="+", dest="groups", help="groups to use"
+)
+all_cloned_arg = arg(
+    "--all-cloned",
+    action="store_true",
+    dest="all_cloned",
+    help="run on all cloned repos",
+)
+
+
+def repos_arg(f: Callable) -> Callable:
+    return composed(workspace_arg, groups_arg, all_cloned_arg)(f)  # type: ignore
+
+
+def workspace_action(f: Callable) -> Callable:
+    @functools.wraps(f)
+    def res(*args: Any, workspace_path: Optional[Path] = None, **kwargs: Any) -> Any:
+        if not workspace_path:
+            workspace_path = find_workspace_path()
+        workspace = tsrc.Workspace(workspace_path)
+        return f(workspace, *args, **kwargs)
+
+    return res
+
+
+def repos_action(f: Callable) -> Callable:
+    @functools.wraps(f)
+    def res(
+        *args: Any,
+        workspace_path: Optional[Path] = None,
+        groups: Optional[List[str]] = None,
+        all_cloned: bool = False,
+        **kwargs: Any
+    ) -> Any:
+        if not workspace_path:
+            workspace_path = find_workspace_path()
+        workspace = tsrc.Workspace(workspace_path)
+        workspace.repos = resolve_repos(workspace, groups, all_cloned)
+        return f(workspace, *args, **kwargs)
+
+    return res
 
 
 def find_workspace_path() -> Path:
@@ -30,21 +93,23 @@ def find_workspace_path() -> Path:
     raise tsrc.Error("Could not find current workspace")
 
 
-def get_workspace(args: argparse.Namespace) -> tsrc.Workspace:
-    if args.workspace_path:
-        workspace_path = Path(args.workspace_path)
-    else:
+def get_workspace(workspace_path: Optional[Path]) -> tsrc.Workspace:
+    if not workspace_path:
         workspace_path = find_workspace_path()
     return tsrc.Workspace(workspace_path)
 
 
-def get_workspace_with_repos(args: argparse.Namespace) -> tsrc.Workspace:
-    workspace = get_workspace(args)
-    workspace.repos = resolve_repos(workspace, args=args)
+def get_workspace_with_repos(
+    workspace_path: Path, groups: Optional[List[str]], all_cloned: bool
+) -> tsrc.Workspace:
+    workspace = get_workspace(workspace_path)
+    workspace.repos = resolve_repos(workspace, groups, all_cloned)
     return workspace
 
 
-def resolve_repos(workspace: Workspace, args: argparse.Namespace) -> List[tsrc.Repo]:
+def resolve_repos(
+    workspace: Workspace, groups: Optional[List[str]], all_cloned: bool
+) -> List[tsrc.Repo]:
     """"
     Given a workspace with its config and its local manifest,
     and a collection of parsed command  line arguments,
@@ -52,10 +117,10 @@ def resolve_repos(workspace: Workspace, args: argparse.Namespace) -> List[tsrc.R
     """
     # Handle --all-cloned and --groups
     manifest = workspace.get_manifest()
-    if args.groups:
-        return manifest.get_repos(groups=args.groups)
+    if groups:
+        return manifest.get_repos(groups=groups)
 
-    if args.all_cloned:
+    if all_cloned:
         repos = manifest.get_repos(all_=True)
         return [repo for repo in repos if (workspace.root_path / repo.dest).exists()]
 
