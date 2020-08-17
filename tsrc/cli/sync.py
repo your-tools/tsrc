@@ -1,4 +1,4 @@
-""" Entry point for tsrc sync """
+""" Entry point for `tsrc sync` """
 
 from typing import List, Optional
 import cli_ui as ui

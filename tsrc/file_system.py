@@ -49,7 +49,7 @@ class Link(FileSystemOperation):
 
 
 def safe_link(*, source: Path, target: Path) -> None:
-    """ Safely create a link in 'source' pointing to 'target' """
+    """ Safely create a link in 'source' pointing to 'target'. """
     # Not: we need to call both islink() and exist() to safely ensure
     # that the link exists:
     #

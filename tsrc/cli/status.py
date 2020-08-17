@@ -18,18 +18,24 @@ from tsrc.cli import (
 
 
 class ManifestStatus:
+    """ Represent the status of a repo w.r.t the manifest. """
+
     def __init__(self, repo: tsrc.Repo, *, manifest: tsrc.Manifest):
         self.repo = repo
         self.manifest = manifest
         self.incorrect_branch = None  # type: Optional[Tuple[str,str]]
 
     def update(self, git_status: tsrc.git.Status) -> None:
+        """ Set self.incorrect_branch if the local git status
+        does not match the branch set in the manifest.
+        """
         expected_branch = self.repo.branch
         actual_branch = git_status.branch
         if actual_branch and actual_branch != expected_branch:
             self.incorrect_branch = (actual_branch, expected_branch)
 
     def describe(self) -> List[ui.Token]:
+        """ Return a list of tokens suitable for ui.info()`. """
         res = []  # type: List[ui.Token]
         incorrect_branch = self.incorrect_branch
         if incorrect_branch:
@@ -39,6 +45,8 @@ class ManifestStatus:
 
 
 class Status:
+    """ Wrapper class for both ManifestStatus and GitStatus"""
+
     def __init__(self, *, git: tsrc.git.Status, manifest: ManifestStatus):
         self.git = git
         self.manifest = manifest
@@ -49,7 +57,7 @@ CollectedStatuses = Dict[str, StatusOrError]
 
 
 def describe_status(status: StatusOrError) -> List[ui.Token]:
-    """ Returns a list of tokens suitable for ui.info() """
+    """ Return a list of tokens suitable for ui.info(). """
     if isinstance(status, tsrc.errors.MissingRepo):
         return [ui.red, "error: missing repo"]
     if isinstance(status, Exception):
@@ -65,6 +73,10 @@ def erase_last_line() -> None:
 
 
 class StatusCollector(tsrc.Task[tsrc.Repo]):
+    """ Implement a Task to collect local git status and
+    stats w.r.t the manifest for each repo.
+    """
+
     def __init__(self, workspace: tsrc.Workspace) -> None:
         self.workspace = workspace
         self.manifest = workspace.get_manifest()

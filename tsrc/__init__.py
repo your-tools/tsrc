@@ -1,6 +1,7 @@
-""" Common tools """
-
 __version__ = "2.2.0"
+
+# Re-exports objects from underlying packages (so that we can use
+# tsrc.Workspace instead of tsrc.workspace.Workspace).
 
 from .config import Config, parse_config  # noqa
 from .errors import Error, InvalidConfig  # noqa

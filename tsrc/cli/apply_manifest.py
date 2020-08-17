@@ -1,4 +1,4 @@
-""" Entry point for `tsrc apply-manifest` """
+""" Entry point for `tsrc apply-manifest`. """
 
 from typing import Any
 
@@ -8,11 +8,7 @@ from path import Path
 import cli_ui as ui
 
 import tsrc.manifest
-from tsrc.cli import (
-    workspace_arg,
-    workspace_action,
-    repos_from_config,
-)
+from tsrc.cli import workspace_arg, workspace_action, repos_from_config
 
 
 @workspace_arg  # type: ignore

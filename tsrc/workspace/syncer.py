@@ -42,6 +42,16 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         return repo.dest
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+        """ Synchronize a repo given its configuration in the manifest.
+
+        Always start by running `git fetch`, then either:
+
+        * try resetting the repo to the given tag or sha1 (abort
+          if the repo is dirty)
+
+        * or try merging the local branch with its upstream (abort if not
+          on on the correct branch, or if the merge is not fast-forward).
+        """
         ui.info_count(index, count, repo.dest)
         repo_path = self.workspace_path / repo.dest
         self.fetch(repo)

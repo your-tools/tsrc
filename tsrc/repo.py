@@ -1,4 +1,4 @@
-""" Repo objects """
+""" Repo objects. """
 from typing import Optional, List  # noqa
 
 import attr
@@ -7,6 +7,8 @@ import attr
 @attr.s(frozen=True)
 class Repo:
     dest = attr.ib()  # type: str
+    # Note: a repo has at least one remote called 'origin' by default -
+    # other remotes may be configured explicitly in the manifest file.
     remotes = attr.ib()  # type: List[Remote]
     branch = attr.ib(default="master")  # type: str
     sha1 = attr.ib(default=None)  # type: Optional[str]

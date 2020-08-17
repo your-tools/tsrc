@@ -1,4 +1,6 @@
-""" Helpers to run things on multiple repos and collect errors """
+""" Helpers to run the same task on multiple items and collect errors.
+
+"""
 
 import abc
 import sys
@@ -17,27 +19,45 @@ class ExecutorFailed(tsrc.Error):
 
 
 class Task(Generic[T], metaclass=abc.ABCMeta):
+    """ Represent an action to be performed. """
+
+    @abc.abstractmethod
+    def process(self, index: int, count: int, item: T) -> None:
+        """
+        Daughter classes should override this method to provide the code
+        that processes the item.
+
+        It's advised (but not required) to call `ui.info_count(index, count)` at
+        the beginning of the overwritten method.
+        """
+        pass
+
     def on_start(self, *, num_items: int) -> None:
+        """ Called when the executor starts. """
         pass
 
     def on_failure(self, *, num_errors: int) -> None:
+        """ Called when the executor ends and `num_errors` is not 0. """
         pass
 
     def on_success(self) -> None:
+        """ Called when the task succeeds on one item. """
         pass
 
     @abc.abstractmethod
     def display_item(self, item: T) -> str:
-        pass
-
-    @abc.abstractmethod
-    def process(self, index: int, count: int, item: T) -> None:
+        """ Called to describe the item that caused an error. """
         pass
 
 
 class SequentialExecutor(Generic[T]):
+    """ Run the task on all items one at a time, while collecting errors that
+    occur in the process.
+    """
+
     def __init__(self, task: Task[T]) -> None:
         self.task = task
+        # Collected errors as a list tuples: (item, caught_exception)
         self.errors = []  # type: List[Tuple[T, tsrc.Error]]
 
     def process(self, items: List[T]) -> None:

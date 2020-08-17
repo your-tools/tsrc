@@ -1,4 +1,4 @@
-""" Fixtures for tsrc testing """
+""" Fixtures for tsrc testing. """
 
 from typing import Any, Iterator
 from path import Path
@@ -13,7 +13,7 @@ from .helpers.cli import tsrc_cli  # noqa
 
 @pytest.fixture()
 def tmp_path(tmpdir: Any) -> Path:
-    """ Convert py.path.Local() to Path() objects """
+    """ Convert py.path.Local() to Path() objects. """
     return Path(tmpdir.strpath)
 
 
