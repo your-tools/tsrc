@@ -10,6 +10,21 @@ import tsrc.file_system
 
 
 @attr.s(frozen=True)
+class Repo:
+    dest = attr.ib()  # type: str
+    remotes = attr.ib()  # type: List[Remote]
+    branch = attr.ib(default="master")  # type: str
+    sha1 = attr.ib(default=None)  # type: Optional[str]
+    tag = attr.ib(default=None)  # type: Optional[str]
+    shallow = attr.ib(default=False)  # type: bool
+
+    @property
+    def clone_url(self) -> str:
+        assert self.remotes
+        return self.remotes[0].url
+
+
+@attr.s(frozen=True)
 class Remote:
     name = attr.ib()  # type: str
     url = attr.ib()  # type: str
@@ -53,18 +68,3 @@ class Link(FileSystemOperation):
 
     def __str__(self) -> str:
         return f"link from '{self.source}' to '{self.target}'"
-
-
-@attr.s(frozen=True)
-class Repo:
-    dest = attr.ib()  # type: str
-    remotes = attr.ib()  # type: List[Remote]
-    branch = attr.ib(default="master")  # type: str
-    sha1 = attr.ib(default=None)  # type: Optional[str]
-    tag = attr.ib(default=None)  # type: Optional[str]
-    shallow = attr.ib(default=False)  # type: bool
-
-    @property
-    def clone_url(self) -> str:
-        assert self.remotes
-        return self.remotes[0].url
