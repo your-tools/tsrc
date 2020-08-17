@@ -1,9 +1,51 @@
+import abc
 import os
 
+import attr
 import cli_ui as ui
 from path import Path
 
 import tsrc
+
+
+class FileSystemOperation(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def perform(self, workspace_path: Path) -> None:
+        pass
+
+    @abc.abstractmethod
+    def __str__(self) -> str:
+        pass
+
+
+@attr.s(frozen=True)
+class Copy(FileSystemOperation):
+    repo = attr.ib()  # type: str
+    src = attr.ib()  # type: str
+    dest = attr.ib()  # type: str
+
+    def perform(self, workspace_path: Path) -> None:
+        src_path = workspace_path / self.repo / self.src
+        dest_path = workspace_path / self.dest
+        src_path.copy(dest_path)
+
+    def __str__(self) -> str:
+        return f"copy from '{self.repo}/{self.src}' to '{self.dest}'"
+
+
+@attr.s(frozen=True)
+class Link(FileSystemOperation):
+    repo = attr.ib()  # type: str
+    source = attr.ib()  # type: str
+    target = attr.ib()  # type: str
+
+    def perform(self, workspace_path: Path) -> None:
+        source = workspace_path / self.source
+        target = Path(self.target)
+        safe_link(source=source, target=target)
+
+    def __str__(self) -> str:
+        return f"link from '{self.source}' to '{self.target}'"
 
 
 def safe_link(*, source: Path, target: Path) -> None:
