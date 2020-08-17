@@ -2,7 +2,7 @@
 
 from path import Path
 import ruamel.yaml
-import schema
+from schema import Schema, SchemaError
 from typing import Any, Dict, NewType, Optional
 
 import tsrc
@@ -10,9 +10,7 @@ import tsrc
 Config = NewType("Config", Dict[str, Any])
 
 
-def parse_config(
-    file_path: Path, config_schema: Optional[schema.Schema] = None
-) -> Config:
+def parse_config(file_path: Path, config_schema: Optional[Schema] = None) -> Config:
     try:
         contents = file_path.read_text()
     except OSError as os_error:
@@ -25,6 +23,6 @@ def parse_config(
     if config_schema:
         try:
             config_schema.validate(parsed)
-        except schema.SchemaError as schema_error:
+        except SchemaError as schema_error:
             raise tsrc.InvalidConfig(file_path, schema_error)
     return Config(parsed)
