@@ -20,12 +20,6 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         return repo.dest
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
-        try:
-            self.try_process_repo(repo)
-        except Exception:
-            raise tsrc.Error(repo.dest, ":", "Failed to configure remotes")
-
-    def try_process_repo(self, repo: tsrc.Repo) -> None:
         for remote in repo.remotes:
             existing_remote = self.get_remote(repo, remote.name)
             if existing_remote:
