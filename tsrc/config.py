@@ -10,7 +10,7 @@ import tsrc
 Config = NewType("Config", Dict[str, Any])
 
 
-def parse_config(file_path: Path, config_schema: Optional[Schema] = None) -> Config:
+def parse_config(file_path: Path, schema: Optional[Schema] = None) -> Config:
     try:
         contents = file_path.read_text()
     except OSError as os_error:
@@ -20,9 +20,9 @@ def parse_config(file_path: Path, config_schema: Optional[Schema] = None) -> Con
         parsed = yaml.load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
         raise tsrc.InvalidConfig(file_path, yaml_error)
-    if config_schema:
+    if schema:
         try:
-            config_schema.validate(parsed)
+            schema.validate(parsed)
         except SchemaError as schema_error:
             raise tsrc.InvalidConfig(file_path, schema_error)
     return Config(parsed)
