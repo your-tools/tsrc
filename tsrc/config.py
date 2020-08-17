@@ -3,14 +3,14 @@
 from path import Path
 import ruamel.yaml
 from schema import Schema, SchemaError
-from typing import Any, Dict, NewType, Optional
+from typing import Any, Dict, NewType
 
 import tsrc
 
 Config = NewType("Config", Dict[str, Any])
 
 
-def parse_config(file_path: Path, schema: Optional[Schema] = None) -> Config:
+def parse_config(file_path: Path, *, schema: Schema) -> Config:
     try:
         contents = file_path.read_text()
     except OSError as os_error:
@@ -20,9 +20,8 @@ def parse_config(file_path: Path, schema: Optional[Schema] = None) -> Config:
         parsed = yaml.load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
         raise tsrc.InvalidConfig(file_path, yaml_error)
-    if schema:
-        try:
-            schema.validate(parsed)
-        except SchemaError as schema_error:
-            raise tsrc.InvalidConfig(file_path, schema_error)
+    try:
+        schema.validate(parsed)
+    except SchemaError as schema_error:
+        raise tsrc.InvalidConfig(file_path, schema_error)
     return Config(parsed)

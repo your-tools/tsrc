@@ -168,7 +168,7 @@ def load(manifest_path: Path) -> Manifest:
             schema.Optional("groups"): {str: group_schema},
         }
     )
-    parsed = tsrc.parse_config(manifest_path, manifest_schema)
+    parsed = tsrc.parse_config(manifest_path, schema=manifest_schema)
     res = Manifest()
     res.apply_config(parsed)
     return res
