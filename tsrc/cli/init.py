@@ -1,4 +1,4 @@
-""" Entry point for `tsrc init` """
+""" Entry point for `tsrc init`. """
 from typing import List, Optional
 import os
 

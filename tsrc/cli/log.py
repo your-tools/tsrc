@@ -1,4 +1,4 @@
-""" Entry point for tsrc log """
+""" Entry point for `tsrc log`. """
 
 from typing import Any
 
@@ -18,7 +18,7 @@ from tsrc.cli import (
 @arg("--from", dest="from", metavar="FROM", help="from ref")  # type: ignore
 @arg("--to", help="to ref")  # type: ignore
 def log(workspace: tsrc.Workspace, **kwargs: Any) -> None:
-    """ show a combine git log for several repositories """
+    """ show a combined git log for several repositories """
     from_: str = kwargs["from"]
     to: str = kwargs["to"] or "HEAD"
 

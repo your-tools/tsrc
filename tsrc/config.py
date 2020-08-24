@@ -2,17 +2,20 @@
 
 from path import Path
 import ruamel.yaml
-import schema
-from typing import Any, Dict, NewType, Optional
+from schema import Schema, SchemaError
+from typing import Any, Dict, NewType
 
 import tsrc
 
 Config = NewType("Config", Dict[str, Any])
 
 
-def parse_config(
-    file_path: Path, config_schema: Optional[schema.Schema] = None
-) -> Config:
+def parse_config(file_path: Path, *, schema: Schema) -> Config:
+    """ Parse a config given a file path and a schema."""
+
+    # Note: we try and wrap any raised exception into a generic
+    # tsrc.InvalidConfig error, so that error messages always contains
+    # the path of the file that caused the error.
     try:
         contents = file_path.read_text()
     except OSError as os_error:
@@ -22,9 +25,8 @@ def parse_config(
         parsed = yaml.load(contents)
     except ruamel.yaml.error.YAMLError as yaml_error:
         raise tsrc.InvalidConfig(file_path, yaml_error)
-    if config_schema:
-        try:
-            config_schema.validate(parsed)
-        except schema.SchemaError as schema_error:
-            raise tsrc.InvalidConfig(file_path, schema_error)
+    try:
+        schema.validate(parsed)
+    except SchemaError as schema_error:
+        raise tsrc.InvalidConfig(file_path, schema_error)
     return Config(parsed)

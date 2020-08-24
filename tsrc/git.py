@@ -48,7 +48,16 @@ def assert_working_path(path: Path) -> None:
 
 
 class Status:
+    """ Represent a status of a git repo.
+
+    Usage:
+    >>> status = Status(repo_path)
+    >>> status.update()
+    """
+
     def __init__(self, working_path: Path) -> None:
+        # Note: at this point no information is known, and all
+        # attributes have their default value.
         self.empty = False
         self.working_path = working_path
         self.untracked = 0
@@ -63,6 +72,8 @@ class Status:
         self.sha1 = None  # type: Optional[str]
 
     def update(self) -> None:
+        # Try and gather as many information about the git repository as
+        # possible.
         try:
             self.update_sha1()
         except CommandError:
@@ -119,6 +130,7 @@ class Status:
                 self.dirty = True
 
     def describe(self) -> List[ui.Token]:
+        """ Return a list of tokens suitable for ui.info. """
         res = []  # type: List[ui.Token]
         if self.empty:
             return [ui.red, "empty"]
@@ -139,12 +151,19 @@ class Status:
 
     @staticmethod
     def commit_string(number: int) -> str:
+        """ Describe the number of commit with correct pluralization. """
+
         if number == 1:
             return "commit"
         else:
             return "commits"
 
     def describe_position(self) -> List[ui.Token]:
+        """ Return a status looking like `↑2↓1` if the branch
+        is 2 commits ahead and one commit behind its upstream,
+        as a list of tokens suitable for `ui.info()`.
+
+        """
         res = []  # type: List[ui.Token]
         if self.ahead != 0:
             n_commits = Status.commit_string(self.ahead)
@@ -157,6 +176,7 @@ class Status:
         return res
 
     def describe_dirty(self) -> List[ui.Token]:
+        """ Add the `(dirty)` colored string if the repo is dirty. """
         res = []  # type: List[ui.Token]
         if self.dirty:
             res += [ui.red, "(dirty)", ui.reset]
@@ -164,7 +184,7 @@ class Status:
 
 
 def run(working_path: Path, *cmd: str, check: bool = True) -> None:
-    """ Run git `cmd` in given `working_path`
+    """ Run git `cmd` in given `working_path`.
 
     Raise GitCommandError if return code is non-zero and `check` is True.
     """
@@ -179,11 +199,11 @@ def run(working_path: Path, *cmd: str, check: bool = True) -> None:
 
 
 def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:
-    """ Run git `cmd` in given `working_path`, capturing the output
+    """ Run git `cmd` in given `working_path`, capturing the output.
 
     Return a tuple (returncode, output).
 
-    Raise GitCommandError if return code is non-zero and check is True
+    Raise GitCommandError if return code is non-zero and check is True.
     """
     assert_working_path(working_path)
     git_cmd = list(cmd)

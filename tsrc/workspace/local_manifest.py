@@ -6,8 +6,19 @@ import tsrc.manifest
 
 
 class LocalManifest:
-    """ Represent a manifest that has been cloned locally inside the
-    hidden <workspace>/.tsrc/manifest
+    """ Represent a manifest repository that has been cloned locally
+    inside `<workspace>/.tsrc/manifest`.
+
+    Usage:
+
+    >>> local_manifest = LocalManifest(Path(workspace / ".tsrc/manifest")
+
+    # First, update the cloned repository using a remote git URL and a
+    # branch:
+    >>> manifest.update("git@acme.com/manifest.git", branch="devel")
+
+    # Then, read the `manifest.yml` file from the clone repository:
+    >>> manifest = local_manifest.get_manifest()
 
     """
 

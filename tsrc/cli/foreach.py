@@ -1,4 +1,4 @@
-""" Entry point for tsrc foreach """
+""" Entry point for `tsrc foreach`. """
 
 from typing import Any, List, Union
 from argh import arg
@@ -10,10 +10,7 @@ from path import Path
 import cli_ui as ui
 
 import tsrc
-from tsrc.cli import (
-    repos_arg,
-    repos_action,
-)
+from tsrc.cli import repos_arg, repos_action
 
 EPILOG = textwrap.dedent(
     """\
@@ -39,6 +36,10 @@ class CouldNotStartProcess(tsrc.Error):
 
 
 class CmdRunner(tsrc.Task[tsrc.Repo]):
+    """
+    Implements a Task that runs the same command on several repositories.
+    """
+
     def __init__(
         self,
         workspace_path: Path,
@@ -90,7 +91,9 @@ def die(message: str) -> None:
 @repos_arg
 @repos_action
 @arg("cmd", help="command to run", nargs="*", default=None)  # type: ignore
-@arg("-c", help="use a shell to run the command", dest="shell", default=False)  # type: ignore
+@arg(  # type: ignore
+    "-c", help="use a shell to run the command", dest="shell", default=False
+)
 def foreach(workspace: tsrc.Workspace, *args: Any, **kwargs: Any) -> None:
     cmd: List[str] = args  # type: ignore
     shell: bool = kwargs["shell"]
@@ -100,8 +103,8 @@ def foreach(workspace: tsrc.Workspace, *args: Any, **kwargs: Any) -> None:
     #  and
     #  $ tsrc foreach -- some-cmd --some-opts
     #
-    # Due to argparse limitations, cmd will always be a list,
-    # but we need a *string* when using 'shell=True'
+    # Due to argparse limitations, `cmd` will always be a list,
+    # but we need a *string* when using 'shell=True'.
     #
     # So transform use the value from `cmd` and `shell` to build:
     # * `subprocess_cmd`, suitable as argument to pass to subprocess.run()

@@ -7,6 +7,15 @@ import tsrc.executor
 
 
 class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
+    """
+    For each repository:
+
+      * look for the remote configured in the manifest,
+      * add any missing remote,
+      * if a remote is found but with an incorrect URL, update its URL.
+
+    """
+
     def __init__(self, workspace_path: Path) -> None:
         self.workspace_path = workspace_path
 
@@ -20,12 +29,6 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
         return repo.dest
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
-        try:
-            self.try_process_repo(repo)
-        except Exception:
-            raise tsrc.Error(repo.dest, ":", "Failed to configure remotes")
-
-    def try_process_repo(self, repo: tsrc.Repo) -> None:
         for remote in repo.remotes:
             existing_remote = self.get_remote(repo, remote.name)
             if existing_remote:

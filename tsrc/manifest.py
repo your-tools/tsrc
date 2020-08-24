@@ -1,4 +1,4 @@
-""" manifests for tsrc """
+""" Manifest support. """
 
 # TODO: check for absolute paths in _handle_copies, _handle_links
 
@@ -17,6 +17,11 @@ class RepoNotFound(tsrc.Error):
 
 
 class Manifest:
+    """ Contains a list of `tsrc.Repo` instances, and optionally
+    a group list.
+
+    """
+
     def __init__(self) -> None:
         self._repos = []  # type: List[tsrc.Repo]
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
@@ -155,6 +160,10 @@ def validate_repo(data: Any) -> None:
 
 
 def load(manifest_path: Path) -> Manifest:
+    """ Main entry point: return a manifest instance by parsing
+    a `manifest.yml` file.
+
+    """
     remote_git_server_schema = {"url": str}
     repo_schema = schema.Use(validate_repo)
     group_schema = {"repos": [str], schema.Optional("includes"): [str]}
@@ -168,7 +177,7 @@ def load(manifest_path: Path) -> Manifest:
             schema.Optional("groups"): {str: group_schema},
         }
     )
-    parsed = tsrc.parse_config(manifest_path, manifest_schema)
+    parsed = tsrc.parse_config(manifest_path, schema=manifest_schema)
     res = Manifest()
     res.apply_config(parsed)
     return res
