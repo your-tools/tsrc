@@ -16,6 +16,7 @@ documentation = "https://tankerhq.github.io/tsrc"
 python = "^3.6"
 
 attrs = "^19.3.0"
+argh = "^0.26.2"
 cli-ui = "^0.11.0"
 colored_traceback = "^0.3.0"
 path = "^13.1.0"
@@ -24,7 +25,6 @@ requests = "^2.22.0"
 schema = "^0.7.1"
 tabulate = "^0.8.6"
 unidecode = "^1.1.1"
-argh = "^0.26.2"
 
 [tool.poetry.dev-dependencies]
 # Tests
