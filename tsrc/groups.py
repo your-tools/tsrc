@@ -43,7 +43,7 @@ class UnknownElement(GroupError):
 
 
 class GroupList(Generic[T]):
-    """ Usage:
+    """Usage:
 
     >>> group_list = GroupList()
     >>> group_list.add("group1", ["foo", "bar"])

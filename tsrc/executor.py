@@ -51,7 +51,7 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
 
 
 class SequentialExecutor(Generic[T]):
-    """ Run the task on all items one at a time, while collecting errors that
+    """Run the task on all items one at a time, while collecting errors that
     occur in the process.
     """
 

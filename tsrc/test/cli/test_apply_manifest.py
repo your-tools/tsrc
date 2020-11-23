@@ -8,7 +8,7 @@ from path import Path
 def test_apply_manifest_adds_new_repo(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
 
     * Create a manifest with one repo
     * Create a workspace using `tsrc init`

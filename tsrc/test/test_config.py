@@ -48,7 +48,7 @@ def test_invalid_schema(tmp_path: Path) -> None:
 
 
 def test_use_pure_python_types(tmp_path: Path) -> None:
-    """ Check that parse_config() returns pure Python dicts,
+    """Check that parse_config() returns pure Python dicts,
     not an OrderedDict or yaml's CommentedMap
     """
     foo_yml = tmp_path / "foo.yml"

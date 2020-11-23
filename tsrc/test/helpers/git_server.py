@@ -85,7 +85,7 @@ class BareRepo:
 
 
 class ManifestHandler:
-    """ Contains methods to update repositories configuration
+    """Contains methods to update repositories configuration
     in the manifest repo.
 
     Data is written directly to the underlying BareRepo instance,

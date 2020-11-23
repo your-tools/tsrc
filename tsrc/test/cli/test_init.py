@@ -65,7 +65,7 @@ def test_init_maint_manifest_branch(
 def test_copy_files_happy(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'top' repo
     * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
     * Push `top.cmake` to the `top` repo
@@ -90,7 +90,7 @@ def test_copy_files_source_does_not_exist(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'top' repo
     * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
     * Check that `tsrc init` fails (the `top.cmake` file is missing from the
@@ -107,7 +107,7 @@ def test_copy_files_source_does_not_exist(
 def test_create_symlink(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'foo' repo
     * Push 'foo.txt' to the 'foo' repo
     * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
@@ -129,7 +129,7 @@ def test_create_symlink(
 def test_uses_correct_branch_for_repo(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a foo repo with two branches `master` and `next`
     * Set the branch to `next` in the manifest
     * Init the repository
@@ -148,7 +148,7 @@ def test_uses_correct_branch_for_repo(
 
 
 def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest containing an empty repo
     * Check that `tsrc init` fails but does not crash
     """
@@ -163,7 +163,7 @@ def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
 def test_resets_to_tag(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a repository containing a v1.0 tag
     * Add a commit on top of the v1.0 tag
     * Configure the manifest to specify that the repo
@@ -232,7 +232,7 @@ def test_clone_all_repos(
 def test_use_specific_groups(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * the manifest contains one repo 'other'
     * the 'other' repo is configured with a file copy
 

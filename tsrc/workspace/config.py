@@ -6,7 +6,7 @@ import ruamel.yaml
 
 @attr.s
 class WorkspaceConfig:
-    """ Persistent configuration of the workspace.
+    """Persistent configuration of the workspace.
 
     Stored in <workspace>/.tsrc/config.yml, and can be
     edited by hand to use a different set of groups

@@ -6,7 +6,7 @@ import tsrc.manifest
 
 
 class LocalManifest:
-    """ Represent a manifest repository that has been cloned locally
+    """Represent a manifest repository that has been cloned locally
     inside `<workspace>/.tsrc/manifest`.
 
     Usage:

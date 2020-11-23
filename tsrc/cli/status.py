@@ -26,7 +26,7 @@ class ManifestStatus:
         self.incorrect_branch = None  # type: Optional[Tuple[str,str]]
 
     def update(self, git_status: tsrc.git.Status) -> None:
-        """ Set self.incorrect_branch if the local git status
+        """Set self.incorrect_branch if the local git status
         does not match the branch set in the manifest.
         """
         expected_branch = self.repo.branch
@@ -73,7 +73,7 @@ def erase_last_line() -> None:
 
 
 class StatusCollector(tsrc.Task[tsrc.Repo]):
-    """ Implement a Task to collect local git status and
+    """Implement a Task to collect local git status and
     stats w.r.t the manifest for each repo.
     """
 

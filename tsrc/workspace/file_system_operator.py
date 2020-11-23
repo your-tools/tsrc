@@ -8,7 +8,7 @@ import tsrc.executor
 
 
 class FileSystemOperator(tsrc.executor.Task[tsrc.FileSystemOperation]):
-    """ Implement file system operations to be run once every missing
+    """Implement file system operations to be run once every missing
     repo has been cloned, like copying files or creating symlinks.
 
     """

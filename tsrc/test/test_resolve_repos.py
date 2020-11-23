@@ -45,13 +45,13 @@ def repo_names(repos: List[Repo]) -> List[str]:
 
 
 def test_no_args_no_config_no_default_group(tmp_path: Path) -> None:
-    """ Scenario:
-        * Nothing passed on the command line
-        * No default group in the manifest
-        * No workspace config
+    """Scenario:
+    * Nothing passed on the command line
+    * No default group in the manifest
+    * No workspace config
 
-        Should return all repos in the manifest
-        """
+    Should return all repos in the manifest
+    """
     create_manifest(tmp_path, repos=["foo", "bar"])
     workspace = create_workspace(tmp_path)
     actual = resolve_repos(workspace, groups=None, all_cloned=False)
@@ -59,14 +59,14 @@ def test_no_args_no_config_no_default_group(tmp_path: Path) -> None:
 
 
 def test_no_args_no_config_default_group(tmp_path: Path) -> None:
-    """ Scenario:
-        * Nothing passed on the command line
-        * A default group in the manifest containing 'foo'
-        * A repo named 'outside' in the manifest - not in any group
-        * No workspace config
+    """Scenario:
+    * Nothing passed on the command line
+    * A default group in the manifest containing 'foo'
+    * A repo named 'outside' in the manifest - not in any group
+    * No workspace config
 
-        Should use the default group
-        """
+    Should use the default group
+    """
     groups = {
         "default": {"repos": ["foo"]},
     }
@@ -78,14 +78,14 @@ def test_no_args_no_config_default_group(tmp_path: Path) -> None:
 
 
 def test_no_args_workspace_configured_with_all_repos(tmp_path: Path) -> None:
-    """ Scenario:
-        * Nothing passed on the command line
-        * A default group in the manifest containing foo
-        * A repo named 'outside' in the manifest - not in any group
-        * Workspace configured with clone_all_repos: True
+    """Scenario:
+    * Nothing passed on the command line
+    * A default group in the manifest containing foo
+    * A repo named 'outside' in the manifest - not in any group
+    * Workspace configured with clone_all_repos: True
 
-        Should return everything
-        """
+    Should return everything
+    """
     groups = {
         "default": {"repos": ["foo"]},
     }
@@ -97,14 +97,14 @@ def test_no_args_workspace_configured_with_all_repos(tmp_path: Path) -> None:
 
 
 def test_no_args_workspace_configured_with_some_groups(tmp_path: Path) -> None:
-    """ Scenario:
-        * Nothing passed on the command line
-        * A group named 'group1' in the manifest containing foo
-        * A group named 'group2' in the manifest containing bar
-        * Workspace configured with repo_groups=[group1]
+    """Scenario:
+    * Nothing passed on the command line
+    * A group named 'group1' in the manifest containing foo
+    * A group named 'group2' in the manifest containing bar
+    * Workspace configured with repo_groups=[group1]
 
-        Should return foo from group1
-        """
+    Should return foo from group1
+    """
     groups = {
         "group1": {"repos": ["foo"]},
         "group2": {"repos": ["bar"]},
@@ -117,14 +117,14 @@ def test_no_args_workspace_configured_with_some_groups(tmp_path: Path) -> None:
 
 
 def test_groups_requested(tmp_path: Path) -> None:
-    """ Scenario:
-        * A group named 'group1' in the manifest containing foo
-        * A group named 'group2' in the manifest containing bar
-        * Workspace configured with repo_groups=[group1, group2]
-        * --group group1 used on the command line
+    """Scenario:
+    * A group named 'group1' in the manifest containing foo
+    * A group named 'group2' in the manifest containing bar
+    * Workspace configured with repo_groups=[group1, group2]
+    * --group group1 used on the command line
 
-        Should return repos from group1
-        """
+    Should return repos from group1
+    """
     groups = {
         "group1": {"repos": ["foo"]},
         "group2": {"repos": ["bar"]},
@@ -137,15 +137,15 @@ def test_groups_requested(tmp_path: Path) -> None:
 
 
 def test_all_cloned_requested(tmp_path: Path) -> None:
-    """ Scenario:
-        * A group named 'group1' in the manifest containing foo and bar
-        * A repo named 'other' in the manifest
-        * Workspace configured with repo_groups=[group1]
-        * tmp_path / foo and tmp_path / other exists, but not tmp_path / bar
-        * --all-cloned used on the command line
+    """Scenario:
+    * A group named 'group1' in the manifest containing foo and bar
+    * A repo named 'other' in the manifest
+    * Workspace configured with repo_groups=[group1]
+    * tmp_path / foo and tmp_path / other exists, but not tmp_path / bar
+    * --all-cloned used on the command line
 
-        Should return foo and other
-        """
+    Should return foo and other
+    """
     groups = {
         "group1": {"repos": ["foo", "bar"]},
     }

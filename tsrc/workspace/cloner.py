@@ -56,7 +56,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         return repo.remotes[0]
 
     def clone_repo(self, repo: tsrc.Repo) -> None:
-        """ Clone a missing repo.
+        """Clone a missing repo.
 
         Note: must use the correct remote(s) and branch when cloning,
         *and* must reset the repo to the correct state if `tag` or

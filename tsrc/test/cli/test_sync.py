@@ -13,7 +13,7 @@ from tsrc.test.helpers.git_server import GitServer
 
 
 def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
-    """" Scenario:
+    """ " Scenario:
     * Create a manifest with two repos (foo and bar)
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -38,7 +38,7 @@ def test_sync_with_errors(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """" Scenario:
+    """ " Scenario:
     * Create a manifest with two repos (foo and bar)
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -65,7 +65,7 @@ def test_sync_with_errors(
 def test_sync_finds_root(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path, monkeypatch: Any
 ) -> None:
-    """ Check that you can run `tsrc sync` from inside a cloned
+    """Check that you can run `tsrc sync` from inside a cloned
     repository
 
     """
@@ -106,7 +106,7 @@ def change_workspace_manifest_branch(workspace_path: Path, branch: str) -> None:
 def test_switching_manifest_branch(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Initialize aw workspace with a manifest on the master branch
     * Create a new repo bar, on the 'devel' branch of the manifest
     * Run `tsrc sync`: bar should not get cloned
@@ -137,15 +137,15 @@ def test_sync_not_on_master(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """"
-   Scenario:
-   * Create a manifest with two repos, foo and bar
-   * Initialize a workspace from this manifest
-   * Checkout a different branch on foo, tracking an existing remote
-   * Run `tsrc sync`
-   * Check that:
-      * foo is updated
-      * but the command fails because foo was not an the expected branch
+    """ "
+    Scenario:
+    * Create a manifest with two repos, foo and bar
+    * Initialize a workspace from this manifest
+    * Checkout a different branch on foo, tracking an existing remote
+    * Run `tsrc sync`
+    * Check that:
+       * foo is updated
+       * but the command fails because foo was not an the expected branch
     """
     git_server.add_repo("foo")
     git_server.add_repo("bar")
@@ -244,7 +244,7 @@ def test_copies_preserve_stat(
 def test_update_symlink(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'foo' repo
     * Push 'foo.txt' to the 'foo' repo
     * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
@@ -276,7 +276,7 @@ def test_changing_branch(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo
     * Initialize a workspace from this manifest
     * Create a new branch named `next` on the foo repo
@@ -299,7 +299,7 @@ def test_changing_branch(
 def test_tags_are_not_updated(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo, frozen at the `v0.1` tag
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -325,7 +325,7 @@ def test_tags_are_not_updated(
 def test_sha1s_are_not_updated(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo, frozen at a given revision
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -351,7 +351,7 @@ def test_sha1s_are_not_updated(
 def test_tags_are_updated_when_clean(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo, frozen at the v0.1 tag
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -381,7 +381,7 @@ def test_tags_are_updated_when_clean(
 def test_sha1s_are_updated_when_clean(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo, frozen at an initial revision
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -410,7 +410,7 @@ def test_sha1s_are_updated_when_clean(
 def test_tags_are_skipped_when_not_clean_tags(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo, frozen at the v0.1 tag
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -441,7 +441,7 @@ def test_tags_are_skipped_when_not_clean_tags(
 def test_sha1s_are_skipped_when_not_clean(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with a foo repo, frozen at an initial revision
     * Initialize a workspace from this manifest
     * Push a new file to the foo repo
@@ -472,7 +472,7 @@ def test_sha1s_are_skipped_when_not_clean(
 def test_sync_uses_group_from_config_by_default(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest containing:
       * a group named 'foo'  containing the repos 'bar'  and 'baz'
       * a repo named 'other' not in any group
@@ -501,7 +501,7 @@ def test_sync_uses_group_from_config_by_default(
 def test_fetch_additional_remotes(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest containing a foo repo with two remotes
     * Initialize a workspace from this manifest
     * Update the second remote
@@ -526,7 +526,7 @@ def test_fetch_additional_remotes(
 def test_adding_remotes(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest containing a foo repo with one remote
     * Initialize a workspace from this manifest
     * Add an 'other' remote to the foo repo in the manifest
@@ -549,7 +549,7 @@ def test_adding_remotes(
 def test_changing_remote_url(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest containing a foo repo with one remote
     * Initialize a workspace from this manifest
     * Change the url in the manifest
@@ -571,13 +571,13 @@ def test_changing_remote_url(
 def test_sync_with_singular_remote(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
-     * Create a manifest that contains one repo with two remotes
-       ('origin' and 'vpn')
-     * Marke sure that the 'origin' URL is valid but the 'vpn'
-       URL is not.
-     * Run 'tsrc init -r origin'
-     * Check that 'tsrc sync' does not try and fetch the 'vpn' remote
+    """Scenario:
+    * Create a manifest that contains one repo with two remotes
+      ('origin' and 'vpn')
+    * Marke sure that the 'origin' URL is valid but the 'vpn'
+      URL is not.
+    * Run 'tsrc init -r origin'
+    * Check that 'tsrc sync' does not try and fetch the 'vpn' remote
     """
     foo_url = git_server.add_repo("foo")
     vpn_url = "/does/not/exist"
@@ -597,7 +597,7 @@ class TestSyncWithGroups:
     def test_ignore_other_groups(
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
-        """ Scenario:
+        """Scenario:
         * Create a manifest containing:
           * a group named 'group1' containing the repos 'foo'  and 'bar'
           * a group named 'group2' containing the repo 'baz'
@@ -644,16 +644,16 @@ class TestSyncWithGroups:
     def test_honors_new_included_groups(
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
-        """ Scenario:
-       * Create a manifest containing:
-         * a group named 'group1'  containing the repos 'foo'  and 'bar'
-         * a group named 'group2' containing the repo 'baz'
-       * Initialize a workspace from this manifest using the 'group1' and 'group2' groups
-       * Create a new group 'inc' containing the repo 'quux'
-       * Update 'group1' group to include 'inc'
-       * Run `tsrc sync --group 'group1'
-       * Check that `quux` is cloned
-       """
+        """Scenario:
+        * Create a manifest containing:
+          * a group named 'group1'  containing the repos 'foo'  and 'bar'
+          * a group named 'group2' containing the repo 'baz'
+        * Initialize a workspace from this manifest using the 'group1' and 'group2' groups
+        * Create a new group 'inc' containing the repo 'quux'
+        * Update 'group1' group to include 'inc'
+        * Run `tsrc sync --group 'group1'
+        * Check that `quux` is cloned
+        """
         git_server.add_group("group1", ["foo", "bar"])
         git_server.add_group("group2", ["baz"])
         tsrc_cli.run("init", git_server.manifest_url, "--groups", "group1", "group2")
@@ -669,7 +669,7 @@ class TestSyncWithGroups:
     def test_can_use_new_group(
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
-        """ Scenario:
+        """Scenario:
         * Create a manifest containing:
           * a group named 'default'  containing the repos 'foo'  and 'bar'
         * Initialize a workspace from this manifest using the default group
@@ -702,7 +702,7 @@ class TestSyncWithGroups:
     def test_non_existing_group(
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
-        """ Scenario:
+        """Scenario:
         * Create a manifest contaning :
           * a group named 'group1'  containing the repo 'foo'
           * a group named 'group2'  containing the repo 'bar'
@@ -720,7 +720,7 @@ class TestSyncWithGroups:
     def test_group_not_cloned(
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
-        """ Scenario:
+        """Scenario:
         * Create a manifest contaning :
           * a group named 'group1'  containing the repo 'foo'
           * a group named 'group2'  containing the repo 'bar'

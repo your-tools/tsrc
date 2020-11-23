@@ -7,9 +7,7 @@ DOC_URL = "https://TankerHQ.github.io/tsrc/ref/formats/"
 
 
 class Error(Exception):
-    """ Base class for our own errors.
-
-    """
+    """Base class for our own errors."""
 
     def __init__(self, *args: Any) -> None:
         super().__init__(self, *args)
