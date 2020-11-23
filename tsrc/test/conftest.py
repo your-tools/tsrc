@@ -1,10 +1,10 @@
 """ Fixtures for tsrc testing. """
 
+from pathlib import Path
 from typing import Any, Iterator
 
 import pytest
 from cli_ui.tests import MessageRecorder
-from path import Path
 
 import tsrc
 
@@ -20,7 +20,9 @@ def tmp_path(tmpdir: Any) -> Path:
 
 @pytest.fixture
 def workspace_path(tmp_path: Path) -> Path:
-    return (tmp_path / "work").mkdir()
+    res = tmp_path / "work"
+    res.mkdir()
+    return res
 
 
 @pytest.fixture

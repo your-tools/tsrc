@@ -1,8 +1,8 @@
+from pathlib import Path
 from typing import List, Optional, Tuple  # noqa
 
 import attr
 import cli_ui as ui
-from path import Path
 
 import tsrc
 import tsrc.executor

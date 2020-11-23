@@ -1,5 +1,7 @@
+import shutil
+from pathlib import Path
+
 from cli_ui.tests import MessageRecorder
-from path import Path
 
 import tsrc.cli
 from tsrc.test.helpers.cli import CLI
@@ -157,7 +159,7 @@ def test_status_with_missing_repos(
     # shutil.rmtree has trouble removing read-only
     # files in the .git repo, but this won't affect
     # the outcome of the test anyway
-    (workspace_path / "foo").rmtree(ignore_errors=True)
+    shutil.rmtree(workspace_path / "foo", ignore_errors=True)
 
     tsrc_cli.run("status")
 

@@ -1,10 +1,10 @@
 import textwrap
+from pathlib import Path
 
 import mock
 import pytest
 import ruamel.yaml
 import schema
-from path import Path
 
 import tsrc
 

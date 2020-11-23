@@ -4,12 +4,12 @@ that contains valid git URLs.
 It is mostly used by the end-to-end tests in tsrc/test/cli/.
 """
 
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pygit2
 import pytest
 import ruamel.yaml
-from path import Path
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]
@@ -193,7 +193,7 @@ class GitServer:
         self.manifest = ManifestHandler(manifest_repo)
 
     def get_url(self, name: str) -> str:
-        return str("file://" + (self.bare_path / name))
+        return f"file://{self.bare_path / name}"
 
     def _get_repo(self, name: str) -> BareRepo:
         repo_path = self.bare_path / name
@@ -206,7 +206,7 @@ class GitServer:
         assert (
             not repo_path.exists()
         ), f"cannot create repo in {repo_path}: this folder already exits"
-        repo_path.makedirs()
+        repo_path.mkdir(parents=True, exist_ok=True)
         repo = BareRepo.create(repo_path, initial_branch=branch, empty=empty)
         return repo
 

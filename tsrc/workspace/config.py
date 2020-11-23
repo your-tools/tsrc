@@ -1,8 +1,8 @@
+from pathlib import Path
 from typing import List, Optional
 
 import attr
 import ruamel.yaml
-from path import Path
 
 
 @attr.s
@@ -35,7 +35,7 @@ class WorkspaceConfig:
         return cls(**parsed)
 
     def save_to_file(self, cfg_path: Path) -> None:
-        cfg_path.parent.makedirs_p()
+        cfg_path.parent.mkdir(parents=True, exist_ok=True)
         yaml = ruamel.yaml.YAML(typ="rt")
         yaml.register_class(Path)
         as_dict = attr.asdict(self)

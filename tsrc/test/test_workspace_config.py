@@ -1,4 +1,4 @@
-from path import Path
+from pathlib import Path
 
 from tsrc.workspace.config import WorkspaceConfig
 

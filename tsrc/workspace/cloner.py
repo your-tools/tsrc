@@ -1,8 +1,8 @@
 import textwrap
+from pathlib import Path
 from typing import Optional
 
 import cli_ui as ui
-from path import Path
 
 import tsrc
 import tsrc.executor
@@ -62,8 +62,9 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         `sha1` were set in the manifest configuration.
         """
         repo_path = self.workspace_path / repo.dest
-        parent, name = repo_path.splitpath()
-        parent.makedirs_p()
+        parent = repo_path.parent
+        name = repo_path.name
+        parent.mkdir(parents=True, exist_ok=True)
         remote = self._choose_remote(repo)
         remote_name = remote.name
         remote_url = remote.url

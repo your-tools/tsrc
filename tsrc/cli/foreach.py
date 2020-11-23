@@ -3,11 +3,11 @@
 import subprocess
 import sys
 import textwrap
+from pathlib import Path
 from typing import Any, List, Union
 
 import cli_ui as ui
 from argh import arg
-from path import Path
 
 import tsrc
 from tsrc.cli import repos_action, repos_arg

@@ -1,9 +1,9 @@
 """ Parse tsrc config files """
 
+from pathlib import Path
 from typing import Any, Dict, NewType
 
 import ruamel.yaml
-from path import Path
 from schema import Schema, SchemaError
 
 import tsrc

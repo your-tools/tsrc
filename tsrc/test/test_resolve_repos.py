@@ -1,7 +1,7 @@
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import ruamel.yaml
-from path import Path
 
 from tsrc.cli import resolve_repos
 from tsrc.repo import Repo
@@ -18,9 +18,11 @@ def create_manifest(
     for name in repos:
         config["repos"].append({"dest": name, "url": f"git@acme.org:{name}"})
     manifest_path = tmp_path / ".tsrc/manifest"
-    manifest_path.makedirs_p()
+    manifest_path.mkdir(parents=True, exist_ok=True)
     dump_path = manifest_path / "manifest.yml"
-    dump_path.write_text(ruamel.yaml.dump(config))
+    to_write = ruamel.yaml.dump(config)
+    assert to_write
+    dump_path.write_text(to_write)
 
 
 def create_workspace(
@@ -152,8 +154,8 @@ def test_all_cloned_requested(tmp_path: Path) -> None:
     create_manifest(tmp_path, repos=["foo", "bar", "other"], groups=groups)
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
 
-    (tmp_path / "foo").makedirs_p()
-    (tmp_path / "other").makedirs_p()
+    (tmp_path / "foo").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "other").mkdir(parents=True, exist_ok=True)
 
     actual = resolve_repos(workspace, groups=None, all_cloned=True)
     assert repo_names(actual) == ["foo", "other"]

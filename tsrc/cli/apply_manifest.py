@@ -1,10 +1,10 @@
 """ Entry point for `tsrc apply-manifest`. """
 
+from pathlib import Path
 from typing import Any
 
 import cli_ui as ui
 from argh import arg
-from path import Path
 
 import tsrc.manifest
 from tsrc.cli import repos_from_config, workspace_action, workspace_arg

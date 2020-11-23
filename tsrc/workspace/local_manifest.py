@@ -1,6 +1,5 @@
+from pathlib import Path
 from typing import List, Optional, Tuple, cast  # noqa
-
-from path import Path
 
 import tsrc
 import tsrc.manifest
@@ -50,6 +49,7 @@ class LocalManifest:
         tsrc.git.run(self.clone_path, "reset", "--hard", ref)
 
     def _clone_manifest(self, url: str, *, branch: str) -> None:
-        parent, name = self.clone_path.splitpath()
-        parent.makedirs_p()
+        parent = self.clone_path.parent
+        name = self.clone_path.name
+        parent.mkdir(parents=True, exist_ok=True)
         tsrc.git.run(self.clone_path.parent, "clone", url, "--branch", branch, name)

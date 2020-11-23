@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import pytest
 from cli_ui.tests import MessageRecorder
-from path import Path
 
 import tsrc.git
 from tsrc.test.helpers.cli import CLI

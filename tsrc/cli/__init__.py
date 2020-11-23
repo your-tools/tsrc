@@ -2,11 +2,11 @@
 
 import functools
 import os
+from pathlib import Path
 from typing import Any, Callable, List, Optional
 
 import cli_ui as ui
 from argh import arg
-from path import Path
 
 import tsrc
 from tsrc.manifest import Manifest

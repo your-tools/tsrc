@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 from typing import Any
 
 from cli_ui.tests import MessageRecorder
-from path import Path
 
 import tsrc.cli
 from tsrc.groups import GroupNotFound
@@ -266,7 +266,7 @@ def test_update_symlink(
 
     actual_link = workspace_path / "foo.link"
     assert actual_link.exists()
-    assert actual_link.readlink() == os.path.normpath("foo/bar.txt")
+    assert os.readlink(str(actual_link)) == os.path.normpath("foo/bar.txt")
 
 
 def test_changing_branch(

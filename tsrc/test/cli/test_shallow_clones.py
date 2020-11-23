@@ -1,5 +1,6 @@
+from pathlib import Path
+
 from cli_ui.tests import MessageRecorder
-from path import Path
 
 import tsrc
 import tsrc.git

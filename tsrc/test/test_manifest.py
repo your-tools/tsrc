@@ -1,9 +1,9 @@
 import textwrap
+from pathlib import Path
 from typing import List, Optional
 
 import pytest
 import ruamel.yaml
-from path import Path
 
 import tsrc
 

@@ -4,11 +4,11 @@ Used by the `tsrc_cli` fixture.
 """
 
 import os
+from pathlib import Path
 from typing import Any, Type
 
 import cli_ui as ui
 import pytest
-from path import Path
 
 import tsrc
 import tsrc.cli.main

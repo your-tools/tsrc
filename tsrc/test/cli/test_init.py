@@ -1,8 +1,8 @@
 import os
-from typing import Any, cast
+from pathlib import Path
+from typing import Any
 
 from cli_ui.tests import MessageRecorder
-from path import Path
 
 import tsrc
 import tsrc.git
@@ -11,8 +11,7 @@ from tsrc.test.helpers.git_server import GitServer
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
-    res = (workspace_path / repo).exists()
-    return cast(bool, res)
+    return (workspace_path / repo).exists()
 
 
 def assert_cloned(workspace_path: Path, repo: str) -> None:
@@ -38,8 +37,9 @@ def test_init_with_args(
     tsrc_cli: CLI, git_server: GitServer, monkeypatch: Any, tmp_path: Path
 ) -> None:
     git_server.add_repo("foo")
-    work2_path = (tmp_path / "work2").mkdir()
-    tsrc_cli.run("init", "--workspace", work2_path, git_server.manifest_url)
+    work2_path = tmp_path / "work2"
+    work2_path.mkdir()
+    tsrc_cli.run("init", "--workspace", str(work2_path), git_server.manifest_url)
     assert_cloned(work2_path, "foo")
 
 
@@ -123,7 +123,7 @@ def test_create_symlink(
 
     actual_link = workspace_path / "foo.link"
     assert actual_link.exists()
-    assert actual_link.readlink() == os.path.normpath("foo/foo.txt")
+    assert os.readlink(str(actual_link)) == os.path.normpath("foo/foo.txt")
 
 
 def test_uses_correct_branch_for_repo(
