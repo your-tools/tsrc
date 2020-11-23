@@ -1,9 +1,10 @@
 import subprocess
-import cli_ui as ui
-from path import Path
-import pytest
 
-from tsrc.git import Status, UP, DOWN
+import cli_ui as ui
+import pytest
+from path import Path
+
+from tsrc.git import DOWN, UP, Status
 from tsrc.test.helpers.git_server import BareRepo
 
 

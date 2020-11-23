@@ -1,6 +1,8 @@
-import pytest
 import os
+
+import pytest
 from path import Path
+
 import tsrc.file_system
 
 

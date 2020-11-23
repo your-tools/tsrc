@@ -3,10 +3,10 @@
 
 import os
 import subprocess
-from typing import Any, Dict, List, Iterable, Tuple, Optional  # noqa
+from typing import Any, Dict, Iterable, List, Optional, Tuple  # noqa
 
-from path import Path
 import cli_ui as ui
+from path import Path
 
 import tsrc
 

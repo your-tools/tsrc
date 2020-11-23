@@ -2,13 +2,12 @@
 
 from typing import Any
 
+import cli_ui as ui
 from argh import arg
 from path import Path
 
-import cli_ui as ui
-
 import tsrc.manifest
-from tsrc.cli import workspace_arg, workspace_action, repos_from_config
+from tsrc.cli import repos_from_config, workspace_action, workspace_arg
 
 
 @workspace_arg  # type: ignore

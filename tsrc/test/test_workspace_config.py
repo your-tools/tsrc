@@ -1,5 +1,6 @@
-from tsrc.workspace.config import WorkspaceConfig
 from path import Path
+
+from tsrc.workspace.config import WorkspaceConfig
 
 
 def test_save(tmp_path: Path) -> None:

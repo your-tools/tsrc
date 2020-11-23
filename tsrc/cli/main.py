@@ -1,14 +1,14 @@
 """ Main tsrc entry point. """
 
 import argparse
-import argh
 import functools
 import os
 import sys
 from typing import Callable, Optional, Sequence
 
-import colored_traceback
+import argh
 import cli_ui as ui
+import colored_traceback
 
 import tsrc
 

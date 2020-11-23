@@ -1,6 +1,7 @@
 from typing import Optional
-from path import Path
+
 import cli_ui as ui
+from path import Path
 
 import tsrc
 import tsrc.executor

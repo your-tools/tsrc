@@ -1,13 +1,12 @@
-import ruamel.yaml
 import textwrap
 
+import mock
+import pytest
+import ruamel.yaml
 import schema
 from path import Path
 
 import tsrc
-
-import pytest
-import mock
 
 
 def test_invalid_syntax(tmp_path: Path) -> None:

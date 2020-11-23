@@ -1,13 +1,12 @@
+import textwrap
 from typing import Optional
 
-import textwrap
-
-from path import Path
 import cli_ui as ui
+from path import Path
 
 import tsrc
-import tsrc.git
 import tsrc.executor
+import tsrc.git
 
 
 class Cloner(tsrc.executor.Task[tsrc.Repo]):

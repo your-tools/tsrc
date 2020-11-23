@@ -3,10 +3,10 @@
 # TODO: check for absolute paths in _handle_copies, _handle_links
 
 import operator
-from typing import cast, Any, Dict, List, Optional  # noqa
+from typing import Any, Dict, List, Optional, cast  # noqa
 
-from path import Path
 import schema
+from path import Path
 
 import tsrc
 

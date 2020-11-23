@@ -1,14 +1,15 @@
 """ Fixtures for tsrc testing. """
 
 from typing import Any, Iterator
-from path import Path
+
 import pytest
+from cli_ui.tests import MessageRecorder
+from path import Path
 
 import tsrc
 
-from cli_ui.tests import MessageRecorder
-from .helpers.git_server import git_server  # noqa
 from .helpers.cli import tsrc_cli  # noqa
+from .helpers.git_server import git_server  # noqa
 
 
 @pytest.fixture()

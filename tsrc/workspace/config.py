@@ -1,7 +1,8 @@
 from typing import List, Optional
+
 import attr
-from path import Path
 import ruamel.yaml
+from path import Path
 
 
 @attr.s

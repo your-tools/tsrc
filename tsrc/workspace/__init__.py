@@ -4,8 +4,8 @@
 from typing import Iterable, List, Tuple
 
 import cli_ui as ui
-from path import Path
 import ruamel.yaml
+from path import Path
 
 import tsrc
 import tsrc.executor

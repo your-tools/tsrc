@@ -1,8 +1,8 @@
+import ruamel.yaml
+from path import Path
+
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-import ruamel.yaml
-
-from path import Path
 
 
 def test_apply_manifest_adds_new_repo(

@@ -1,15 +1,14 @@
-from typing import Any
 import os
+from typing import Any
 
+from cli_ui.tests import MessageRecorder
 from path import Path
 
 import tsrc.cli
-from tsrc.workspace.config import WorkspaceConfig
 from tsrc.groups import GroupNotFound
-
-from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
+from tsrc.workspace.config import WorkspaceConfig
 
 
 def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:

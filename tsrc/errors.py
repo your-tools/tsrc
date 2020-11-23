@@ -1,6 +1,7 @@
 """ Custom exceptions """
 
 from typing import Any
+
 from path import Path
 
 DOC_URL = "https://TankerHQ.github.io/tsrc/ref/formats/"

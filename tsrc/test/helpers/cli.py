@@ -3,12 +3,12 @@
 Used by the `tsrc_cli` fixture.
 """
 
-from typing import Any, Type
 import os
+from typing import Any, Type
 
-from path import Path
-import pytest
 import cli_ui as ui
+import pytest
+from path import Path
 
 import tsrc
 import tsrc.cli.main

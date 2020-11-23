@@ -1,5 +1,5 @@
 """ Repo objects. """
-from typing import Optional, List  # noqa
+from typing import List, Optional  # noqa
 
 import attr
 

@@ -1,6 +1,6 @@
-import tsrc
-
 import pytest
+
+import tsrc
 
 
 def test_happy_grouping() -> None:

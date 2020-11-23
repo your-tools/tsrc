@@ -1,11 +1,10 @@
 import pytest
-
+from cli_ui.tests import MessageRecorder
 from path import Path
 
 import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-from cli_ui.tests import MessageRecorder
 
 
 def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:

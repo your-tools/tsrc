@@ -1,9 +1,8 @@
+from cli_ui.tests import MessageRecorder
 from path import Path
 
 import tsrc
 import tsrc.git
-
-from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 

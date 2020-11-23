@@ -2,15 +2,11 @@
 
 from typing import Any
 
-from argh import arg
 import cli_ui as ui
+from argh import arg
 
 import tsrc
-
-from tsrc.cli import (
-    repos_arg,
-    repos_action,
-)
+from tsrc.cli import repos_action, repos_arg
 
 
 @repos_arg

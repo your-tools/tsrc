@@ -1,12 +1,12 @@
 from typing import Any, Dict, List, Optional
 
-from path import Path
 import ruamel.yaml
+from path import Path
 
+from tsrc.cli import resolve_repos
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
-from tsrc.cli import resolve_repos
 
 
 def create_manifest(

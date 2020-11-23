@@ -1,16 +1,16 @@
 """ Entry point for `tsrc foreach`. """
 
-from typing import Any, List, Union
-from argh import arg
 import subprocess
-import textwrap
 import sys
+import textwrap
+from typing import Any, List, Union
 
-from path import Path
 import cli_ui as ui
+from argh import arg
+from path import Path
 
 import tsrc
-from tsrc.cli import repos_arg, repos_action
+from tsrc.cli import repos_action, repos_arg
 
 EPILOG = textwrap.dedent(
     """\

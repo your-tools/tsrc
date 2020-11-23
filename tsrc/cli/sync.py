@@ -1,14 +1,11 @@
 """ Entry point for `tsrc sync` """
 
 from typing import List, Optional
+
 import cli_ui as ui
 from path import Path
 
-from tsrc.cli import (
-    get_workspace,
-    repos_arg,
-    resolve_repos,
-)
+from tsrc.cli import get_workspace, repos_arg, resolve_repos
 
 
 @repos_arg

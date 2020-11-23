@@ -1,13 +1,13 @@
 """ Entry point for `tsrc init`. """
-from typing import List, Optional
 import os
+from typing import List, Optional
 
-from argh import arg
 import cli_ui as ui
+from argh import arg
 from path import Path
 
 import tsrc
-from tsrc.cli import repos_from_config, workspace_arg, groups_arg
+from tsrc.cli import groups_arg, repos_from_config, workspace_arg
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 

@@ -4,13 +4,12 @@ that contains valid git URLs.
 It is mostly used by the end-to-end tests in tsrc/test/cli/.
 """
 
-from typing import cast, Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple, cast
 
-import ruamel.yaml
-import pytest
-
-from path import Path
 import pygit2
+import pytest
+import ruamel.yaml
+from path import Path
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]

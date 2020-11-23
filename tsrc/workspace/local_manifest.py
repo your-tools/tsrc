@@ -1,4 +1,5 @@
-from typing import cast, Optional, List, Tuple  # noqa
+from typing import List, Optional, Tuple, cast  # noqa
+
 from path import Path
 
 import tsrc

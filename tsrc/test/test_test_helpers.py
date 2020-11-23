@@ -2,7 +2,6 @@ from path import Path
 
 import tsrc
 import tsrc.git
-
 from tsrc.test.helpers.git_server import GitServer
 
 

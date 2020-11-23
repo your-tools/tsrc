@@ -1,13 +1,13 @@
-from typing import cast, Any
+import os
+from typing import Any, cast
+
 from cli_ui.tests import MessageRecorder
+from path import Path
 
 import tsrc
 import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-
-from path import Path
-import os
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:

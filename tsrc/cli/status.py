@@ -1,20 +1,15 @@
 """ Entry point for tsrc status """
 
-from typing import Any, Dict, List, Union, Optional, Tuple
-
 import collections
 import shutil
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import cli_ui as ui
 
 import tsrc
 import tsrc.errors
 import tsrc.git
-
-from tsrc.cli import (
-    repos_arg,
-    repos_action,
-)
+from tsrc.cli import repos_action, repos_arg
 
 
 class ManifestStatus:
