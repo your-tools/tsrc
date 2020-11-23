@@ -37,7 +37,7 @@ mock = "^3.0.5"
 black = "19.10b0"
 flake8 = "3.7.8"
 flake8-comprehensions = "1.4.1"
-mypy = "0.760"
+mypy = "0.790"
 
 # Docs
 mkdocs = "1.0.4"
