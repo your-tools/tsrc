@@ -1,3 +1,9 @@
+# 2.2.1 (2020-01-24)
+
+* Add CI jobs to check this project also works with Python 3.9
+* Drop ``Path Pie`` dependency
+* Minor internal fixes
+
 # 2.2.0 (2020-07-17)
 
 ## Add symlink support
