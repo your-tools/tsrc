@@ -9,6 +9,7 @@ import cli_ui as ui
 from argh import arg
 
 import tsrc
+import tsrc.workspace
 from tsrc.manifest import Manifest
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
@@ -65,7 +66,7 @@ def workspace_action(f: Callable) -> Callable:
     def res(*args: Any, workspace_path: Optional[Path] = None, **kwargs: Any) -> Any:
         if not workspace_path:
             workspace_path = find_workspace_path()
-        workspace = tsrc.Workspace(workspace_path)
+        workspace = tsrc.workspace.from_path(workspace_path)
         return f(workspace, *args, **kwargs)
 
     return res
@@ -90,7 +91,7 @@ def repos_action(f: Callable) -> Callable:
     ) -> Any:
         if not workspace_path:
             workspace_path = find_workspace_path()
-        workspace = tsrc.Workspace(workspace_path)
+        workspace = tsrc.workspace.from_path(workspace_path)
         workspace.repos = resolve_repos(workspace, groups, all_cloned)
         return f(workspace, *args, **kwargs)
 
@@ -123,7 +124,7 @@ def get_workspace(workspace_path: Optional[Path]) -> tsrc.Workspace:
     """
     if not workspace_path:
         workspace_path = find_workspace_path()
-    return tsrc.Workspace(workspace_path)
+    return tsrc.workspace.from_path(workspace_path)
 
 
 def get_workspace_with_repos(
@@ -136,7 +137,7 @@ def get_workspace_with_repos(
     Uses the value of the `-w, --workspace` option first, then the values
     of the  `--groups` and `--all-cloned` options.
     """
-    workspace = get_workspace(workspace_path)
+    workspace = tsrc.workspace.from_path(workspace_path)
     workspace.repos = resolve_repos(workspace, groups, all_cloned)
     return workspace
 

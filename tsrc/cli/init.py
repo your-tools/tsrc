@@ -7,8 +7,8 @@ import cli_ui as ui
 from argh import arg
 
 import tsrc
+import tsrc.workspace
 from tsrc.cli import groups_arg, repos_from_config, workspace_arg
-from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
 remote_help = "only use this remote when cloning repositories"
@@ -47,7 +47,8 @@ def init(
 
     workspace_config.save_to_file(cfg_path)
 
-    workspace = Workspace(workspace_path)
+    workspace = tsrc.workspace.from_path(workspace_path)
+
     workspace.update_manifest()
     manifest = workspace.get_manifest()
     workspace.repos = repos_from_config(manifest, workspace_config)
@@ -55,4 +56,4 @@ def init(
     workspace.set_remotes()
     workspace.perform_filesystem_operations()
     ui.info_2("Workspace initialized")
-    ui.info_2("Configuration written in", ui.bold, workspace.cfg_path)
+    ui.info_2("Configuration written in", ui.bold, cfg_path)

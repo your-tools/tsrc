@@ -7,6 +7,7 @@ import pytest
 from cli_ui.tests import MessageRecorder
 
 import tsrc
+import tsrc.workspace
 
 from .helpers.cli import tsrc_cli  # noqa
 from .helpers.git_server import git_server  # noqa
@@ -27,7 +28,7 @@ def workspace_path(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def workspace(workspace_path: Path) -> tsrc.Workspace:
-    return tsrc.Workspace(workspace_path)
+    return tsrc.workspace.from_path(workspace_path)
 
 
 @pytest.fixture()

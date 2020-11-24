@@ -11,6 +11,7 @@ import tsrc
 import tsrc.executor
 import tsrc.git
 
+from .cloned_manifest import ClonedManifest
 from .cloner import Cloner
 from .config import WorkspaceConfig
 from .file_system_operator import FileSystemOperator
@@ -37,16 +38,12 @@ def copy_cfg_path_if_needed(root_path: Path) -> None:
 
 
 class Workspace:
-    def __init__(self, root_path: Path) -> None:
-        local_manifest_path = root_path / ".tsrc" / "manifest"
-        self.cfg_path = root_path / ".tsrc" / "config.yml"
+    def __init__(
+        self, root_path: Path, *, local_manifest: LocalManifest, config: WorkspaceConfig
+    ) -> None:
         self.root_path = root_path
-        self.local_manifest = LocalManifest(local_manifest_path)
-        copy_cfg_path_if_needed(root_path)
-        if not self.cfg_path.exists():
-            raise WorkspaceNotConfigured(root_path)
-
-        self.config = WorkspaceConfig.from_file(self.cfg_path)
+        self.config = config
+        self.local_manifest = local_manifest
 
         # Note: at this point the repositories on which the user wishes to
         # execute an action is unknown. This list will be set after processing
@@ -65,9 +62,7 @@ class Workspace:
         return self.local_manifest.get_manifest()
 
     def update_manifest(self) -> None:
-        manifest_url = self.config.manifest_url
-        manifest_branch = self.config.manifest_branch
-        self.local_manifest.update(url=manifest_url, branch=manifest_branch)
+        self.local_manifest.update()
 
     def clone_missing(self) -> None:
         to_clone = []
@@ -118,3 +113,21 @@ class WorkspaceNotConfigured(tsrc.Error):
         super().__init__(
             f"Workspace in '{root_path}' is not configured. Please run `tsrc init`"
         )
+
+
+def from_path(root_path: Path) -> Workspace:
+    cfg_path = root_path / ".tsrc" / "config.yml"
+    copy_cfg_path_if_needed(root_path)
+    if not cfg_path.exists():
+        raise WorkspaceNotConfigured(root_path)
+
+    config = WorkspaceConfig.from_file(cfg_path)
+
+    local_manifest_path = root_path / ".tsrc" / "manifest"
+    cloned_manifest = ClonedManifest(
+        local_manifest_path,
+        url=config.manifest_url,
+        branch=config.manifest_branch,
+    )
+
+    return Workspace(root_path, local_manifest=cloned_manifest, config=config)

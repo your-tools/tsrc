@@ -1,3 +1,7 @@
+# 2.2.2 (2020-01-24)
+
+* Fix #268: `tsrc apply-manifest` no longer skips file system operations
+
 # 2.2.1 (2020-01-24)
 
 * Add CI jobs to check this project also works with Python 3.9

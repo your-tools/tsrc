@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 
 import ruamel.yaml
 
+import tsrc.workspace
 from tsrc.cli import resolve_repos
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
@@ -39,7 +40,7 @@ def create_workspace(
         repo_groups=repo_groups or [],
     )
     config.save_to_file(tmp_path / ".tsrc" / "config.yml")
-    return Workspace(tmp_path)
+    return tsrc.workspace.from_path(tmp_path)
 
 
 def repo_names(repos: List[Repo]) -> List[str]:
