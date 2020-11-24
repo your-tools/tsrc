@@ -1,4 +1,7 @@
-from typing import cast, Any
+import os
+from pathlib import Path
+from typing import Any
+
 from cli_ui.tests import MessageRecorder
 
 import tsrc
@@ -6,13 +9,9 @@ import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
-from path import Path
-import os
-
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
-    res = (workspace_path / repo).exists()
-    return cast(bool, res)
+    return (workspace_path / repo).exists()
 
 
 def assert_cloned(workspace_path: Path, repo: str) -> None:
@@ -38,8 +37,9 @@ def test_init_with_args(
     tsrc_cli: CLI, git_server: GitServer, monkeypatch: Any, tmp_path: Path
 ) -> None:
     git_server.add_repo("foo")
-    work2_path = (tmp_path / "work2").mkdir()
-    tsrc_cli.run("init", "--workspace", work2_path, git_server.manifest_url)
+    work2_path = tmp_path / "work2"
+    work2_path.mkdir()
+    tsrc_cli.run("init", "--workspace", str(work2_path), git_server.manifest_url)
     assert_cloned(work2_path, "foo")
 
 
@@ -65,7 +65,7 @@ def test_init_maint_manifest_branch(
 def test_copy_files_happy(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'top' repo
     * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
     * Push `top.cmake` to the `top` repo
@@ -90,7 +90,7 @@ def test_copy_files_source_does_not_exist(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'top' repo
     * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
     * Check that `tsrc init` fails (the `top.cmake` file is missing from the
@@ -107,7 +107,7 @@ def test_copy_files_source_does_not_exist(
 def test_create_symlink(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Crate a manifest with a 'foo' repo
     * Push 'foo.txt' to the 'foo' repo
     * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
@@ -123,13 +123,13 @@ def test_create_symlink(
 
     actual_link = workspace_path / "foo.link"
     assert actual_link.exists()
-    assert actual_link.readlink() == os.path.normpath("foo/foo.txt")
+    assert os.readlink(str(actual_link)) == os.path.normpath("foo/foo.txt")
 
 
 def test_uses_correct_branch_for_repo(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a foo repo with two branches `master` and `next`
     * Set the branch to `next` in the manifest
     * Init the repository
@@ -148,7 +148,7 @@ def test_uses_correct_branch_for_repo(
 
 
 def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest containing an empty repo
     * Check that `tsrc init` fails but does not crash
     """
@@ -163,7 +163,7 @@ def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
 def test_resets_to_tag(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a repository containing a v1.0 tag
     * Add a commit on top of the v1.0 tag
     * Configure the manifest to specify that the repo
@@ -232,7 +232,7 @@ def test_clone_all_repos(
 def test_use_specific_groups(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * the manifest contains one repo 'other'
     * the 'other' repo is configured with a file copy
 

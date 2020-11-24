@@ -1,6 +1,7 @@
+from cli_ui.tests import MessageRecorder
+
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-from cli_ui.tests import MessageRecorder
 
 
 def test_happy(

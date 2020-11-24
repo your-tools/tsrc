@@ -1,5 +1,6 @@
+from pathlib import Path
 from typing import Optional
-from path import Path
+
 import cli_ui as ui
 
 import tsrc

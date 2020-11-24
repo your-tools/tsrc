@@ -1,13 +1,13 @@
 """ Entry point for `tsrc init`. """
-from typing import List, Optional
 import os
+from pathlib import Path
+from typing import List, Optional
 
-from argh import arg
 import cli_ui as ui
-from path import Path
+from argh import arg
 
 import tsrc
-from tsrc.cli import repos_from_config, workspace_arg, groups_arg
+from tsrc.cli import groups_arg, repos_from_config, workspace_arg
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
@@ -32,7 +32,7 @@ def init(
     cfg_path = workspace_path / ".tsrc" / "config.yml"
 
     if cfg_path.exists():
-        raise tsrc.Error("Workspace already configured with file " + cfg_path)
+        raise tsrc.Error(f"Workspace already configured. `{cfg_path}` already exists")
 
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 

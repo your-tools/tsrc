@@ -2,6 +2,7 @@
 # Note that groups are allowed to include other groups.
 
 from typing import Any, Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
+
 import tsrc
 
 T = TypeVar("T")
@@ -43,7 +44,7 @@ class UnknownElement(GroupError):
 
 
 class GroupList(Generic[T]):
-    """ Usage:
+    """Usage:
 
     >>> group_list = GroupList()
     >>> group_list.add("group1", ["foo", "bar"])

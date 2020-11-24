@@ -1,10 +1,10 @@
 """ Implementation of the tsrc Workspace: a collection of git repositories
 """
 
+from pathlib import Path
 from typing import Iterable, List, Tuple
 
 import cli_ui as ui
-from path import Path
 import ruamel.yaml
 
 import tsrc

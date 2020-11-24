@@ -1,8 +1,7 @@
-from path import Path
+from pathlib import Path
 
 import tsrc
 import tsrc.git
-
 from tsrc.test.helpers.git_server import GitServer
 
 
@@ -16,7 +15,7 @@ def read_remote_manifest(workspace_path: Path, git_server: GitServer) -> tsrc.Ma
 def test_git_server_add_repo_can_clone(
     workspace_path: Path, git_server: GitServer
 ) -> None:
-    """ Check that repo added to the GitServer can be cloned,
+    """Check that repo added to the GitServer can be cloned,
     typically, they should be bare but not empty!
 
     """

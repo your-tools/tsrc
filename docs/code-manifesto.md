@@ -280,7 +280,7 @@ my_bar = bar.Bar()
 ```
 
 !!! note
-    We allow a few exceptions like `from path import Path` or importing classes directory in tests. Use your best judgment.
+    We allow a few exceptions like `from pathlib import Path` or importing classes directory in tests. Use your best judgment.
 
 # Classes
 

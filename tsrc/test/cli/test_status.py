@@ -1,8 +1,9 @@
-from path import Path
-
-import tsrc.cli
+import shutil
+from pathlib import Path
 
 from cli_ui.tests import MessageRecorder
+
+import tsrc.cli
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -13,7 +14,7 @@ def test_status_happy(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a workspace with two clean repos in
       foo/bar and spam/eggs
     * Run `tsrc status`
@@ -39,7 +40,7 @@ def test_status_dirty(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a workspace with one repo
     * Create an untracked modifications
     * Run `tsrc status`
@@ -62,7 +63,7 @@ def test_status_incorrect_branch(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a workspace with  one repo
     * Create and checkout an 'other' branch
     * Run `tsrc status`
@@ -89,7 +90,7 @@ def test_status_not_on_any_branch(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a workspace with one repo
     * Make sure the repo is not an any branch
     * Run `tsrc status`
@@ -119,7 +120,7 @@ def test_status_on_tag(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a workspace with one repo
     * Create a tag on the repo
     * Run `tsrc status`
@@ -142,7 +143,7 @@ def test_status_with_missing_repos(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with two repos, foo and bar
     * Initialize a workspace from this manifest
     * Remove the `foo` clone
@@ -158,7 +159,7 @@ def test_status_with_missing_repos(
     # shutil.rmtree has trouble removing read-only
     # files in the .git repo, but this won't affect
     # the outcome of the test anyway
-    (workspace_path / "foo").rmtree(ignore_errors=True)
+    shutil.rmtree(workspace_path / "foo", ignore_errors=True)
 
     tsrc_cli.run("status")
 
@@ -169,7 +170,7 @@ def test_use_given_group(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with two disjoint groups,
       group1 and group2
     * Initialize a workspace from this manifest using
@@ -196,7 +197,7 @@ def test_use_non_cloned_group(
     workspace_path: Path,
     message_recorder: MessageRecorder,
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a manifest with two disjoint groups,
       group1 and group2
     * Initialize a workspace from this manifest using

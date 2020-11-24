@@ -1,11 +1,11 @@
-import pytest
+from pathlib import Path
 
-from path import Path
+import pytest
+from cli_ui.tests import MessageRecorder
 
 import tsrc.git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
-from cli_ui.tests import MessageRecorder
 
 
 def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
@@ -18,7 +18,7 @@ def test_foreach_no_args(tsrc_cli: CLI, git_server: GitServer) -> None:
 def test_foreach_with_errors(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create a repo 'foo'
     * Create a repo 'bar' containing 'stuff.txt'
 
@@ -38,7 +38,7 @@ def test_foreach_with_errors(
 def test_foreach_happy(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
-    """ Scenario:
+    """Scenario:
     * Create two repos
     * Check that `tsrc foreach ls` works
     * Check that the string `ls` is printed
@@ -54,7 +54,7 @@ def test_foreach_happy(
 def test_foreach_shell(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
-    """ Scenario
+    """Scenario
     * Create two repos containing README.rst and README.md
     * Check that `tsrc foreach -c 'ls README*'` works
     """
@@ -71,7 +71,7 @@ def test_foreach_shell(
 def test_foreach_with_explicit_groups(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
-    """ Scenario
+    """Scenario
     * Create a manifest containing:
        * a group named `foo` with repos `bar` and `baz`,
        * a group named `spam` with repos `eggs` and `beacon`

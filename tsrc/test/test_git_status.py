@@ -1,9 +1,10 @@
 import subprocess
+from pathlib import Path
+
 import cli_ui as ui
-from path import Path
 import pytest
 
-from tsrc.git import Status, UP, DOWN
+from tsrc.git import DOWN, UP, Status
 from tsrc.test.helpers.git_server import BareRepo
 
 
@@ -12,7 +13,7 @@ class GitProject:
         self.path = path
         self.run_git("init")
         self.remote_repo = remote_repo
-        self.run_git("remote", "add", "origin", remote_repo.path)
+        self.run_git("remote", "add", "origin", str(remote_repo.path))
 
     def get_status(self) -> Status:
         status = Status(self.path)
@@ -43,7 +44,7 @@ class GitProject:
 @pytest.fixture
 def git_project(tmp_path: Path, remote_repo: BareRepo) -> GitProject:
     src_path = tmp_path / "src"
-    src_path.makedirs()
+    src_path.mkdir(parents=True)
     res = GitProject(src_path, remote_repo)
     return res
 
@@ -51,7 +52,7 @@ def git_project(tmp_path: Path, remote_repo: BareRepo) -> GitProject:
 @pytest.fixture
 def remote_repo(tmp_path: Path) -> BareRepo:
     srv_path = tmp_path / "srv"
-    srv_path.makedirs()
+    srv_path.mkdir(parents=True)
     return BareRepo.create(srv_path, "master", empty=True)
 
 

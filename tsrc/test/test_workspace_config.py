@@ -1,9 +1,10 @@
+from pathlib import Path
+
 from tsrc.workspace.config import WorkspaceConfig
-from path import Path
 
 
 def test_save(tmp_path: Path) -> None:
-    """ Check that workspace config can be written
+    """Check that workspace config can be written
     and read.
 
     Note: the writing is done by `tsrc init`, all other

@@ -3,9 +3,9 @@
 
 import os
 import subprocess
-from typing import Any, Dict, List, Iterable, Tuple, Optional  # noqa
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Tuple  # noqa
 
-from path import Path
 import cli_ui as ui
 
 import tsrc
@@ -48,7 +48,7 @@ def assert_working_path(path: Path) -> None:
 
 
 class Status:
-    """ Represent a status of a git repo.
+    """Represent a status of a git repo.
 
     Usage:
     >>> status = Status(repo_path)
@@ -159,7 +159,7 @@ class Status:
             return "commits"
 
     def describe_position(self) -> List[ui.Token]:
-        """ Return a status looking like `↑2↓1` if the branch
+        """Return a status looking like `↑2↓1` if the branch
         is 2 commits ahead and one commit behind its upstream,
         as a list of tokens suitable for `ui.info()`.
 
@@ -184,7 +184,7 @@ class Status:
 
 
 def run(working_path: Path, *cmd: str, check: bool = True) -> None:
-    """ Run git `cmd` in given `working_path`.
+    """Run git `cmd` in given `working_path`.
 
     Raise GitCommandError if return code is non-zero and `check` is True.
     """
@@ -199,7 +199,7 @@ def run(working_path: Path, *cmd: str, check: bool = True) -> None:
 
 
 def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:
-    """ Run git `cmd` in given `working_path`, capturing the output.
+    """Run git `cmd` in given `working_path`, capturing the output.
 
     Return a tuple (returncode, output).
 

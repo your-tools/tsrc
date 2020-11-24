@@ -1,13 +1,12 @@
+import textwrap
+from pathlib import Path
 from typing import Optional
 
-import textwrap
-
-from path import Path
 import cli_ui as ui
 
 import tsrc
-import tsrc.git
 import tsrc.executor
+import tsrc.git
 
 
 class Cloner(tsrc.executor.Task[tsrc.Repo]):
@@ -56,15 +55,16 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         return repo.remotes[0]
 
     def clone_repo(self, repo: tsrc.Repo) -> None:
-        """ Clone a missing repo.
+        """Clone a missing repo.
 
         Note: must use the correct remote(s) and branch when cloning,
         *and* must reset the repo to the correct state if `tag` or
         `sha1` were set in the manifest configuration.
         """
         repo_path = self.workspace_path / repo.dest
-        parent, name = repo_path.splitpath()
-        parent.makedirs_p()
+        parent = repo_path.parent
+        name = repo_path.name
+        parent.mkdir(parents=True, exist_ok=True)
         remote = self._choose_remote(repo)
         remote_name = remote.name
         remote_url = remote.url

@@ -1,14 +1,14 @@
 """ Main tsrc entry point. """
 
 import argparse
-import argh
 import functools
 import os
 import sys
 from typing import Callable, Optional, Sequence
 
-import colored_traceback
+import argh
 import cli_ui as ui
+import colored_traceback
 
 import tsrc
 
@@ -48,7 +48,7 @@ def main_wrapper(main_func: MainFunc) -> MainFunc:
 
 
 def setup_ui(args: argparse.Namespace) -> None:
-    """ Configure the cli_ui package using options
+    """Configure the cli_ui package using options
     set on the command line and environment variables.
 
     """
@@ -67,7 +67,7 @@ def main(args: ArgsList = None) -> None:
 
 
 def testable_main(args: ArgsList) -> None:
-    """ Same behavior as the main entrypoint, except we never
+    """Same behavior as the main entrypoint, except we never
     hide backtraces when an exception is raised.
 
     """

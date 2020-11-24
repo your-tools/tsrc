@@ -3,9 +3,9 @@
 # TODO: check for absolute paths in _handle_copies, _handle_links
 
 import operator
-from typing import cast, Any, Dict, List, Optional  # noqa
+from pathlib import Path
+from typing import Any, Dict, List, Optional, cast  # noqa
 
-from path import Path
 import schema
 
 import tsrc
@@ -17,7 +17,7 @@ class RepoNotFound(tsrc.Error):
 
 
 class Manifest:
-    """ Contains a list of `tsrc.Repo` instances, and optionally
+    """Contains a list of `tsrc.Repo` instances, and optionally
     a group list.
 
     """
@@ -160,7 +160,7 @@ def validate_repo(data: Any) -> None:
 
 
 def load(manifest_path: Path) -> Manifest:
-    """ Main entry point: return a manifest instance by parsing
+    """Main entry point: return a manifest instance by parsing
     a `manifest.yml` file.
 
     """

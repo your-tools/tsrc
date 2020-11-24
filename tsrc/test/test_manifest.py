@@ -1,12 +1,11 @@
-from typing import List, Optional
 import textwrap
+from pathlib import Path
+from typing import List, Optional
 
+import pytest
 import ruamel.yaml
 
 import tsrc
-from path import Path
-
-import pytest
 
 
 def test_load() -> None:

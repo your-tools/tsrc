@@ -1,17 +1,17 @@
 """ Common tools for tsrc commands. """
 
 import functools
-from typing import Any, Callable, List, Optional
 import os
+from pathlib import Path
+from typing import Any, Callable, List, Optional
 
-from argh import arg
 import cli_ui as ui
-from path import Path
+from argh import arg
 
 import tsrc
-from tsrc.workspace.config import WorkspaceConfig
-from tsrc.workspace import Workspace
 from tsrc.manifest import Manifest
+from tsrc.workspace import Workspace
+from tsrc.workspace.config import WorkspaceConfig
 
 
 def composed(*decorators: Callable) -> Callable:

@@ -1,6 +1,7 @@
+from pathlib import Path
 from typing import List, Optional, Tuple  # noqa
+
 import attr
-from path import Path
 import cli_ui as ui
 
 import tsrc
@@ -42,7 +43,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         return repo.dest
 
     def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
-        """ Synchronize a repo given its configuration in the manifest.
+        """Synchronize a repo given its configuration in the manifest.
 
         Always start by running `git fetch`, then either:
 
