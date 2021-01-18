@@ -21,6 +21,11 @@ tsrc: manage groups of git repositories
 
 `Overview`_ · `Installation`_ · `Usage example`_ · `Documentation`_ · `Release notes`_ · `Contributing`_ · `License`_
 
+Note
+----
+
+This project is no longer developed on GitHub. The new repository can be found `on GitLab <https://gitlab.com/tsrc2/tsrc>`_.
+
 Overview
 ---------
 
