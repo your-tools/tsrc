@@ -1,8 +1,3 @@
-.. image::  https://tanker.io/images/github-logo.png
-   :target: #readme
-
-|
-
 .. image:: https://img.shields.io/github/license/TankerHQ/tsrc.svg
    :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
 
