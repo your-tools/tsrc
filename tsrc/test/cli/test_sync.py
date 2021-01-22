@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
 import tsrc.cli
@@ -189,6 +190,73 @@ def test_sync_with_force(
     assert (
         foo_path / "latest.txt"
     ).read_text() == "2", "foo should have been reset to the latest tag"
+
+
+def add_repo_unstaged(name: str, git_server: GitServer, workspace_path: Path) -> None:
+    """Add a repo to the manifest without staging this change."""
+    repo_config = {"url": git_server.get_url(name), "dest": name}
+    manifest_data = git_server.manifest.data.copy()
+    manifest_data["repos"].append(repo_config)
+    manifest_path = workspace_path / ".tsrc" / "manifest" / "manifest.yml"
+    with open(manifest_path, "w") as manifest:
+        to_write = ruamel.yaml.dump(manifest_data)
+        assert to_write
+        manifest.write(to_write)
+
+
+def test_sync_discards_local_manifest_changes(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """
+    Scenario:
+    * Create a manifest with one repo, foo
+    * Initialize a workspace from this manifest
+    * Add repo bar and do not commit or push this change
+    * Run tsrc sync
+    * The manifest is updated from the remote, and the change is discarded
+    * Only foo is present after the sync
+    """
+    git_server.add_repo("foo")
+    git_server.push_file("foo", "foo.txt", contents="foo")
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    git_server.add_repo("bar", add_to_manifest=False)
+    git_server.push_file("bar", "bar.txt", contents="bar")
+    add_repo_unstaged("bar", git_server, workspace_path)
+
+    tsrc_cli.run("sync")
+
+    bar_path = workspace_path / "bar"
+    assert not bar_path.exists(), "bar should not have been synced"
+
+
+def test_sync_with_no_update_manifest_flag_leaves_changes(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """
+    Scenario:
+    * Create a manifest with one repo, foo
+    * Initialize a workspace from this manifest
+    * Add repo bar and do not commit or push this change
+    * Run tsrc sync --no-update-manifest
+    * The manifest is not updated from the remote, and the change is left
+    * Both foo and bar are present after the sync
+    """
+    git_server.add_repo("foo")
+    git_server.push_file("foo", "foo.txt", contents="foo")
+    tsrc_cli.run("init", git_server.manifest_url)
+
+    git_server.add_repo("bar", add_to_manifest=False)
+    git_server.push_file("bar", "bar.txt", contents="bar")
+    add_repo_unstaged("bar", git_server, workspace_path)
+
+    tsrc_cli.run("sync", "--no-update-manifest")
+
+    bar_path = workspace_path / "bar"
+    assert bar_path.exists(), "bar should have been synced"
+    assert (
+        bar_path / "bar.txt"
+    ).read_text() == "bar", "bar should have the correct contents"
 
 
 def test_copies_are_up_to_date(
