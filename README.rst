@@ -24,7 +24,10 @@ tsrc: manage groups of git repositories
 Note
 ----
 
-This project is no longer developed on GitHub. The new repository can be found `on GitLab <https://gitlab.com/tsrc2/tsrc>`_.
+This project was originally hosted on the `TankerHQ
+<github.com/TankerHQ>`_ organization, which was my employer from 2016
+to 2021. They kindly agreed to give back ownership of this project to
+me. Thanks!
 
 Overview
 ---------
