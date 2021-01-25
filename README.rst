@@ -25,7 +25,7 @@ Note
 ----
 
 This project was originally hosted on the `TankerHQ
-<github.com/TankerHQ>`_ organization, which was my employer from 2016
+<https://github.com/TankerHQ>`_ organization, which was my employer from 2016
 to 2021. They kindly agreed to give back ownership of this project to
 me. Thanks!
 
