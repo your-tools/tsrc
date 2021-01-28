@@ -14,12 +14,16 @@ def sync(
     groups: Optional[List[str]] = None,
     all_cloned: bool = False,
     force: bool = False,
+    no_update_manifest: bool = False,
 ) -> None:
     """ synchronize the current workspace with the manifest """
     workspace = get_workspace(workspace_path)
 
-    ui.info_2("Updating manifest")
-    workspace.update_manifest()
+    if no_update_manifest:
+        ui.info_2("Not updating manifest")
+    else:
+        ui.info_2("Updating manifest")
+        workspace.update_manifest()
 
     workspace.repos = resolve_repos(workspace, groups=groups, all_cloned=all_cloned)
     workspace.clone_missing()
