@@ -1,16 +1,20 @@
 """ Entry point for `tsrc foreach`. """
 
+import argparse
 import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import Any, List, Union
+from typing import List, Union
 
 import cli_ui as ui
-from argh import arg
 
 import tsrc
-from tsrc.cli import repos_action, repos_arg
+from tsrc.cli import (
+    add_repos_selection_args,
+    add_workspace_arg,
+    get_workspace_with_repos,
+)
 
 EPILOG = textwrap.dedent(
     """\
@@ -23,8 +27,57 @@ EPILOG = textwrap.dedent(
     """
 )
 
-
 Command = Union[str, List[str]]
+
+
+def configure_parser(subparser: argparse._SubParsersAction) -> None:
+    parser = subparser.add_parser("foreach")
+    add_workspace_arg(parser)
+    add_repos_selection_args(parser)
+    parser.add_argument("cmd", nargs="*")
+    parser.add_argument(
+        "-c",
+        help="use a shell to run the command",
+        dest="shell",
+        default=False,
+        action="store_true",
+    )
+    parser.set_defaults(run=run)
+
+
+def run(args: argparse.Namespace) -> None:
+    # Note:
+    # we want to support both:
+    #  $ tsrc foreach -c 'shell command'
+    #  and
+    #  $ tsrc foreach -- some-cmd --some-opts
+    #
+    # Due to argparse limitations, `cmd` will always be a list,
+    # but we need a *string* when using 'shell=True'.
+    #
+    # So transform use the value from `cmd` and `shell` so that:
+    # * action.command is suitable as argument to pass to subprocess.run()
+    # * action.description is suitable for display purposes
+    command: Command = []
+    if args.shell:
+        if len(args.cmd) != 1:
+            die("foreach -c must be followed by exactly one argument")
+        command = args.cmd[0]
+        description = args.cmd[0]
+    else:
+        if not args.cmd:
+            die("needs a command to run")
+        command = args.cmd
+        description = " ".join(args.cmd)
+    shell = args.shell
+    command = command
+    description = description
+
+    workspace = get_workspace_with_repos(args)
+
+    cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
+    tsrc.run_sequence(workspace.repos, cmd_runner)
+    ui.info("OK", ui.check)
 
 
 class CommandFailed(tsrc.Error):
@@ -86,43 +139,6 @@ def die(message: str) -> None:
     ui.error(message)
     print(EPILOG, end="")
     sys.exit(1)
-
-
-@repos_arg
-@repos_action
-@arg("cmd", help="command to run", nargs="*", default=None)  # type: ignore
-@arg(  # type: ignore
-    "-c", help="use a shell to run the command", dest="shell", default=False
-)
-def foreach(workspace: tsrc.Workspace, *args: Any, **kwargs: Any) -> None:
-    cmd: List[str] = args  # type: ignore
-    shell: bool = kwargs["shell"]
-    # Note:
-    # we want to support both:
-    #  $ tsrc foreach -c 'shell command'
-    #  and
-    #  $ tsrc foreach -- some-cmd --some-opts
-    #
-    # Due to argparse limitations, `cmd` will always be a list,
-    # but we need a *string* when using 'shell=True'.
-    #
-    # So transform use the value from `cmd` and `shell` to build:
-    # * `subprocess_cmd`, suitable as argument to pass to subprocess.run()
-    # * `cmd_as_str`, suitable for display purposes
-    command: Command = []
-    if shell:
-        if len(cmd) != 1:
-            die("foreach -c must be followed by exactly one argument")
-        command = cmd[0]
-        description = cmd[0]
-    else:
-        if not cmd:
-            die("needs a command to run")
-        command = cmd
-        description = " ".join(cmd)
-    cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
-    tsrc.run_sequence(workspace.repos, cmd_runner)
-    ui.info("OK", ui.check)
 
 
 class MissingRepo(tsrc.Error):

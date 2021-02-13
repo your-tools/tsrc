@@ -1,23 +1,28 @@
 """ Entry point for `tsrc log`. """
 
-from typing import Any
+import argparse
 
 import cli_ui as ui
-from argh import arg
 
 import tsrc
-from tsrc.cli import repos_action, repos_arg
+from tsrc.cli import (
+    add_repos_selection_args,
+    add_workspace_arg,
+    get_workspace_with_repos,
+)
 
 
-@repos_arg
-@repos_action
-@arg("--from", dest="from", metavar="FROM", help="from ref")  # type: ignore
-@arg("--to", help="to ref")  # type: ignore
-def log(workspace: tsrc.Workspace, **kwargs: Any) -> None:
-    """ show a combined git log for several repositories """
-    from_: str = kwargs["from"]
-    to: str = kwargs["to"] or "HEAD"
+def configure_parser(subparser: argparse._SubParsersAction) -> None:
+    parser = subparser.add_parser("log")
+    add_workspace_arg(parser)
+    add_repos_selection_args(parser)
+    parser.add_argument("--from", dest="from_ref", metavar="FROM", help="from ref")
+    parser.add_argument("--to", help="to ref", dest="to_ref", default="HEAD")
+    parser.set_defaults(run=run)
 
+
+def run(args: argparse.Namespace) -> None:
+    workspace = get_workspace_with_repos(args)
     all_ok = True
     for repo in workspace.repos:
         full_path = workspace.root_path / repo.dest
@@ -33,7 +38,7 @@ def log(workspace: tsrc.Workspace, **kwargs: Any) -> None:
             "log",
             "--color=always",
             f"--pretty=format:{log_format}",
-            f"{from_}...{to}",
+            f"{args.from_ref}...{args.to_ref}",
         ]
         rc, out = tsrc.git.run_captured(full_path, *cmd, check=False)
         if rc != 0:

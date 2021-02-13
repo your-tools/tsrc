@@ -1,15 +1,33 @@
 """ Entry point for tsrc status """
 
+import argparse
 import collections
 import shutil
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import cli_ui as ui
 
 import tsrc
 import tsrc.errors
 import tsrc.git
-from tsrc.cli import repos_action, repos_arg
+from tsrc.cli import (
+    add_repos_selection_args,
+    add_workspace_arg,
+    get_workspace_with_repos,
+)
+
+
+def configure_parser(subparser: argparse._SubParsersAction) -> None:
+    parser = subparser.add_parser("status")
+    add_workspace_arg(parser)
+    add_repos_selection_args(parser)
+    parser.set_defaults(run=run)
+
+
+def run(args: argparse.Namespace) -> None:
+    workspace = get_workspace_with_repos(args)
+    status_collector = StatusCollector(workspace)
+    tsrc.run_sequence(workspace.repos, status_collector)
 
 
 class ManifestStatus:
@@ -114,11 +132,3 @@ class StatusCollector(tsrc.Task[tsrc.Repo]):
             message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
             message += describe_status(status)
             ui.info(*message)
-
-
-@repos_arg
-@repos_action
-def status(workspace: tsrc.Workspace, **kwargs: Any) -> None:
-    """ display workspace status summary """
-    status_collector = StatusCollector(workspace)
-    tsrc.run_sequence(workspace.repos, status_collector)

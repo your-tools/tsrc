@@ -1,100 +1,46 @@
 """ Common tools for tsrc commands. """
 
-import functools
+import argparse
 import os
 from pathlib import Path
-from typing import Any, Callable, List, Optional
+from typing import List, Optional
 
 import cli_ui as ui
-from argh import arg
 
 import tsrc
-from tsrc.manifest import Manifest
-from tsrc.workspace import Workspace
+from tsrc import Manifest, Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
 
-def composed(*decorators: Callable) -> Callable:
-    """ Build a decorator by composing a list of decorator """
-
-    def inner(f: Callable) -> Callable:
-        for decorator in reversed(decorators):
-            f = decorator(f)
-        return f
-
-    return inner
-
-
-# Define a common set of command line options.
-# For instance, almost every command has a
-# `-w,--workspace` option, which is defined here.
-workspace_arg = arg(
-    "-w",
-    "--workspace",
-    dest="workspace_path",
-    help="path to the current workspace",
-    type=Path,
-)
-groups_arg = arg(
-    "-g", "--group", "--groups", nargs="+", dest="groups", help="groups to use"
-)
-all_cloned_arg = arg(
-    "--all-cloned",
-    action="store_true",
-    dest="all_cloned",
-    help="run on all cloned repos",
-)
+def add_workspace_arg(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "-w",
+        "--workspace",
+        help="workspace path",
+        type=Path,
+        dest="workspace_path",
+    )
 
 
-def repos_arg(f: Callable) -> Callable:
-    """
-    Define a set of command line options to select a group of
-    repos, like `--group` and `--all-cloned`.
-    """
-    return composed(workspace_arg, groups_arg, all_cloned_arg)(f)  # type: ignore
+def get_workspace(namespace: argparse.Namespace) -> Workspace:
+    workspace_path = namespace.workspace_path or find_workspace_path()
+    return tsrc.Workspace(workspace_path)
 
 
-def workspace_action(f: Callable) -> Callable:
-    """
-    Take a function that has a `workspace_path` parameter and return
-    a function that takes a `Workspace` instance instead.
-
-    """
-
-    @functools.wraps(f)
-    def res(*args: Any, workspace_path: Optional[Path] = None, **kwargs: Any) -> Any:
-        if not workspace_path:
-            workspace_path = find_workspace_path()
-        workspace = tsrc.Workspace(workspace_path)
-        return f(workspace, *args, **kwargs)
-
-    return res
+def add_groups_arg(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "-g", "--group", "--groups", nargs="+", dest="groups", help="groups to use"
+    )
 
 
-def repos_action(f: Callable) -> Callable:
-    """
-    Take a function that has all the parameters required by the
-    `repos_arg` group of command line options, and return a function
-    that takes a `Workspace` instance the `repos` attribute correctly
-    set.
-
-    """
-
-    @functools.wraps(f)
-    def res(
-        *args: Any,
-        workspace_path: Optional[Path] = None,
-        groups: Optional[List[str]] = None,
-        all_cloned: bool = False,
-        **kwargs: Any
-    ) -> Any:
-        if not workspace_path:
-            workspace_path = find_workspace_path()
-        workspace = tsrc.Workspace(workspace_path)
-        workspace.repos = resolve_repos(workspace, groups, all_cloned)
-        return f(workspace, *args, **kwargs)
-
-    return res
+def add_repos_selection_args(parser: argparse.ArgumentParser) -> None:
+    add_groups_arg(parser)
+    parser.add_argument(
+        "--all-cloned",
+        action="store_true",
+        dest="all_cloned",
+        help="run on all cloned repos",
+    )
 
 
 def find_workspace_path() -> Path:
@@ -114,35 +60,16 @@ def find_workspace_path() -> Path:
     raise tsrc.Error("Could not find current workspace")
 
 
-def get_workspace(workspace_path: Optional[Path]) -> tsrc.Workspace:
-    """
-    Return a workspace instance after having parsed command line
-    arguments.
-
-    Uses the value of the `-w, --workspace` option.
-    """
-    if not workspace_path:
-        workspace_path = find_workspace_path()
-    return tsrc.Workspace(workspace_path)
-
-
-def get_workspace_with_repos(
-    workspace_path: Path, groups: Optional[List[str]], all_cloned: bool
-) -> tsrc.Workspace:
-    """
-    Return a workspace instance and its repos after having parsed the
-    command line.
-
-    Uses the value of the `-w, --workspace` option first, then the values
-    of the  `--groups` and `--all-cloned` options.
-    """
-    workspace = get_workspace(workspace_path)
-    workspace.repos = resolve_repos(workspace, groups, all_cloned)
+def get_workspace_with_repos(namespace: argparse.Namespace) -> Workspace:
+    workspace = get_workspace(namespace)
+    workspace.repos = resolve_repos(
+        workspace, groups=namespace.groups, all_cloned=namespace.all_cloned
+    )
     return workspace
 
 
 def resolve_repos(
-    workspace: Workspace, groups: Optional[List[str]], all_cloned: bool
+    workspace: Workspace, *, groups: Optional[List[str]], all_cloned: bool
 ) -> List[tsrc.Repo]:
     """
     Given a workspace with its config and its local manifest,
