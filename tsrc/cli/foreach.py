@@ -31,7 +31,9 @@ Command = Union[str, List[str]]
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
-    parser = subparser.add_parser("foreach")
+    parser = subparser.add_parser(
+        "foreach", epilog=EPILOG, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
     parser.add_argument("cmd", nargs="*")

@@ -18,10 +18,13 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     add_repos_selection_args(parser)
     parser.set_defaults(update_manifest=True, force=False)
     parser.add_argument(
-        "--force", help="use fetch --force while syncing", action="store_true"
+        "--force", help="use `git fetch --force` while syncing", action="store_true"
     )
     parser.add_argument(
-        "--no-update-manifest", action="store_false", dest="update_manifest"
+        "--no-update-manifest",
+        action="store_false",
+        dest="update_manifest",
+        help="skip updating the manifest before synching repositories",
     )
     parser.set_defaults(run=run)
 
