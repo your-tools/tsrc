@@ -26,4 +26,6 @@ jobs:
         run: python -m poetry install
 
       - name: Run safety dependency check
-        run: python -m poetry run safety check --full-report
+        # Note: skip CVE regarding tornado. See
+        # https://github.com/tornadoweb/tornado/issues/2981 for details
+        run: python -m poetry run safety check --full-report --ignore=39462
