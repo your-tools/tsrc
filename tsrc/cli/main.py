@@ -76,7 +76,11 @@ def main_impl(args: ArgsList = None) -> None:
     parser.add_argument(
         "-q", "--quiet", help="only display warnings and errors", action="store_true"
     )
-    parser.add_argument("--color", choices=["auto", "always", "never"])
+    parser.add_argument(
+        "--color",
+        choices=["auto", "always", "never"],
+        help="whether to enable colored output",
+    )
 
     actions_parser = parser.add_subparsers(help="available actions", dest="action")
 

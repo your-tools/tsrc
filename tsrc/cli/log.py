@@ -16,8 +16,15 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser = subparser.add_parser("log")
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
-    parser.add_argument("--from", dest="from_ref", metavar="FROM", help="from ref")
-    parser.add_argument("--to", help="to ref", dest="to_ref", default="HEAD")
+    parser.add_argument(
+        "--from", dest="from_ref", metavar="FROM", help="run `git log` from this ref"
+    )
+    parser.add_argument(
+        "--to",
+        dest="to_ref",
+        default="HEAD",
+        help="run `git log` until this ref",
+    )
     parser.set_defaults(run=run)
 
 
