@@ -1,34 +1,49 @@
 """ Entry point for `tsrc init`. """
-import os
+import argparse
 from pathlib import Path
-from typing import List, Optional
 
 import cli_ui as ui
-from argh import arg
 
 import tsrc
-from tsrc.cli import groups_arg, repos_from_config, workspace_arg
+from tsrc.cli import add_groups_arg, add_workspace_arg, repos_from_config
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
-remote_help = "only use this remote when cloning repositories"
+
+def configure_parser(subparser: argparse._SubParsersAction) -> None:
+    parser = subparser.add_parser("init")
+    add_workspace_arg(parser)
+    parser.add_argument("manifest_url", help="git url containing the manifest file")
+    parser.add_argument(
+        "--branch",
+        help="use this branch for the manifest",
+        default="master",
+        dest="manifest_branch",
+    )
+    parser.add_argument(
+        "--shallow",
+        action="store_true",
+        help="use shallow clones",
+        dest="shallow_clones",
+    )
+    parser.add_argument(
+        "-r",
+        "--singular-remote",
+        help="only use this remote when cloning repositories",
+    )
+
+    parser.add_argument(
+        "--clone-all-repos",
+        action="store_true",
+        help="clone all repos from the manifet, regarless of the groups",
+    )
+    add_groups_arg(parser)
+    parser.set_defaults(run=run)
 
 
-@workspace_arg  # type: ignore
-@groups_arg  # type: ignore
-@arg("-r", "--singular-remote", help=remote_help)  # type: ignore
-def init(
-    url: str,
-    workspace_path: Optional[Path] = None,
-    groups: Optional[List[str]] = None,
-    branch: str = "master",
-    clone_all_repos: bool = False,
-    shallow: bool = False,
-    singular_remote: Optional[str] = None,
-) -> None:
-    """ initialize a new workspace"""
-    path_as_str = workspace_path or os.getcwd()
-    workspace_path = Path(path_as_str)
+def run(args: argparse.Namespace) -> None:
+    workspace_path = args.workspace_path or Path.cwd()
+
     cfg_path = workspace_path / ".tsrc" / "config.yml"
 
     if cfg_path.exists():
@@ -37,12 +52,12 @@ def init(
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 
     workspace_config = WorkspaceConfig(
-        manifest_url=url,
-        manifest_branch=branch,
-        clone_all_repos=clone_all_repos,
-        repo_groups=groups or [],
-        shallow_clones=shallow,
-        singular_remote=singular_remote,
+        manifest_url=args.manifest_url,
+        manifest_branch=args.manifest_branch,
+        clone_all_repos=args.clone_all_repos,
+        repo_groups=args.groups or [],
+        shallow_clones=args.shallow_clones,
+        singular_remote=args.singular_remote,
     )
 
     workspace_config.save_to_file(cfg_path)

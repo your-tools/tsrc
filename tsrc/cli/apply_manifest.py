@@ -1,25 +1,22 @@
 """ Entry point for `tsrc apply-manifest`. """
 
+import argparse
 from pathlib import Path
-from typing import Any
-
-import cli_ui as ui
-from argh import arg
 
 import tsrc.manifest
-from tsrc.cli import repos_from_config, workspace_action, workspace_arg
+from tsrc.cli import add_workspace_arg, get_workspace, repos_from_config
 
 
-@workspace_arg  # type: ignore
-@workspace_action
-@arg("manifest_path", help="path to the local manifest", type=Path)  # type: ignore
-def apply_manifest(
-    workspace: tsrc.Workspace, manifest_path: Path, **kwargs: Any
-) -> None:
-    """ apply a local manifest file """
-    ui.info_1("Applying manifest from", manifest_path)
+def configure_parser(subparser: argparse._SubParsersAction) -> None:
+    parser = subparser.add_parser("apply-manifest")
+    parser.add_argument("manifest_path", help="path to the local manifest", type=Path)
+    add_workspace_arg(parser)
+    parser.set_defaults(run=run)
 
-    manifest = tsrc.manifest.load(manifest_path)
+
+def run(args: argparse.Namespace) -> None:
+    manifest = tsrc.manifest.load(args.manifest_path)
+    workspace = get_workspace(args)
     workspace.repos = repos_from_config(manifest, workspace.config)
     workspace.clone_missing()
     workspace.set_remotes()

@@ -6,19 +6,11 @@ import os
 import sys
 from typing import Callable, Optional, Sequence
 
-import argh
 import cli_ui as ui
 import colored_traceback
 
 import tsrc
-
-from .apply_manifest import apply_manifest
-from .foreach import foreach
-from .init import init
-from .log import log
-from .status import status
-from .sync import sync
-from .version import version
+from tsrc.cli import apply_manifest, foreach, init, log, status, sync, version
 
 ArgsList = Optional[Sequence[str]]
 MainFunc = Callable[..., None]
@@ -75,7 +67,7 @@ def testable_main(args: ArgsList) -> None:
 
 
 def main_impl(args: ArgsList = None) -> None:
-    parser = argh.ArghParser(prog="tsrc")
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version", action="version", version="tsrc " + tsrc.__version__
     )
@@ -86,9 +78,12 @@ def main_impl(args: ArgsList = None) -> None:
     )
     parser.add_argument("--color", choices=["auto", "always", "never"])
 
-    parser.add_commands([apply_manifest, init, foreach, version, log, sync, status])
+    actions_parser = parser.add_subparsers(help="available actions", dest="action")
 
-    ui_args = parser.parse_args(args=args)
-    setup_ui(ui_args)
+    for module in (apply_manifest, foreach, init, log, status, sync, version):
+        module.configure_parser(actions_parser)  # type: ignore
 
-    parser.dispatch(argv=args)
+    namespace = parser.parse_args(args=args)
+
+    setup_ui(namespace)
+    namespace.run(namespace)
