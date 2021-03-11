@@ -1,20 +1,20 @@
-.. image:: https://img.shields.io/github/license/TankerHQ/tsrc.svg
-   :target: https://github.com/TankerHQ/tsrc/blob/master/LICENSE
+.. image:: https://img.shields.io/github/license/dmerejkowsky/tsrc.svg
+   :target: https://github.com/dmerejkowsky/tsrc/blob/master/LICENSE
 
-.. image:: https://github.com/TankerHQ/tsrc/workflows/tests/badge.svg
-   :target: https://github.com/TankerHQ/tsrc/actions
+.. image:: https://github.com/dmerejkowsky/tsrc/workflows/tests/badge.svg
+   :target: https://github.com/dmerejkowsky/tsrc/actions
 
-.. image:: https://github.com/TankerHQ/tsrc/workflows/linters/badge.svg
-   :target: https://github.com/TankerHQ/tsrc/actions
+.. image:: https://github.com/dmerejkowsky/tsrc/workflows/linters/badge.svg
+   :target: https://github.com/dmerejkowsky/tsrc/actions
 
-.. image:: https://img.shields.io/codecov/c/github/TankerHQ/tsrc.svg?label=Coverage
-   :target: https://codecov.io/gh/TankerHQ/tsrc
+.. image:: https://img.shields.io/codecov/c/github/dmerejkowsky/tsrc.svg?label=Coverage
+   :target: https://codecov.io/gh/dmerejkowsky/tsrc
 
 .. image:: https://img.shields.io/pypi/v/tsrc.svg
    :target: https://pypi.org/project/tsrc/
 
 .. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
-     :target: https://github.com/TankerHQ/tsrc/actions
+     :target: https://github.com/dmerejkowsky/tsrc/actions
 
 tsrc: manage groups of git repositories
 =======================================
@@ -39,7 +39,7 @@ It can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
 Note
 -----
 
-`tsrc` does not adhere strictly to the `semver specification <https://semver.org/>`_. So before upgrading to a new version, please take the time to read the `Changelog <https://tankerhq.github.io/tsrc/changelog/>`_ first!
+`tsrc` does not adhere strictly to the `semver specification <https://semver.org/>`_. So before upgrading to a new version, please take the time to read the `Changelog <https://dmerejkowsky.github.io/tsrc/changelog/>`_ first!
 
 Installation
 -------------
@@ -111,21 +111,21 @@ Usage Example
 Documentation
 --------------
 
-For more details and examples, please refer to `tsrc documentation <https://TankerHQ.github.io/tsrc/>`_.
+For more details and examples, please refer to `tsrc documentation <https://dmerejkowsky.github.io/tsrc/>`_.
 
 Release notes
 -------------
 
-Detailed changes for each release are documented in the `changelog <https://tankerhq.github.io/tsrc/changelog/>`_.
+Detailed changes for each release are documented in the `changelog <https://dmerejkowsky.github.io/tsrc/changelog/>`_.
 
 Contributing
 ------------
 
-We welcome feedback, `bug reports <https://github.com/TankerHQ/tsrc/issues>`_, and bug fixes in the form of `pull requests <https://github.com/TankerHQ/tsrc/pulls>`_.
+We welcome feedback, `bug reports <https://github.com/dmerejkowsky/tsrc/issues>`_, and bug fixes in the form of `pull requests <https://github.com/dmerejkowsky/tsrc/pulls>`_.
 
-Detailed instructions can be found `in the documentation <https://tankerhq.github.io/tsrc/contrib/>`_.
+Detailed instructions can be found `in the documentation <https://dmerejkowsky.github.io/tsrc/contrib/>`_.
 
 License
 -------
 
-tsrc is licensed under a `BSD 3-Clause license <https://github.com/TankerHQ/tsrc/blob/master/LICENSE>`_.
+tsrc is licensed under a `BSD 3-Clause license <https://github.com/dmerejkowsky/tsrc/blob/master/LICENSE>`_.

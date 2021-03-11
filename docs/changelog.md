@@ -1,3 +1,12 @@
+# Unreleased yet
+
+## Misc
+
+* Project has been moved from `TankerHQ` organization to `dmerejkowsky`. New urls are:
+
+    * [github.com/dmerejkowsky/tsrc](https://github.com/dmerejkowsky/tsrc) for the git repository
+    * [dmerejkowsky.github.io/tsrc](https://dmerejkowsky.github.io/tsrc) for the documentation
+
 # 2.2.1 (2020-01-24)
 
 * Add CI jobs to check this project also works with Python 3.9
@@ -93,7 +102,7 @@ Drop support for Python 3.5
 
 ## Bug fixes
 
-* Fix [#217](https://github.com/TankerHQ/tsrc/issues/217): Preserves file attributes during the `copy` statements in `repos`
+* Fix [#217](https://github.com/dmerejkowsky/tsrc/issues/217): Preserves file attributes during the `copy` statements in `repos`
 
 ## Other
 
@@ -110,7 +119,7 @@ Drop support for Python 3.5
 * Remove the `tsrc push` command and all review automation features. Please
   use [hub](https://github.com/github/hub), [lab](https://github.com/zaquestion/lab),
   or [repo](https://github.com/guyzmo/git-repo) instead.
-  See [#207](https://github.com/TankerHQ/tsrc/issues/207) for the discussion leading
+  See [#207](https://github.com/dmerejkowsky/tsrc/issues/207) for the discussion leading
   to this removal.
 
 * Implement small improvements on `tsrc` output messages.
@@ -136,7 +145,7 @@ Starting the new year with a stable release, at last!
 ## Revamp group UX
 
 The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
-[corresponding milestone](https://github.com/TankerHQ/tsrc/milestone/1) for the full list.
+[corresponding milestone](https://github.com/dmerejkowsky/tsrc/milestone/1) for the full list.
 
 ## New configuration file
 
@@ -226,8 +235,8 @@ tsrc init --groups foo bar
 
 # v0.6.3 (2018-11-04)
 
-* GitHub organization is now `TankerHQ`
-* We now use [dmenv](https://github.com/TankerHQ/dmenv) for dependencies management
+* GitHub organization is now `dmerejkowsky`
+* We now use [dmenv](https://github.com/dmerejkowsky/dmenv) for dependencies management
 
 # v0.6.2 (2018-10-19)
 
@@ -270,7 +279,7 @@ Thanks @tst2005 and @cgestes for their help with the configuration format.
 
 ## Other fixes
 
-* Fix [#113](https://github.com/TankerHQ/tsrc/issues/113): do not hide branch when showing tag status.
+* Fix [#113](https://github.com/dmerejkowsky/tsrc/issues/113): do not hide branch when showing tag status.
 * Add support for Python 3.7
 
 # v0.5.0 (2018-08-14)
@@ -314,8 +323,8 @@ This change has no impact if you were already using `GitLab`.
 * **Breaking change**: `-m/--message` option is gone, use `--title` instead. There's a concept of "description" or "message" for pull requests and merge requests, but the value of the option was only used to update the *title*, so it had to be renamed.
 * Do not assume local and remote tracking branch have the same name.
 * Allow using `tsrc push <local>:<remote>` to explicitly specify local and remote branch names.
-* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/TankerHQ/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
-* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/TankerHQ/tsrc/issues/80)). Patch by @maximerety.
+* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/dmerejkowsky/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
+* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/dmerejkowsky/tsrc/issues/80)). Patch by @maximerety.
 
 
 ## Improve fixed reference handling
@@ -336,7 +345,7 @@ repos:
     tag: v0.1
 ```
 
-See the [dedicated section about manifest format](ref/formats.md#repos) and the [#57 pull request discussion](https://github.com/TankerHQ/tsrc/pull/57) for the details.
+See the [dedicated section about manifest format](ref/formats.md#repos) and the [#57 pull request discussion](https://github.com/dmerejkowsky/tsrc/pull/57) for the details.
 
 This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.
 
@@ -395,7 +404,7 @@ This is required to create the `<workspace>/.tsrc/manifest.yml` file which is la
 
 # v0.2.3 (2017-09-01)
 
-* Split user interface functionality into its own project: [python-cli-ui](https://github.com/TankerHQ/python-cli-ui).
+* Split user interface functionality into its own project: [python-cli-ui](https://github.com/dmerejkowsky/python-cli-ui).
 
 * Add `--quiet` and `--color` global options.
 

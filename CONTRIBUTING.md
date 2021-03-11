@@ -1,13 +1,13 @@
 # Development
 
-All the development happens on [GitHub](https://github.com/TankerHQ/tsrc).
+All the development happens on [GitHub](https://github.com/dmerejkowsky/tsrc).
 
-Outcome of discussions among maintainers and users of the software are tracked in the [wiki](https://github.com/TankerHQ/tsrc/wiki).
+Outcome of discussions among maintainers and users of the software are tracked in the [wiki](https://github.com/dmerejkowsky/tsrc/wiki).
 
 
 # Reporting bugs and suggesting new features
 
-Feel free to use the [GitHub's bug tracker](https://github.com/TankerHQ/tsrc/issues) to open issues.
+Feel free to use the [GitHub's bug tracker](https://github.com/dmerejkowsky/tsrc/issues) to open issues.
 
 If you are reporting a bug, please provide the following information:
 
@@ -22,7 +22,7 @@ Doing so will ensure we can investigate your bug right away.
 
 You are free to open a pull request on GitHub for any feature you'd like.
 
-Before opening a merge request, please read the [code manifesto](https://TankerHQ.github.io/tsrc/code-manifesto).
+Before opening a merge request, please read the [code manifesto](https://dmerejkowsky.github.io/tsrc/code-manifesto).
 
 Note that for your merge request to be accepted, we'll ask that:
 
@@ -31,7 +31,7 @@ Note that for your merge request to be accepted, we'll ask that:
 * All existing tests run
 * The new feature comes with appropriate tests
 
-See the [GitHub actions workflows](https://github.com/TankerHQ/tsrc/blob/master/.github/workflows)
+See the [GitHub actions workflows](https://github.com/dmerejkowsky/tsrc/blob/master/.github/workflows)
 to see what exactly what commands are run and the Python versions we
 support.
 

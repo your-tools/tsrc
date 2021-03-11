@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any
 
-DOC_URL = "https://TankerHQ.github.io/tsrc/ref/formats/"
+DOC_URL = "https://dmerejkowsky.github.io/tsrc/ref/formats/"
 
 
 class Error(Exception):

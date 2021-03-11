@@ -8,8 +8,8 @@ description = "Manage groups of git repositories"
 authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
 readme = "README.rst"
 license = "BSD-3-Clause"
-repository = "https://github.com/TankerHQ/tsrc"
-documentation = "https://tankerhq.github.io/tsrc"
+repository = "https://github.com/dmerejkowsky/tsrc"
+documentation = "https://dmerejkowsky.github.io/tsrc"
 
 [tool.poetry.dependencies]
 # Note: keep this in sync with .github/workflows/tests.yml
