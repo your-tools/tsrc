@@ -107,7 +107,7 @@ Also, being Python fans, we don't mind that white space is part of the syntax.
 
 # Why do I have to create a separate git repo with just one file in it?
 
-See [#235](https://github.com/TankerHQ/tsrc/issues/235) for why you can't
+See [#235](https://github.com/dmerejkowsky/tsrc/issues/235) for why you can't
 have multiple manifest files in the same repository.
 
 Also, note that you can put other files in the repo - for instance,

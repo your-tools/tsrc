@@ -1,5 +1,5 @@
 site_name: tsrc documentation
-repo_url: https://github.com/TankerHQ/tsrc/
+repo_url: https://github.com/dmerejkowsky/tsrc/
 
 theme:
   name: readthedocs
