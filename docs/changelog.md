@@ -1,3 +1,12 @@
+# Unreleased yet
+
+## Misc
+
+* Project has been moved from `TankerHQ` organization to `dmerejkowsky`. New urls are:
+
+    * [github.com/dmerejkowsky/tsrc](https://github.com/dmerejkowsky/tsrc) for the git repository
+    * [dmerejkowsky.github.io/tsrc](https://dmerejkowsky.github.io/tsrc) for the documentation
+
 # 2.2.1 (2020-01-24)
 
 * Add CI jobs to check this project also works with Python 3.9
