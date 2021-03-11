@@ -235,7 +235,7 @@ tsrc init --groups foo bar
 
 # v0.6.3 (2018-11-04)
 
-* GitHub organization is now `dmerejkowsky`
+* GitHub organization is now `TankerHQ`
 * We now use [dmenv](https://github.com/dmerejkowsky/dmenv) for dependencies management
 
 # v0.6.2 (2018-10-19)
