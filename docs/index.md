@@ -13,9 +13,6 @@ We use it at [tanker.io](https://tanker.io) because:
 * None on the many existing solutions did fully match our needs
   (see the [FAQ](faq.md) for more details)
 
-In addition, `tsrc` has some support for interaction with `GitLab` and makes
-handling merge requests from the command line possible.
-
 # Installing tsrc
 
 `tsrc` is compatible with **Python 3.6** or higher.
