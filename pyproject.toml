@@ -11,6 +11,10 @@ license = "BSD-3-Clause"
 repository = "https://github.com/dmerejkowsky/tsrc"
 documentation = "https://dmerejkowsky.github.io/tsrc"
 
+[tool.poetry.urls]
+Changelog = "https://dmerejkowsky.github.io/tsrc/changelog/"
+Issues = "https://github.com/dmerejkowsky/tsrc/issues"
+
 [tool.poetry.dependencies]
 # Note: keep this in sync with .github/workflows/tests.yml
 python = "^3.6"
