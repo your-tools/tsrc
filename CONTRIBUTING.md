@@ -55,7 +55,7 @@ $ poetry install
 * Run linters and tests:
 
 ```console
-$ ./lint.sh
+$ poetry run invoke lint
 $ poetry run pytest -n auto
 ```
 

@@ -41,10 +41,18 @@ def mypy(c, machine_readable=False):
 
 @task
 def test(c):
-    c.run("pytest")
+    print("Running pytest")
+    c.run("pytest -n auto")
 
 
-@task(pre=[call(black, check=True), call(isort, check=True), call(flake8), call(mypy)])
+@task(
+    pre=[
+        call(black, check=True),
+        call(isort, check=True),
+        call(flake8),
+        call(mypy),
+    ]
+)
 def lint(c):
     pass
 

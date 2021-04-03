@@ -26,4 +26,7 @@ jobs:
         python -m poetry install
 
     - name: Run linters
-      run: ./lint.sh
+      run: python -m poetry run invoke lint
+
+    - name: Check that doc builds without warnings
+      run: python -m poetry run mkdocs build
