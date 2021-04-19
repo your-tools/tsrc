@@ -45,7 +45,7 @@ jobs:
     # Note: for some reason pytest --cov fails on Windows
     - name: Run tests (unix)
       if: ${{ matrix.os != 'windows-latest' }}
-      run: poetry run pytest --cov . --cov-report xml --numprocesses auto
+      run: poetry run pytest --cov . --cov-report term --numprocesses auto
 
     - name: Run tests (windows)
       if: ${{ matrix.os == 'windows-latest' }}
