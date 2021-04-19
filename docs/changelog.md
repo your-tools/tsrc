@@ -1,3 +1,7 @@
+# Next release
+
+* Remove codecov usage
+
 # 2.2.1 (2021-04-10)
 
 * Project has been moved from `TankerHQ` organization to `dmerejkowsky`. New urls are:

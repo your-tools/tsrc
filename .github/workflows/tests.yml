@@ -50,9 +50,3 @@ jobs:
     - name: Run tests (windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: poetry run pytest --numprocesses auto
-
-    - name: Send coverage to codecov.io (unix)
-      if: ${{ matrix.os != 'windows-latest' }}
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}

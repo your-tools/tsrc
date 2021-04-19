@@ -7,9 +7,6 @@
 .. image:: https://github.com/dmerejkowsky/tsrc/workflows/linters/badge.svg
    :target: https://github.com/dmerejkowsky/tsrc/actions
 
-.. image:: https://img.shields.io/codecov/c/github/dmerejkowsky/tsrc.svg?label=Coverage
-   :target: https://codecov.io/gh/dmerejkowsky/tsrc
-
 .. image:: https://img.shields.io/pypi/v/tsrc.svg
    :target: https://pypi.org/project/tsrc/
 
