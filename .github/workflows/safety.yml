@@ -23,7 +23,9 @@ jobs:
           python -m pip install poetry
 
       - name: Prepare project for development
-        run: python -m poetry install
+        run: |
+          python -m poetry run pip install --upgrade pip
+          python -m poetry install
 
       - name: Run safety dependency check
         # Note: skip CVE regarding tornado. See
