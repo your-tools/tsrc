@@ -136,7 +136,7 @@ class ManifestHandler:
         for repo in self.data["repos"]:
             if repo["dest"] == name:
                 return cast(RepoConfig, repo)
-        assert False, f"repo '{name}' not found in manifest"
+        raise AssertionError(f"repo '{name}' not found in manifest")
 
     def configure_repo(self, name: str, key: str, value: Any) -> None:
         repo = self.get_repo(name)

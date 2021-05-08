@@ -29,8 +29,8 @@ def main_wrapper(main_func: MainFunc) -> MainFunc:
             # tsrc.Error instances to have an empty message. In that
             # case, do not print anything and assume relevant info has
             # already been printed.
-            if e.message:
-                ui.error(e.message)
+            if e.message:  # noqa: B306
+                ui.error(e.message)  # noqa: B306
             sys.exit(1)
         except KeyboardInterrupt:
             ui.warning("Interrupted by user, quitting")
