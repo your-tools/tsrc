@@ -1,0 +1,8 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v1.0.0-3-g4166fe3
+_src_path: git+https://git.sr.ht/~dmerej/copier-python
+author_email: dimitri@dmerej.info
+author_name: Dimitri Merejkowsky
+project_description: Manage groups of git repositories
+project_name: tsrc
+project_version: 2.2.1
