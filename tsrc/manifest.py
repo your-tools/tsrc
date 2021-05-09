@@ -27,7 +27,7 @@ class Manifest:
         self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
 
     def apply_config(self, config: Any) -> None:
-        """ Apply config coming form the yaml file """
+        """Apply config coming form the yaml file"""
         # Note: we cannot just serialize the yaml file into the class,
         # because we need to convert the plain old dicts into
         # higher-level classes.

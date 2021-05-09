@@ -18,7 +18,7 @@ class ExecutorFailed(tsrc.Error):
 
 
 class Task(Generic[T], metaclass=abc.ABCMeta):
-    """ Represent an action to be performed. """
+    """Represent an action to be performed."""
 
     @abc.abstractmethod
     def process(self, index: int, count: int, item: T) -> None:
@@ -32,20 +32,20 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
         pass
 
     def on_start(self, *, num_items: int) -> None:
-        """ Called when the executor starts. """
+        """Called when the executor starts."""
         pass
 
     def on_failure(self, *, num_errors: int) -> None:
-        """ Called when the executor ends and `num_errors` is not 0. """
+        """Called when the executor ends and `num_errors` is not 0."""
         pass
 
     def on_success(self) -> None:
-        """ Called when the task succeeds on one item. """
+        """Called when the task succeeds on one item."""
         pass
 
     @abc.abstractmethod
     def display_item(self, item: T) -> str:
-        """ Called to describe the item that caused an error. """
+        """Called to describe the item that caused an error."""
         pass
 
 

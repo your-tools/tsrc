@@ -31,7 +31,7 @@ def run(args: argparse.Namespace) -> None:
 
 
 class ManifestStatus:
-    """ Represent the status of a repo w.r.t the manifest. """
+    """Represent the status of a repo w.r.t the manifest."""
 
     def __init__(self, repo: tsrc.Repo, *, manifest: tsrc.Manifest):
         self.repo = repo
@@ -48,7 +48,7 @@ class ManifestStatus:
             self.incorrect_branch = (actual_branch, expected_branch)
 
     def describe(self) -> List[ui.Token]:
-        """ Return a list of tokens suitable for ui.info()`. """
+        """Return a list of tokens suitable for ui.info()`."""
         res = []  # type: List[ui.Token]
         incorrect_branch = self.incorrect_branch
         if incorrect_branch:
@@ -58,7 +58,7 @@ class ManifestStatus:
 
 
 class Status:
-    """ Wrapper class for both ManifestStatus and GitStatus"""
+    """Wrapper class for both ManifestStatus and GitStatus"""
 
     def __init__(self, *, git: tsrc.git.Status, manifest: ManifestStatus):
         self.git = git
@@ -70,7 +70,7 @@ CollectedStatuses = Dict[str, StatusOrError]
 
 
 def describe_status(status: StatusOrError) -> List[ui.Token]:
-    """ Return a list of tokens suitable for ui.info(). """
+    """Return a list of tokens suitable for ui.info()."""
     if isinstance(status, tsrc.errors.MissingRepo):
         return [ui.red, "error: missing repo"]
     if isinstance(status, Exception):

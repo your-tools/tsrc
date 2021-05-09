@@ -12,7 +12,7 @@ Config = NewType("Config", Dict[str, Any])
 
 
 def parse_config(file_path: Path, *, schema: Schema) -> Config:
-    """ Parse a config given a file path and a schema."""
+    """Parse a config given a file path and a schema."""
 
     # Note: we try and wrap any raised exception into a generic
     # tsrc.InvalidConfig error, so that error messages always contains

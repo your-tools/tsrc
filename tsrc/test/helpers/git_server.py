@@ -17,7 +17,7 @@ RemoteConfig = Tuple[str, str]
 
 
 class BareRepo:
-    """ Simple wrapper over pygit2. """
+    """Simple wrapper over pygit2."""
 
     user = pygit2.Signature("Tasty Test", "test@tsrc.io")
 

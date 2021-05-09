@@ -14,7 +14,7 @@ from .helpers.git_server import git_server  # noqa
 
 @pytest.fixture()
 def tmp_path(tmpdir: Any) -> Path:
-    """ Convert py.path.Local() to Path() objects. """
+    """Convert py.path.Local() to Path() objects."""
     return Path(tmpdir.strpath)
 
 

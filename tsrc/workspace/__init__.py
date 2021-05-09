@@ -20,7 +20,7 @@ from .syncer import Syncer
 
 
 def copy_cfg_path_if_needed(root_path: Path) -> None:
-    """ Backward compatibility layer with tsrc < 1.0 """
+    """Backward compatibility layer with tsrc < 1.0"""
     old_path = root_path / ".tsrc/manifest.yml"
     new_path = root_path / ".tsrc/config.yml"
     if old_path.exists() and not new_path.exists():
@@ -107,7 +107,7 @@ class Workspace:
             syncer.display_bad_branches()
 
     def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
-        """ Yield (index, repo, full_path) for all the repos """
+        """Yield (index, repo, full_path) for all the repos"""
         for i, repo in enumerate(self.repos):
             full_path = self.root_path / repo.dest
             yield (i, repo, full_path)

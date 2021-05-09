@@ -130,7 +130,7 @@ class Status:
                 self.dirty = True
 
     def describe(self) -> List[ui.Token]:
-        """ Return a list of tokens suitable for ui.info. """
+        """Return a list of tokens suitable for ui.info."""
         res = []  # type: List[ui.Token]
         if self.empty:
             return [ui.red, "empty"]
@@ -151,7 +151,7 @@ class Status:
 
     @staticmethod
     def commit_string(number: int) -> str:
-        """ Describe the number of commit with correct pluralization. """
+        """Describe the number of commit with correct pluralization."""
 
         if number == 1:
             return "commit"
@@ -176,7 +176,7 @@ class Status:
         return res
 
     def describe_dirty(self) -> List[ui.Token]:
-        """ Add the `(dirty)` colored string if the repo is dirty. """
+        """Add the `(dirty)` colored string if the repo is dirty."""
         res = []  # type: List[ui.Token]
         if self.dirty:
             res += [ui.red, "(dirty)", ui.reset]
@@ -259,7 +259,7 @@ def get_repo_root(working_path: Optional[Path] = None) -> Path:
 
 
 def find_ref(repo: Path, candidate_refs: Iterable[str]) -> str:
-    """ Find the first reference that exists in the given repo """
+    """Find the first reference that exists in the given repo"""
     run(repo, "fetch", "--all", "--prune")
     for candidate_ref in candidate_refs:
         code, _ = run_captured(repo, "rev-parse", candidate_ref, check=False)

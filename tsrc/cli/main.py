@@ -17,7 +17,7 @@ MainFunc = Callable[..., None]
 
 
 def main_wrapper(main_func: MainFunc) -> MainFunc:
-    """ Wraps main() entry point to better deal with errors. """
+    """Wraps main() entry point to better deal with errors."""
 
     @functools.wraps(main_func)
     def wrapped(args: ArgsList = None) -> None:
@@ -54,7 +54,7 @@ def setup_ui(args: argparse.Namespace) -> None:
 
 @main_wrapper
 def main(args: ArgsList = None) -> None:
-    """ Main entry point. """
+    """Main entry point."""
     main_impl(args=args)
 
 

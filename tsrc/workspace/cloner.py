@@ -10,7 +10,7 @@ import tsrc.git
 
 
 class Cloner(tsrc.executor.Task[tsrc.Repo]):
-    """ Implement cloning missing repos. """
+    """Implement cloning missing repos."""
 
     def __init__(
         self,
