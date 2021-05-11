@@ -2,9 +2,6 @@
 
 All the development happens on [GitHub](https://github.com/dmerejkowsky/tsrc).
 
-Outcome of discussions among maintainers and users of the software are tracked in the [wiki](https://github.com/dmerejkowsky/tsrc/wiki).
-
-
 # Reporting bugs and suggesting new features
 
 Feel free to use the [GitHub's bug tracker](https://github.com/dmerejkowsky/tsrc/issues) to open issues.
