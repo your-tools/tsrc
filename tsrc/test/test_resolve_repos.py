@@ -159,3 +159,66 @@ def test_all_cloned_requested(tmp_path: Path) -> None:
 
     actual = resolve_repos(workspace, groups=None, all_cloned=True)
     assert repo_names(actual) == ["foo", "other"]
+
+
+def test_filter_inclusive(tmp_path: Path) -> None:
+    """Scenario:
+    * A group named 'group1' in the manifest containing foo, foo2, bar, bar2
+    * A repo named 'other' in the manifest
+    * Workspace configured with repo_group=[group]
+    * --group group1 used on the command line
+    * -r foo used on the command line
+
+    Should return repos foo and foo2 from group1
+    """
+    groups = {"group1": {"repos": ["foo", "foo2", "bar", "bar2"]}}
+    create_manifest(
+        tmp_path, repos=["foo", "foo2", "bar", "bar2", "other"], groups=groups
+    )
+    workspace = create_workspace(tmp_path, repo_groups=["group1"])
+
+    actual = resolve_repos(workspace, groups=["group1"], all_cloned=False, regex="foo")
+    assert repo_names(actual) == ["foo", "foo2"]
+
+
+def test_filter_exclusive(tmp_path: Path) -> None:
+    """Scenario:
+    * A group named 'group1' in the manifest containing foo, foo2, bar, bar2
+    * A repo named 'other' in the manifest
+    * Workspace configured with repo_group=[group]
+    * --group group1 used on the command line
+    * -i foo used on the command line
+
+    Should return repos bar and bar2 from group1
+    """
+    groups = {"group1": {"repos": ["foo", "foo2", "bar", "bar2"]}}
+    create_manifest(
+        tmp_path, repos=["foo", "foo2", "bar", "bar2", "other"], groups=groups
+    )
+    workspace = create_workspace(tmp_path, repo_groups=["group1"])
+
+    actual = resolve_repos(workspace, groups=["group1"], all_cloned=False, iregex="foo")
+    assert repo_names(actual) == ["bar", "bar2"]
+
+
+def test_filter_inclusive_exclusive(tmp_path: Path) -> None:
+    """Scenario:
+    * A group named 'group1' in the manifest containing foo, foo2, bar, bar2
+    * A repo named 'other' in the manifest
+    * Workspace configured with repo_group=[group]
+    * --group group1 used on the command line
+    * -r foo used on the command line
+    * -i 2 used on the command line
+
+    Should return repo foo from group1
+    """
+    groups = {"group1": {"repos": ["foo", "foo2", "bar", "bar2"]}}
+    create_manifest(
+        tmp_path, repos=["foo", "foo2", "bar", "bar2", "other"], groups=groups
+    )
+    workspace = create_workspace(tmp_path, repo_groups=["group1"])
+
+    actual = resolve_repos(
+        workspace, groups=["group1"], all_cloned=False, regex="foo", iregex="2"
+    )
+    assert repo_names(actual) == ["foo"]
