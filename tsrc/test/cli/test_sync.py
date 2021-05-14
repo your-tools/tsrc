@@ -770,7 +770,7 @@ class TestSyncWithGroups:
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
         """Scenario:
-        * Create a manifest contaning :
+        * Create a manifest containing :
           * a group named 'group1'  containing the repo 'foo'
           * a group named 'group2'  containing the repo 'bar'
         * Initialize a workspace from this manifest using the 'group1' and 'group2' groups
@@ -788,7 +788,7 @@ class TestSyncWithGroups:
         tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
     ) -> None:
         """Scenario:
-        * Create a manifest contaning :
+        * Create a manifest containing :
           * a group named 'group1'  containing the repo 'foo'
           * a group named 'group2'  containing the repo 'bar'
         * Initialize a workspace from this manifest using the 'group1'

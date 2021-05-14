@@ -24,7 +24,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         "--no-update-manifest",
         action="store_false",
         dest="update_manifest",
-        help="skip updating the manifest before synching repositories",
+        help="skip updating the manifest before syncing repositories",
     )
     parser.set_defaults(run=run)
 

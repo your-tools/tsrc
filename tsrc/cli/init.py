@@ -35,7 +35,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "--clone-all-repos",
         action="store_true",
-        help="clone all repos from the manifet, regarless of the groups",
+        help="clone all repos from the manifest, regardless of the groups",
     )
     add_groups_arg(parser)
     parser.set_defaults(run=run)

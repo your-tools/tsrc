@@ -15,7 +15,7 @@ def test_can_create_symlink_when_source_does_not_exist(tmp_path: Path) -> None:
     assert source.resolve() == target.resolve()
 
 
-def test_can_create_symlink_pointing_to_diretory(tmp_path: Path) -> None:
+def test_can_create_symlink_pointing_to_directory(tmp_path: Path) -> None:
     source = tmp_path / "source"
     target = tmp_path / "target"
     target.mkdir(parents=True)
