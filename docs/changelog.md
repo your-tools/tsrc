@@ -1,6 +1,7 @@
 # Next release
 
 * Remove codecov usage
+* Rename default branch to `main`.
 
 # 2.2.1 (2021-04-10)
 

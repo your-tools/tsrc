@@ -28,7 +28,7 @@ Note that for your merge request to be accepted, we'll ask that:
 * All existing tests run
 * The new feature comes with appropriate tests
 
-See the [GitHub actions workflows](https://github.com/dmerejkowsky/tsrc/blob/master/.github/workflows)
+See the [GitHub actions workflows](https://github.com/dmerejkowsky/tsrc/blob/main/.github/workflows)
 to see what exactly what commands are run and the Python versions we
 support.
 

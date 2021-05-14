@@ -1,5 +1,5 @@
 .. image:: https://img.shields.io/github/license/dmerejkowsky/tsrc.svg
-   :target: https://github.com/dmerejkowsky/tsrc/blob/master/LICENSE
+   :target: https://github.com/dmerejkowsky/tsrc/blob/main/LICENSE
 
 .. image:: https://github.com/dmerejkowsky/tsrc/workflows/tests/badge.svg
    :target: https://github.com/dmerejkowsky/tsrc/actions
@@ -125,4 +125,4 @@ Detailed instructions can be found `in the documentation <https://dmerejkowsky.g
 License
 -------
 
-tsrc is licensed under a `BSD 3-Clause license <https://github.com/dmerejkowsky/tsrc/blob/master/LICENSE>`_.
+tsrc is licensed under a `BSD 3-Clause license <https://github.com/dmerejkowsky/tsrc/blob/main/LICENSE>`_.
