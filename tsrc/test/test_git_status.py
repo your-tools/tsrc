@@ -11,7 +11,9 @@ from tsrc.test.helpers.git_server import BareRepo
 class GitProject:
     def __init__(self, path: Path, remote_repo: BareRepo):
         self.path = path
-        self.run_git("init")
+        # Make sure the initial branch is the same regardless of the user
+        # git configuration
+        self.run_git("init", "--initial-branch", "master")
         self.remote_repo = remote_repo
         self.run_git("remote", "add", "origin", str(remote_repo.path))
 
