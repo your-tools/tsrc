@@ -51,8 +51,16 @@ def run(args: argparse.Namespace) -> None:
 
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 
+    manifest_file = Path(args.manifest_url)
+    if manifest_file.exists():
+        manifest_url = str(
+            manifest_file.absolute().relative_to(Path(workspace_path).absolute())
+        )
+    else:
+        manifest_url = args.manifest_url
+
     workspace_config = WorkspaceConfig(
-        manifest_url=args.manifest_url,
+        manifest_url=manifest_url,
         manifest_branch=args.manifest_branch,
         clone_all_repos=args.clone_all_repos,
         repo_groups=args.groups or [],

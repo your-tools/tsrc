@@ -22,17 +22,22 @@ class LocalManifest:
 
     """
 
-    def __init__(self, clone_path: Path) -> None:
+    def __init__(
+        self, clone_path: Path, manifest_filename="manifest.yml", remote_repo=True
+    ) -> None:
         self.clone_path = clone_path
+        self.manifest_filename = manifest_filename
+        self.remote_repo = remote_repo
 
     def update(self, url: str, *, branch: str) -> None:
         if self.clone_path.exists():
-            self._reset_manifest_clone(url, branch=branch)
+            if self.remote_repo:
+                self._reset_manifest_clone(url, branch=branch)
         else:
             self._clone_manifest(url, branch=branch)
 
     def get_manifest(self) -> tsrc.manifest.Manifest:
-        return tsrc.manifest.load(self.clone_path / "manifest.yml")
+        return tsrc.manifest.load(self.clone_path / self.manifest_filename)
 
     def _reset_manifest_clone(self, url: str, *, branch: str) -> None:
         tsrc.git.run(self.clone_path, "remote", "set-url", "origin", url)

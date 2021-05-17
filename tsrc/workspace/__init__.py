@@ -47,6 +47,12 @@ class Workspace:
             raise WorkspaceNotConfigured(root_path)
 
         self.config = WorkspaceConfig.from_file(self.cfg_path)
+        manifest_file = root_path / self.config.manifest_url
+        if manifest_file.is_file():
+            manifest_file = manifest_file.absolute()
+            self.local_manifest = LocalManifest(
+                manifest_file.parent, manifest_file.name, remote_repo=False
+            )
 
         # Note: at this point the repositories on which the user wishes to
         # execute an action is unknown. This list will be set after processing
@@ -66,6 +72,10 @@ class Workspace:
 
     def update_manifest(self) -> None:
         manifest_url = self.config.manifest_url
+        manifest_file = self.root_path / manifest_url
+        if manifest_file.is_dir():
+            manifest_file = manifest_file.absolute()
+            manifest_url = str(manifest_file)
         manifest_branch = self.config.manifest_branch
         self.local_manifest.update(url=manifest_url, branch=manifest_branch)
 
