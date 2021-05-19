@@ -22,7 +22,7 @@ def test_foreach_with_errors(
     * Create a repo 'foo'
     * Create a repo 'bar' containing 'stuff.txt'
 
-    Check that tsr foreach -- ls stuff.txt fails, and prints
+    Check that tsrc foreach -- ls stuff.txt fails, and prints
     the failing repo in the list of error
     """
     git_server.add_repo("foo")

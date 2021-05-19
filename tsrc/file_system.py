@@ -56,7 +56,7 @@ def safe_link(*, source: Path, target: Path) -> None:
     #
     #    islink()  exists()    Description
     #    ----------------------------------------------------------
-    #    False     False       source doesn't currently exist : OK
+    #    False     False       source does not currently exist : OK
     #    False     True        source corresponds to a file or dir : Error!
     #    True      False       broken symlink, need to remove
     #    True      True        symlink points to a valid target, check target

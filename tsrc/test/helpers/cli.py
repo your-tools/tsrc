@@ -1,4 +1,4 @@
-""" Helper to cal tsrc's main() function.
+""" Helper to call tsrc's main() function.
 
 Used by the `tsrc_cli` fixture.
 """

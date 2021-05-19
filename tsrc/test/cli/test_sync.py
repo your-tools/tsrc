@@ -107,7 +107,7 @@ def test_switching_manifest_branch(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """Scenario:
-    * Initialize aw workspace with a manifest on the master branch
+    * Initialize a new workspace with a manifest on the master branch
     * Create a new repo bar, on the 'devel' branch of the manifest
     * Run `tsrc sync`: bar should not get cloned
     * Configure the workspace to use the `devel` branch of the manifest

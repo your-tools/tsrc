@@ -306,7 +306,7 @@ def test_singular_remote(
     Scenario:
      * Create a manifest that contains one repo with two remotes
        ('origin' and 'vpn')
-     * Marke sure that the `origin` URL is valid but the `vpn`
+     * Make sure that the `origin` URL is valid but the `vpn`
        URL is not.
      * Run `tsrc init --remote origin`
      * Check that foo is cloned
