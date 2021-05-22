@@ -78,6 +78,7 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             clone_args.extend(["--branch", ref])
         if self.shallow:
             clone_args.extend(["--depth", "1"])
+        clone_args.append("--recurse-submodules")
         clone_args.append(name)
         try:
             tsrc.git.run(parent, *clone_args)

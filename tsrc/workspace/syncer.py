@@ -69,6 +69,8 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             self.check_branch(repo, repo_path)
             self.sync_repo_to_branch(repo_path)
 
+        self.update_submodules(repo_path)
+
     def check_branch(self, repo: tsrc.Repo, repo_path: Path) -> None:
         current_branch = None
         try:
@@ -115,6 +117,10 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             tsrc.git.run(repo_path, "reset", "--hard", ref)
         except tsrc.Error:
             raise tsrc.Error("updating ref failed")
+
+    @staticmethod
+    def update_submodules(repo_path: Path) -> None:
+        tsrc.git.run(repo_path, "submodule", "update", "--init", "--recursive")
 
     @staticmethod
     def sync_repo_to_branch(repo_path: Path) -> None:
