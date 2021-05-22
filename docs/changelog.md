@@ -1,7 +1,15 @@
 # Next release
 
+## Add support for submodules
+
+* `tsrc` calls `git clone` with `--recurse-submodules` when adding missing repositories
+* `tsrc` calls `git submodule update --init --recursive` when updating repositories
+
+## Misc
+
 * Remove codecov usage
 * Rename default branch to `main`.
+
 
 # 2.2.1 (2021-04-10)
 
