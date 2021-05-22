@@ -641,7 +641,7 @@ def test_sync_with_singular_remote(
     """Scenario:
     * Create a manifest that contains one repo with two remotes
       ('origin' and 'vpn')
-    * Marke sure that the 'origin' URL is valid but the 'vpn'
+    * Make sure that the 'origin' URL is valid but the 'vpn'
       URL is not.
     * Run 'tsrc init -r origin'
     * Check that 'tsrc sync' does not try and fetch the 'vpn' remote
