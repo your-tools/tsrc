@@ -89,3 +89,34 @@ def test_default_branch_devel(workspace_path: Path, git_server: GitServer) -> No
     manifest = read_remote_manifest(workspace_path, git_server)
     foo_config = manifest.get_repo("foo")
     assert foo_config.branch == "devel"
+
+
+def test_create_submodule(workspace_path: Path, git_server: GitServer) -> None:
+    top_url = git_server.add_repo("top")
+    sub_url = git_server.add_repo("sub", add_to_manifest=False)
+    git_server.add_submodule("top", url=sub_url, path=Path("sub"))
+
+    tsrc.git.run(workspace_path, "clone", top_url, "--recurse-submodules")
+
+    top_path = workspace_path / "top"
+    sub_readme = top_path / "sub" / "README"
+    assert sub_readme.exists()
+
+
+def test_update_submodule(workspace_path: Path, git_server: GitServer) -> None:
+    top_url = git_server.add_repo("top")
+    sub_url = git_server.add_repo("sub", add_to_manifest=False)
+    git_server.add_submodule("top", url=sub_url, path=Path("sub"))
+
+    tsrc.git.run(workspace_path, "clone", top_url, "--recurse-submodules")
+
+    git_server.push_file("sub", "new.txt")
+    git_server.update_submodule("top", "sub")
+
+    top_path = workspace_path / "top"
+    tsrc.git.run(top_path, "fetch")
+    tsrc.git.run(top_path, "reset", "--hard", "origin/master")
+    tsrc.git.run(top_path, "submodule", "update", "--init", "--recursive")
+
+    new_sub = top_path / "sub" / "new.txt"
+    assert new_sub.exists()

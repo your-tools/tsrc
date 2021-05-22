@@ -16,20 +16,20 @@ CopyConfig = Tuple[str, str]
 RemoteConfig = Tuple[str, str]
 
 
-class BareRepo:
-    """Simple wrapper over pygit2."""
-
+class BaseTestRepo:
     user = pygit2.Signature("Tasty Test", "test@tsrc.io")
 
-    def __init__(self, path: Path) -> None:
-        self._repo = pygit2.Repository(str(path))
+    def __init__(self, repo: pygit2.Repository, path: Path) -> None:
+        self._repo = repo
         self.path = path
 
+
+class BareRepo(BaseTestRepo):
     @classmethod
     def create(cls, path: Path, initial_branch: str, empty: bool = False) -> "BareRepo":
         repo = pygit2.init_repository(str(path), bare=True, initial_head=initial_branch)
         if empty:
-            return cls(path)
+            return cls(repo, path)
 
         blob_oid = repo.create_blob(b"this is the readme")
         tree_builder = repo.TreeBuilder()
@@ -38,7 +38,13 @@ class BareRepo:
         repo.create_commit(
             "HEAD", cls.user, cls.user, "initial commit", tree_builder.write(), []
         )
-        return cls(path)
+        return cls(repo, path)
+
+    @classmethod
+    def open(cls, path: Path) -> "BareRepo":
+        repo = pygit2.Repository(path)
+        assert repo.is_bare
+        return cls(repo, path)
 
     def create_tag(self, tag_name: str, *, branch: str, force: bool = False) -> None:
         ref_name = "refs/heads/" + branch
@@ -83,11 +89,63 @@ class BareRepo:
         return self._repo.head.target.hex  # type: ignore
 
 
+class TestRepo(BaseTestRepo):
+    @classmethod
+    def clone(
+        cls, url: str, path: Path, *, initial_branch: str = "master"
+    ) -> "TestRepo":
+        repo = pygit2.clone_repository(url, str(path), checkout_branch=initial_branch)
+        return cls(repo, path)
+
+    @classmethod
+    def open(cls, path: Path) -> "TestRepo":
+        repo = pygit2.Repository(path)
+        assert not repo.is_bare
+        return cls(repo, path)
+
+    def add_submodule(self, *, path: Path, url: str) -> None:
+        self._repo.add_submodule(url, str(path))
+
+    def commit_all_and_push(self, *, message: str) -> None:
+        ref = self._repo.references.get("refs/heads/master")
+        last_commit = self._repo.get(ref.target)
+        parents = [last_commit.oid]
+        self._repo.index.add_all()
+        tree = self._repo.index.write_tree()
+        self._repo.create_commit(
+            "HEAD",
+            self.user,
+            self.user,
+            message,
+            tree,
+            parents,
+        )
+        origin = self._repo.remotes["origin"]
+        origin.push(["refs/heads/master"])
+
+    def fetch_and_reset(
+        self,
+        *,
+        local_branch: str = "master",
+        remote_name: str = "origin",
+        remote_branch: str = "master",
+    ) -> None:
+        """Fetch and reset the current branc using remote_branch of the given remote"""
+        origin = self._repo.remotes[remote_name]
+        origin.fetch([f"refs/heads/{remote_branch}"], prune=pygit2.GIT_FETCH_PRUNE)
+        remote_target = self._repo.lookup_reference(
+            f"refs/remotes/{remote_name}/{remote_branch}"
+        ).target
+        current_ref = self._repo.lookup_reference(f"refs/heads/{local_branch}")
+        current_ref.set_target(remote_target)
+        self._repo.reset(current_ref.target, pygit2.GIT_RESET_HARD)
+
+
 class ManifestHandler:
     """Contains methods to update repositories configuration
     in the manifest repo.
 
-    Data is written directly to the underlying BareRepo instance,
+    Data is written directly to the underlying bare repo instance,
     using `refs/heads/master` ref by default.
 
     After a call `change_branch(new_branch)`, changes will be
@@ -185,8 +243,12 @@ class GitServer:
     """
 
     def __init__(self, tmpdir: Path) -> None:
-        self.tmpdir = tmpdir
-        self.bare_path = tmpdir / "srv"
+        srv_path = tmpdir / "srv"
+        srv_path.mkdir()
+        self.bare_path = srv_path / "bare"
+        self.src_path = srv_path / "src"
+        self.bare_path.mkdir()
+        self.src_path.mkdir()
         self.manifest_url = self.get_url("manifest")
 
         manifest_repo = self._create_repo("manifest")
@@ -195,9 +257,16 @@ class GitServer:
     def get_url(self, name: str) -> str:
         return f"file://{self.bare_path / name}"
 
+    def url_to_local_path(self, url: str) -> str:
+        """It seems that libgit2 not support file:// local URLs like git does
+        so we use this conversion method when using PyGit2 when cloning or
+        handling submodules
+        """
+        return url.replace("file://", "")
+
     def _get_repo(self, name: str) -> BareRepo:
         repo_path = self.bare_path / name
-        return BareRepo(repo_path)
+        return BareRepo.open(repo_path)
 
     def _create_repo(
         self, name: str, empty: bool = False, branch: str = "master"
@@ -209,6 +278,29 @@ class GitServer:
         repo_path.mkdir(parents=True, exist_ok=True)
         repo = BareRepo.create(repo_path, initial_branch=branch, empty=empty)
         return repo
+
+    def add_submodule(self, name: str, *, path: Path, url: str) -> None:
+        # pygit2 does not know how to add a submodule in a bare repo, so we have
+        # to do it with a non-bare repo.
+        bare_path = self.bare_path / name
+        src_path = self.src_path / name
+        test_repo = TestRepo.clone(str(bare_path), src_path)
+
+        test_repo.add_submodule(path=path, url=self.url_to_local_path(url))
+        test_repo.commit_all_and_push(message=f"Add submodule in {path}")
+
+    def update_submodule(self, name: str, path: str) -> None:
+        parent_path = self.src_path / name
+        sub_path = parent_path / path
+
+        # Fetch and reset the submodule
+        sub_repo = TestRepo.open(sub_path)
+        sub_repo.fetch_and_reset()
+
+        # Make a commit which updates the submodule in the
+        # parent repo and push it
+        parent_repo = TestRepo.open(parent_path)
+        parent_repo.commit_all_and_push(message=f"Update submodule in {path}")
 
     def add_repo(
         self,
