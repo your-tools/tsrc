@@ -327,3 +327,32 @@ def test_singular_remote(
     _, output = tsrc.git.run_captured(foo_path, "remote", "show", check=True)
 
     assert output == "origin"
+
+
+def test_clone_submodules(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """
+    Scenario:
+    * Create repo 'sub1' containing a 'sub2' submodule
+    * Create a repo 'top' containing the 'sub1' submodule
+    * Add 'top' to the manifest
+    * Run `tsrc init`
+    * Check that both submodules where cloned properly
+    """
+
+    git_server.add_repo("top")
+    sub1_url = git_server.add_repo("sub1", add_to_manifest=False)
+    sub2_url = git_server.add_repo("sub2", add_to_manifest=False)
+    git_server.add_submodule("sub1", url=sub2_url, path=Path("sub2"))
+    git_server.add_submodule("top", url=sub1_url, path=Path("sub1"))
+
+    tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
+
+    clone_path = workspace_path / "top"
+
+    sub1_readme = clone_path / "sub1" / "README"
+    assert sub1_readme.exists(), "sub1 was not cloned"
+
+    sub2_readme = clone_path / "sub1" / "sub2" / "README"
+    assert sub2_readme.exists(), "sub2 was not cloned"
