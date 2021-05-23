@@ -18,7 +18,7 @@ class FileSystemOperator(tsrc.executor.Task[tsrc.FileSystemOperation]):
         self.repos = repos
 
     def on_start(self, *, num_items: int) -> None:
-        ui.info_2("Performing filesytem operations")
+        ui.info_2("Performing filesystem operations")
 
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to perform the following operations:")
