@@ -12,3 +12,5 @@ site/
 .mypy_cache/
 
 .venv/
+
+.idea/
