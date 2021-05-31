@@ -268,7 +268,7 @@ src: foo
 url: git@github.com/foo
 
 # also valid (two explicit remotes)
-src: fooo
+src: foo
 remotes:
   - { name: origin, url: git@github.com:john/foo }
   - { name: upstream, url: git@github.com:foo/foo}
