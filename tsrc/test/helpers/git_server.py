@@ -82,8 +82,10 @@ class BareRepo(BaseTestRepo):
         new_tree = tree_builder.write()
 
         author = self.user
-        commiter = self.user
-        self._repo.create_commit(ref_name, author, commiter, message, new_tree, parents)
+        committer = self.user
+        self._repo.create_commit(
+            ref_name, author, committer, message, new_tree, parents
+        )
 
     def get_sha1(self) -> str:
         return self._repo.head.target.hex  # type: ignore
