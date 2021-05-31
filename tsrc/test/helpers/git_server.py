@@ -130,7 +130,7 @@ class TestRepo(BaseTestRepo):
         remote_name: str = "origin",
         remote_branch: str = "master",
     ) -> None:
-        """Fetch and reset the current branc using remote_branch of the given remote"""
+        """Fetch and reset the current branch using remote_branch of the given remote"""
         origin = self._repo.remotes[remote_name]
         origin.fetch([f"refs/heads/{remote_branch}"], prune=pygit2.GIT_FETCH_PRUNE)
         remote_target = self._repo.lookup_reference(
