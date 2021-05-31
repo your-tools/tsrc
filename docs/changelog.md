@@ -1,5 +1,9 @@
 # Next release
 
+## Repo selection
+
+* Added -r (regex) and -i (inverse regex) params for filtering repos. Patch by @xzr
+
 ## Add support for submodules
 
 * `tsrc` calls `git clone` with `--recurse-submodules` when adding missing repositories
