@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -41,6 +42,14 @@ def add_repos_selection_args(parser: argparse.ArgumentParser) -> None:
         dest="all_cloned",
         help="run on all cloned repos",
     )
+    parser.add_argument(
+        "-r",
+        dest="regex",
+        help="Include only repositories matching the regex",
+    )
+    parser.add_argument(
+        "-i", dest="iregex", help="Exclude repositories matching the regex"
+    )
 
 
 def find_workspace_path() -> Path:
@@ -63,13 +72,22 @@ def find_workspace_path() -> Path:
 def get_workspace_with_repos(namespace: argparse.Namespace) -> Workspace:
     workspace = get_workspace(namespace)
     workspace.repos = resolve_repos(
-        workspace, groups=namespace.groups, all_cloned=namespace.all_cloned
+        workspace,
+        groups=namespace.groups,
+        all_cloned=namespace.all_cloned,
+        regex=namespace.regex,
+        iregex=namespace.iregex,
     )
     return workspace
 
 
 def resolve_repos(
-    workspace: Workspace, *, groups: Optional[List[str]], all_cloned: bool
+    workspace: Workspace,
+    *,
+    groups: Optional[List[str]],
+    all_cloned: bool,
+    regex: str = "",
+    iregex: str = ""
 ) -> List[tsrc.Repo]:
     """
     Given a workspace with its config and its local manifest,
@@ -78,16 +96,25 @@ def resolve_repos(
     """
     # Handle --all-cloned and --groups
     manifest = workspace.get_manifest()
-    if groups:
-        return manifest.get_repos(groups=groups)
+    repos = []
 
-    if all_cloned:
+    if groups:
+        repos = manifest.get_repos(groups=groups)
+    elif all_cloned:
         repos = manifest.get_repos(all_=True)
-        return [repo for repo in repos if (workspace.root_path / repo.dest).exists()]
+        repos = [repo for repo in repos if (workspace.root_path / repo.dest).exists()]
+    else:
+        repos = repos_from_config(manifest, workspace.config)
+
+    if regex:
+        repos = [repo for repo in repos if re.search(regex, repo.dest)]
+
+    if iregex:
+        repos = [repo for repo in repos if not re.search(iregex, repo.dest)]
 
     # At this point, nothing was requested on the command line, time to
     # use the workspace configuration:
-    return repos_from_config(manifest, workspace.config)
+    return repos
 
 
 def repos_from_config(

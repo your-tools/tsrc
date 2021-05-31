@@ -34,7 +34,8 @@ def run(args: argparse.Namespace) -> None:
     update_manifest = args.update_manifest
     groups = args.groups
     all_cloned = args.all_cloned
-
+    regex = args.regex
+    iregex = args.iregex
     workspace = get_workspace(args)
 
     if update_manifest:
@@ -43,7 +44,9 @@ def run(args: argparse.Namespace) -> None:
     else:
         ui.info_2("Not updating manifest")
 
-    workspace.repos = resolve_repos(workspace, groups=groups, all_cloned=all_cloned)
+    workspace.repos = resolve_repos(
+        workspace, groups=groups, all_cloned=all_cloned, regex=regex, iregex=iregex
+    )
 
     workspace.clone_missing()
     workspace.set_remotes()
