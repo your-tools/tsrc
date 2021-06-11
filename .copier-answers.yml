@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v1.1.1
+_commit: v1.1.2
 _src_path: git+https://git.sr.ht/~dmerej/copier-python
 author_email: dimitri@dmerej.info
 author_name: Dimitri Merejkowsky
