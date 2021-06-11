@@ -36,6 +36,8 @@ coverage = "^5.2"
 pytest = "^6.2.1"
 pytest-cov = "^2.10"
 pytest-xdist = "^1.32.0"
+# cached-property is required by pygit2 for old Pythons
+cached-property = { version = "^1.5.2", python = "< 3.8" }
 pygit2 = "^1.2.0"  # for GitSever test helpers
 mock = "^3.0.5"
 
