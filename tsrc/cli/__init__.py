@@ -25,6 +25,7 @@ def add_workspace_arg(parser: argparse.ArgumentParser) -> None:
 
 def get_workspace(namespace: argparse.Namespace) -> Workspace:
     workspace_path = namespace.workspace_path or find_workspace_path()
+    ui.info_1("Using workspace in", ui.bold, workspace_path)
     return tsrc.Workspace(workspace_path)
 
 
