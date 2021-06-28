@@ -235,7 +235,7 @@ If you use the last form, Python will let you use `foo(42, False)`, and set `spa
 This can cause problems if someone ever changes the `foo` function and adds a new optional argument before `spam`:
 
 ```python
-def foo(bar, eggs=False, spam=Tue):
+def foo(bar, eggs=False, spam=True):
     ...
 ```
 After such a change, the line `foo(42, False)` which used to call `foo` with `spam=False` now calls `foo` with `bar=False` and `spam=True`, leading to all kinds of interesting bugs.

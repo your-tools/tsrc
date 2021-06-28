@@ -239,7 +239,7 @@ tsrc init --groups foo bar
 
 # v0.6.5 (2019-04-0)
 
-* Use `codecov.io` to measure coveage
+* Use `codecov.io` to measure coverage
 * Prettify README
 
 # v0.6.4 (2019-01-07)
