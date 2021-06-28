@@ -2,7 +2,7 @@
 """
 
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import cli_ui as ui
 import ruamel.yaml
@@ -87,10 +87,13 @@ class Workspace:
             remote_setter = RemoteSetter(self.root_path)
             tsrc.executor.run_sequence(self.repos, remote_setter)
 
-    def perform_filesystem_operations(self) -> None:
+    def perform_filesystem_operations(
+        self, manifest: Optional[tsrc.Manifest] = None
+    ) -> None:
         repos = self.repos
+        if not manifest:
+            manifest = self.get_manifest()
         operator = FileSystemOperator(self.root_path, repos)
-        manifest = self.local_manifest.get_manifest()
         operations = manifest.file_system_operations
         known_repos = [x.dest for x in repos]
         operations = [x for x in operations if x.repo in known_repos]  # type: ignore
