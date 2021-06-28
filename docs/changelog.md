@@ -1,3 +1,17 @@
+# 2.3.1 (2021-06-28)
+
+## Bug fixes and small improvements
+
+* Fix #268: `tsrc apply-manifest` now performs file system operation
+* Always display workspace path at the beginning of any action
+* Skip "performing file system operations" message if there is no
+  work to be done
+
+## Internal changes
+
+* Bump linters and formatters  (`black`, `mypy`, `isort` ...)
+* Use `copier` to simplify maintenance of tools configuration
+
 # 2.3.0 (2021-05-31)
 
 ## Repo selection

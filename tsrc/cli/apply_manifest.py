@@ -20,4 +20,4 @@ def run(args: argparse.Namespace) -> None:
     workspace.repos = repos_from_config(manifest, workspace.config)
     workspace.clone_missing()
     workspace.set_remotes()
-    workspace.perform_filesystem_operations()
+    workspace.perform_filesystem_operations(manifest=manifest)
