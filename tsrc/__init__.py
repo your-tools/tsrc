@@ -3,7 +3,7 @@
    isort:skip_file
 """
 
-__version__ = "2.3.1"
+__version__ = "2.4.0"
 
 # Re-exports objects from underlying packages (so that we can use
 # tsrc.Workspace instead of tsrc.workspace.Workspace).

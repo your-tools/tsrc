@@ -3,7 +3,9 @@
 """
 
 import abc
+import concurrent
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Generic, List, Tuple, TypeVar  # noqa
 
 import cli_ui as ui
@@ -89,6 +91,39 @@ class SequentialExecutor(Generic[T]):
             self.errors.append((item, error))
 
 
+class ParallelExecutor(SequentialExecutor):
+    """Run the task on all items in parallel, while collecting errors that
+    occur in the process.
+    """
+
+    def __init__(self, task: Task[T]) -> None:
+        super().__init__(task)
+
+    def process(self, items: List[T]) -> None:
+        self.task.on_start(num_items=len(items))
+
+        self.errors = []
+        num_items = len(items)
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = []
+
+            for i, item in enumerate(items):
+                futures.append(executor.submit(self.task.process, i, num_items, item))
+
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    future.result()
+                except tsrc.Error as error:
+                    self.errors.append((item, error))
+
+        if self.errors:
+            self.handle_errors()
+        else:
+            self.task.on_success()
+
+
 def run_sequence(items: List[T], task: Task[Any]) -> None:
-    executor = SequentialExecutor(task)
+    # executor = SequentialExecutor(task)
+    executor = ParallelExecutor(task)
     return executor.process(items)
