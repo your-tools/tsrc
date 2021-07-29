@@ -6,7 +6,7 @@ from pathlib import Path
 import attr
 import cli_ui as ui
 
-import tsrc
+from tsrc.errors import Error
 
 
 class FileSystemOperation(metaclass=abc.ABCMeta):
@@ -75,7 +75,7 @@ def safe_link(*, source: Path, target: Path) -> None:
 def check_link(*, source: Path, target: Path) -> bool:
     remove_link = False
     if source.exists() and not source.is_symlink():
-        raise tsrc.Error("Specified symlink source exists but is not a link")
+        raise Error("Specified symlink source exists but is not a link")
         return False
     if source.is_symlink():
         if source.exists():

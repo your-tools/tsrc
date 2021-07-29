@@ -8,17 +8,17 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple  # noqa
 
 import cli_ui as ui
 
-import tsrc
+from tsrc.errors import Error
 
 UP = ui.Symbol("↑", "+").as_string
 DOWN = ui.Symbol("↓", "-").as_string
 
 
-class Error(tsrc.Error):
+class GitError(Error):
     pass
 
 
-class CommandError(Error):
+class GitCommandError(GitError):
     def __init__(
         self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
     ) -> None:
@@ -32,12 +32,12 @@ class CommandError(Error):
         super().__init__(message)
 
 
-class NoSuchWorkingPath(Error):
+class NoSuchWorkingPath(GitError):
     def __init__(self, path: Path) -> None:
         super().__init__(f"'{path}' does not exist")
 
 
-class WorktreeNotFound(Error):
+class WorktreeNotFound(GitError):
     def __init__(self, working_path: Path) -> None:
         super().__init__(f"'{working_path}' is not inside a git repository")
 
@@ -47,7 +47,7 @@ def assert_working_path(path: Path) -> None:
         raise NoSuchWorkingPath(path)
 
 
-class Status:
+class GitStatus:
     """Represent a status of a git repo.
 
     Usage:
@@ -76,7 +76,7 @@ class Status:
         # possible.
         try:
             self.update_sha1()
-        except CommandError:
+        except GitCommandError:
             self.empty = True
             return
         self.update_branch()
@@ -90,30 +90,30 @@ class Status:
     def update_branch(self) -> None:
         try:
             self.branch = get_current_branch(self.working_path)
-        except Error:
+        except GitError:
             pass
 
     def update_tag(self) -> None:
         try:
             self.tag = get_current_tag(self.working_path)
-        except Error:
+        except GitError:
             pass
 
     def update_remote_status(self) -> None:
-        rc, ahead_rev = run_captured(
+        rc, ahead_rev = run_git_captured(
             self.working_path, "rev-list", "@{upstream}..HEAD", check=False
         )
         if rc == 0:
             self.ahead = len(ahead_rev.splitlines())
 
-        rc, behind_rev = run_captured(
+        rc, behind_rev = run_git_captured(
             self.working_path, "rev-list", "HEAD..@{upstream}", check=False
         )
         if rc == 0:
             self.behind = len(behind_rev.splitlines())
 
     def update_worktree_status(self) -> None:
-        _, out = run_captured(self.working_path, "status", "--porcelain")
+        _, out = run_git_captured(self.working_path, "status", "--porcelain")
 
         for line in out.splitlines():
             if line.startswith("??"):
@@ -166,11 +166,11 @@ class Status:
         """
         res = []  # type: List[ui.Token]
         if self.ahead != 0:
-            n_commits = Status.commit_string(self.ahead)
+            n_commits = GitStatus.commit_string(self.ahead)
             ahead_desc = f"{UP}{self.ahead} {n_commits}"
             res += [ui.blue, ahead_desc, ui.reset]
         if self.behind != 0:
-            n_commits = Status.commit_string(self.behind)
+            n_commits = GitStatus.commit_string(self.behind)
             behind_desc = f"{DOWN}{self.behind} {n_commits}"
             res += [ui.blue, behind_desc, ui.reset]
         return res
@@ -183,7 +183,7 @@ class Status:
         return res
 
 
-def run(working_path: Path, *cmd: str, check: bool = True) -> None:
+def run_git(working_path: Path, *cmd: str, check: bool = True) -> None:
     """Run git `cmd` in given `working_path`.
 
     Raise GitCommandError if return code is non-zero and `check` is True.
@@ -195,10 +195,12 @@ def run(working_path: Path, *cmd: str, check: bool = True) -> None:
     ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
     returncode = subprocess.call(git_cmd, cwd=working_path)
     if returncode != 0 and check:
-        raise CommandError(working_path, cmd)
+        raise GitCommandError(working_path, cmd)
 
 
-def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:
+def run_git_captured(
+    working_path: Path, *cmd: str, check: bool = True
+) -> Tuple[int, str]:
     """Run git `cmd` in given `working_path`, capturing the output.
 
     Return a tuple (returncode, output).
@@ -221,7 +223,7 @@ def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int
     returncode = process.returncode
     ui.debug(ui.lightgray, "[", returncode, "]", ui.reset, out)
     if check and returncode != 0:
-        raise CommandError(working_path, cmd, output=out)
+        raise GitCommandError(working_path, cmd, output=out)
     return returncode, out
 
 
@@ -230,21 +232,21 @@ def get_sha1(working_path: Path, short: bool = False, ref: str = "HEAD") -> str:
     if short:
         cmd.append("--short")
     cmd.append(ref)
-    _, output = run_captured(working_path, *cmd)
+    _, output = run_git_captured(working_path, *cmd)
     return output
 
 
 def get_current_branch(working_path: Path) -> str:
     cmd = ("rev-parse", "--abbrev-ref", "HEAD")
-    _, output = run_captured(working_path, *cmd)
+    _, output = run_git_captured(working_path, *cmd)
     if output == "HEAD":
-        raise Error("Not an any branch")
+        raise GitError("Not an any branch")
     return output
 
 
 def get_current_tag(working_path: Path) -> str:
     cmd = ("tag", "--points-at", "HEAD")
-    _, output = run_captured(working_path, *cmd)
+    _, output = run_git_captured(working_path, *cmd)
     return output
 
 
@@ -252,7 +254,7 @@ def get_repo_root(working_path: Optional[Path] = None) -> Path:
     if not working_path:
         working_path = Path(os.getcwd())
     cmd = ("rev-parse", "--show-toplevel")
-    status, output = run_captured(working_path, *cmd, check=False)
+    status, output = run_git_captured(working_path, *cmd, check=False)
     if status != 0:
         raise WorktreeNotFound(working_path)
     return Path(output)
@@ -260,29 +262,29 @@ def get_repo_root(working_path: Optional[Path] = None) -> Path:
 
 def find_ref(repo: Path, candidate_refs: Iterable[str]) -> str:
     """Find the first reference that exists in the given repo"""
-    run(repo, "fetch", "--all", "--prune")
+    run_git(repo, "fetch", "--all", "--prune")
     for candidate_ref in candidate_refs:
-        code, _ = run_captured(repo, "rev-parse", candidate_ref, check=False)
+        code, _ = run_git_captured(repo, "rev-parse", candidate_ref, check=False)
         if code == 0:
             return candidate_ref
     ref_list = ", ".join(candidate_refs)
-    raise Error("Could not find any of:", ref_list, "in repo", repo)
+    raise GitError("Could not find any of:", ref_list, "in repo", repo)
 
 
-def reset(repo: Path, ref: str) -> None:
+def git_reset(repo: Path, ref: str) -> None:
     ui.info_2("Resetting", repo, "to", ref)
-    run(repo, "reset", "--hard", ref)
+    run_git(repo, "reset", "--hard", ref)
 
 
-def get_status(working_path: Path) -> Status:
-    status = Status(working_path)
+def get_git_status(working_path: Path) -> GitStatus:
+    status = GitStatus(working_path)
     status.update()
     return status
 
 
 def get_tracking_ref(working_path: Path) -> Optional[str]:
     # fmt: off
-    rc, out = run_captured(
+    rc, out = run_git_captured(
         working_path,
         "rev-parse", "--abbrev-ref",
         "--symbolic-full-name", "@{upstream}",

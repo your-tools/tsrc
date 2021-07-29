@@ -8,12 +8,12 @@ from typing import Any, Generic, List, Tuple, TypeVar  # noqa
 
 import cli_ui as ui
 
-import tsrc
+from tsrc.errors import Error
 
 T = TypeVar("T")
 
 
-class ExecutorFailed(tsrc.Error):
+class ExecutorFailed(Error):
     pass
 
 
@@ -57,7 +57,7 @@ class SequentialExecutor(Generic[T]):
     def __init__(self, task: Task[T]) -> None:
         self.task = task
         # Collected errors as a list tuples: (item, caught_exception)
-        self.errors = []  # type: List[Tuple[T, tsrc.Error]]
+        self.errors = []  # type: List[Tuple[T, Error]]
 
     def process(self, items: List[T]) -> None:
         self.task.on_start(num_items=len(items))
@@ -85,7 +85,7 @@ class SequentialExecutor(Generic[T]):
     def process_one(self, index: int, count: int, item: T) -> None:
         try:
             self.task.process(index, count, item)
-        except tsrc.Error as error:
+        except Error as error:
             self.errors.append((item, error))
 
 

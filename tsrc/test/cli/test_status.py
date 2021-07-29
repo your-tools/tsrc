@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cli_ui.tests import MessageRecorder
 
-import tsrc.cli
+from tsrc.git import run_git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -26,7 +26,7 @@ def test_status_happy(
     git_server.push_file("spam/eggs", "CMakeLists.txt")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    tsrc.git.run(workspace_path / "spam/eggs", "checkout", "-b", "fish")
+    run_git(workspace_path / "spam/eggs", "checkout", "-b", "fish")
 
     tsrc_cli.run("status")
 
@@ -76,8 +76,8 @@ def test_status_incorrect_branch(
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    tsrc.git.run(foo_path, "checkout", "-b", "other")
-    tsrc.git.run(foo_path, "push", "--set-upstream", "origin", "other:other")
+    run_git(foo_path, "checkout", "-b", "other")
+    run_git(foo_path, "push", "--set-upstream", "origin", "other:other")
 
     tsrc_cli.run("status")
 
@@ -107,7 +107,7 @@ def test_status_not_on_any_branch(
 
     # detach HEAD on foo repo
     foo_path = workspace_path / "foo"
-    tsrc.git.run(foo_path, "checkout", "HEAD~1")
+    run_git(foo_path, "checkout", "HEAD~1")
 
     tsrc_cli.run("status")
 
@@ -130,7 +130,7 @@ def test_status_on_tag(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
     foo_path = workspace_path / "foo"
-    tsrc.git.run(foo_path, "tag", "v1.0")
+    run_git(foo_path, "tag", "v1.0")
 
     tsrc_cli.run("status")
 

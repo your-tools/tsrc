@@ -10,8 +10,8 @@ from typing import Any, Type
 import cli_ui as ui
 import pytest
 
-import tsrc
-import tsrc.cli.main
+from tsrc.cli.main import testable_main
+from tsrc.errors import Error
 
 
 class CLI:
@@ -20,16 +20,16 @@ class CLI:
 
     def run(self, *args: str) -> None:
         ui.info(">", ui.bold, "tsrc", *args)
-        tsrc.cli.main.testable_main(args)
+        testable_main(args)
 
-    def run_and_fail(self, *args: str) -> tsrc.Error:
+    def run_and_fail(self, *args: str) -> Error:
         ui.info(">", ui.bold, "tsrc", *args, end="")
         ui.info(ui.red, " (expecting failure)")
-        with pytest.raises(tsrc.Error) as e:
-            tsrc.cli.main.testable_main(args)
+        with pytest.raises(Error) as e:
+            testable_main(args)
         return e.value
 
-    def run_and_fail_with(self, error: Type[tsrc.Error], *args: str) -> tsrc.Error:
+    def run_and_fail_with(self, error: Type[Error], *args: str) -> Error:
         actual_error = self.run_and_fail(*args)
         assert isinstance(actual_error, error)
         return actual_error

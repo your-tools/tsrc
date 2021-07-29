@@ -3,11 +3,12 @@ from typing import Optional
 
 import cli_ui as ui
 
-import tsrc
-import tsrc.executor
+from tsrc.executor import Task
+from tsrc.git import run_git, run_git_captured
+from tsrc.repo import Remote, Repo
 
 
-class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
+class RemoteSetter(Task[Repo]):
     """
     For each repository:
 
@@ -26,10 +27,10 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to configure remotes")
 
-    def display_item(self, repo: tsrc.Repo) -> str:
+    def display_item(self, repo: Repo) -> str:
         return repo.dest
 
-    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+    def process(self, index: int, count: int, repo: Repo) -> None:
         for remote in repo.remotes:
             existing_remote = self.get_remote(repo, remote.name)
             if existing_remote:
@@ -38,30 +39,28 @@ class RemoteSetter(tsrc.executor.Task[tsrc.Repo]):
             else:
                 self.add_remote(repo, remote)
 
-    def get_remote(self, repo: tsrc.Repo, name: str) -> Optional[tsrc.Remote]:
+    def get_remote(self, repo: Repo, name: str) -> Optional[Remote]:
         full_path = self.workspace_path / repo.dest
-        rc, url = tsrc.git.run_captured(
-            full_path, "remote", "get-url", name, check=False
-        )
+        rc, url = run_git_captured(full_path, "remote", "get-url", name, check=False)
         if rc != 0:
             return None
         else:
-            return tsrc.Remote(name=name, url=url)
+            return Remote(name=name, url=url)
 
-    def set_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
+    def set_remote(self, repo: Repo, remote: Remote) -> None:
         full_path = self.workspace_path / repo.dest
         # fmt: off
         ui.info_3(repo.dest + ":", "Update remote", ui.reset,
                   ui.bold, remote.name, ui.reset,
                   "to new url:", ui.brown, f"({remote.url})")
         # fmt: on
-        tsrc.git.run(full_path, "remote", "set-url", remote.name, remote.url)
+        run_git(full_path, "remote", "set-url", remote.name, remote.url)
 
-    def add_remote(self, repo: tsrc.Repo, remote: tsrc.Remote) -> None:
+    def add_remote(self, repo: Repo, remote: Remote) -> None:
         full_path = self.workspace_path / repo.dest
         # fmt: off
         ui.info_3(repo.dest + ":", "Add remote",
                   ui.bold, remote.name, ui.reset,
                   ui.brown, f"({remote.url})")
         # fmt: on
-        tsrc.git.run(full_path, "remote", "add", remote.name, remote.url)
+        run_git(full_path, "remote", "add", remote.name, remote.url)

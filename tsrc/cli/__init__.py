@@ -8,8 +8,10 @@ from typing import List, Optional
 
 import cli_ui as ui
 
-import tsrc
-from tsrc import Manifest, Workspace
+from tsrc.errors import Error
+from tsrc.manifest import Manifest
+from tsrc.repo import Repo
+from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
 
@@ -26,7 +28,7 @@ def add_workspace_arg(parser: argparse.ArgumentParser) -> None:
 def get_workspace(namespace: argparse.Namespace) -> Workspace:
     workspace_path = namespace.workspace_path or find_workspace_path()
     ui.info_1("Using workspace in", ui.bold, workspace_path)
-    return tsrc.Workspace(workspace_path)
+    return Workspace(workspace_path)
 
 
 def add_groups_arg(parser: argparse.ArgumentParser) -> None:
@@ -67,7 +69,7 @@ def find_workspace_path() -> Path:
 
         else:
             head, tail = os.path.split(head)
-    raise tsrc.Error("Could not find current workspace")
+    raise Error("Could not find current workspace")
 
 
 def get_workspace_with_repos(namespace: argparse.Namespace) -> Workspace:
@@ -89,7 +91,7 @@ def resolve_repos(
     all_cloned: bool,
     regex: str = "",
     iregex: str = ""
-) -> List[tsrc.Repo]:
+) -> List[Repo]:
     """
     Given a workspace with its config and its local manifest,
     and a collection of parsed command  line arguments,
@@ -120,7 +122,7 @@ def resolve_repos(
 
 def repos_from_config(
     manifest: Manifest, workspace_config: WorkspaceConfig
-) -> List[tsrc.Repo]:
+) -> List[Repo]:
     """
     Given a workspace config, returns a list of repos.
 

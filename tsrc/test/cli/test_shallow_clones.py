@@ -2,15 +2,14 @@ from pathlib import Path
 
 from cli_ui.tests import MessageRecorder
 
-import tsrc
-import tsrc.git
+from tsrc.git import is_shallow
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
 
 def assert_shallow_clone(workspace_path: Path, repo: str) -> None:
     repo_path = workspace_path / repo
-    assert tsrc.git.is_shallow(repo_path)
+    assert is_shallow(repo_path)
 
 
 def test_shallow_clones(

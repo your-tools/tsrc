@@ -4,12 +4,13 @@ from typing import Optional
 
 import cli_ui as ui
 
-import tsrc
-import tsrc.executor
-import tsrc.git
+from tsrc.errors import Error
+from tsrc.executor import Task
+from tsrc.git import run_git
+from tsrc.repo import Remote, Repo
 
 
-class Cloner(tsrc.executor.Task[tsrc.Repo]):
+class Cloner(Task[Repo]):
     """Implement cloning missing repos."""
 
     def __init__(
@@ -29,10 +30,10 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to clone missing repos")
 
-    def display_item(self, repo: tsrc.Repo) -> str:
+    def display_item(self, repo: Repo) -> str:
         return repo.dest
 
-    def check_shallow_with_sha1(self, repo: tsrc.Repo) -> None:
+    def check_shallow_with_sha1(self, repo: Repo) -> None:
         if not repo.sha1:
             return
         if self.shallow:
@@ -40,9 +41,9 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
                 f"Cannot use --shallow with a fixed sha1 ({repo.sha1})\n"
                 "Consider using a tag instead"
             )
-            raise tsrc.Error(message)
+            raise Error(message)
 
-    def _choose_remote(self, repo: tsrc.Repo) -> tsrc.Remote:
+    def _choose_remote(self, repo: Repo) -> Remote:
         if self.remote_name:
             for remote in repo.remotes:
                 if remote.name == self.remote_name:
@@ -50,11 +51,11 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
             message = (
                 f"Remote '{self.remote_name}' not found for repository '{repo.dest}'"
             )
-            raise tsrc.Error(message)
+            raise Error(message)
 
         return repo.remotes[0]
 
-    def clone_repo(self, repo: tsrc.Repo) -> None:
+    def clone_repo(self, repo: Repo) -> None:
         """Clone a missing repo.
 
         Note: must use the correct remote(s) and branch when cloning,
@@ -81,21 +82,21 @@ class Cloner(tsrc.executor.Task[tsrc.Repo]):
         clone_args.append("--recurse-submodules")
         clone_args.append(name)
         try:
-            tsrc.git.run(parent, *clone_args)
-        except tsrc.Error:
-            raise tsrc.Error("Cloning failed")
+            run_git(parent, *clone_args)
+        except Error:
+            raise Error("Cloning failed")
 
-    def reset_repo(self, repo: tsrc.Repo) -> None:
+    def reset_repo(self, repo: Repo) -> None:
         repo_path = self.workspace_path / repo.dest
         ref = repo.sha1
         if ref:
             ui.info_2("Resetting", repo.dest, "to", ref)
             try:
-                tsrc.git.run(repo_path, "reset", "--hard", ref)
-            except tsrc.Error:
-                raise tsrc.Error("Resetting to", ref, "failed")
+                run_git(repo_path, "reset", "--hard", ref)
+            except Error:
+                raise Error("Resetting to", ref, "failed")
 
-    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+    def process(self, index: int, count: int, repo: Repo) -> None:
         ui.info_count(index, count, repo.dest)
         self.check_shallow_with_sha1(repo)
         self.clone_repo(repo)

@@ -5,7 +5,7 @@ from typing import Any
 import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
-import tsrc.cli
+from tsrc.git import get_sha1, run_git, run_git_captured
 from tsrc.groups import GroupNotFound
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
@@ -155,8 +155,8 @@ def test_sync_not_on_master(
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    tsrc.git.run(foo_path, "checkout", "-B", "devel")
-    tsrc.git.run(foo_path, "branch", "--set-upstream-to", "origin/devel")
+    run_git(foo_path, "checkout", "-B", "devel")
+    run_git(foo_path, "branch", "--set-upstream-to", "origin/devel")
 
     tsrc_cli.run_and_fail("sync")
 
@@ -581,11 +581,11 @@ def test_fetch_additional_remotes(
 
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path / "foo"
-    first_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
+    first_sha1 = get_sha1(foo_path, ref="other/master")
     git_server.push_file("foo2", "new.txt")
 
     tsrc_cli.run("sync")
-    second_sha1 = tsrc.git.get_sha1(foo_path, ref="other/master")
+    second_sha1 = get_sha1(foo_path, ref="other/master")
 
     assert first_sha1 != second_sha1, "remote 'other' was not fetched"
 
@@ -608,9 +608,7 @@ def test_adding_remotes(
     tsrc_cli.run("sync")
 
     foo_path = workspace_path / "foo"
-    assert tsrc.git.get_sha1(
-        foo_path, ref="other/master"
-    ), "remote 'other' was not added"
+    assert get_sha1(foo_path, ref="other/master"), "remote 'other' was not added"
 
 
 def test_changing_remote_url(
@@ -631,7 +629,7 @@ def test_changing_remote_url(
     tsrc_cli.run("sync")
 
     foo_path = workspace_path / "foo"
-    _, actual_url = tsrc.git.run_captured(foo_path, "remote", "get-url", "origin")
+    _, actual_url = run_git_captured(foo_path, "remote", "get-url", "origin")
     assert actual_url == foo2_url, "remote was not updated"
 
 

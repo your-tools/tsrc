@@ -10,13 +10,15 @@ from typing import List, Union
 
 import cli_ui as ui
 
-import tsrc
 from tsrc.cli import (
     add_repos_selection_args,
     add_workspace_arg,
     get_workspace_with_repos,
 )
 from tsrc.cli.env_setter import EnvSetter
+from tsrc.errors import Error
+from tsrc.executor import Task, run_sequence
+from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 
 EPILOG = textwrap.dedent(
@@ -81,19 +83,19 @@ def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
 
     cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
-    tsrc.run_sequence(workspace.repos, cmd_runner)
+    run_sequence(workspace.repos, cmd_runner)
     ui.info("OK", ui.check)
 
 
-class CommandFailed(tsrc.Error):
+class CommandFailed(Error):
     pass
 
 
-class CouldNotStartProcess(tsrc.Error):
+class CouldNotStartProcess(Error):
     pass
 
 
-class CmdRunner(tsrc.Task[tsrc.Repo]):
+class CmdRunner(Task[Repo]):
     """
     Implements a Task that runs the same command on several repositories.
     """
@@ -112,7 +114,7 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         workspace = Workspace(workspace_path)
         self.env_setter = EnvSetter(workspace)
 
-    def display_item(self, repo: tsrc.Repo) -> str:
+    def display_item(self, repo: Repo) -> str:
         return repo.dest
 
     def on_start(self, *, num_items: int) -> None:
@@ -121,7 +123,7 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
     def on_failure(self, *, num_errors: int) -> None:
         ui.error(f"Command failed for {num_errors} repo(s)")
 
-    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+    def process(self, index: int, count: int, repo: Repo) -> None:
         ui.info_count(index, count, repo.dest)
         full_path = self.workspace_path / repo.dest
         if not full_path.exists():
@@ -152,7 +154,7 @@ def die(message: str) -> None:
     sys.exit(1)
 
 
-class MissingRepo(tsrc.Error):
+class MissingRepo(Error):
     def __init__(self, dest: str):
         self.dest = dest
         super().__init__("not cloned")

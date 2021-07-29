@@ -9,8 +9,9 @@ from typing import Callable, Optional, Sequence
 import cli_ui as ui
 import colored_traceback
 
-import tsrc
+from tsrc import __version__
 from tsrc.cli import apply_manifest, foreach, init, log, status, sync, version
+from tsrc.errors import Error
 
 ArgsList = Optional[Sequence[str]]
 MainFunc = Callable[..., None]
@@ -24,9 +25,9 @@ def main_wrapper(main_func: MainFunc) -> MainFunc:
         colored_traceback.add_hook()
         try:
             main_func(args=args)
-        except tsrc.Error as e:
+        except Error as e:
             # "expected" failure, display it and exit note: we allow
-            # tsrc.Error instances to have an empty message. In that
+            # Error instances to have an empty message. In that
             # case, do not print anything and assume relevant info has
             # already been printed.
             if e.message:  # noqa: B306
@@ -68,9 +69,7 @@ def testable_main(args: ArgsList) -> None:
 
 def main_impl(args: ArgsList = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--version", action="version", version="tsrc " + tsrc.__version__
-    )
+    parser.add_argument("--version", action="version", version="tsrc " + __version__)
 
     parser.add_argument("--verbose", help="show debug messages", action="store_true")
     parser.add_argument(

@@ -1,15 +1,16 @@
 import cli_ui as ui
 import pytest
 
-import tsrc
+from tsrc.errors import Error
+from tsrc.executor import ExecutorFailed, Task, run_sequence
 
 
-class Kaboom(tsrc.Error):
+class Kaboom(Error):
     def __str__(self) -> str:
         return "Kaboom!"
 
 
-class FakeTask(tsrc.Task[str]):
+class FakeTask(Task[str]):
     def __init__(self) -> None:
         pass
 
@@ -29,15 +30,15 @@ class FakeTask(tsrc.Task[str]):
 
 def test_doing_nothing() -> None:
     task = FakeTask()
-    tsrc.run_sequence([], task)
+    run_sequence([], task)
 
 
 def test_happy() -> None:
     task = FakeTask()
-    tsrc.run_sequence(["foo", "spam"], task)
+    run_sequence(["foo", "spam"], task)
 
 
 def test_collect_errors() -> None:
     task = FakeTask()
-    with pytest.raises(tsrc.ExecutorFailed):
-        tsrc.run_sequence(["foo", "bar"], task)
+    with pytest.raises(ExecutorFailed):
+        run_sequence(["foo", "bar"], task)
