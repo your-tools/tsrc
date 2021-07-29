@@ -4,7 +4,7 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple  # noqa
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import cli_ui as ui
 
@@ -67,9 +67,9 @@ class GitStatus:
         self.ahead = 0
         self.behind = 0
         self.dirty = False
-        self.tag = None  # type: Optional[str]
-        self.branch = None  # type: Optional[str]
-        self.sha1 = None  # type: Optional[str]
+        self.tag: Optional[str] = None
+        self.branch: Optional[str] = None
+        self.sha1: Optional[str] = None
 
     def update(self) -> None:
         # Try and gather as many information about the git repository as
@@ -131,7 +131,7 @@ class GitStatus:
 
     def describe(self) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info."""
-        res = []  # type: List[ui.Token]
+        res: List[ui.Token] = []
         if self.empty:
             return [ui.red, "empty"]
         res += self.describe_branch()
@@ -140,7 +140,7 @@ class GitStatus:
         return res
 
     def describe_branch(self) -> List[ui.Token]:
-        res = []  # type: List[ui.Token]
+        res: List[ui.Token] = []
         if self.branch:
             res += [ui.green, self.branch, ui.reset]
         elif self.sha1:
@@ -164,7 +164,7 @@ class GitStatus:
         as a list of tokens suitable for `ui.info()`.
 
         """
-        res = []  # type: List[ui.Token]
+        res: List[ui.Token] = []
         if self.ahead != 0:
             n_commits = GitStatus.commit_string(self.ahead)
             ahead_desc = f"{UP}{self.ahead} {n_commits}"
@@ -177,7 +177,7 @@ class GitStatus:
 
     def describe_dirty(self) -> List[ui.Token]:
         """Add the `(dirty)` colored string if the repo is dirty."""
-        res = []  # type: List[ui.Token]
+        res: List[ui.Token] = []
         if self.dirty:
             res += [ui.red, "(dirty)", ui.reset]
         return res
@@ -210,7 +210,7 @@ def run_git_captured(
     assert_working_path(working_path)
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
-    options = {}  # type: Dict[str, Any]
+    options: Dict[str, Any] = {}
     options["stdout"] = subprocess.PIPE
     options["stderr"] = subprocess.STDOUT
 
@@ -299,5 +299,5 @@ def get_tracking_ref(working_path: Path) -> Optional[str]:
 
 def is_shallow(working_path: Path) -> bool:
     root = get_repo_root(working_path)
-    res = (root / ".git/shallow").exists()  # type: bool
+    res = (root / ".git/shallow").exists()
     return res

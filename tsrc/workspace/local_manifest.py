@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List, Optional, Tuple, cast  # noqa
 
 from tsrc.git import run_git
 from tsrc.manifest import Manifest, load_manifest

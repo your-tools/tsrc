@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional, Tuple  # noqa
+from typing import List, Optional
 
 import attr
 import cli_ui as ui
@@ -16,9 +16,9 @@ class BadBranches(Error):
 
 @attr.s(frozen=True)
 class RepoAtIncorrectBranchDescription:
-    dest = attr.ib()  # type: str
-    actual = attr.ib()  # type: str
-    expected = attr.ib()  # type: str
+    dest: str = attr.ib()
+    actual: str = attr.ib()
+    expected: str = attr.ib()
 
 
 class Syncer(Task[Repo]):
@@ -30,7 +30,7 @@ class Syncer(Task[Repo]):
         remote_name: Optional[str] = None,
     ) -> None:
         self.workspace_path = workspace_path
-        self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
+        self.bad_branches: List[RepoAtIncorrectBranchDescription] = []
         self.force = force
         self.remote_name = remote_name
 

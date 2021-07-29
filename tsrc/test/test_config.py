@@ -55,4 +55,4 @@ def test_use_pure_python_types(tmp_path: Path) -> None:
     foo_yml.write_text("foo: 42\n")
     foo_schema = schema.Schema({"foo": int})
     parsed = parse_config(foo_yml, schema=foo_schema)
-    assert type(parsed) == type({})  # noqa
+    assert parsed.__class__ == dict

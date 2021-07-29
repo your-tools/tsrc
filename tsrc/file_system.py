@@ -21,9 +21,9 @@ class FileSystemOperation(metaclass=abc.ABCMeta):
 
 @attr.s(frozen=True)
 class Copy(FileSystemOperation):
-    repo = attr.ib()  # type: str
-    src = attr.ib()  # type: str
-    dest = attr.ib()  # type: str
+    repo: str = attr.ib()
+    src: str = attr.ib()
+    dest: str = attr.ib()
 
     def perform(self, workspace_path: Path) -> None:
         src_path = workspace_path / self.repo / self.src
@@ -36,9 +36,9 @@ class Copy(FileSystemOperation):
 
 @attr.s(frozen=True)
 class Link(FileSystemOperation):
-    repo = attr.ib()  # type: str
-    source = attr.ib()  # type: str
-    target = attr.ib()  # type: str
+    repo: str = attr.ib()
+    source: str = attr.ib()
+    target: str = attr.ib()
 
     def perform(self, workspace_path: Path) -> None:
         source = workspace_path / self.source

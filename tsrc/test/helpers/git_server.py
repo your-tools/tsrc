@@ -157,7 +157,7 @@ class ManifestHandler:
     def __init__(self, repo: BareRepo) -> None:
 
         self.repo = repo
-        self.data = {"repos": []}  # type: Dict[str, Any]
+        self.data: Dict[str, Any] = {"repos": []}
         self.branch = "master"
         self.write_changes("Add an empty manifest")
 

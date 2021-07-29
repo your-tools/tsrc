@@ -55,9 +55,9 @@ class GroupList(Generic[T]):
     """
 
     def __init__(self, *, elements: Iterable[T]) -> None:
-        self.groups = {}  # type: Dict[str, Group[T]]
+        self.groups: Dict[str, Group[T]] = {}
         self.all_elements = elements
-        self._groups_seen = set()  # type: Set[str]
+        self._groups_seen: Set[str] = set()
 
     def add(
         self, name: str, elements: Iterable[T], includes: Optional[List[str]] = None
@@ -78,7 +78,7 @@ class GroupList(Generic[T]):
         # This algorithms allows to have groups that include each other
         # without creating infinite loops.
         self._groups_seen = set()
-        res = set()  # type: Set[T]
+        res: Set[T] = set()
         self._rec_get_elements(res, groups, parent_group=None)
         return res
 

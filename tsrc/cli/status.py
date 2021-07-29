@@ -39,7 +39,7 @@ class ManifestStatus:
     def __init__(self, repo: Repo, *, manifest: Manifest):
         self.repo = repo
         self.manifest = manifest
-        self.incorrect_branch = None  # type: Optional[Tuple[str,str]]
+        self.incorrect_branch: Optional[Tuple[str, str]] = None
 
     def update(self, git_status: GitStatus) -> None:
         """Set self.incorrect_branch if the local git status
@@ -52,7 +52,7 @@ class ManifestStatus:
 
     def describe(self) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info()`."""
-        res = []  # type: List[ui.Token]
+        res: List[ui.Token] = []
         incorrect_branch = self.incorrect_branch
         if incorrect_branch:
             actual, expected = incorrect_branch
@@ -96,7 +96,7 @@ class StatusCollector(Task[Repo]):
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
         self.manifest = workspace.get_manifest()
-        self.statuses = collections.OrderedDict()  # type: CollectedStatuses
+        self.statuses: CollectedStatuses = collections.OrderedDict()
         self.num_repos = 0
 
     def display_item(self, repo: Repo) -> str:

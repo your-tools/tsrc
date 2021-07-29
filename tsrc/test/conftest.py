@@ -6,8 +6,8 @@ from typing import Any, Iterator
 import pytest
 from cli_ui.tests import MessageRecorder
 
-from tsrc.test.helpers.cli import tsrc_cli  # noqa
-from tsrc.test.helpers.git_server import git_server  # noqa
+from tsrc.test.helpers.cli import tsrc_cli  # noqa: F401
+from tsrc.test.helpers.git_server import git_server  # noqa: F401
 from tsrc.workspace import Workspace
 
 
