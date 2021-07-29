@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pytest
@@ -185,3 +186,16 @@ def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
     tsrc_cli.run_and_fail("foreach", "no-such")
+
+
+def test_set_environment_variables(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    git_server.add_repo("foo")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    check_env_py = workspace_path / "check-env.py"
+    check_env_py.write_text("import os; print(os.environ['TSRC_PROJECT_DEST'])")
+
+    tsrc_cli.run("foreach", sys.executable, str(check_env_py))

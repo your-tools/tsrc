@@ -1,6 +1,7 @@
 """ Entry point for `tsrc foreach`. """
 
 import argparse
+import os
 import subprocess
 import sys
 import textwrap
@@ -15,6 +16,8 @@ from tsrc.cli import (
     add_workspace_arg,
     get_workspace_with_repos,
 )
+from tsrc.cli.env_setter import EnvSetter
+from tsrc.workspace import Workspace
 
 EPILOG = textwrap.dedent(
     """\
@@ -106,6 +109,8 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         self.command = command
         self.description = description
         self.shell = shell
+        workspace = Workspace(workspace_path)
+        self.env_setter = EnvSetter(workspace)
 
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.dest
@@ -129,8 +134,12 @@ class CmdRunner(tsrc.Task[tsrc.Repo]):
         )
         # fmt: on
         full_path = self.workspace_path / repo.dest
+        run_env = self.env_setter.get_env_for_repo(repo)
+        run_env.update(os.environ)
         try:
-            rc = subprocess.call(self.command, cwd=full_path, shell=self.shell)
+            rc = subprocess.call(
+                self.command, cwd=full_path, shell=self.shell, env=run_env
+            )
         except OSError as e:
             raise CouldNotStartProcess("Error when starting process:", e)
         if rc != 0:
