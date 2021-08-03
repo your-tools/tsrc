@@ -1,6 +1,6 @@
 from typing import Dict
 
-from tsrc.git import Status as GitStatus
+from tsrc.git import GitStatus
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 

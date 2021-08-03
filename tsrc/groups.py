@@ -1,14 +1,14 @@
 """ Support for groups of elements """
 # Note that groups are allowed to include other groups.
 
-from typing import Any, Dict, Generic, Iterable, List, Optional, Set, TypeVar  # noqa
+from typing import Any, Dict, Generic, Iterable, List, Optional, Set, TypeVar
 
-import tsrc
+from tsrc.errors import Error
 
 T = TypeVar("T")
 
 
-class GroupError(tsrc.Error):
+class GroupError(Error):
     pass
 
 
@@ -35,7 +35,7 @@ class GroupNotFound(GroupError):
         super().__init__(message)
 
 
-class UnknownElement(GroupError):
+class UnknownGroupElement(GroupError):
     def __init__(self, group_name: str, element: T) -> None:
         self.group_name = group_name
         self.element = element
@@ -55,16 +55,16 @@ class GroupList(Generic[T]):
     """
 
     def __init__(self, *, elements: Iterable[T]) -> None:
-        self.groups = {}  # type: Dict[str, Group[T]]
+        self.groups: Dict[str, Group[T]] = {}
         self.all_elements = elements
-        self._groups_seen = set()  # type: Set[str]
+        self._groups_seen: Set[str] = set()
 
     def add(
         self, name: str, elements: Iterable[T], includes: Optional[List[str]] = None
     ) -> None:
         for element in elements:
             if element not in self.all_elements:
-                raise UnknownElement(name, element)
+                raise UnknownGroupElement(name, element)
         self.groups[name] = Group(name, elements, includes=includes)
 
     def get_group(self, name: str) -> Optional[Group[T]]:
@@ -78,7 +78,7 @@ class GroupList(Generic[T]):
         # This algorithms allows to have groups that include each other
         # without creating infinite loops.
         self._groups_seen = set()
-        res = set()  # type: Set[T]
+        res: Set[T] = set()
         self._rec_get_elements(res, groups, parent_group=None)
         return res
 

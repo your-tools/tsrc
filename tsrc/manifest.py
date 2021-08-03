@@ -4,35 +4,39 @@
 
 import operator
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast  # noqa
+from typing import Any, List, Optional
 
 import schema
 
-import tsrc
+from tsrc.config import parse_config
+from tsrc.errors import Error
+from tsrc.file_system import Copy, FileSystemOperation, Link
+from tsrc.groups import GroupList
+from tsrc.repo import Remote, Repo
 
 
-class RepoNotFound(tsrc.Error):
+class RepoNotFound(Error):
     def __init__(self, dest: str) -> None:
         super().__init__(f"No repo found in '{dest}'")
 
 
 class Manifest:
-    """Contains a list of `tsrc.Repo` instances, and optionally
+    """Contains a list of `Repo` instances, and optionally
     a group list.
 
     """
 
     def __init__(self) -> None:
-        self._repos = []  # type: List[tsrc.Repo]
-        self.group_list = None  # type:  Optional[tsrc.GroupList[str]]
+        self._repos: List[Repo] = []
+        self.group_list: Optional[GroupList[str]] = None
 
     def apply_config(self, config: Any) -> None:
         """Apply config coming form the yaml file"""
         # Note: we cannot just serialize the yaml file into the class,
         # because we need to convert the plain old dicts into
         # higher-level classes.
-        self.file_system_operations = []  # type: List[tsrc.FileSystemOperation]
-        self.symlinks = []  # type: List[tsrc.Link]
+        self.file_system_operations: List[FileSystemOperation] = []
+        self.symlinks: List[Link] = []
         repos_config = config["repos"]
         for repo_config in repos_config:
             self._handle_repo(repo_config)
@@ -49,21 +53,19 @@ class Manifest:
         sha1 = repo_config.get("sha1")
         url = repo_config.get("url")
         if url:
-            origin = tsrc.Remote(name="origin", url=url)
+            origin = Remote(name="origin", url=url)
             remotes = [origin]
         else:
             remotes = self._handle_remotes(repo_config)
-        repo = tsrc.Repo(dest=dest, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
+        repo = Repo(dest=dest, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
         self._repos.append(repo)
 
-    def _handle_remotes(self, repo_config: Any) -> List[tsrc.Remote]:
+    def _handle_remotes(self, repo_config: Any) -> List[Remote]:
         remotes_config = repo_config.get("remotes")
         res = []
         if remotes_config:
             for remote_config in remotes_config:
-                remote = tsrc.Remote(
-                    name=remote_config["name"], url=remote_config["url"]
-                )
+                remote = Remote(name=remote_config["name"], url=remote_config["url"])
                 res.append(remote)
         return res
 
@@ -74,7 +76,7 @@ class Manifest:
         for item in to_cp:
             src = item["file"]
             dest = item.get("dest", src)
-            copy = tsrc.Copy(repo_config["dest"], src, dest)
+            copy = Copy(repo_config["dest"], src, dest)
             self.file_system_operations.append(copy)
 
     def _handle_links(self, repo_config: Any) -> None:
@@ -84,12 +86,12 @@ class Manifest:
         for item in to_link:
             source = item["source"]
             target = item["target"]
-            link = tsrc.Link(repo_config["dest"], source, target)
+            link = Link(repo_config["dest"], source, target)
             self.file_system_operations.append(link)
 
     def _handle_groups(self, groups_config: Any) -> None:
         elements = {repo.dest for repo in self._repos}
-        self.group_list = tsrc.GroupList(elements=elements)
+        self.group_list = GroupList(elements=elements)
         if not groups_config:
             return
         for name, group_config in groups_config.items():
@@ -99,7 +101,7 @@ class Manifest:
 
     def get_repos(
         self, groups: Optional[List[str]] = None, all_: bool = False
-    ) -> List[tsrc.Repo]:
+    ) -> List[Repo]:
         if all_:
             return self._repos
 
@@ -115,7 +117,7 @@ class Manifest:
         assert self.group_list
         return self.group_list.get_group("default") is not None
 
-    def _get_repos_in_groups(self, groups: List[str]) -> List[tsrc.Repo]:
+    def _get_repos_in_groups(self, groups: List[str]) -> List[Repo]:
         assert self.group_list
         elements = self.group_list.get_elements(groups=groups)
         res = []
@@ -123,7 +125,7 @@ class Manifest:
             res.append(self.get_repo(dest))
         return sorted(res, key=operator.attrgetter("dest"))
 
-    def get_repo(self, dest: str) -> tsrc.Repo:
+    def get_repo(self, dest: str) -> Repo:
         for repo in self._repos:
             if repo.dest == dest:
                 return repo
@@ -159,7 +161,7 @@ def validate_repo(data: Any) -> None:
         )
 
 
-def load(manifest_path: Path) -> Manifest:
+def load_manifest(manifest_path: Path) -> Manifest:
     """Main entry point: return a manifest instance by parsing
     a `manifest.yml` file.
 
@@ -177,7 +179,7 @@ def load(manifest_path: Path) -> Manifest:
             schema.Optional("groups"): {str: group_schema},
         }
     )
-    parsed = tsrc.parse_config(manifest_path, schema=manifest_schema)
+    parsed = parse_config(manifest_path, schema=manifest_schema)
     res = Manifest()
     res.apply_config(parsed)
     return res

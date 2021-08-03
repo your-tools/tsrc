@@ -6,7 +6,7 @@ from pathlib import Path
 import attr
 import cli_ui as ui
 
-import tsrc
+from tsrc.errors import Error
 
 
 class FileSystemOperation(metaclass=abc.ABCMeta):
@@ -21,9 +21,9 @@ class FileSystemOperation(metaclass=abc.ABCMeta):
 
 @attr.s(frozen=True)
 class Copy(FileSystemOperation):
-    repo = attr.ib()  # type: str
-    src = attr.ib()  # type: str
-    dest = attr.ib()  # type: str
+    repo: str = attr.ib()
+    src: str = attr.ib()
+    dest: str = attr.ib()
 
     def perform(self, workspace_path: Path) -> None:
         src_path = workspace_path / self.repo / self.src
@@ -36,9 +36,9 @@ class Copy(FileSystemOperation):
 
 @attr.s(frozen=True)
 class Link(FileSystemOperation):
-    repo = attr.ib()  # type: str
-    source = attr.ib()  # type: str
-    target = attr.ib()  # type: str
+    repo: str = attr.ib()
+    source: str = attr.ib()
+    target: str = attr.ib()
 
     def perform(self, workspace_path: Path) -> None:
         source = workspace_path / self.source
@@ -75,7 +75,7 @@ def safe_link(*, source: Path, target: Path) -> None:
 def check_link(*, source: Path, target: Path) -> bool:
     remove_link = False
     if source.exists() and not source.is_symlink():
-        raise tsrc.Error("Specified symlink source exists but is not a link")
+        raise Error("Specified symlink source exists but is not a link")
         return False
     if source.is_symlink():
         if source.exists():

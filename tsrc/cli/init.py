@@ -4,8 +4,8 @@ from pathlib import Path
 
 import cli_ui as ui
 
-import tsrc
 from tsrc.cli import add_groups_arg, add_workspace_arg, repos_from_config
+from tsrc.errors import Error
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
 
@@ -47,7 +47,7 @@ def run(args: argparse.Namespace) -> None:
     cfg_path = workspace_path / ".tsrc" / "config.yml"
 
     if cfg_path.exists():
-        raise tsrc.Error(f"Workspace already configured. `{cfg_path}` already exists")
+        raise Error(f"Workspace already configured. `{cfg_path}` already exists")
 
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 

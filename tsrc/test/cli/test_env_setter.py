@@ -6,8 +6,7 @@ from tsrc.cli.env_setter import (
     get_status_vars,
     get_workspace_vars,
 )
-from tsrc.git import Status as GitStatus
-from tsrc.git import run as run_git
+from tsrc.git import GitStatus, run_git
 from tsrc.repo import Remote, Repo
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer

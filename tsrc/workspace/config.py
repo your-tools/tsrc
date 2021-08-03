@@ -14,14 +14,14 @@ class WorkspaceConfig:
     for instance.
     """
 
-    manifest_url = attr.ib()  # type: str
-    manifest_branch = attr.ib()  # type: str
-    repo_groups = attr.ib()  # type: List[str]
+    manifest_url: str = attr.ib()
+    manifest_branch: str = attr.ib()
+    repo_groups: List[str] = attr.ib()
 
-    shallow_clones = attr.ib(default=False)  # type: bool
-    clone_all_repos = attr.ib(default=False)  # type: bool
+    shallow_clones: bool = attr.ib(default=False)
+    clone_all_repos: bool = attr.ib(default=False)
 
-    singular_remote = attr.ib(default=None)  # type: Optional[str]
+    singular_remote: Optional[str] = attr.ib(default=None)
 
     @manifest_url.validator
     def check(self, attribute: str, value: Optional[str] = None) -> None:

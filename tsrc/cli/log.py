@@ -4,12 +4,13 @@ import argparse
 
 import cli_ui as ui
 
-import tsrc
 from tsrc.cli import (
     add_repos_selection_args,
     add_workspace_arg,
     get_workspace_with_repos,
 )
+from tsrc.errors import Error
+from tsrc.git import run_git_captured
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -47,7 +48,7 @@ def run(args: argparse.Namespace) -> None:
             f"--pretty=format:{log_format}",
             f"{args.from_ref}...{args.to_ref}",
         ]
-        rc, out = tsrc.git.run_captured(full_path, *cmd, check=False)
+        rc, out = run_git_captured(full_path, *cmd, check=False)
         if rc != 0:
             all_ok = False
         if out:
@@ -55,4 +56,4 @@ def run(args: argparse.Namespace) -> None:
             ui.info(ui.bold, "-" * len(repo.dest))
             ui.info(out)
     if not all_ok:
-        raise tsrc.Error()
+        raise Error()

@@ -4,7 +4,7 @@ from pathlib import Path
 import cli_ui as ui
 import pytest
 
-from tsrc.git import DOWN, UP, Status
+from tsrc.git import DOWN, UP, GitStatus
 from tsrc.test.helpers.git_server import BareRepo
 
 
@@ -17,8 +17,8 @@ class GitProject:
         self.remote_repo = remote_repo
         self.run_git("remote", "add", "origin", str(remote_repo.path))
 
-    def get_status(self) -> Status:
-        status = Status(self.path)
+    def get_status(self) -> GitStatus:
+        status = GitStatus(self.path)
         status.update()
         return status
 
@@ -132,12 +132,12 @@ class TestDescribe:
     dummy_path = Path("src")
 
     def test_up_to_date(self) -> None:
-        status = Status(self.dummy_path)
+        status = GitStatus(self.dummy_path)
         status.branch = "master"
         assert status.describe() == [ui.green, "master", ui.reset]
 
     def test_ahead_1_commit(self) -> None:
-        status = Status(self.dummy_path)
+        status = GitStatus(self.dummy_path)
         status.branch = "master"
         status.ahead = 1
         # fmt: off
@@ -148,7 +148,7 @@ class TestDescribe:
         # fmt: on
 
     def test_diverged(self) -> None:
-        status = Status(self.dummy_path)
+        status = GitStatus(self.dummy_path)
         status.branch = "master"
         status.ahead = 1
         status.behind = 2
@@ -161,11 +161,11 @@ class TestDescribe:
         # fmt: on
 
     def test_on_sha1(self) -> None:
-        status = Status(self.dummy_path)
+        status = GitStatus(self.dummy_path)
         status.sha1 = "b6cfd80"
         assert status.describe() == [ui.red, "b6cfd80", ui.reset]
 
     def test_on_tag(self) -> None:
-        status = Status(self.dummy_path)
+        status = GitStatus(self.dummy_path)
         status.tag = "v0.1"
         assert status.describe() == [ui.yellow, "on", "v0.1", ui.reset]

@@ -7,16 +7,16 @@ from typing import Iterable, List, Optional, Tuple
 import cli_ui as ui
 import ruamel.yaml
 
-import tsrc
-import tsrc.executor
-import tsrc.git
-
-from .cloner import Cloner
-from .config import WorkspaceConfig
-from .file_system_operator import FileSystemOperator
-from .local_manifest import LocalManifest
-from .remote_setter import RemoteSetter
-from .syncer import Syncer
+from tsrc.errors import Error
+from tsrc.executor import run_sequence
+from tsrc.manifest import Manifest
+from tsrc.repo import Repo
+from tsrc.workspace.cloner import Cloner
+from tsrc.workspace.config import WorkspaceConfig
+from tsrc.workspace.file_system_operator import FileSystemOperator
+from tsrc.workspace.local_manifest import LocalManifest
+from tsrc.workspace.remote_setter import RemoteSetter
+from tsrc.workspace.syncer import Syncer
 
 
 def copy_cfg_path_if_needed(root_path: Path) -> None:
@@ -59,9 +59,9 @@ class Workspace:
         # the workspace and the requested repos - for instance, the user could
         # have configured a workspace with a `backend` group, but using
         # a disjoint `front-end` group on the command line.
-        self.repos: List[tsrc.Repo] = []
+        self.repos: List[Repo] = []
 
-    def get_manifest(self) -> tsrc.Manifest:
+    def get_manifest(self) -> Manifest:
         return self.local_manifest.get_manifest()
 
     def update_manifest(self) -> None:
@@ -80,15 +80,15 @@ class Workspace:
             shallow=self.config.shallow_clones,
             remote_name=self.config.singular_remote,
         )
-        tsrc.executor.run_sequence(to_clone, cloner)
+        run_sequence(to_clone, cloner)
 
     def set_remotes(self) -> None:
         if not self.config.singular_remote:
             remote_setter = RemoteSetter(self.root_path)
-            tsrc.executor.run_sequence(self.repos, remote_setter)
+            run_sequence(self.repos, remote_setter)
 
     def perform_filesystem_operations(
-        self, manifest: Optional[tsrc.Manifest] = None
+        self, manifest: Optional[Manifest] = None
     ) -> None:
         repos = self.repos
         if not manifest:
@@ -97,7 +97,7 @@ class Workspace:
         operations = manifest.file_system_operations
         known_repos = [x.dest for x in repos]
         operations = [x for x in operations if x.repo in known_repos]  # type: ignore
-        tsrc.executor.run_sequence(operations, operator)
+        run_sequence(operations, operator)
 
     def sync(self, *, force: bool = False) -> None:
         syncer = Syncer(
@@ -105,18 +105,18 @@ class Workspace:
         )
         repos = self.repos
         try:
-            tsrc.executor.run_sequence(repos, syncer)
+            run_sequence(repos, syncer)
         finally:
             syncer.display_bad_branches()
 
-    def enumerate_repos(self) -> Iterable[Tuple[int, tsrc.Repo, Path]]:
+    def enumerate_repos(self) -> Iterable[Tuple[int, Repo, Path]]:
         """Yield (index, repo, full_path) for all the repos"""
         for i, repo in enumerate(self.repos):
             full_path = self.root_path / repo.dest
             yield (i, repo, full_path)
 
 
-class WorkspaceNotConfigured(tsrc.Error):
+class WorkspaceNotConfigured(Error):
     def __init__(self, root_path: Path):
         super().__init__(
             f"Workspace in '{root_path}' is not configured. Please run `tsrc init`"

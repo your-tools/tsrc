@@ -3,8 +3,8 @@
 import argparse
 from pathlib import Path
 
-import tsrc.manifest
 from tsrc.cli import add_workspace_arg, get_workspace, repos_from_config
+from tsrc.manifest import load_manifest
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -15,7 +15,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
-    manifest = tsrc.manifest.load(args.manifest_path)
+    manifest = load_manifest(args.manifest_path)
     workspace = get_workspace(args)
     workspace.repos = repos_from_config(manifest, workspace.config)
     workspace.clone_missing()

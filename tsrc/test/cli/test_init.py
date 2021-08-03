@@ -4,8 +4,7 @@ from typing import Any
 
 from cli_ui.tests import MessageRecorder
 
-import tsrc
-import tsrc.git
+from tsrc.git import get_current_branch, run_git, run_git_captured
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -144,7 +143,7 @@ def test_uses_correct_branch_for_repo(
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    assert tsrc.git.get_current_branch(foo_path) == "next"
+    assert get_current_branch(foo_path) == "next"
 
 
 def test_empty_repo(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
@@ -180,8 +179,8 @@ def test_resets_to_tag(
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    _, expected_ref = tsrc.git.run_captured(foo_path, "rev-parse", "v1.0")
-    _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
+    _, expected_ref = run_git_captured(foo_path, "rev-parse", "v1.0")
+    _, actual_ref = run_git_captured(foo_path, "rev-parse", "HEAD")
     assert expected_ref == actual_ref
 
 
@@ -198,7 +197,7 @@ def test_resets_to_sha1(
     tsrc_cli.run("init", manifest_url)
 
     foo_path = workspace_path / "foo"
-    _, actual_ref = tsrc.git.run_captured(foo_path, "rev-parse", "HEAD")
+    _, actual_ref = run_git_captured(foo_path, "rev-parse", "HEAD")
     assert initial_sha1 == actual_ref
 
 
@@ -262,7 +261,7 @@ def test_no_remote_named_origin(
 
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path / "foo"
-    tsrc.git.run(foo_path, "remote", "rename", "origin", "upstream")
+    run_git(foo_path, "remote", "rename", "origin", "upstream")
 
     tsrc_cli.run("sync")
 
@@ -275,7 +274,7 @@ def test_repo_default_branch_not_master(
     tsrc_cli.run("init", git_server.manifest_url)
 
     foo_path = workspace_path / "foo"
-    assert tsrc.git.get_current_branch(foo_path) == "devel"
+    assert get_current_branch(foo_path) == "devel"
 
 
 def test_several_remotes(
@@ -292,7 +291,7 @@ def test_several_remotes(
     tsrc_cli.run("init", git_server.manifest_url)
 
     foo_path = workspace_path / "foo"
-    rc, output = tsrc.git.run_captured(
+    rc, output = run_git_captured(
         foo_path, "remote", "get-url", "upstream", check=False
     )
     assert rc == 0, output
@@ -324,7 +323,7 @@ def test_singular_remote(
     tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
 
     foo_path = workspace_path / "foo"
-    _, output = tsrc.git.run_captured(foo_path, "remote", "show", check=True)
+    _, output = run_git_captured(foo_path, "remote", "show", check=True)
 
     assert output == "origin"
 

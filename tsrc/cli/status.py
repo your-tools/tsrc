@@ -7,14 +7,17 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import cli_ui as ui
 
-import tsrc
-import tsrc.errors
-import tsrc.git
 from tsrc.cli import (
     add_repos_selection_args,
     add_workspace_arg,
     get_workspace_with_repos,
 )
+from tsrc.errors import MissingRepo
+from tsrc.executor import Task, run_sequence
+from tsrc.git import GitStatus, get_git_status
+from tsrc.manifest import Manifest
+from tsrc.repo import Repo
+from tsrc.workspace import Workspace
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -27,18 +30,18 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
     status_collector = StatusCollector(workspace)
-    tsrc.run_sequence(workspace.repos, status_collector)
+    run_sequence(workspace.repos, status_collector)
 
 
 class ManifestStatus:
     """Represent the status of a repo w.r.t the manifest."""
 
-    def __init__(self, repo: tsrc.Repo, *, manifest: tsrc.Manifest):
+    def __init__(self, repo: Repo, *, manifest: Manifest):
         self.repo = repo
         self.manifest = manifest
-        self.incorrect_branch = None  # type: Optional[Tuple[str,str]]
+        self.incorrect_branch: Optional[Tuple[str, str]] = None
 
-    def update(self, git_status: tsrc.git.Status) -> None:
+    def update(self, git_status: GitStatus) -> None:
         """Set self.incorrect_branch if the local git status
         does not match the branch set in the manifest.
         """
@@ -49,7 +52,7 @@ class ManifestStatus:
 
     def describe(self) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info()`."""
-        res = []  # type: List[ui.Token]
+        res: List[ui.Token] = []
         incorrect_branch = self.incorrect_branch
         if incorrect_branch:
             actual, expected = incorrect_branch
@@ -60,7 +63,7 @@ class ManifestStatus:
 class Status:
     """Wrapper class for both ManifestStatus and GitStatus"""
 
-    def __init__(self, *, git: tsrc.git.Status, manifest: ManifestStatus):
+    def __init__(self, *, git: GitStatus, manifest: ManifestStatus):
         self.git = git
         self.manifest = manifest
 
@@ -71,7 +74,7 @@ CollectedStatuses = Dict[str, StatusOrError]
 
 def describe_status(status: StatusOrError) -> List[ui.Token]:
     """Return a list of tokens suitable for ui.info()."""
-    if isinstance(status, tsrc.errors.MissingRepo):
+    if isinstance(status, MissingRepo):
         return [ui.red, "error: missing repo"]
     if isinstance(status, Exception):
         return [ui.red, "error: ", status]
@@ -85,30 +88,30 @@ def erase_last_line() -> None:
     ui.info(" " * terminal_size.columns, end="\r")
 
 
-class StatusCollector(tsrc.Task[tsrc.Repo]):
+class StatusCollector(Task[Repo]):
     """Implement a Task to collect local git status and
     stats w.r.t the manifest for each repo.
     """
 
-    def __init__(self, workspace: tsrc.Workspace) -> None:
+    def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
         self.manifest = workspace.get_manifest()
-        self.statuses = collections.OrderedDict()  # type: CollectedStatuses
+        self.statuses: CollectedStatuses = collections.OrderedDict()
         self.num_repos = 0
 
-    def display_item(self, repo: tsrc.Repo) -> str:
+    def display_item(self, repo: Repo) -> str:
         return repo.dest
 
-    def process(self, index: int, total: int, repo: tsrc.Repo) -> None:
+    def process(self, index: int, total: int, repo: Repo) -> None:
         ui.info_count(index, total, repo.dest, end="\r")
         full_path = self.workspace.root_path / repo.dest
 
         if not full_path.exists():
-            self.statuses[repo.dest] = tsrc.errors.MissingRepo(repo.dest)
+            self.statuses[repo.dest] = MissingRepo(repo.dest)
             return
 
         try:
-            git_status = tsrc.git.get_status(full_path)
+            git_status = get_git_status(full_path)
             manifest_status = ManifestStatus(repo, manifest=self.manifest)
             manifest_status.update(git_status)
             status = Status(git=git_status, manifest=manifest_status)

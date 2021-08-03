@@ -2,7 +2,7 @@
 
 import argparse
 
-import tsrc
+from tsrc import __version__
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -11,4 +11,4 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
-    print("tsrc version", tsrc.__version__)
+    print("tsrc version", __version__)

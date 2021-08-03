@@ -6,10 +6,9 @@ from typing import Any, Iterator
 import pytest
 from cli_ui.tests import MessageRecorder
 
-import tsrc
-
-from .helpers.cli import tsrc_cli  # noqa
-from .helpers.git_server import git_server  # noqa
+from tsrc.test.helpers.cli import tsrc_cli  # noqa: F401
+from tsrc.test.helpers.git_server import git_server  # noqa: F401
+from tsrc.workspace import Workspace
 
 
 @pytest.fixture()
@@ -26,8 +25,8 @@ def workspace_path(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def workspace(workspace_path: Path) -> tsrc.Workspace:
-    return tsrc.Workspace(workspace_path)
+def workspace(workspace_path: Path) -> Workspace:
+    return Workspace(workspace_path)
 
 
 @pytest.fixture()

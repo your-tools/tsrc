@@ -5,7 +5,10 @@ from typing import List, Optional
 import pytest
 import ruamel.yaml
 
-import tsrc
+from tsrc.errors import Error, InvalidConfig
+from tsrc.file_system import Copy, Link
+from tsrc.manifest import Manifest, RepoNotFound, load_manifest
+from tsrc.repo import Remote, Repo
 
 
 def test_load() -> None:
@@ -31,26 +34,26 @@ repos:
       - source: some_source
         target: some_target
 """
-    manifest = tsrc.Manifest()
+    manifest = Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.apply_config(parsed)
     assert manifest.get_repos() == [
-        tsrc.Repo(
-            remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:foo.git")],
+        Repo(
+            remotes=[Remote(name="origin", url="git@example.com:foo.git")],
             dest="foo",
             branch="next",
             sha1=None,
             tag=None,
         ),
-        tsrc.Repo(
-            remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:bar.git")],
+        Repo(
+            remotes=[Remote(name="origin", url="git@example.com:bar.git")],
             dest="bar",
             branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
             tag=None,
         ),
-        tsrc.Repo(
-            remotes=[tsrc.repo.Remote(name="origin", url="git@example.com:master.git")],
+        Repo(
+            remotes=[Remote(name="origin", url="git@example.com:master.git")],
             dest="master",
             branch="master",
             sha1=None,
@@ -58,9 +61,9 @@ repos:
         ),
     ]
     assert manifest.file_system_operations == [
-        tsrc.Copy("master", "top.cmake", "CMakeLists.txt"),
-        tsrc.Copy("master", ".clang-format", ".clang-format"),
-        tsrc.Link("master", "some_source", "some_target"),
+        Copy("master", "top.cmake", "CMakeLists.txt"),
+        Copy("master", ".clang-format", ".clang-format"),
+        Link("master", "some_source", "some_target"),
     ]
 
 
@@ -73,7 +76,7 @@ repos:
   - dest: bar
     url: git@example.com:proj_two/bar
 """
-    manifest = tsrc.Manifest()
+    manifest = Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.apply_config(parsed)
 
@@ -83,7 +86,7 @@ repos:
 
     assert_clone_url("foo", "git@example.com:proj_one/foo")
     assert_clone_url("bar", "git@example.com:proj_two/bar")
-    with pytest.raises(tsrc.manifest.RepoNotFound) as e:
+    with pytest.raises(RepoNotFound) as e:
         manifest.get_repo("no/such")
         assert "no/such" in e.value.message
 
@@ -97,7 +100,7 @@ repos:
       - name: upstream
         url: git@upstream.com/foo
 """
-    manifest = tsrc.manifest.Manifest()
+    manifest = Manifest()
     parsed = ruamel.yaml.safe_load(contents)
     manifest.apply_config(parsed)
     one_repo = manifest.get_repo("foo")
@@ -112,25 +115,25 @@ repos:
 """
     manifest_path = tmp_path / "manifest.yml"
     manifest_path.write_text(contents)
-    with pytest.raises(tsrc.InvalidConfig):
-        tsrc.manifest.load(manifest_path)
+    with pytest.raises(InvalidConfig):
+        load_manifest(manifest_path)
 
 
-def assert_valid_schema(tmp_path: Path, contents: str) -> tsrc.manifest.Manifest:
+def assert_valid_schema(tmp_path: Path, contents: str) -> Manifest:
     manifest_path = tmp_path / "manifest.yml"
     manifest_path.write_text(textwrap.dedent(contents))
-    res = tsrc.manifest.load(manifest_path)
+    res = load_manifest(manifest_path)
     return res
 
 
-def assert_invalid_schema(tmp_path: Path, contents: str) -> tsrc.Error:
+def assert_invalid_schema(tmp_path: Path, contents: str) -> Error:
     manifest_path = tmp_path / "manifest.yml"
     manifest_path.write_text(textwrap.dedent(contents))
     try:
-        tsrc.manifest.load(manifest_path)
-    except tsrc.InvalidConfig as error:
+        load_manifest(manifest_path)
+    except InvalidConfig as error:
         return error
-    pytest.fail("Did not raise tsrc.InvalidConfig")
+    pytest.fail("Did not raise InvalidConfig")
 
 
 def test_validates(tmp_path: Path) -> None:
@@ -192,7 +195,7 @@ class ReposGetter:
     ) -> List[str]:
         manifest_path = self.tmp_path / "manifest.yml"
         manifest_path.write_text(self.contents)
-        manifest = tsrc.manifest.load(manifest_path)
+        manifest = load_manifest(manifest_path)
         return [repo.dest for repo in manifest.get_repos(groups=groups, all_=all_)]
 
 

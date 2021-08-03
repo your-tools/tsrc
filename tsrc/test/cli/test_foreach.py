@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from cli_ui.tests import MessageRecorder
 
-import tsrc.git
+from tsrc.git import run_git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 
@@ -169,7 +169,7 @@ def test_foreach_with_all_cloned_repos_requested(
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url, "--groups", "foo", "spam")
 
-    tsrc.git.run(workspace_path, "clone", quux_url)
+    run_git(workspace_path, "clone", quux_url)
     message_recorder.reset()
 
     tsrc_cli.run("foreach", "--all-cloned", "ls")
