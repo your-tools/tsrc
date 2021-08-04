@@ -31,10 +31,6 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
         """
         pass
 
-    def on_start(self, *, num_items: int) -> None:
-        """Called when the executor starts."""
-        pass
-
     def on_failure(self, *, num_errors: int) -> None:
         """Called when the executor ends and `num_errors` is not 0."""
         pass

@@ -21,9 +21,6 @@ class FakeTask(Task[str]):
     def __init__(self) -> None:
         pass
 
-    def on_start(self, *, num_items: int) -> None:
-        ui.info("Frobnicating", num_items, "items")
-
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to frobnicate some items")
 

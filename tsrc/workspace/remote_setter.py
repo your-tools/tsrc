@@ -21,9 +21,6 @@ class RemoteSetter(Task[Repo]):
     def __init__(self, workspace_path: Path) -> None:
         self.workspace_path = workspace_path
 
-    def on_start(self, *, num_items: int) -> None:
-        ui.info_2("Configuring remotes")
-
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to configure remotes")
 

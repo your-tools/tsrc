@@ -30,7 +30,9 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
     status_collector = StatusCollector(workspace)
-    run_sequence(workspace.repos, status_collector)
+    repos = workspace.repos
+    ui.info_1(f"Collecting statuses of {len(repos)} repo(s)")
+    run_sequence(repos, status_collector)
 
 
 class ManifestStatus:
@@ -92,7 +94,6 @@ class StatusCollector(Task[Repo]):
         self.workspace = workspace
         self.manifest = workspace.get_manifest()
         self.statuses: CollectedStatuses = collections.OrderedDict()
-        self.num_repos = 0
 
     def display_item(self, repo: Repo) -> str:
         return repo.dest
@@ -114,10 +115,6 @@ class StatusCollector(Task[Repo]):
         except Exception as e:
             self.statuses[repo.dest] = e
         erase_last_line()
-
-    def on_start(self, num_items: int) -> None:
-        ui.info_1(f"Collecting statuses of {num_items} repo(s)")
-        self.num_repos = num_items
 
     def on_success(self) -> None:
         erase_last_line()

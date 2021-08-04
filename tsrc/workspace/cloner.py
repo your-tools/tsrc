@@ -24,9 +24,6 @@ class Cloner(Task[Repo]):
         self.shallow = shallow
         self.remote_name = remote_name
 
-    def on_start(self, *, num_items: int) -> None:
-        ui.info_2("Cloning missing repos")
-
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to clone missing repos")
 

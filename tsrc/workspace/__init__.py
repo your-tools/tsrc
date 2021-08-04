@@ -80,10 +80,12 @@ class Workspace:
             shallow=self.config.shallow_clones,
             remote_name=self.config.singular_remote,
         )
+        ui.info_2("Cloning missing repos")
         run_sequence(to_clone, cloner)
 
     def set_remotes(self) -> None:
         if not self.config.singular_remote:
+            ui.info_2("Configuring remotes")
             remote_setter = RemoteSetter(self.root_path)
             run_sequence(self.repos, remote_setter)
 
@@ -97,7 +99,9 @@ class Workspace:
         operations = manifest.file_system_operations
         known_repos = [x.dest for x in repos]
         operations = [x for x in operations if x.repo in known_repos]  # type: ignore
-        run_sequence(operations, operator)
+        if operations:
+            ui.info_2("Performing filesystem operations")
+            run_sequence(operations, operator)
 
     def sync(self, *, force: bool = False) -> None:
         syncer = Syncer(
@@ -105,6 +109,7 @@ class Workspace:
         )
         repos = self.repos
         try:
+            ui.info_1("Synchronizing workspace")
             run_sequence(repos, syncer)
         finally:
             syncer.display_bad_branches()

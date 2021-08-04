@@ -34,9 +34,6 @@ class Syncer(Task[Repo]):
         self.force = force
         self.remote_name = remote_name
 
-    def on_start(self, *, num_items: int) -> None:
-        ui.info_1("Synchronizing workspace")
-
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to synchronize workspace")
 

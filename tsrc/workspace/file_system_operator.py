@@ -19,10 +19,6 @@ class FileSystemOperator(Task[FileSystemOperation]):
         self.workspace_path = workspace_path
         self.repos = repos
 
-    def on_start(self, *, num_items: int) -> None:
-        if num_items:
-            ui.info_2("Performing filesystem operations")
-
     def on_failure(self, *, num_errors: int) -> None:
         ui.error("Failed to perform the following operations:")
 

@@ -81,9 +81,10 @@ def run(args: argparse.Namespace) -> None:
     description = description
 
     workspace = get_workspace_with_repos(args)
-
     cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
-    run_sequence(workspace.repos, cmd_runner)
+    repos = workspace.repos
+    ui.info_1(f"Running `{description}` on {len(repos)} repos")
+    run_sequence(repos, cmd_runner)
     ui.info("OK", ui.check)
 
 
@@ -116,9 +117,6 @@ class CmdRunner(Task[Repo]):
 
     def display_item(self, repo: Repo) -> str:
         return repo.dest
-
-    def on_start(self, *, num_items: int) -> None:
-        ui.info_1(f"Running `{self.description}` on {num_items} repos")
 
     def on_failure(self, *, num_errors: int) -> None:
         ui.error(f"Command failed for {num_errors} repo(s)")
