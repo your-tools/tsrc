@@ -19,7 +19,7 @@ class Error(tsrc.Error):
 
 class CommandError(Error):
     def __init__(
-            self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
+        self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
     ) -> None:
         self.cmd = cmd
         self.working_path = working_path

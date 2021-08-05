@@ -21,7 +21,13 @@ class RepoAtIncorrectBranchDescription:
 
 
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(self, workspace_path: Path, *, force: bool = False, remote_name: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        workspace_path: Path,
+        *,
+        force: bool = False,
+        remote_name: Optional[str] = None,
+    ) -> None:
         super().__init__()
         self.workspace_path = workspace_path
         self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
@@ -115,7 +121,9 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             raise tsrc.Error("updating ref failed")
 
     def update_submodules(self, repo_path: Path, buffer: int) -> None:
-        tsrc.git.run(repo_path, "submodule", "update", "--init", "--recursive", buffer=buffer)
+        tsrc.git.run(
+            repo_path, "submodule", "update", "--init", "--recursive", buffer=buffer
+        )
 
     def sync_repo_to_branch(self, repo_path: Path, buffer: int) -> None:
         ui.info_2("Updating branch", buffer=buffer)
