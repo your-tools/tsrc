@@ -109,7 +109,8 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             except tsrc.Error:
                 raise tsrc.Error(f"fetch from '{remote.name}' failed")
 
-    def sync_repo_to_ref(self, repo_path: Path, ref: str, buffer: int) -> None:
+    @staticmethod
+    def sync_repo_to_ref(repo_path: Path, ref: str, buffer: int) -> None:
         ui.info_2("Resetting to", ref, buffer=buffer)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
@@ -119,12 +120,14 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         except tsrc.Error:
             raise tsrc.Error("updating ref failed")
 
-    def update_submodules(self, repo_path: Path, buffer: int) -> None:
+    @staticmethod
+    def update_submodules(repo_path: Path, buffer: int) -> None:
         tsrc.git.run(
             repo_path, "submodule", "update", "--init", "--recursive", buffer=buffer
         )
 
-    def sync_repo_to_branch(self, repo_path: Path, buffer: int) -> None:
+    @staticmethod
+    def sync_repo_to_branch(repo_path: Path, buffer: int) -> None:
         ui.info_2("Updating branch", buffer=buffer)
         try:
             tsrc.git.run(repo_path, "merge", "--ff-only", "@{upstream}", buffer=buffer)
