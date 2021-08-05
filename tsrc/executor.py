@@ -5,7 +5,8 @@
 import abc
 import concurrent
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
+
 from typing import Any, Generic, List, Tuple, TypeVar  # noqa
 
 import cli_ui as ui
@@ -23,13 +24,13 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
     """Represent an action to be performed."""
 
     @abc.abstractmethod
-    def process(self, index: int, count: int, item: T) -> None:
+    def process(self, index: int, count: int, item: T) -> int:
         """
         Daughter classes should override this method to provide the code
         that processes the item.
 
-        It's advised (but not required) to call `ui.info_count(index, count)` at
-        the beginning of the overwritten method.
+        It returns the item's index (for printing out its output in a synchronized
+        if the item was processes paralleled).
         """
         pass
 
@@ -42,7 +43,7 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
         pass
 
     def on_success(self) -> None:
-        """Called when the task succeeds on one item."""
+        """Called when the task succeeds on all items."""
         pass
 
     @abc.abstractmethod
@@ -92,20 +93,20 @@ class SequentialExecutor(Generic[T]):
 
 
 class ParallelExecutor(SequentialExecutor):
-    """Run the task on all items in parallel, while collecting errors that
+    """Run the tasks using `n` threads, while collecting errors that
     occur in the process.
     """
 
-    def __init__(self, task: Task[T]) -> None:
+    def __init__(self, task: Task[T], max_workers: int) -> None:
         super().__init__(task)
+        self.max_workers = max_workers
 
     def process(self, items: List[T]) -> None:
         self.task.on_start(num_items=len(items))
-
         self.errors = []
         num_items = len(items)
 
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = []
 
             for i, item in enumerate(items):
@@ -113,7 +114,8 @@ class ParallelExecutor(SequentialExecutor):
 
             for future in concurrent.futures.as_completed(futures):
                 try:
-                    future.result()
+                    buffer_id = future.result()
+                    ui.print_buffer(buffer_id)
                 except tsrc.Error as error:
                     self.errors.append((item, error))
 
@@ -125,5 +127,5 @@ class ParallelExecutor(SequentialExecutor):
 
 def run_sequence(items: List[T], task: Task[Any]) -> None:
     # executor = SequentialExecutor(task)
-    executor = ParallelExecutor(task)
+    executor = ParallelExecutor(task, 10)
     return executor.process(items)

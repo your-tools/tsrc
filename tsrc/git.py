@@ -1,6 +1,5 @@
 """ git tools """
 
-
 import os
 import subprocess
 from pathlib import Path
@@ -20,7 +19,7 @@ class Error(tsrc.Error):
 
 class CommandError(Error):
     def __init__(
-        self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
+            self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
     ) -> None:
         self.cmd = cmd
         self.working_path = working_path
@@ -183,19 +182,26 @@ class Status:
         return res
 
 
-def run(working_path: Path, *cmd: str, check: bool = True) -> None:
+def run(working_path: Path, *cmd: str, check: bool = True, buffer: Any = None) -> None:
     """Run git `cmd` in given `working_path`.
 
     Raise GitCommandError if return code is non-zero and `check` is True.
     """
-    assert_working_path(working_path)
-    git_cmd = list(cmd)
-    git_cmd.insert(0, "git")
+    if buffer:
+        # we could achieve almost the same result with using this block
+        # for both cases, but the other has the benefit of printing each
+        # line immediately after git returns it, showing the progress
+        _, out = run_captured(working_path, *cmd, check=check)
+        ui.message(out, buffer=buffer)
+    else:
+        assert_working_path(working_path)
+        git_cmd = list(cmd)
+        git_cmd.insert(0, "git")
 
-    ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
-    returncode = subprocess.call(git_cmd, cwd=working_path)
-    if returncode != 0 and check:
-        raise CommandError(working_path, cmd)
+        ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd, buffer=buffer)
+        returncode = subprocess.call(git_cmd, cwd=working_path)
+        if returncode != 0 and check:
+            raise CommandError(working_path, cmd)
 
 
 def run_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:

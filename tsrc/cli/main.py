@@ -49,7 +49,7 @@ def setup_ui(args: argparse.Namespace) -> None:
         verbose = True
     if args.verbose:
         verbose = args.verbose
-    ui.setup(verbose=verbose, quiet=args.quiet, color=args.color)
+    ui.setup(verbose=verbose, quiet=args.quiet, color=args.color, parallel=True)
 
 
 @main_wrapper

@@ -21,13 +21,8 @@ class RepoAtIncorrectBranchDescription:
 
 
 class Syncer(tsrc.executor.Task[tsrc.Repo]):
-    def __init__(
-        self,
-        workspace_path: Path,
-        *,
-        force: bool = False,
-        remote_name: Optional[str] = None,
-    ) -> None:
+    def __init__(self, workspace_path: Path, *, force: bool = False, remote_name: Optional[str] = None) -> None:
+        super().__init__()
         self.workspace_path = workspace_path
         self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
         self.force = force
@@ -42,7 +37,7 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
     def display_item(self, repo: tsrc.Repo) -> str:
         return repo.dest
 
-    def process(self, index: int, count: int, repo: tsrc.Repo) -> None:
+    def process(self, index: int, count: int, repo: tsrc.Repo) -> int:
         """Synchronize a repo given its configuration in the manifest.
 
         Always start by running `git fetch`, then either:
@@ -53,9 +48,9 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         * or try merging the local branch with its upstream (abort if not
           on on the correct branch, or if the merge is not fast-forward).
         """
-        ui.info_count(index, count, repo.dest)
+        ui.info_count(index, count, repo.dest, buffer=index)
         repo_path = self.workspace_path / repo.dest
-        self.fetch(repo)
+        self.fetch(repo, buffer=index)
         ref = None
 
         if repo.tag:
@@ -64,12 +59,14 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
             ref = repo.sha1
 
         if ref:
-            self.sync_repo_to_ref(repo_path, ref)
+            self.sync_repo_to_ref(repo_path, ref, buffer=index)
         else:
             self.check_branch(repo, repo_path)
-            self.sync_repo_to_branch(repo_path)
+            self.sync_repo_to_branch(repo_path, buffer=index)
 
-        self.update_submodules(repo_path)
+        self.update_submodules(repo_path, buffer=index)
+
+        return index
 
     def check_branch(self, repo: tsrc.Repo, repo_path: Path) -> None:
         current_branch = None
@@ -95,38 +92,35 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
 
         return repo.remotes
 
-    def fetch(self, repo: tsrc.Repo) -> None:
+    def fetch(self, repo: tsrc.Repo, buffer: int) -> None:
         repo_path = self.workspace_path / repo.dest
         for remote in self._pick_remotes(repo):
             try:
-                ui.info_2("Fetching", remote.name)
+                ui.info_2("Fetching", remote.name, buffer=buffer)
                 cmd = ["fetch", "--tags", "--prune", remote.name]
                 if self.force:
                     cmd.append("--force")
-                tsrc.git.run(repo_path, *cmd)
+                tsrc.git.run(repo_path, *cmd, buffer=buffer)
             except tsrc.Error:
                 raise tsrc.Error(f"fetch from '{remote.name}' failed")
 
-    @staticmethod
-    def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
-        ui.info_2("Resetting to", ref)
+    def sync_repo_to_ref(self, repo_path: Path, ref: str, buffer: int) -> None:
+        ui.info_2("Resetting to", ref, buffer=buffer)
         status = tsrc.git.get_status(repo_path)
         if status.dirty:
             raise tsrc.Error(f"{repo_path} is dirty, skipping")
         try:
-            tsrc.git.run(repo_path, "reset", "--hard", ref)
+            tsrc.git.run(repo_path, "reset", "--hard", ref, buffer=buffer)
         except tsrc.Error:
             raise tsrc.Error("updating ref failed")
 
-    @staticmethod
-    def update_submodules(repo_path: Path) -> None:
-        tsrc.git.run(repo_path, "submodule", "update", "--init", "--recursive")
+    def update_submodules(self, repo_path: Path, buffer: int) -> None:
+        tsrc.git.run(repo_path, "submodule", "update", "--init", "--recursive", buffer=buffer)
 
-    @staticmethod
-    def sync_repo_to_branch(repo_path: Path) -> None:
-        ui.info_2("Updating branch")
+    def sync_repo_to_branch(self, repo_path: Path, buffer: int) -> None:
+        ui.info_2("Updating branch", buffer=buffer)
         try:
-            tsrc.git.run(repo_path, "merge", "--ff-only", "@{upstream}")
+            tsrc.git.run(repo_path, "merge", "--ff-only", "@{upstream}", buffer=buffer)
         except tsrc.Error:
             raise tsrc.Error("updating branch failed")
 
