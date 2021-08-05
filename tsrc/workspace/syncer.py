@@ -28,7 +28,6 @@ class Syncer(tsrc.executor.Task[tsrc.Repo]):
         force: bool = False,
         remote_name: Optional[str] = None,
     ) -> None:
-        super().__init__()
         self.workspace_path = workspace_path
         self.bad_branches = []  # type: List[RepoAtIncorrectBranchDescription]
         self.force = force
