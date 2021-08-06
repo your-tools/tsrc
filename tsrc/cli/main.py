@@ -89,4 +89,7 @@ def main_impl(args: ArgsList = None) -> None:
     namespace = parser.parse_args(args=args)
 
     setup_ui(namespace)
+    if not hasattr(namespace, "run"):
+        parser.print_help()
+        sys.exit(1)
     namespace.run(namespace)
