@@ -33,7 +33,7 @@ def test_foreach_with_errors(
     tsrc_cli.run("init", manifest_url)
     tsrc_cli.run_and_fail("foreach", "ls", "stuff.txt")
     assert message_recorder.find("Command failed")
-    assert message_recorder.find(r"\* foo")
+    assert message_recorder.find(r"\bfoo\b")
 
 
 def test_foreach_happy(
@@ -121,10 +121,10 @@ def test_foreach_with_groups_from_config(
     message_recorder.reset()
     tsrc_cli.run("foreach", "ls")
 
-    assert message_recorder.find("bar\n")
-    assert message_recorder.find("baz\n")
-    assert message_recorder.find("eggs\n")
-    assert not message_recorder.find("other\n")
+    assert message_recorder.find(r"\bbar\b")
+    assert message_recorder.find(r"\bbaz\b")
+    assert message_recorder.find(r"\beggs\b")
+    assert not message_recorder.find(r"\bother\b")
 
 
 def test_foreach_error_when_using_missing_groups(
@@ -174,11 +174,11 @@ def test_foreach_with_all_cloned_repos_requested(
 
     tsrc_cli.run("foreach", "--all-cloned", "ls")
 
-    assert message_recorder.find("bar\n")
-    assert message_recorder.find("baz\n")
-    assert message_recorder.find("eggs\n")
-    assert message_recorder.find("bacon\n")
-    assert message_recorder.find("quux\n")
+    assert message_recorder.find(r"\bbar\b")
+    assert message_recorder.find(r"\bbaz\b")
+    assert message_recorder.find(r"\beggs\b")
+    assert message_recorder.find(r"\bbacon\b")
+    assert message_recorder.find(r"\bquux\b")
 
 
 def test_cannot_start_cmd(tsrc_cli: CLI, git_server: GitServer) -> None:
