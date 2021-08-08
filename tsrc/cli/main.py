@@ -10,7 +10,7 @@ import cli_ui as ui
 import colored_traceback
 
 from tsrc import __version__
-from tsrc.cli import apply_manifest, foreach, init, log, status, sync, version
+from tsrc.cli import apply_manifest, foreach, init, log, status, sync
 from tsrc.errors import Error
 
 ArgsList = Optional[Sequence[str]]
@@ -83,7 +83,7 @@ def main_impl(args: ArgsList = None) -> None:
 
     actions_parser = parser.add_subparsers(help="available actions", dest="action")
 
-    for module in (apply_manifest, foreach, init, log, status, sync, version):
+    for module in (apply_manifest, foreach, init, log, status, sync):
         module.configure_parser(actions_parser)  # type: ignore
 
     namespace = parser.parse_args(args=args)
