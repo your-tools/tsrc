@@ -18,7 +18,7 @@ from tsrc.cli import (
     get_workspace_with_repos,
 )
 from tsrc.cli.env_setter import EnvSetter
-from tsrc.errors import Error
+from tsrc.errors import Error, MissingRepo
 from tsrc.executor import Outcome, Task, process_items
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
@@ -226,9 +226,3 @@ def die(message: str) -> None:
     ui.error(message)
     print(EPILOG, end="")
     sys.exit(1)
-
-
-class MissingRepo(Error):
-    def __init__(self, dest: str):
-        self.dest = dest
-        super().__init__("not cloned")
