@@ -3,6 +3,8 @@
 import argparse
 import os
 import re
+import sys
+from multiprocessing import cpu_count
 from pathlib import Path
 from typing import List, Optional
 
@@ -23,6 +25,27 @@ def add_workspace_arg(parser: argparse.ArgumentParser) -> None:
         type=Path,
         dest="workspace_path",
     )
+
+
+def add_num_jobs_arg(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        dest="num_jobs",
+        help="Number of jobs to use simultaneously",
+    )
+
+
+def get_num_jobs(args: argparse.Namespace) -> Optional[int]:
+    value = args.num_jobs
+    if value is None:
+        return None
+    if value == "auto":
+        return cpu_count()
+    try:
+        return int(value)
+    except ValueError:
+        sys.exit(f"error: argument -j/--jobs: invalid value: {value}")
 
 
 def get_workspace(namespace: argparse.Namespace) -> Workspace:
@@ -90,7 +113,7 @@ def resolve_repos(
     groups: Optional[List[str]],
     all_cloned: bool,
     regex: str = "",
-    iregex: str = ""
+    iregex: str = "",
 ) -> List[Repo]:
     """
     Given a workspace with its config and its local manifest,

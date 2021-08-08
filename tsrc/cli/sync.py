@@ -5,8 +5,10 @@ import argparse
 import cli_ui as ui
 
 from tsrc.cli import (
+    add_num_jobs_arg,
     add_repos_selection_args,
     add_workspace_arg,
+    get_num_jobs,
     get_workspace,
     resolve_repos,
 )
@@ -26,6 +28,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         dest="update_manifest",
         help="skip updating the manifest before syncing repositories",
     )
+    add_num_jobs_arg(parser)
     parser.set_defaults(run=run)
 
 
@@ -37,6 +40,7 @@ def run(args: argparse.Namespace) -> None:
     regex = args.regex
     iregex = args.iregex
     workspace = get_workspace(args)
+    num_jobs = get_num_jobs(args)
 
     if update_manifest:
         ui.info_2("Updating manifest")
@@ -48,8 +52,8 @@ def run(args: argparse.Namespace) -> None:
         workspace, groups=groups, all_cloned=all_cloned, regex=regex, iregex=iregex
     )
 
-    workspace.clone_missing()
-    workspace.set_remotes()
-    workspace.sync(force=force)
+    workspace.clone_missing(num_jobs=num_jobs)
+    workspace.set_remotes(num_jobs=num_jobs)
+    workspace.sync(force=force, num_jobs=num_jobs)
     workspace.perform_filesystem_operations()
-    ui.info("Done", ui.check)
+    ui.info_1("Workspace synchronized")

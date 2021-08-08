@@ -6,18 +6,20 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import cli_ui as ui
 
 from tsrc.cli import (
+    add_num_jobs_arg,
     add_repos_selection_args,
     add_workspace_arg,
+    get_num_jobs,
     get_workspace_with_repos,
 )
 from tsrc.cli.env_setter import EnvSetter
 from tsrc.errors import Error
-from tsrc.executor import Task, run_sequence
+from tsrc.executor import Outcome, Task, process_items
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 
@@ -41,6 +43,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     )
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
+    add_num_jobs_arg(parser)
     parser.add_argument("cmd", nargs="*")
     parser.add_argument(
         "-c",
@@ -79,20 +82,59 @@ def run(args: argparse.Namespace) -> None:
     shell = args.shell
     command = command
     description = description
+    num_jobs = get_num_jobs(args)
 
     workspace = get_workspace_with_repos(args)
     cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
     repos = workspace.repos
     ui.info_1(f"Running `{description}` on {len(repos)} repos")
-    run_sequence(repos, cmd_runner)
-    ui.info("OK", ui.check)
+    collection = process_items(repos, cmd_runner, num_jobs=num_jobs)
+    errors = collection.errors
+    if errors:
+        ui.error(f"Command failed for {len(errors)} repo(s)")
+        if cmd_runner.parallel:
+            # Print output of failed commands that were hidden
+            for (item, error) in errors.items():
+                ui.info(item)
+                ui.info("-" * len(item))
+                ui.info(error)
+        else:
+            # Just print the repos
+            for item in errors:
+                ui.info(ui.green, "*", ui.reset, item)
+        raise ForeachError()
+    else:
+        ui.info("OK", ui.check)
 
 
-class CommandFailed(Error):
+class DetailedCommandError(Error):
+    def __init__(
+        self,
+        *,
+        working_path: Path,
+        cmd: str,
+        rc: int,
+        output: Optional[str] = None,
+    ) -> None:
+        self.cmd = cmd
+        self.working_path = working_path
+        self.output = output
+        self.rc = rc
+        message = f"`{cmd}` from {working_path} exited with code {rc}"
+        if output:
+            message += "\n" + output
+        super().__init__(message)
+
+
+class CommandError(Error):
     pass
 
 
 class CouldNotStartProcess(Error):
+    pass
+
+
+class ForeachError(Error):
     pass
 
 
@@ -115,21 +157,40 @@ class CmdRunner(Task[Repo]):
         workspace = Workspace(workspace_path)
         self.env_setter = EnvSetter(workspace)
 
-    def display_item(self, repo: Repo) -> str:
-        return repo.dest
+    def describe_item(self, item: Repo) -> str:
+        return item.dest
 
-    def on_failure(self, *, num_errors: int) -> None:
-        ui.error(f"Command failed for {num_errors} repo(s)")
+    def describe_process_start(self, item: Repo) -> List[ui.Token]:
+        return [item.dest]
 
-    def process(self, index: int, count: int, repo: Repo) -> None:
-        ui.info_count(index, count, repo.dest)
+    def describe_process_end(self, item: Repo) -> List[ui.Token]:
+        return [ui.green, "ok", ui.reset, item.dest]
+
+    def process(self, index: int, count: int, repo: Repo) -> Outcome:
+        # Note:
+        #  When self.parallel is True, this task will be run in parallel with
+        #  other tasks.
+        #
+        #  So we need to:
+        #    * capture the output of the commands we are running
+        #    * raise a DetailedCommandError instance if a command's return code
+        #      is 0 (because otherwise the output of the command is lost)
+        #
+        # When self.parallel is False, we don't capture the output, which means we
+        # can't raise a DetailedCommandError. Instead, we raise a plain CommandError
+        # instance. This means the user has to go up in the output to see the output
+        # of the command that failed, but also that the command output are printed
+        # in real time.
         full_path = self.workspace_path / repo.dest
         if not full_path.exists():
             raise MissingRepo(repo.dest)
         # fmt: off
-        ui.info(
+        self.info(
+            ui.brown,
+            self.workspace_path / repo.dest,
+            " ",
             ui.lightgray, "$ ",
-            ui.reset, ui.bold, self.description,
+            ui.reset, self.description,
             sep=""
         )
         # fmt: on
@@ -137,13 +198,28 @@ class CmdRunner(Task[Repo]):
         run_env = self.env_setter.get_env_for_repo(repo)
         run_env.update(os.environ)
         try:
-            rc = subprocess.call(
-                self.command, cwd=full_path, shell=self.shell, env=run_env
-            )
+            kwargs: Dict[str, Any] = {
+                "cwd": full_path,
+                "shell": self.shell,
+                "env": run_env,
+            }
+            if self.parallel:
+                kwargs["stdout"] = subprocess.PIPE
+                kwargs["stderr"] = subprocess.STDOUT
+            process = subprocess.run(self.command, **kwargs, universal_newlines=True)
         except OSError as e:
             raise CouldNotStartProcess("Error when starting process:", e)
-        if rc != 0:
-            raise CommandFailed()
+        if process.returncode != 0:
+            if self.parallel:
+                raise DetailedCommandError(
+                    working_path=full_path,
+                    cmd=self.description,
+                    rc=process.returncode,
+                    output=process.stdout,
+                )
+            else:
+                raise CommandError()
+        return Outcome.empty()
 
 
 def die(message: str) -> None:

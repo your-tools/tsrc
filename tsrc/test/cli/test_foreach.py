@@ -52,6 +52,22 @@ def test_foreach_happy(
     assert message_recorder.find("`ls`")
 
 
+def test_foreach_parallel(
+    tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
+) -> None:
+    """Scenario:
+    * Create two repos
+    * Check that `tsrc foreach ls` works
+    * Check that the string `ls` is printed
+    """
+    git_server.add_repo("foo")
+    git_server.add_repo("spam")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+    tsrc_cli.run("foreach", "-j", "auto", "ls")
+    assert message_recorder.find("`ls`")
+
+
 def test_foreach_shell(
     tsrc_cli: CLI, git_server: GitServer, message_recorder: MessageRecorder
 ) -> None:
