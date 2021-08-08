@@ -92,10 +92,10 @@ def test_foreach_with_explicit_groups(
     message_recorder.reset()
     tsrc_cli.run("foreach", "-g", "foo", "--", "ls")
 
-    assert message_recorder.find("bar\n")
-    assert message_recorder.find("baz\n")
-    assert not message_recorder.find("eggs\n")
-    assert not message_recorder.find("other\n")
+    assert message_recorder.find(r"\bbar\b")
+    assert message_recorder.find(r"\bbaz\b")
+    assert not message_recorder.find(r"\beggs\b")
+    assert not message_recorder.find(r"\bother\b")
 
 
 def test_foreach_with_groups_from_config(
