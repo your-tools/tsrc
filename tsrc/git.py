@@ -183,7 +183,9 @@ class GitStatus:
         return res
 
 
-def run_git(working_path: Path, *cmd: str, check: bool = True) -> None:
+def run_git(
+    working_path: Path, *cmd: str, check: bool = True, verbose: bool = True
+) -> None:
     """Run git `cmd` in given `working_path`.
 
     Raise GitCommandError if return code is non-zero and `check` is True.
@@ -193,9 +195,18 @@ def run_git(working_path: Path, *cmd: str, check: bool = True) -> None:
     git_cmd.insert(0, "git")
 
     ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
-    returncode = subprocess.call(git_cmd, cwd=working_path)
-    if returncode != 0 and check:
-        raise GitCommandError(working_path, cmd)
+    if verbose:
+        process = subprocess.run(git_cmd, cwd=working_path, universal_newlines=True)
+    else:
+        process = subprocess.run(
+            git_cmd,
+            cwd=working_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+        )
+    if process.returncode != 0 and check:
+        raise GitCommandError(working_path, cmd, output=process.stdout)
 
 
 def run_git_captured(
