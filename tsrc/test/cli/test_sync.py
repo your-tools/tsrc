@@ -575,14 +575,18 @@ def test_fetch_additional_remotes(
     * Run `tsrc sync`
     * Check that the second remote was fetched
     """
-    git_server.add_repo("foo")
-    foo2_url = git_server.add_repo("foo2")
-    git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])
+    foo_url = git_server.add_repo("foo")
+    foo2_url = git_server.add_repo("foo2", add_to_manifest=False)
+    git_server.manifest.set_repo_remotes(
+        "foo", [("origin", foo_url), ("other", foo2_url)]
+    )
 
     tsrc_cli.run("init", git_server.manifest_url)
     foo_path = workspace_path / "foo"
+    run_git(foo_path, "fetch", "other")
     first_sha1 = get_sha1(foo_path, ref="other/master")
     git_server.push_file("foo2", "new.txt")
+    foo_path = workspace_path / "foo"
 
     tsrc_cli.run("sync")
     second_sha1 = get_sha1(foo_path, ref="other/master")
@@ -600,10 +604,12 @@ def test_adding_remotes(
     * Run `tsrc sync`
     * Check that the second remote was fetched
     """
-    git_server.add_repo("foo")
+    foo_url = git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
-    foo2_url = git_server.add_repo("foo2")
-    git_server.manifest.set_repo_remotes("foo", [("other", foo2_url)])
+    foo2_url = git_server.add_repo("foo2", add_to_manifest=False)
+    git_server.manifest.set_repo_remotes(
+        "foo", [("origin", foo_url), ("other", foo2_url)]
+    )
 
     tsrc_cli.run("sync")
 
@@ -624,7 +630,7 @@ def test_changing_remote_url(
     git_server.add_repo("foo")
     tsrc_cli.run("init", git_server.manifest_url)
 
-    foo2_url = git_server.add_repo("foo2")
+    foo2_url = git_server.add_repo("foo2", add_to_manifest=False)
     git_server.manifest.set_repo_url("foo", foo2_url)
     tsrc_cli.run("sync")
 
