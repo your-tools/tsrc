@@ -1,17 +1,20 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import attr
 import cli_ui as ui
 
 from tsrc.errors import Error
-from tsrc.executor import Task
-from tsrc.git import get_current_branch, get_git_status, run_git
+from tsrc.executor import Outcome, Task
+from tsrc.git import get_current_branch, get_git_status, run_git_captured
 from tsrc.repo import Remote, Repo
 
 
-class BadBranches(Error):
-    pass
+class IncorrectBranch(Error):
+    def __init__(self, *, actual: str, expected: str):
+        self.message = (
+            f"Current branch: '{actual}' does not match expected branch: '{expected}'"
+        )
 
 
 @attr.s(frozen=True)
@@ -34,13 +37,16 @@ class Syncer(Task[Repo]):
         self.force = force
         self.remote_name = remote_name
 
-    def on_failure(self, *, num_errors: int) -> None:
-        ui.error("Failed to synchronize workspace")
+    def describe_item(self, item: Repo) -> str:
+        return item.dest
 
-    def display_item(self, repo: Repo) -> str:
-        return repo.dest
+    def describe_process_start(self, item: Repo) -> List[ui.Token]:
+        return ["Syncing", item.dest]
 
-    def process(self, index: int, count: int, repo: Repo) -> None:
+    def describe_process_end(self, item: Repo) -> List[ui.Token]:
+        return [ui.green, "ok", ui.reset, item.dest]
+
+    def process(self, index: int, count: int, repo: Repo) -> Outcome:
         """Synchronize a repo given its configuration in the manifest.
 
         Always start by running `git fetch`, then either:
@@ -51,25 +57,39 @@ class Syncer(Task[Repo]):
         * or try merging the local branch with its upstream (abort if not
           on on the correct branch, or if the merge is not fast-forward).
         """
-        ui.info_count(index, count, repo.dest)
-        repo_path = self.workspace_path / repo.dest
+        error = None
+        self.info_count(index, count, "Synchronizing", repo.dest)
         self.fetch(repo)
-        ref = None
 
+        summary_lines = []
+        ref = None
         if repo.tag:
             ref = repo.tag
         elif repo.sha1:
             ref = repo.sha1
 
         if ref:
-            self.sync_repo_to_ref(repo_path, ref)
+            self.info_3("Resetting to", ref)
+            self.sync_repo_to_ref(repo, ref)
+            summary_lines += [repo.dest, "-" * len(repo.dest)]
+            summary_lines += [f"Reset to {ref}"]
         else:
-            self.check_branch(repo, repo_path)
-            self.sync_repo_to_branch(repo_path)
+            error, current_branch = self.check_branch(repo)
+            self.info_3("Updating branch:", current_branch)
+            sync_summary = self.sync_repo_to_branch(repo, current_branch=current_branch)
+            if sync_summary:
+                title = f"{repo.dest} on {current_branch}"
+                summary_lines += [title, "-" * len(title), sync_summary]
 
-        self.update_submodules(repo_path)
+        submodule_line = self.update_submodules(repo)
+        if submodule_line:
+            summary_lines.append(submodule_line)
 
-    def check_branch(self, repo: Repo, repo_path: Path) -> None:
+        summary = "\n".join(summary_lines)
+        return Outcome(error=error, summary=summary)
+
+    def check_branch(self, repo: Repo) -> Tuple[Optional[Error], str]:
+        repo_path = self.workspace_path / repo.dest
         current_branch = None
         try:
             current_branch = get_current_branch(repo_path)
@@ -77,11 +97,12 @@ class Syncer(Task[Repo]):
             raise Error("Not on any branch")
 
         if current_branch and current_branch != repo.branch:
-            self.bad_branches.append(
-                RepoAtIncorrectBranchDescription(
-                    dest=repo.dest, actual=current_branch, expected=repo.branch
-                )
+            return (
+                IncorrectBranch(actual=current_branch, expected=repo.branch),
+                current_branch,
             )
+        else:
+            return None, current_branch
 
     def _pick_remotes(self, repo: Repo) -> List[Remote]:
         if self.remote_name:
@@ -97,45 +118,49 @@ class Syncer(Task[Repo]):
         repo_path = self.workspace_path / repo.dest
         for remote in self._pick_remotes(repo):
             try:
-                ui.info_2("Fetching", remote.name)
+                self.info_3("Fetching", remote.name)
                 cmd = ["fetch", "--tags", "--prune", remote.name]
                 if self.force:
                     cmd.append("--force")
-                run_git(repo_path, *cmd)
+                self.run_git(repo_path, *cmd)
             except Error:
                 raise Error(f"fetch from '{remote.name}' failed")
 
-    @staticmethod
-    def sync_repo_to_ref(repo_path: Path, ref: str) -> None:
-        ui.info_2("Resetting to", ref)
+    def sync_repo_to_ref(self, repo: Repo, ref: str) -> None:
+        repo_path = self.workspace_path / repo.dest
         status = get_git_status(repo_path)
         if status.dirty:
-            raise Error(f"{repo_path} is dirty, skipping")
+            raise Error(f"git repo is dirty: cannot sync to ref: {ref}")
         try:
-            run_git(repo_path, "reset", "--hard", ref)
+            self.run_git(repo_path, "reset", "--hard", ref)
         except Error:
             raise Error("updating ref failed")
 
-    @staticmethod
-    def update_submodules(repo_path: Path) -> None:
-        run_git(repo_path, "submodule", "update", "--init", "--recursive")
+    def update_submodules(self, repo: Repo) -> str:
+        repo_path = self.workspace_path / repo.dest
+        cmd = ("submodule", "update", "--init", "--recursive")
+        if self.parallel:
+            _, out = run_git_captured(repo_path, *cmd, check=True)
+            return out
+        else:
+            self.run_git(repo_path, *cmd)
+            return ""
 
-    @staticmethod
-    def sync_repo_to_branch(repo_path: Path) -> None:
-        ui.info_2("Updating branch")
-        try:
-            run_git(repo_path, "merge", "--ff-only", "@{upstream}")
-        except Error:
-            raise Error("updating branch failed")
-
-    def display_bad_branches(self) -> None:
-        if not self.bad_branches:
-            return
-        ui.error("Some projects were not on the correct branch")
-        headers = ("project", "actual", "expected")
-        data = [
-            ((ui.bold, x.dest), (ui.red, x.actual), (ui.green, x.expected))
-            for x in self.bad_branches
-        ]
-        ui.info_table(data, headers=headers)
-        raise BadBranches()
+    def sync_repo_to_branch(self, repo: Repo, *, current_branch: str) -> str:
+        repo_path = self.workspace_path / repo.dest
+        if self.parallel:
+            rc, out = run_git_captured(
+                repo_path, "log", "--oneline", "HEAD..@{upstream}", check=False
+            )
+            if rc == 0 and not out:
+                return ""
+            _, merge_output = run_git_captured(
+                repo_path, "merge", "--ff-only", "@{upstream}", check=True
+            )
+            return merge_output
+        else:
+            try:
+                self.run_git(repo_path, "merge", "--ff-only", "@{upstream}")
+            except Error:
+                raise Error("updating branch failed")
+            return ""

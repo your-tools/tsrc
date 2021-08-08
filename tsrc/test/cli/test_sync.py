@@ -5,6 +5,7 @@ from typing import Any
 import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
+from tsrc.errors import Error
 from tsrc.git import get_sha1, run_git, run_git_captured
 from tsrc.groups import GroupNotFound
 from tsrc.test.helpers.cli import CLI
@@ -32,6 +33,30 @@ def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
     assert new_txt_path.exists(), "foo should have been updated"
 
 
+def test_sync_parallel(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """
+    Run `tsrc` with 2 jobs on three repos, two of which have changed
+
+    This is useful to check tsrc output when running tasks in parallel
+    """
+    git_server.add_repo("foo")
+    git_server.add_repo("bar")
+    git_server.add_repo("baz")
+    manifest_url = git_server.manifest_url
+
+    tsrc_cli.run("init", manifest_url, "-j", "2")
+
+    baz_path = workspace_path / "baz"
+    run_git(baz_path, "remote", "set-url", "origin", "other@domain.tld/baz")
+    git_server.push_file("foo", "foo.txt")
+    git_server.push_file("bar", "bar1")
+    git_server.push_file("bar", "bar2", contents="two\nlines\n")
+
+    tsrc_cli.run("sync", "-j", "2")
+
+
 def test_sync_with_errors(
     tsrc_cli: CLI,
     git_server: GitServer,
@@ -56,10 +81,7 @@ def test_sync_with_errors(
     foo_src = workspace_path / "foo"
     (foo_src / "conflict.txt").write_text("this is green")
 
-    tsrc_cli.run_and_fail("sync")
-
-    assert message_recorder.find("Failed to synchronize workspace")
-    assert message_recorder.find(r"\* foo")
+    tsrc_cli.run_and_fail_with(Error, "sync")
 
 
 def test_sync_finds_root(
@@ -161,7 +183,7 @@ def test_sync_not_on_master(
     tsrc_cli.run_and_fail("sync")
 
     assert (foo_path / "devel.txt").exists(), "foo should have been updated"
-    assert message_recorder.find("not on the correct branch")
+    assert message_recorder.find("does not match")
 
 
 def test_sync_with_force(
@@ -360,7 +382,7 @@ def test_changing_branch(
     git_server.manifest.set_repo_branch("foo", "next")
 
     tsrc_cli.run_and_fail("sync")
-    assert message_recorder.find("not on the correct branch")
+    assert message_recorder.find("does not match")
 
 
 def test_tags_are_not_updated(

@@ -7,12 +7,14 @@ from typing import Dict, List, Optional, Tuple, Union
 import cli_ui as ui
 
 from tsrc.cli import (
+    add_num_jobs_arg,
     add_repos_selection_args,
     add_workspace_arg,
+    get_num_jobs,
     get_workspace_with_repos,
 )
 from tsrc.errors import MissingRepo
-from tsrc.executor import Task, run_sequence
+from tsrc.executor import Outcome, Task, process_items
 from tsrc.git import GitStatus, get_git_status
 from tsrc.manifest import Manifest
 from tsrc.repo import Repo
@@ -24,6 +26,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser = subparser.add_parser("status")
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
+    add_num_jobs_arg(parser)
     parser.set_defaults(run=run)
 
 
@@ -31,8 +34,20 @@ def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
     status_collector = StatusCollector(workspace)
     repos = workspace.repos
+    if not repos:
+        ui.info_2("Workspace is empty")
+        return
     ui.info_1(f"Collecting statuses of {len(repos)} repo(s)")
-    run_sequence(repos, status_collector)
+    num_jobs = get_num_jobs(args)
+    process_items(repos, status_collector, num_jobs=num_jobs)
+    erase_last_line()
+    ui.info_2("Workspace status:")
+    statuses = status_collector.statuses
+    max_dest = max(len(x) for x in statuses.keys())
+    for dest, status in statuses.items():
+        message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
+        message += describe_status(status)
+        ui.info(*message)
 
 
 class ManifestStatus:
@@ -95,16 +110,20 @@ class StatusCollector(Task[Repo]):
         self.manifest = workspace.get_manifest()
         self.statuses: CollectedStatuses = collections.OrderedDict()
 
-    def display_item(self, repo: Repo) -> str:
-        return repo.dest
+    def describe_item(self, item: Repo) -> str:
+        return item.dest
 
-    def process(self, index: int, total: int, repo: Repo) -> None:
-        ui.info_count(index, total, repo.dest, end="\r")
+    def describe_process_start(self, item: Repo) -> List[ui.Token]:
+        return [item.dest]
+
+    def describe_process_end(self, item: Repo) -> List[ui.Token]:
+        return []
+
+    def process(self, index: int, count: int, repo: Repo) -> Outcome:
         full_path = self.workspace.root_path / repo.dest
-
+        self.info_count(index, count, repo.dest, end="\r")
         if not full_path.exists():
             self.statuses[repo.dest] = MissingRepo(repo.dest)
-            return
 
         try:
             git_status = get_git_status(full_path)
@@ -114,16 +133,6 @@ class StatusCollector(Task[Repo]):
             self.statuses[repo.dest] = status
         except Exception as e:
             self.statuses[repo.dest] = e
-        erase_last_line()
-
-    def on_success(self) -> None:
-        erase_last_line()
-        if not self.statuses:
-            ui.info_2("Workspace is empty")
-            return
-        ui.info_2("Workspace status:")
-        max_dest = max(len(x) for x in self.statuses.keys())
-        for dest, status in self.statuses.items():
-            message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
-            message += describe_status(status)
-            ui.info(*message)
+        if not self.parallel:
+            erase_last_line()
+        return Outcome.empty()

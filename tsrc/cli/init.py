@@ -4,7 +4,13 @@ from pathlib import Path
 
 import cli_ui as ui
 
-from tsrc.cli import add_groups_arg, add_workspace_arg, repos_from_config
+from tsrc.cli import (
+    add_groups_arg,
+    add_num_jobs_arg,
+    add_workspace_arg,
+    get_num_jobs,
+    repos_from_config,
+)
 from tsrc.errors import Error
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
@@ -38,11 +44,13 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="clone all repos from the manifest, regardless of the groups",
     )
     add_groups_arg(parser)
+    add_num_jobs_arg(parser)
     parser.set_defaults(run=run)
 
 
 def run(args: argparse.Namespace) -> None:
     workspace_path = args.workspace_path or Path.cwd()
+    num_jobs = get_num_jobs(args)
 
     cfg_path = workspace_path / ".tsrc" / "config.yml"
 
@@ -66,8 +74,8 @@ def run(args: argparse.Namespace) -> None:
     workspace.update_manifest()
     manifest = workspace.get_manifest()
     workspace.repos = repos_from_config(manifest, workspace_config)
-    workspace.clone_missing()
-    workspace.set_remotes()
+    workspace.clone_missing(num_jobs=num_jobs)
+    workspace.set_remotes(num_jobs=num_jobs)
     workspace.perform_filesystem_operations()
     ui.info_2("Workspace initialized")
     ui.info_2("Configuration written in", ui.bold, workspace.cfg_path)

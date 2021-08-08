@@ -1,12 +1,11 @@
 import textwrap
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import cli_ui as ui
 
 from tsrc.errors import Error
-from tsrc.executor import Task
-from tsrc.git import run_git
+from tsrc.executor import Outcome, Task
 from tsrc.repo import Remote, Repo
 
 
@@ -24,11 +23,14 @@ class Cloner(Task[Repo]):
         self.shallow = shallow
         self.remote_name = remote_name
 
-    def on_failure(self, *, num_errors: int) -> None:
-        ui.error("Failed to clone missing repos")
+    def describe_process_start(self, item: Repo) -> List[ui.Token]:
+        return ["Cloning", item.dest]
 
-    def display_item(self, repo: Repo) -> str:
-        return repo.dest
+    def describe_process_end(self, item: Repo) -> List[ui.Token]:
+        return [ui.green, "ok", ui.reset, item.dest]
+
+    def describe_item(self, item: Repo) -> str:
+        return item.dest
 
     def check_shallow_with_sha1(self, repo: Repo) -> None:
         if not repo.sha1:
@@ -52,7 +54,7 @@ class Cloner(Task[Repo]):
 
         return repo.remotes[0]
 
-    def clone_repo(self, repo: Repo) -> None:
+    def clone_repo(self, repo: Repo) -> str:
         """Clone a missing repo.
 
         Note: must use the correct remote(s) and branch when cloning,
@@ -79,22 +81,32 @@ class Cloner(Task[Repo]):
         clone_args.append("--recurse-submodules")
         clone_args.append(name)
         try:
-            run_git(parent, *clone_args)
+            self.run_git(parent, *clone_args)
+            summary = f"{repo.dest} cloned from {remote_url}"
+            if ref:
+                summary += f" at {ref}"
+            return summary
         except Error:
             raise Error("Cloning failed")
 
-    def reset_repo(self, repo: Repo) -> None:
-        repo_path = self.workspace_path / repo.dest
+    def reset_repo(self, repo: Repo) -> str:
         ref = repo.sha1
-        if ref:
-            ui.info_2("Resetting", repo.dest, "to", ref)
+        if not ref:
+            return ""
+        else:
+            self.info_2("Resetting", repo.dest, "to", ref)
+            repo_path = self.workspace_path / repo.dest
             try:
-                run_git(repo_path, "reset", "--hard", ref)
+                self.run_git(repo_path, "reset", "--hard", ref)
             except Error:
                 raise Error("Resetting to", ref, "failed")
+            summary = f" and reset to {ref}"
+            return summary
 
-    def process(self, index: int, count: int, repo: Repo) -> None:
-        ui.info_count(index, count, repo.dest)
+    def process(self, index: int, count: int, repo: Repo) -> Outcome:
+        self.info_count(index, count, "Cloning", repo.dest)
         self.check_shallow_with_sha1(repo)
-        self.clone_repo(repo)
-        self.reset_repo(repo)
+        summary: str = ""
+        summary += self.clone_repo(repo)
+        summary += self.reset_repo(repo)
+        return Outcome.from_summary(summary)
