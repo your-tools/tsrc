@@ -146,14 +146,6 @@ class OutcomeCollection:
             if outcome.error:
                 self.errors[item] = outcome.error
 
-    def handle_result(self, *, error_message: str) -> None:
-        if self.summary:
-            self.print_summary()
-        if self.errors:
-            ui.error(error_message)
-            self.print_errors()
-            raise ExecutorFailed
-
     def print_summary(self) -> None:
         if not self.summary:
             return

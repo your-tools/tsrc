@@ -88,4 +88,12 @@ def run(args: argparse.Namespace) -> None:
     repos = workspace.repos
     log_collector = LogCollector(workspace.root_path, from_ref=from_ref, to_ref=to_ref)
     collection = process_items(repos, log_collector, num_jobs=num_jobs)
-    collection.handle_result(error_message="Error when collecting logs")
+    collection.print_summary()
+    if collection.errors:
+        ui.error("Error when collecting logs")
+        collection.print_errors()
+        raise LogCollectorFailed
+
+
+class LogCollectorFailed(Error):
+    pass

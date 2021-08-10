@@ -97,9 +97,11 @@ class Workspace:
         ui.info_2("Configuring remotes")
         remote_setter = RemoteSetter(self.root_path)
         collection = process_items(self.repos, remote_setter, num_jobs=num_jobs)
-        collection.handle_result(
-            error_message="Failed to configure remotes for the following repos"
-        )
+        collection.print_summary()
+        if collection.errors:
+            ui.error("Failed to set remotes for the following repos:")
+            collection.print_errors()
+            raise RemoteSetterError
 
     def perform_filesystem_operations(
         self, manifest: Optional[Manifest] = None
@@ -115,9 +117,11 @@ class Workspace:
             ui.info_2("Performing filesystem operations")
             # Not sure it's a good idea to have FileSystemOperations running in parallel
             collection = process_items(operations, operator, num_jobs=None)
-            collection.handle_result(
-                error_message="Failed to perform the following file system operations"
-            )
+            collection.print_summary()
+            if collection.errors:
+                ui.error("Failed to perform the following file system operations")
+                collection.print_errors()
+                raise FileSystemOperatorError
 
     def sync(self, *, force: bool = False, num_jobs: Optional[int] = None) -> None:
         syncer = Syncer(
