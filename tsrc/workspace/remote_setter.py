@@ -31,6 +31,9 @@ class RemoteSetter(Task[Repo]):
         return [ui.green, "ok", ui.reset, item.dest]
 
     def process(self, index: int, count: int, repo: Repo) -> Outcome:
+        # Note:
+        #   When self.parallel is True we need to return a string describing
+        #   all the changes, otherwise, we can just call cli_ui.info() directly
         summary_lines = []
         for remote in repo.remotes:
             existing_remote = self.get_remote(repo, remote.name)

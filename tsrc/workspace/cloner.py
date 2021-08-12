@@ -55,12 +55,11 @@ class Cloner(Task[Repo]):
         return repo.remotes[0]
 
     def clone_repo(self, repo: Repo) -> str:
-        """Clone a missing repo.
-
-        Note: must use the correct remote(s) and branch when cloning,
-        *and* must reset the repo to the correct state if `tag` or
-        `sha1` were set in the manifest configuration.
-        """
+        """Clone a missing repo."""
+        # Note:
+        # Must use the correct remote(s) and branch when cloning,
+        # *and* must reset the repo to the correct state if `tag` or
+        # `sha1` were set in the manifest configuration.
         repo_path = self.workspace_path / repo.dest
         parent = repo_path.parent
         name = repo_path.name
@@ -104,6 +103,15 @@ class Cloner(Task[Repo]):
             return summary
 
     def process(self, index: int, count: int, repo: Repo) -> Outcome:
+        # Note:
+        #
+        # When self.parallel is True, the output of `git clone` and
+        # `git reset` will be captured, so we need to compute a summary
+        # string for the user.
+        #
+        # Otherwise, the output of `git clone` and
+        # `git reset` will be shown directly to the user, so we can use
+        # an empty summary
         self.info_count(index, count, "Cloning", repo.dest)
         self.check_shallow_with_sha1(repo)
         summary: str = ""
