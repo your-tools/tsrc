@@ -149,6 +149,9 @@ class Syncer(Task[Repo]):
     def sync_repo_to_branch(self, repo: Repo, *, current_branch: str) -> str:
         repo_path = self.workspace_path / repo.dest
         if self.parallel:
+            # Note: we want the summary to:
+            # * be empty if the repo was already up-to-date
+            # * contain the diffstat if the merge with upstream succeeds
             rc, out = run_git_captured(
                 repo_path, "log", "--oneline", "HEAD..@{upstream}", check=False
             )
@@ -159,6 +162,9 @@ class Syncer(Task[Repo]):
             )
             return merge_output
         else:
+            # Note: no summary here, because the output of `git merge`
+            # is not captured, so the diffstat or the "Already up to
+            # date"  message are directly shown to the user
             try:
                 self.run_git(repo_path, "merge", "--ff-only", "@{upstream}")
             except Error:

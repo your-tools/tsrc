@@ -120,11 +120,13 @@ class StatusCollector(Task[Repo]):
         return []
 
     def process(self, index: int, count: int, repo: Repo) -> Outcome:
+        # Note: Outcome is always empty here, because we
+        # use self.statuses in the main `run()` function instead
+        # of calling OutcomeCollection.print_summary()
         full_path = self.workspace.root_path / repo.dest
         self.info_count(index, count, repo.dest, end="\r")
         if not full_path.exists():
             self.statuses[repo.dest] = MissingRepo(repo.dest)
-
         try:
             git_status = get_git_status(full_path)
             manifest_status = ManifestStatus(repo, manifest=self.manifest)

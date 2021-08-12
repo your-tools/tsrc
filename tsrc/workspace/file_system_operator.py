@@ -29,6 +29,9 @@ class FileSystemOperator(Task[FileSystemOperation]):
         return []
 
     def process(self, index: int, count: int, item: FileSystemOperation) -> Outcome:
+        # Note: we don't want to run this Task in parallel, just in case
+        # the order of filesystem operations matters, so we can always
+        # return an empty Outcome
         self.info_count(index, count, str(item))
         try:
             item.perform(self.workspace_path)

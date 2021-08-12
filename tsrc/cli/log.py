@@ -52,10 +52,19 @@ class LogCollector(Task[Repo]):
         return [ui.green, "ok", ui.reset, item.dest]
 
     def process(self, index: int, count: int, repo: Repo) -> Outcome:
+        # We just need to compute a summary here with the log between
+        # self.from_ref and self.to_ref
+        #
+        # Note: make sure that when there is no diff between
+        # self.from_ref and self.to_ref, the summary is empty,
+        # so that the repo is not shown by OutcomeCollection.print_summary()
         repo_path = self.workspace_path / repo.dest
         if not repo_path.exists():
             raise MissingRepo(repo.dest)
 
+        # The main reason for the `git log` command to fail is if `self.from_ref` or
+        # `self.to_ref` references are not found for the repo, so check for this case
+        # explicitly
         rc, _ = run_git_captured(repo_path, "rev-parse", self.from_ref, check=False)
         if rc != 0:
             raise Error(f"{self.from_ref} not found")
