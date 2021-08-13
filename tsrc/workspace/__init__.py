@@ -9,6 +9,7 @@ import ruamel.yaml
 
 from tsrc.errors import Error
 from tsrc.executor import process_items
+from tsrc.git import is_git_repository
 from tsrc.manifest import Manifest
 from tsrc.repo import Repo
 from tsrc.workspace.cloner import Cloner
@@ -73,7 +74,7 @@ class Workspace:
         to_clone = []
         for repo in self.repos:
             repo_path = self.root_path / repo.dest
-            if not repo_path.exists():
+            if not is_git_repository(repo_path):
                 to_clone.append(repo)
         cloner = Cloner(
             self.root_path,

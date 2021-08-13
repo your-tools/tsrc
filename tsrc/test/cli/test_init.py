@@ -7,6 +7,7 @@ from cli_ui.tests import MessageRecorder
 from tsrc.git import get_current_branch, run_git, run_git_captured
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
+from tsrc.workspace import ClonerError
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
@@ -101,6 +102,18 @@ def test_copy_files_source_does_not_exist(
 
     tsrc_cli.run_and_fail("init", manifest_url)
     assert message_recorder.find("Failed to perform")
+
+
+def test_clone_destination_is_a_file(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    manifest_url = git_server.manifest_url
+    git_server.add_repo("foo")
+
+    with (workspace_path / "foo").open("w") as f:
+        f.write("this is a file")
+
+    tsrc_cli.run_and_fail_with(ClonerError, "init", manifest_url)
 
 
 def test_create_symlink(

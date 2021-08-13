@@ -293,6 +293,13 @@ def get_git_status(working_path: Path) -> GitStatus:
     return status
 
 
+def is_git_repository(working_path: Path) -> bool:
+    if not working_path.is_dir():
+        return False
+    rc, _ = run_git_captured(working_path, "rev-parse", "--git-dir", check=False)
+    return rc == 0
+
+
 def get_tracking_ref(working_path: Path) -> Optional[str]:
     # fmt: off
     rc, out = run_git_captured(
