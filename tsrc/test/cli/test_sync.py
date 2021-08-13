@@ -10,6 +10,7 @@ from tsrc.git import get_sha1, run_git, run_git_captured
 from tsrc.groups import GroupNotFound
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
+from tsrc.workspace import SyncError
 from tsrc.workspace.config import WorkspaceConfig
 
 
@@ -82,6 +83,22 @@ def test_sync_with_errors(
     (foo_src / "conflict.txt").write_text("this is green")
 
     tsrc_cli.run_and_fail_with(Error, "sync")
+
+
+def test_sync_on_bare_repo(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+) -> None:
+    git_server.add_repo("foo")
+    manifest_url = git_server.manifest_url
+
+    foo_path = workspace_path / "foo"
+    foo_path.mkdir(parents=True)
+    run_git(foo_path, "init", "--bare")
+
+    tsrc_cli.run("init", manifest_url)
+    tsrc_cli.run_and_fail_with(SyncError, "sync")
 
 
 def test_sync_finds_root(
