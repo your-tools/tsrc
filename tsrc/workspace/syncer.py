@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-import attr
 import cli_ui as ui
 
 from tsrc.errors import Error
@@ -17,13 +16,6 @@ class IncorrectBranch(Error):
         )
 
 
-@attr.s(frozen=True)
-class RepoAtIncorrectBranchDescription:
-    dest: str = attr.ib()
-    actual: str = attr.ib()
-    expected: str = attr.ib()
-
-
 class Syncer(Task[Repo]):
     def __init__(
         self,
@@ -33,7 +25,6 @@ class Syncer(Task[Repo]):
         remote_name: Optional[str] = None,
     ) -> None:
         self.workspace_path = workspace_path
-        self.bad_branches: List[RepoAtIncorrectBranchDescription] = []
         self.force = force
         self.remote_name = remote_name
 
@@ -89,6 +80,19 @@ class Syncer(Task[Repo]):
         return Outcome(error=error, summary=summary)
 
     def check_branch(self, repo: Repo) -> Tuple[Optional[Error], str]:
+        """Check that the current branch:
+            * exists
+            * matches the one in the manifest
+
+        * Raise Error if the branch does not exist (because we can't
+          do anything else in that case)
+
+        * _Return_ on Error if the current branch does not match the
+          one in the manifest - because we still want to run
+          `git merge @upstream` in that case
+
+        * Otherwise, return the current branch
+        """
         repo_path = self.workspace_path / repo.dest
         current_branch = None
         try:
