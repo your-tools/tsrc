@@ -46,7 +46,7 @@ much more information to the user *as it happens*.
 
 For instance, when calling `git fetch` with the SequentialExecutor, it's
 useful to call `run_git` without capturing output so that the progress of
-`git fetch` is clearly visible. On the other and, displaying the progress
+`git fetch` is clearly visible. On the other hand, displaying the progress
 of `git fetch` when several repos are being synced at the same time would
 only be confusing.
 
