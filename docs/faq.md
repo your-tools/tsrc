@@ -91,13 +91,6 @@ That being said:
 * If you still need to see *all* the git commands that are run, we provide a
   `--verbose` flag, like so: `tsrc --verbose sync`
 
-
-# Why argh?
-
-Because we need (almost) all of `argparse` features, but still want to keep the
-code DRY.
-
-
 # Why YAML?
 
 It's nice to read and write, and we use the excellent [ruamel.yaml](
