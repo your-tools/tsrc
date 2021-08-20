@@ -1,5 +1,34 @@
 # Changelog
 
+## 2.4.0 (2021-06-28)
+
+### Highlights
+
+* All of `tsrc` commands can now be run in parallel. Try for instance `tsrc sync -j auto`.
+* `tsrc foreach` now sets a bunch of environment variables. This allows
+  developers to add new behaviors to tsrc without having to change its source code.
+
+### Breaking changes
+
+* Remove `tsrc version` - Use `tsrc --version` instead.
+
+* The 'parallel' feature caused the output of some commands like
+  `foreach` or `log` to change slightly. Hopefully
+  `tsrc` output is now more consistent.
+
+### Bug fixes
+
+* Fix crash when running `tsrc` without any arguments
+
+* Fix crash when trying to clone repositories in some rare corner cases
+  (like the destination existing but not being a directory)
+
+### Internal changes
+
+* Make all `tsrc` imports consistent
+* Fix error when calling `repr` on `tsrc` Errors.
+
+
 ## 2.3.1 (2021-06-28)
 
 ### Bug fixes and small improvements
@@ -277,6 +306,7 @@ Fix crash when using `tsrc push` on a GitHub repository for the first time.
 Fix weird output when configuring remotes.
 
 ## v0.6.0 (2018-10-09)
+
 
 ### Add support for multiple remotes
 
