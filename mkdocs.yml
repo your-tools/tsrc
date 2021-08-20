@@ -18,14 +18,16 @@ markdown_extensions:
 
 nav:
 - Home: index.md
+- Getting Started: getting-started.md
 
-- Usage:
-  - Basic usage: guide/basics.md
+- Guides:
   - Using groups: guide/groups.md
+  - Editing workspace configuration: guide/workspace-config.md
 
 - Reference:
   - Command line usage: ref/cli.md
   - Configuration files formats: ref/formats.md
+  - Sync algorithm: ref/sync.md
 
 - Contributing: contrib.md
 

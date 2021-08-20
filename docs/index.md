@@ -1,49 +1,52 @@
 # tsrc - managing groups of git repositories
 
-## What it is
+## What it does
 
 `tsrc` is a command-line tool that helps you manage groups of git repositories.
 
-We use it at [tanker.io](https://tanker.io) because:
+It works by listing the repositories in a file called `manifest.yml` that looks like this:
 
-* We have a small, versatile team of developers
-* We use several programming languages
-* We need a single source of truth for the list of repositories we want to work
-  on: their URL, branch and locations should be the same across all the team
-* None on the many existing solutions did fully match our needs
-  (see the [FAQ](faq.md) for more details)
+```yaml
+repos:
+  - dest: foo
+    url: git@example.com:foo.git
 
-# Installing tsrc
-
-`tsrc` is compatible with **Python 3.6** or higher.
-
-It is available on [pypi](https://pypi.org/project/tsrc/) and can be
-installed with [pip](https://pip.pypa.io/en/stable/):
-
-## Linux
-
-```console
-$ pip3 install tsrc --user
-# Make sure ~/.local/bin is in your PATH
+  - dest: bar
+    url: git@example.com:bar.git
 ```
 
-## macOS
+You can then use:
 
-```console
-$ pip3 install tsrc --user
-# Make sure ~/Library/Python/3.x/bin is in your PATH
-```
+* `tsrc init <manifest url>` to create a *workspace* containing
+  the `foo` and `bar` repository
 
-## Windows
+* `tsrc sync` to synchronize all repos in the workspace.
 
-Install latest Python3 from [python.org/downloads](https://www.python.org/downloads/windows/),
-open cmd.exe and run:
+* ... and many more commands. Run `tsrc help` to list them, or read the [command line reference](/ref/cli.md)
 
-```console
-$ pip3 install tsrc
-```
+# Tutorial
 
-# Next steps
+Interested in using `tsrc` for your own project?
 
-If `tsrc` is installed properly (check by running `tsrc version`), feel free to
-proceed to [basic usage](guide/basics.md).
+Proceed to the [getting started tutorial](getting-started.md)!
+
+# Useful links
+
+* [FAQ](./faq.md)
+* [Changelog](./changelog.md)
+
+# Going further
+
+## Advanced guides
+
+* [Using groups](guide/groups.md)
+
+## Reference
+
+* [File formats](ref/formats.md)
+* [Command line interface](ref/cli.md)
+
+## Contributing
+
+* [Contributing guide](./contrib.md)
+* [Code Manifesto](./code-manifesto.md)
