@@ -1,32 +1,21 @@
-# Development
-
 All the development happens on [GitHub](https://github.com/dmerejkowsky/tsrc).
-
-# Reporting bugs and suggesting new features
-
-Feel free to use the [GitHub's bug tracker](https://github.com/dmerejkowsky/tsrc/issues) to open issues.
-
-If you are reporting a bug, please provide the following information:
-
-* `tsrc` version
-* Details about your environment (operating system, Python version)
-* The exact command you run
-* The full output
-
-Doing so will ensure we can investigate your bug right away.
 
 # Suggesting changes
 
-You are free to open a pull request on GitHub for any feature you'd like.
+You are free to open a pull request for anything you want to change on `tsrc`.
 
-Before opening a merge request, please read the [code manifesto](https://dmerejkowsky.github.io/tsrc/code-manifesto).
+In particular, pull requests that implement a prototype for a new
+feature are welcome, having "real code" to look at can provide useful
+insight, even if the code is not merged after all.
 
-Note that for your merge request to be accepted, we'll ask that:
+That being said, if you want your pull request to be merged, we'll
+ask that:
 
-* You follow indications from the code manifesto
+* The code follows the indications from the [code manifesto](../code-manifesto.md)
 * All existing linters pass
 * All existing tests run
 * The new feature comes with appropriate tests
+* The Git History is easy to review
 
 See the [GitHub actions workflows](https://github.com/dmerejkowsky/tsrc/blob/main/.github/workflows)
 to see what exactly what commands are run and the Python versions we

@@ -29,9 +29,10 @@ nav:
   - Configuration files formats: ref/formats.md
   - Sync algorithm: ref/sync.md
 
-- Contributing: contrib.md
-
-- Code manifesto: code-manifesto.md
+- Contributing:
+    - Using the issue tracker: contrib/issues.md
+    - Suggesting changes: contrib/dev.md
+    - Code manifesto: code-manifesto.md
 
 - FAQ: faq.md
 

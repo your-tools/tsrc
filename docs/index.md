@@ -48,5 +48,6 @@ Proceed to the [getting started tutorial](getting-started.md)!
 
 ## Contributing
 
-* [Contributing guide](./contrib.md)
+* [Using the issue tracker](contrib/issues.md)
+* [Suggesting changes](contrib/dev.md)
 * [Code Manifesto](./code-manifesto.md)
