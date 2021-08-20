@@ -83,7 +83,7 @@ class Cloner(Task[Repo]):
             self.run_git(parent, *clone_args)
             summary = f"{repo.dest} cloned from {remote_url}"
             if ref:
-                summary += f" at {ref}"
+                summary += f" (on {ref})"
             return summary
         except Error:
             raise Error("Cloning failed")
