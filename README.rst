@@ -120,7 +120,7 @@ Contributing
 
 We welcome feedback, `bug reports <https://github.com/dmerejkowsky/tsrc/issues>`_, and bug fixes in the form of `pull requests <https://github.com/dmerejkowsky/tsrc/pulls>`_.
 
-Detailed instructions can be found `in the documentation <https://dmerejkowsky.github.io/tsrc/contrib/>`_.
+Detailed instructions can be found `in the documentation <https://dmerejkowsky.github.io/tsrc>`_.
 
 License
 -------
