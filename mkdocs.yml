@@ -26,12 +26,13 @@ nav:
   - Using groups: guide/groups.md
   - Using several remotes: guide/remotes.md
   - Editing workspace configuration: guide/workspace-config.md
+  - Running a command for each repo in the workspace: guide/foreach.md
 
 - Reference:
   - Command line usage: ref/cli.md
   - Sync algorithm: ref/sync.md
-  - manifest configuration: ref/manifest-config.md
-  - workspace configuration: ref/workspace-config.md
+  - Manifest configuration: ref/manifest-config.md
+  - Workspace configuration: ref/workspace-config.md
 
 - Contributing:
     - Using the issue tracker: contrib/issues.md
