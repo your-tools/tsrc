@@ -21,9 +21,17 @@ $ tsrc --verbose sync
 $ tsrc init MANIFEST_URL
 ```
 
-Finally, note that like `git`, tsrc will walk up the folders hierarchy looking for a `.tsrc`
-folder, which means you can run tsrc commands anywhere in your workspace, not
-just at the top.
+## Goodies
+
+First, note that like `git`, tsrc will walk up the folders hierarchy
+looking for a `.tsrc` folder, which means you can run tsrc commands
+anywhere in your workspace, not just at the top.
+
+Second, almost all commands allow a `-j` option to run the operation in
+parallel. For instance, `tsrc sync -j auto` will use as many jobs as the
+number of CPUs available on the current machine to synchronize the repos
+in your workspace. If this behavior is not desired, you can specify a
+greater (or lower) number of jobs using something like `tsrc sync -j2`.
 
 ## Global options
 
