@@ -1,4 +1,6 @@
-# Installing tsrc
+# Getting started
+
+## Installing tsrc
 
 The recommended way to install `tsrc` is to use [pipx](https://pypa.github.io/pipx/)
 
@@ -8,7 +10,7 @@ The recommended way to install `tsrc` is to use [pipx](https://pypa.github.io/pi
 
 You can also install `tsrc` with `pip` if you know what you are doing :)
 
-# Checking tsrc installation
+## Checking tsrc installation
 
 Run:
 
@@ -16,7 +18,7 @@ Run:
 $ tsrc --version
 ```
 
-# Creating a repository for the manifest
+## Creating a repository for the manifest
 
 Let's say you are working for the ACME company and you have many git repositories.
 
@@ -52,7 +54,7 @@ just a custom GitLab instance. Just replace `gitlab.acme.com/your-team`
 with the correct suffix (like `github.com/your-name/` if you want to
 track some repositories from your GitHub account).
 
-# Creating a new workspace
+## Creating a new workspace
 
 Create a new, empty directory and then run `tsrc init` from it, using the URL of
 the manifest created in the above step:
@@ -89,9 +91,9 @@ You will notice that:
 * The `foo` ad `bar` repositories have been cloned into their respective destination
 * A *workspace configuration file* has been created in `/path/to/work/.tsrc/config.yml`. This
   file can be edited by hand to customize `tsrc` behavior. Follow the relevant [guide](guide/workspace-config.md),
-  or read the [workspace configuration file reference](ref/formats.md) for more details.
+  or read the [workspace configuration file reference](ref/workspace-config.md) for more details.
 
-# Updating a new workspace
+## Updating a new workspace
 
 Now let's assume that Alice created a new commit in `foo`, and Bob a new commit it `bar`, and
 that they both pushed them to the `master` branch of the respective repositories.
@@ -139,7 +141,7 @@ Fast-forward
 Note: `tsrc sync` does not call `git pull` on every repository. The precise algorithm is described
 [in the reference documentation](ref/sync.md)
 
-# Adding a new repo to the manifest
+## Adding a new repo to the manifest
 
 Let's say your team now needs a third repository (for instance, at `gitlab.acme.com/your-team/baz`).
 
@@ -207,7 +209,7 @@ Already up to date.
 :: Workspace synchronized
 ```
 
-# Going further
+## Going further
 
 In this tutorial, we made a lot of assumptions:
 

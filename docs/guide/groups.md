@@ -1,3 +1,5 @@
+# Using groups
+
 Sometimes it can be necessary to create groups of repositories, especially if the number
 of repositories grows and if you have people in different teams work on different repositories.
 
@@ -31,7 +33,7 @@ tsrc init git@gitlab.local:acme/manifest --group g1
 
 ## Filtering repositories in groups with regular expressions
 
-You can utilize inclusive regular expression with the `-r`-flag and 
+You can utilize inclusive regular expression with the `-r`-flag and
 exclusive regular expression with the `-i`-flag. This allows you to filter
 repositories within a group or a set of groups for the given action.
 
@@ -58,6 +60,5 @@ repo_groups:
 You can use this technique to change the groups used in a given workspace -
 the above method using `init` only works to *create* new workspaces.
 
-The config file contains other configuration options, which should be
-self-describing - if not, head over to the
-[configurations format section](../ref/formats.md#workspace_configuration_file).
+The config file contains other configuration options, which are described
+in the [workspace configuration documentation](../ref/workspace-config.md)

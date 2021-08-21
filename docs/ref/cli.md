@@ -1,3 +1,5 @@
+# Command line usage
+
 ## Important note
 
 We use the [argparse](https://docs.python.org/3/library/argparse.html) library to

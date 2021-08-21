@@ -1,4 +1,4 @@
-# About the workspace configuration file
+# Editing workspace configuration
 
 ## Creation
 

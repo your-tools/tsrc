@@ -1,6 +1,6 @@
-All the development happens on [GitHub](https://github.com/dmerejkowsky/tsrc).
-
 # Suggesting changes
+
+All the development happens on [GitHub](https://github.com/dmerejkowsky/tsrc).
 
 You are free to open a pull request for anything you want to change on `tsrc`.
 
@@ -29,7 +29,7 @@ Also, if relevant, you will need to:
 
 Finally, feel free to add your name in the `THANKS` file ;)
 
-# Checking your changes
+## Checking your changes
 
 * Install latest [poetry](https://python-poetry.org) version.
 * Install development and documentation dependencies:
@@ -46,7 +46,7 @@ $ poetry run pytest -n auto
 ```
 
 
-# Adding documentation
+## Adding documentation
 
 * Follow the steps from the above section to setup your python environment
 * Launch the development server locally:

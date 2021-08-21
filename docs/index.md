@@ -1,4 +1,7 @@
+<img alt="tsrc logo" width="80" src="img/tsrc-logo.png" />
+
 # tsrc - managing groups of git repositories
+
 
 ## What it does
 
@@ -43,8 +46,10 @@ Proceed to the [getting started tutorial](getting-started.md)!
 
 ## Reference
 
-* [File formats](ref/formats.md)
 * [Command line interface](ref/cli.md)
+* [Sync algorithm](ref/sync.md)
+* [Manifest configuration](ref/manifest-config.md)
+* [Workspace configuration](ref/workspace-config.md)
 
 ## Contributing
 

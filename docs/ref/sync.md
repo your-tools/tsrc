@@ -1,3 +1,5 @@
+# Sync algorithm
+
 You may have noticed that `tsrc sync` does not just calls `git pull` on every repository.
 
 Here's the algorithm that is used:

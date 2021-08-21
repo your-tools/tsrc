@@ -1,6 +1,8 @@
+# Using the issue tracker
+
 Reporting bugs and requesting new features is done one the [tsrc issue tracker on GitHub](https://github.com/dmerejkowsky/tsrc/issues).
 
-# Reporting bugs
+## Reporting bugs
 
 If you are reporting a bug, please provide the following information:
 
@@ -12,7 +14,7 @@ If you are reporting a bug, please provide the following information:
 Doing so will ensure we can investigate your bug right away.
 
 
-# Suggesting new features
+## Suggesting new features
 
 If you think `tsrc` is lacking a feature, please provide the following information:
 

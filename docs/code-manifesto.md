@@ -1,10 +1,12 @@
-# Basics
+# Code Manifesto
+
+## Basics
 
 We use `black` to enforce a coding style matching [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
 In addition, every text file must be pushed using UNIX line endings. (On Windows, you are advised to set `core.autocrlf` to `true` in your git config file.)
 
-# Pet peeves
+## Pet peeves
 
 * Prefer double quotes for string literals:
 
@@ -123,7 +125,7 @@ if value == "option1" or value == "option2"
   ...
 ```
 
-# Doc strings and comments in production code
+## Doc strings and comments in production code
 
 First off, bad comments are worse that no comments.
 
@@ -133,7 +135,7 @@ In conclusion, use comments and doc strings sparingly: that way, they will not r
 
 Note: this does not apply for tests (see below).
 
-# Collections
+## Collections
 
 
 * Use .extend() instead of += to concatenate lists:
@@ -211,7 +213,7 @@ for result in results:
    # do something with result
 ```
 
-# Functions
+## Functions
 
 Prefer using keyword-only parameters when possible:
 
@@ -246,7 +248,7 @@ def get(value, default=None):
   ...
 ```
 
-# Imports
+## Imports
 
 For any `foo.py` file, `import foo` must never fail, unless there is a necessary module that could not be found. Do not catch  `ImportError` unless it is necessary, for instance to deal with optional dependencies.
 
@@ -282,7 +284,7 @@ my_bar = bar.Bar()
 !!! note
     We allow a few exceptions like `from pathlib import Path` or importing classes directory in tests. Use your best judgment.
 
-# Classes
+## Classes
 
 * When you want to make sure a class follows an interface, use `abc.ABCMeta` instead of raising `NotImplementedError`. This way you get the error when the class is instantiated instead of when the method is called.
 

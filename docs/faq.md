@@ -1,4 +1,6 @@
-# Why not repo?
+# FAQ
+
+## Why not repo?
 
 We used [repo](https://android.googlesource.com/tools/repo/) for a while, but
 found that tsrc had both a better command line API and a nicer output.
@@ -27,7 +29,7 @@ Note that there are a few features present in `repo` that are missing from `tsrc
 (but may be implemented in the future). Feel free to open a feature request
 if needed!
 
-# Why not git-subrepo, mu-repo, or gr?
+## Why not git-subrepo, mu-repo, or gr?
 
 All this projects are fine but did not match our needs:
 
@@ -39,7 +41,7 @@ All this projects are fine but did not match our needs:
 In any case, now that the whole team is using `tsrc` all the time, it's likely
 we'll keep using `tsrc` in the future.
 
-# Why not git submodule?
+## Why not git submodule?
 
 It's all about workflow.
 
@@ -68,7 +70,7 @@ init` and `tsrc sync`, or simple `yaml` files,  which is much easier than
 using the `git submodule` CLI.
 
 
-# Why not using pygit2 or similar instead of running git commands?
+## Why not using pygit2 or similar instead of running git commands?
 
 First off, we do use `pygit2`, but only for tests.
 
@@ -79,7 +81,7 @@ using pure-Python libraries for the production code.
 Finally, we prefer calling git "porcelain" commands, both for readability
 of the source code and ease of debugging (see below).
 
-# Why do you hide which git commands are run?
+## Why do you hide which git commands are run?
 
 It's mainly a matter of not cluttering the output.
 We take care of keeping the output of `tsrc` both concise, readable and
@@ -91,14 +93,14 @@ That being said:
 * If you still need to see *all* the git commands that are run, we provide a
   `--verbose` flag, like so: `tsrc --verbose sync`
 
-# Why YAML?
+## Why YAML?
 
 It's nice to read and write, and we use the excellent [ruamel.yaml](
 https://yaml.readthedocs.io/en/latest/) which even has round-trip support.
 
 Also, being Python fans, we don't mind that white space is part of the syntax.
 
-# Why do I have to create a separate git repo with just one file in it?
+## Why do I have to create a separate git repo with just one file in it?
 
 See [#235](https://github.com/dmerejkowsky/tsrc/issues/235) for why you can't
 have multiple manifest files in the same repository.

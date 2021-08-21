@@ -373,7 +373,7 @@ repos:
     tag: v0.1
 ```
 
-See the [dedicated section about manifest format](ref/formats.md#repos) and the [#57 pull request discussion](https://github.com/dmerejkowsky/tsrc/pull/57) for the details.
+See the [dedicated section about manifest format](ref/workspace-config.md#repos) and the [#57 pull request discussion](https://github.com/dmerejkowsky/tsrc/pull/57) for the details.
 
 This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.
 
@@ -408,7 +408,7 @@ Note that due to limitations in `git` itself, the `shallow` option cannot be use
 
 *Breaking change*: Add support for groups (#30). Reported by @arnaudgelas.
 
-See the [dedicated section about manifest format](ref/formats.md#groups) for details.
+See the [dedicated section about manifest format](ref/manifest-config.md#groups) for details.
 
 **Upgrading from v0.2.4**:
 
