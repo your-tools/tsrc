@@ -1,35 +1,37 @@
-# 2.3.1 (2021-06-28)
+# Changelog
 
-## Bug fixes and small improvements
+## 2.3.1 (2021-06-28)
+
+### Bug fixes and small improvements
 
 * Fix #268: `tsrc apply-manifest` now performs file system operation
 * Always display workspace path at the beginning of any action
 * Skip "performing file system operations" message if there is no
   work to be done
 
-## Internal changes
+### Internal changes
 
 * Bump linters and formatters  (`black`, `mypy`, `isort` ...)
 * Use `copier` to simplify maintenance of tools configuration
 
-# 2.3.0 (2021-05-31)
+## 2.3.0 (2021-05-31)
 
-## Repo selection
+### Repo selection
 
 * Added -r (regex) and -i (inverse regex) params for filtering repos. Patch by @xzr
 
-## Add support for submodules
+### Add support for submodules
 
 * `tsrc` calls `git clone` with `--recurse-submodules` when adding missing repositories
 * `tsrc` calls `git submodule update --init --recursive` when updating repositories
 
-## Misc
+### Misc
 
 * Remove codecov usage
 * Rename default branch to `main`.
 
 
-# 2.2.1 (2021-04-10)
+## 2.2.1 (2021-04-10)
 
 * Project has been moved from `TankerHQ` organization to `dmerejkowsky`. New urls are:
 
@@ -41,9 +43,9 @@
 * Minor internal fixes
 * Add more URLs in the metadata (and pypi.org project page)
 
-# 2.2.0 (2020-07-17)
+## 2.2.0 (2020-07-17)
 
-## Add symlink support
+### Add symlink support
 
 `tsrc sync` and `tsrc init` can now create symlinks as specified in the manifest file:
 
@@ -60,23 +62,23 @@ repos:
 In this case, a symlink will be created from `<workspace>/app/some_file` to `<workspace>/some_file`.
 (both `source` and `target` keys are relative to the repository's destination).
 
-## Changes related to groups
+### Changes related to groups
 
 * log, status, and sync all learned about the `--group` option and the `--all-cloned` options
 * foreach: remove the `--groups-from-config` options since this is now the default behavior
 
-## Misc
+### Misc
 
 * Rework FAQ
 * Run black in `lint.sh`
 * Fix formatting of some messages
 * Update code manifesto to suggest using docstrings in tests
 
-# 2.1.0 (2020-05-27)
+## 2.1.0 (2020-05-27)
 
-## Breaking changes
+### Breaking changes
 
-### Change in manifest syntax
+#### Change in manifest syntax
 
 It was discovered that the manifest syntax was confusing for newcomers, so
 we decided to update it.
@@ -120,7 +122,7 @@ and `copy`).
 Drop support for Python 3.5
 
 
-## New features
+### New features
 
 *  `tsrc init` learned a `-r, --remote` option that pins the remote with the
    given name as the only remote to be used for cloning and syncing.
@@ -128,11 +130,11 @@ Drop support for Python 3.5
    This is useful if you use the same workspace in different physical locations,
    and one of the remotes is behind a VPN for instance. Patch by @tronje.
 
-## Bug fixes
+### Bug fixes
 
 * Fix [#217](https://github.com/dmerejkowsky/tsrc/issues/217): Preserves file attributes during the `copy` statements in `repos`
 
-## Other
+### Other
 
 * The whole test suite now runs without errors on Windows - and Windows support is
   now part of the GitHub actions checks.
@@ -142,7 +144,7 @@ Drop support for Python 3.5
 * Remove usage of deprecated API of the `path` library.
 * Run tests and linters for external pull requests too.
 
-# v2.0.0 - (2020-04-06)
+## v2.0.0 - (2020-04-06)
 
 * Remove the `tsrc push` command and all review automation features. Please
   use [hub](https://github.com/github/hub), [lab](https://github.com/zaquestion/lab),
@@ -154,34 +156,34 @@ Drop support for Python 3.5
 * Add `tsrc apply-manifest`, to apply changes in a manifest file locally, without
   having to make a commit and push to a server first.
 
-# v1.0.3 - (2020-02-05)
+## v1.0.3 - (2020-02-05)
 
 * Use [poetry](https://python-poetry.org) for dependency management and packaging.
 
-# v1.0.2 - (2020-01-29)
+## v1.0.2 - (2020-01-29)
 
 * Fix `python_requires` value in project metadata
 
-# v1.0.1 - (2020-01-21)
+## v1.0.1 - (2020-01-21)
 
 * Fix #196: Do not attempt file copies for non-cloned repositories when using `tsrc init` with a list of groups.
 
-# v1.0.0 - (2020-01-09)
+## v1.0.0 - (2020-01-09)
 
 Starting the new year with a stable release, at last!
 
-## Revamp group UX
+### Revamp group UX
 
 The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
 [corresponding milestone](https://github.com/dmerejkowsky/tsrc/milestone/1) for the full list.
 
-## New configuration file
+### New configuration file
 
 Previously, `tsrc` stored its permanent configuration in `.tsrc/manifest.yml` and the file was not supposed to be edited by hand. Instead, users could use `tsrc init` to modify it, for instance with the `--branch` argument.
 
 Starting with this release, the command `tsrc init` can only be run once per workspace, and you must edit the `.tsrc/config.yml` file instead.
 
-## Changes in command line syntax
+### Changes in command line syntax
 
 * `tsrc init`: remove `--file` option.
 * `tsrc foreach`: instead of repeating the `--group` option, you can use `--groups` with a list of groups:
@@ -203,7 +205,7 @@ tsrc init --groups foo bar
 
 * `tsrc push` learned a `-o, --origin` option to specify a remote name different from "origin". Fix #170
 
-## Other fixes
+### Other fixes
 
 * Try and check that GitLab installation support required features before using them -
   typically, using `tsrc push --approvers` on GitLab Community Edition. (#165)
@@ -214,32 +216,32 @@ tsrc init --groups foo bar
   configuration. (#190). Feature suggested by @janjachnick
 
 
-# v0.9.2 - (2019-09-30)
+## v0.9.2 - (2019-09-30)
 
 * Additional bug fix for #165 - the fix in 0.9.1 was incomplete
 * Improve error message when trying to use non-supported GitLab features (like using `tsrc push --reviewer`
   on GitLab Community Edition)
 
-# v0.9.1 - (2019-09-23)
+## v0.9.1 - (2019-09-23)
 
 * Improve error message when `tsrc foreach` fails to start the process. Suggested by @dlewis-ald in #163
 * Fix crash when finding reviewers for a GitLab project not in a group. Reported by @irizzant in #165
 
-# v0.9.0 - (2019-08-13)
+## v0.9.0 - (2019-08-13)
 
 * Add support for GitHub Enterprise: patch by @sdavids13.
 * Improve error message when using creating a merge request in a GitLab repository when the token cannot be found in the `tsrc` configuration file. Fix #158
 * Fix crash when running `tsrc status` on a workspace with missing repositories (#160) - reported by @blastrock
 
-# v0.8.0 - (2019-08-12)
+## v0.8.0 - (2019-08-12)
 
 * Implement `tsrc sync --force`. Currently all it does is running `git fetch --force` on all repositories. Use with caution. See #152 for details.
 
-# v0.7.1 - (2019-08-02)
+## v0.7.1 - (2019-08-02)
 
 * Fix crash in `tsrc sync` when the `repo` configuration in the manifest contained neither an URL nor a remote. `tsrc` now aborts as soon as the misconfiguration of the manifest is detected (Reported by @jongep86)
 
-# v0.7.0 (2019-07-08)
+## v0.7.0 (2019-07-08)
 
 * Add a `--file` option to `tsrc init` so that manifest can be read from
   a custom path in the file system
@@ -247,38 +249,36 @@ tsrc init --groups foo bar
 * Switch from `xdg` to `pyxdg`
 * Format the code with [black](https://github.com/python/black)
 
-# v0.6.6 (2019-04-02)
+## v0.6.6 (2019-04-02)
 
 * Remove raw HTML from README.rst
 
-# v0.6.5 (2019-04-0)
+## v0.6.5 (2019-04-0)
 
 * Use `codecov.io` to measure coverage
 * Prettify README
 
-# v0.6.4 (2019-01-07)
+## v0.6.4 (2019-01-07)
 
 * Remove support for Python 3.3.
 * Use new and shiny [cli-ui](https://pypi.org/project/cli-ui/) package instead of old `python-cli-ui`.
 
-# v0.6.3 (2018-11-04)
+## v0.6.3 (2018-11-04)
 
 * GitHub organization is now `TankerHQ`
 * We now use [dmenv](https://github.com/dmerejkowsky/dmenv) for dependencies management
 
-# v0.6.2 (2018-10-19)
+## v0.6.2 (2018-10-19)
 
 Fix crash when using `tsrc push` on a GitHub repository for the first time.
 
-# v0.6.1 (2018-10-10)
+## v0.6.1 (2018-10-10)
 
 Fix weird output when configuring remotes.
 
-# v0.6.0 (2018-10-09)
+## v0.6.0 (2018-10-09)
 
-## Highlights
-
-## Add support for multiple remotes
+### Add support for multiple remotes
 
 ```yaml
 # still valid (implicit 'origin' remote)
@@ -301,16 +301,16 @@ remotes:
 Thanks @tst2005 and @cgestes for their help with the configuration format.
 
 
-## tsrc foreach
+### tsrc foreach
 
 * `tsrc foreach`: add a `--group` option to select the repositories to run the command on. Fix #40
 
-## Other fixes
+### Other fixes
 
 * Fix [#113](https://github.com/dmerejkowsky/tsrc/issues/113): do not hide branch when showing tag status.
 * Add support for Python 3.7
 
-# v0.5.0 (2018-08-14)
+## v0.5.0 (2018-08-14)
 
 * Add support for setting approvers with the `-r,--approvers` option in `tsrc push` (GitLab Enterprise Edition only).
 

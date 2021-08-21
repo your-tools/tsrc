@@ -27,24 +27,20 @@ You can then use:
 
 * ... and many more commands. Run `tsrc help` to list them, or read the [command line reference](/ref/cli.md)
 
-# Tutorial
+## Tutorial
 
-Interested in using `tsrc` for your own project?
+Interested in using `tsrc` in your own organization?
 
 Proceed to the [getting started tutorial](getting-started.md)!
 
-# Useful links
 
-* [FAQ](./faq.md)
-* [Changelog](./changelog.md)
+## Going further
 
-# Going further
-
-## Advanced guides
+### Advanced guides
 
 * [Using groups](guide/groups.md)
 
-## Reference
+### Reference
 
 * [Command line interface](ref/cli.md)
 * [Sync algorithm](ref/sync.md)
@@ -56,3 +52,8 @@ Proceed to the [getting started tutorial](getting-started.md)!
 * [Using the issue tracker](contrib/issues.md)
 * [Suggesting changes](contrib/dev.md)
 * [Code Manifesto](./code-manifesto.md)
+
+## Useful links
+
+* [FAQ](./faq.md)
+* [Changelog](./changelog.md)
