@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.4.0 (2021-06-28)
+## Next release
 
 ### Highlights
 
