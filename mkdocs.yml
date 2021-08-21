@@ -24,6 +24,7 @@ nav:
 
 - Guides:
   - Using groups: guide/groups.md
+  - Using several remotes: guide/remotes.md
   - Editing workspace configuration: guide/workspace-config.md
 
 - Reference:
