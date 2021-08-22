@@ -36,9 +36,12 @@ Proceed to the [getting started tutorial](getting-started.md)!
 
 ## Going further
 
-### Advanced guides
+### Guides
 
 * [Using groups](guide/groups.md)
+* [Using several remotes](guide/remotes.md)
+* [Editing workspace configuration](guide/workspace-config.md)
+* [Running a command for each repo in the workspace](guide/foreach.md)
 
 ### Reference
 
