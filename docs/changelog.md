@@ -10,6 +10,8 @@
   developers to add new behaviors to tsrc without having to change its source code. See
   the [relevant guide](https://dmerejkowsky.github.io/tsrc/guide/foreach) for more information.
 
+* Augment documentation with more use cases and examples (still a work in progress)
+
 ### Breaking changes
 
 * Remove `tsrc version` - Use `tsrc --version` instead.
