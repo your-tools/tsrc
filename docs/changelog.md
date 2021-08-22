@@ -5,8 +5,10 @@
 ### Highlights
 
 * All of `tsrc` commands can now be run in parallel. Try for instance `tsrc sync -j auto`.
+
 * `tsrc foreach` now sets a bunch of environment variables. This allows
-  developers to add new behaviors to tsrc without having to change its source code.
+  developers to add new behaviors to tsrc without having to change its source code. See
+  the [relevant guide](https://dmerejkowsky.github.io/tsrc/guide/foreach) for more information.
 
 ### Breaking changes
 
