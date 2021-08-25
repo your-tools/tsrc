@@ -26,6 +26,7 @@ nav:
 - Guides:
   - Using groups: guide/groups.md
   - Using several remotes: guide/remotes.md
+  - Editing the manifest safely: guide/manifest.md
   - Editing workspace configuration: guide/workspace-config.md
   - Running a command for each repo in the workspace: guide/foreach.md
 
