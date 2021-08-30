@@ -24,10 +24,11 @@ nav:
 - Getting Started: getting-started.md
 
 - Guides:
-  - Using groups: guide/groups.md
-  - Using several remotes: guide/remotes.md
   - Editing the manifest safely: guide/manifest.md
   - Editing workspace configuration: guide/workspace-config.md
+  - Using groups: guide/groups.md
+  - Using several remotes: guide/remotes.md
+  - Using fixed git references: guide/fixed-refs.md
   - Running a command for each repo in the workspace: guide/foreach.md
 
 - Reference:

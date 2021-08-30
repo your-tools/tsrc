@@ -65,9 +65,9 @@ Or if you want to go back to the state of the '0.42' release, you will run:
 Note that since `tsrc 0.2` you can also freeze the commits of some of the
 repositories.
 
-Last but not least, with `tsrc` you do everything with commands like `tsrc
-init` and `tsrc sync`, or simple `yaml` files,  which is much easier than
-using the `git submodule` CLI.
+Last but not least, if you really need to use fixed references, you may
+do so by adding a `sha1` or `tag` line to the manifest. See the
+[relevant guide](guide/fixed-refs.md) for more details.
 
 
 ## Why not using pygit2 or similar instead of running git commands?
