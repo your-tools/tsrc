@@ -61,4 +61,4 @@ You can use this technique to change the groups used in a given workspace -
 the above method using `init` only works to *create* new workspaces.
 
 The config file contains other configuration options, which are described
-in the [workspace configuration documentation](../ref/workspace-config.md)
+in the [workspace configuration documentation](../ref/workspace-config.md).
