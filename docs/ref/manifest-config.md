@@ -73,6 +73,8 @@ Each repository is also a *mapping*, containing:
 * `symlink` (optional): A list of mappings with `source` and `target` keys.
 
 
+See the [Using fixed references](../guide/fixed-refs.md) and the [Performing file system operations](../guide/fs.md) guides for details about how and why you would use the `tag`, `sha1`, `copy` or `symlink` fields.
+
 ## groups
 
 The `groups` section lists the groups by name. Each group should have a `repos` field
@@ -117,20 +119,6 @@ with, so that `tsrc sync` re-uses them later on. This means that if you
 want to change the groups used, you must re-run `tsrc init` with the new
 group list.
 
-## About file system operations
+!!! note
+    More information about how to use groups is available in the [relevant guide](../guide/groups.md).
 
-Note that `copy` only works with files, not directories.
-
-The source path for a symbolic link is relative to the top-level `<workspace>`, whereas
-each target path is then relative to the associated source.  (This path relationship
-is essentially identical to how `ln -s` works on the command line in Unix-like
-environments.)  Multiple symlinks can be specified; each must specify a source and target.
-
-Symlink creation is supported on all operating systems, but creation of NTFS symlinks on
-Windows requires that the current user have appropriate security policy permission
-(SeCreateSymbolicLinkPrivilege).  By default, only administrators have that privilege set,
-although newer versions of Windows 10 support a Developer Mode that permits unprivileged
-accounts to create symlinks.  Note that Cygwin running on Windows defaults to creating
-links via Windows shortcuts, which do *not* require any special privileges.
-(Cygwin's symlink behavior can be user controlled with the `winsymlinks` setting
-in the `CYGWIN` environment variable.)

@@ -34,13 +34,19 @@ Interested in using `tsrc` in your own organization?
 Proceed to the [getting started tutorial](getting-started.md)!
 
 
-## Going further
+## Guides
 
-### Guides
+Once you've learn how to setup tsrc for your organization, feel free to
+read the following guides - tsrc supports a variety of use cases beyond
+just listing git repositories to be cloned or synchronized and are
+described here:
 
+* [Editing the manifest safely](guide/manifest.md)
+* [Editing workspace configuration](guide/workspace-config.md)
 * [Using groups](guide/groups.md)
 * [Using several remotes](guide/remotes.md)
-* [Editing workspace configuration](guide/workspace-config.md)
+* [Using fixed git references](guide/fixed-refs.md)
+* [Performing file system operations](guide/fs.md)
 * [Running a command for each repo in the workspace](guide/foreach.md)
 
 ### Reference
