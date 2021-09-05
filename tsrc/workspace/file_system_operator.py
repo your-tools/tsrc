@@ -20,7 +20,7 @@ class FileSystemOperator(Task[FileSystemOperation]):
         self.repos = repos
 
     def describe_item(self, item: FileSystemOperation) -> str:
-        return str(item)
+        return item.describe(self.workspace_path)
 
     def describe_process_start(self, item: FileSystemOperation) -> List[ui.Token]:
         return []
@@ -32,7 +32,8 @@ class FileSystemOperator(Task[FileSystemOperation]):
         # Note: we don't want to run this Task in parallel, just in case
         # the order of filesystem operations matters, so we can always
         # return an empty Outcome
-        self.info_count(index, count, str(item))
+        description = item.describe(self.workspace_path)
+        self.info_count(index, count, description)
         try:
             item.perform(self.workspace_path)
         except OSError as e:
