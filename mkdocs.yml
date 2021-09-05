@@ -29,6 +29,7 @@ nav:
   - Using groups: guide/groups.md
   - Using several remotes: guide/remotes.md
   - Using fixed git references: guide/fixed-refs.md
+  - Performing file system operations: guide/fs.md
   - Running a command for each repo in the workspace: guide/foreach.md
 
 - Reference:
