@@ -11,11 +11,11 @@ from tsrc.errors import Error
 
 class FileSystemOperation(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def perform(self, workspace_path: Path) -> None:
+    def describe(self, workspace_path: Path) -> str:
         pass
 
     @abc.abstractmethod
-    def __str__(self) -> str:
+    def perform(self, workspace_path: Path) -> None:
         pass
 
 
@@ -25,13 +25,15 @@ class Copy(FileSystemOperation):
     src: str = attr.ib()
     dest: str = attr.ib()
 
+    def describe(self, workspace_path: Path) -> str:
+        src_path = workspace_path / self.repo / self.src
+        dest_path = workspace_path / self.dest
+        return f"Copy {src_path} -> {dest_path}"
+
     def perform(self, workspace_path: Path) -> None:
         src_path = workspace_path / self.repo / self.src
         dest_path = workspace_path / self.dest
         shutil.copy(src_path, dest_path)
-
-    def __str__(self) -> str:
-        return f"copy from '{self.repo}/{self.src}' to '{self.dest}'"
 
 
 @attr.s(frozen=True)
@@ -40,13 +42,14 @@ class Link(FileSystemOperation):
     source: str = attr.ib()
     target: str = attr.ib()
 
+    def describe(self, workspace_path: Path) -> str:
+        source = workspace_path / self.source
+        return f"Link {source} -> {self.target}"
+
     def perform(self, workspace_path: Path) -> None:
         source = workspace_path / self.source
         target = Path(self.target)
         safe_link(source=source, target=target)
-
-    def __str__(self) -> str:
-        return f"link from '{self.source}' to '{self.target}'"
 
 
 def safe_link(*, source: Path, target: Path) -> None:
