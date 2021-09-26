@@ -3,12 +3,15 @@
 import argparse
 import os
 import re
+
+import schema
 import sys
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Any
 
 import cli_ui as ui
+from tsrc.config import parse_config
 
 from tsrc.errors import Error
 from tsrc.manifest import Manifest
@@ -37,7 +40,11 @@ def add_num_jobs_arg(parser: argparse.ArgumentParser) -> None:
 
 
 def get_num_jobs(args: argparse.Namespace) -> Optional[int]:
-    value = args.num_jobs
+    if args.num_jobs is not None:
+        value = args.num_jobs
+    else:
+        value = load_config_from_file("jobs", schema.Or(int, "auto"))
+
     if value is None:
         return None
     if value == "auto":
@@ -171,3 +178,18 @@ def repos_from_config(
         # a list of groups, ask the manifest for the list of default
         # repos
         return manifest.get_repos(groups=None)
+
+
+def load_config_from_file(name: str, type: schema.And) -> Any:
+    config_schema = schema.Schema(
+        {
+            schema.Optional(name): type,
+        },
+        ignore_extra_keys=True,
+    )
+    maybe_config = Path(Path.home(), ".config", "tsrc.yaml")
+    if os.path.isfile(maybe_config):
+        config = parse_config(maybe_config, schema=config_schema)
+        return config[name]
+    else:
+        return None
