@@ -6,17 +6,13 @@ on:
 jobs:
   safety:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.7]
     steps:
       - uses: actions/checkout@v1
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+      - name: Set up Python
+        uses: actions/setup-python@v2.2.2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
 
       - name: Install and configure poetry
         run: |
@@ -24,7 +20,6 @@ jobs:
 
       - name: Prepare project for development
         run: |
-          python -m poetry run pip install --upgrade pip
           python -m poetry install
 
       - name: Run safety dependency check
