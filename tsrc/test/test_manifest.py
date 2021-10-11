@@ -33,6 +33,7 @@ repos:
     symlink:
       - source: some_source
         target: some_target
+    ignore_submodules: true
 """
     manifest = Manifest()
     parsed = ruamel.yaml.safe_load(contents)
@@ -44,6 +45,7 @@ repos:
             branch="next",
             sha1=None,
             tag=None,
+            ignore_submodules=False,
         ),
         Repo(
             remotes=[Remote(name="origin", url="git@example.com:bar.git")],
@@ -51,6 +53,7 @@ repos:
             branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
             tag=None,
+            ignore_submodules=False
         ),
         Repo(
             remotes=[Remote(name="origin", url="git@example.com:master.git")],
@@ -58,6 +61,7 @@ repos:
             branch="master",
             sha1=None,
             tag="v0.1",
+            ignore_submodules=True
         ),
     ]
     assert manifest.file_system_operations == [

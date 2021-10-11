@@ -20,6 +20,7 @@ class Repo:
     sha1: Optional[str] = attr.ib(default=None)
     tag: Optional[str] = attr.ib(default=None)
     shallow: bool = attr.ib(default=False)
+    ignore_submodules: bool = attr.ib(default=False)
 
     @property
     def clone_url(self) -> str:

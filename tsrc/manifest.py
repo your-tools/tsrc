@@ -52,12 +52,13 @@ class Manifest:
         tag = repo_config.get("tag")
         sha1 = repo_config.get("sha1")
         url = repo_config.get("url")
+        ignore_submodules = repo_config.get("ignore_submodules", False)
         if url:
             origin = Remote(name="origin", url=url)
             remotes = [origin]
         else:
             remotes = self._handle_remotes(repo_config)
-        repo = Repo(dest=dest, branch=branch, sha1=sha1, tag=tag, remotes=remotes)
+        repo = Repo(dest=dest, branch=branch, sha1=sha1, tag=tag, remotes=remotes, ignore_submodules=ignore_submodules)
         self._repos.append(repo)
 
     def _handle_remotes(self, repo_config: Any) -> List[Remote]:
@@ -144,6 +145,7 @@ def validate_repo(data: Any) -> None:
             schema.Optional("symlink"): [symlink_schema],
             schema.Optional("sha1"): str,
             schema.Optional("tag"): str,
+            schema.Optional("ignore_submodules"): bool,
             schema.Optional("remotes"): [remote_schema],
             schema.Optional("url"): str,
         }
