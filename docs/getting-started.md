@@ -5,8 +5,8 @@
 The recommended way to install `tsrc` is to use [pipx](https://pypa.github.io/pipx/)
 
 * Make sure to have Python 3.6 or later installed.
-*  Install pipx
-* Run `pipx install tbump`
+* Install pipx
+* Run `pipx install tsrc`
 
 You can also install `tsrc` with `pip` if you know what you are doing :)
 
