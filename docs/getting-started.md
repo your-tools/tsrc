@@ -4,7 +4,7 @@
 
 The recommended way to install `tsrc` is to use [pipx](https://pypa.github.io/pipx/)
 
-* Make sure to have Python 3.6 or later installed.
+* Make sure to have Python 3.7 or later installed.
 * Install pipx
 * Run `pipx install tsrc`
 
