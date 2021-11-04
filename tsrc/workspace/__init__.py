@@ -70,7 +70,7 @@ class Workspace:
         manifest_branch = self.config.manifest_branch
         self.local_manifest.update(url=manifest_url, branch=manifest_branch)
 
-    def clone_missing(self, *, num_jobs: Optional[int] = None) -> None:
+    def clone_missing(self, *, num_jobs: int = 1) -> None:
         to_clone = []
         for repo in self.repos:
             repo_path = self.root_path / repo.dest
@@ -92,7 +92,7 @@ class Workspace:
             collection.print_errors()
             raise ClonerError
 
-    def set_remotes(self, num_jobs: Optional[int] = None) -> None:
+    def set_remotes(self, num_jobs: int = 1) -> None:
         if self.config.singular_remote:
             return
         ui.info_2("Configuring remotes")
@@ -117,14 +117,14 @@ class Workspace:
         if operations:
             ui.info_2("Performing filesystem operations")
             # Not sure it's a good idea to have FileSystemOperations running in parallel
-            collection = process_items(operations, operator, num_jobs=None)
+            collection = process_items(operations, operator, num_jobs=1)
             collection.print_summary()
             if collection.errors:
                 ui.error("Failed to perform the following file system operations")
                 collection.print_errors()
                 raise FileSystemOperatorError
 
-    def sync(self, *, force: bool = False, num_jobs: Optional[int] = None) -> None:
+    def sync(self, *, force: bool = False, num_jobs: int = 1) -> None:
         syncer = Syncer(
             self.root_path, force=force, remote_name=self.config.singular_remote
         )

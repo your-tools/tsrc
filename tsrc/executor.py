@@ -18,7 +18,7 @@ the Task[T] interface
 
 ## Running tasks
 
-* If num_jobs is None, the SequentialExecutor is used,
+* If num_jobs is 1, the SequentialExecutor is used,
   otherwise the ParallelExecutor is used. The  `parallel` boolean
   attribute on the Task instances is set accordingly.
 * Both the SequentialExecutor and the ParallelExecutor will call
@@ -319,9 +319,9 @@ class ParallelExecutor(Generic[T]):
 
 
 def process_items(
-    items: List[T], task: Task[T], *, num_jobs: Optional[int] = None
+    items: List[T], task: Task[T], *, num_jobs: int = 1
 ) -> OutcomeCollection:
-    if num_jobs:
+    if num_jobs > 1:
         res = process_items_parallel(items, task, num_jobs=num_jobs)
     else:
         res = process_items_sequence(items, task)
