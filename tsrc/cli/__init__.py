@@ -32,15 +32,13 @@ def add_num_jobs_arg(parser: argparse.ArgumentParser) -> None:
         "-j",
         "--jobs",
         dest="num_jobs",
-        help="Number of jobs to use simultaneously",
+        help="Number of jobs to use simultaneously (1 to disable parallelism)",
     )
 
 
-def get_num_jobs(args: argparse.Namespace) -> Optional[int]:
+def get_num_jobs(args: argparse.Namespace) -> int:
     value = args.num_jobs
-    if value is None:
-        return None
-    if value == "auto":
+    if value in [None, "auto"]:
         return cpu_count()
     try:
         return int(value)
