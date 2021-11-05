@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.1 (2021-11-05)
+
+* Ad more guides in the documentation
+* Display absolute paths when performing file system operations
+* `tsrc sync` now uses parallel jobs by default. Use `-j1` to force
+  sequential processing. Patch by @gdubicki
+
 ## 2.4.0 (2021-08-22)
 
 ### Highlights
