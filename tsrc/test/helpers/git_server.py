@@ -216,6 +216,9 @@ class ManifestHandler:
     def set_repo_tag(self, name: str, tag: str) -> None:
         self.configure_repo(name, "tag", tag)
 
+    def set_ignore_submodules(self, name: str, ignored: bool) -> None:
+        self.configure_repo(name, "ignore_submodules", ignored)
+
     def set_file_copy(self, repo_name: str, src: str, dest: str) -> None:
         copies = [{"file": src, "dest": dest}]
         self.configure_repo(repo_name, "copy", copies)

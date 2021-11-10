@@ -72,9 +72,10 @@ class Syncer(Task[Repo]):
                 title = f"{repo.dest} on {current_branch}"
                 summary_lines += [title, "-" * len(title), sync_summary]
 
-        submodule_line = self.update_submodules(repo)
-        if submodule_line:
-            summary_lines.append(submodule_line)
+        if not repo.ignore_submodules:
+            submodule_line = self.update_submodules(repo)
+            if submodule_line:
+                summary_lines.append(submodule_line)
 
         summary = "\n".join(summary_lines)
         return Outcome(error=error, summary=summary)
