@@ -885,3 +885,38 @@ def test_update_submodules(
 
     sub2_new_txt = clone_path / "sub1" / "sub2" / "new.txt"
     assert sub2_new_txt.exists(), "sub2 was not updated"
+
+
+def test_ignored_submodules(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    """
+    * Create a repo 'top' containing the 'sub1' submodule
+    * Add 'top' to the manifest, and ignore_submodules=True
+    * Run `tsrc init`, check no files are created in `sub1`
+    * Create commit in sub1
+    * Run `tsrc sync`, check no files are created in `sub1`
+    """
+    git_server.add_repo("top")
+    sub1_url = git_server.add_repo("sub1", add_to_manifest=False)
+    git_server.add_submodule("top", url=sub1_url, path=Path("sub1"))
+    git_server.manifest.set_ignore_submodules("top", True)
+
+    tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
+
+    clone_path = workspace_path / "top"
+
+    sub1_readme = clone_path / "sub1" / "README"
+    assert not sub1_readme.exists(), "sub1 was cloned (but should not be)"
+
+    git_server.push_file("sub1", "new.txt")
+    git_server.update_submodule("top", "sub1")
+    tsrc_cli.run("sync")
+    sub1_new_txt = clone_path / "sub1" / "new.txt"
+
+    assert not sub1_new_txt.exists()
+
+    git_server.manifest.set_ignore_submodules("top", False)
+    tsrc_cli.run("sync")
+    assert sub1_readme.exists(), "sub1 was not cloned"
+    assert sub1_new_txt.exists(), "sub1 was not cloned"

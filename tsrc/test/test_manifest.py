@@ -53,7 +53,7 @@ repos:
             branch="master",
             sha1="ad2b68539c78e749a372414165acdf2a1bb68203",
             tag=None,
-            ignore_submodules=False
+            ignore_submodules=False,
         ),
         Repo(
             remotes=[Remote(name="origin", url="git@example.com:master.git")],
@@ -61,7 +61,7 @@ repos:
             branch="master",
             sha1=None,
             tag="v0.1",
-            ignore_submodules=True
+            ignore_submodules=True,
         ),
     ]
     assert manifest.file_system_operations == [
