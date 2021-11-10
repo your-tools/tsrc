@@ -69,6 +69,10 @@ Each repository is also a *mapping*, containing:
     * When running `tsrc init`: Project will be cloned, and then reset to the given sha1.
     * When running `tsrc sync`:  If the project is clean, project will be reset
     to the given sha1, else a warning message will be printed.
+* `ignore_submodules` (optional, default=`false`):
+    * When running `tsrc init`: if `ignore_submodules` is `true`, do not recursively clone submodules.
+    * When running `tsrc sync`: if `ignore_submodules` is `true`, do not initialize or update submodules.
+    to the given sha1, else a warning message will be printed.
 * `copy` (optional): A list of mappings with `file` and `dest` keys.
 * `symlink` (optional): A list of mappings with `source` and `target` keys.
 
