@@ -38,6 +38,8 @@ def add_num_jobs_arg(parser: argparse.ArgumentParser) -> None:
 
 def get_num_jobs(args: argparse.Namespace) -> int:
     value = args.num_jobs
+    if value is None:
+        value = os.environ.get("TSRC_PARALLEL_JOBS")
     if value in [None, "auto"]:
         return cpu_count()
     try:
