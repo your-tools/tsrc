@@ -32,7 +32,8 @@ Second, almost all commands run the operation in parallel. For instance,
 available on the current machine to synchronize the repos in your workspace.
 If this behavior is not desired, you can specify a greater (or lower)
 number of jobs using something like `tsrc sync -j2`, or disable the
-parallelism completely with `-j1`.
+parallelism completely with `-j1`. You can also set the default number
+of jobs by using  the `TSRC_PARALLEL_JOBS ` environment variable.
 
 ## Global options
 

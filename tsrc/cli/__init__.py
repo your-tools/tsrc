@@ -32,7 +32,10 @@ def add_num_jobs_arg(parser: argparse.ArgumentParser) -> None:
         "-j",
         "--jobs",
         dest="num_jobs",
-        help="Number of jobs to use simultaneously (1 to disable parallelism)",
+        help="Number of jobs to use simultaneously. "
+        "Use 1 to disable parallelism. "
+        "Defaults to the value of the "
+        "TSRC_PARALLEL_JOBS environment variable",
     )
 
 
