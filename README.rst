@@ -44,7 +44,7 @@ Installation
 tsrc is `available on pypi <https://pypi.org/project/tsrc>`_ and can be installed via ``pipx``.
 (Or ``pip`` if you know what you are doing).
 
-It requires **Python 3.6** or later.
+It requires **Python 3.7** or later.
 
 
 Usage Example
