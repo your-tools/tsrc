@@ -39,7 +39,6 @@ pytest-xdist = "^1.32.0"
 # cached-property is required by pygit2 for old Pythons
 cached-property = { version = "^1.5.2", python = "< 3.8" }
 pygit2 = { version = "^1.7.1" }
-mock = "^3.0.5"
 
 # Linters
 black = "21.10b0"
