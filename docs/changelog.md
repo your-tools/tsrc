@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.5.0
+
+### Highlights
+
+* Bump minimum supported version to Python **3.7**.
+* Introduce `ignore_submodules` repository option - Patch by Thomas Hiscock.
+* When `-j` is not used, try getting the default `jobs` value from the
+  `TSRC_PARALLEL_JOBS` environment variable.  Patch by Marcin Jaworski.
+
+### Other
+
+* Bump mkdocs from 1.2.2 to 1.2.3
+* Bump pygit2
+* Bump linters (flake8, mypy, black)
+* Remove dependency on `attr`
+
 ## 2.4.1 (2021-11-05)
 
 * Ad more guides in the documentation
