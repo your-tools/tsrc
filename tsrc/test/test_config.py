@@ -1,7 +1,7 @@
 import textwrap
 from pathlib import Path
+from unittest import mock
 
-import mock
 import pytest
 import ruamel.yaml
 import schema
