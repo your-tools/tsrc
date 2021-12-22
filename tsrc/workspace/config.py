@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -23,10 +24,6 @@ class WorkspaceConfig:
 
     singular_remote: Optional[str] = attr.ib(default=None)
 
-    @manifest_url.validator
-    def check(self, attribute: str, value: Optional[str] = None) -> None:
-        if value is None:
-            raise ValueError("manifest_url must not be None")
 
     @classmethod
     def from_file(cls, cfg_path: Path) -> "WorkspaceConfig":
