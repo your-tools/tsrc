@@ -85,11 +85,11 @@ to print the summary, or an error message when relevant.
 
 import abc
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
-import attr
 import cli_ui as ui
 
 from tsrc.errors import Error
@@ -103,12 +103,12 @@ class ExecutorFailed(Error):
     pass
 
 
-@attr.s
+@dataclass
 class Outcome:
     """The result of processing an item."""
 
-    error: Optional[Error] = attr.ib()
-    summary: Optional[str] = attr.ib()
+    error: Optional[Error]
+    summary: Optional[str]
 
     @classmethod
     def empty(cls) -> "Outcome":

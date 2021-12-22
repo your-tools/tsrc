@@ -1,12 +1,11 @@
-
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Optional
 
-import attr
 import ruamel.yaml
 
 
-@attr.s
+@dataclass
 class WorkspaceConfig:
     """Persistent configuration of the workspace.
 
@@ -15,15 +14,14 @@ class WorkspaceConfig:
     for instance.
     """
 
-    manifest_url: str = attr.ib()
-    manifest_branch: str = attr.ib()
-    repo_groups: List[str] = attr.ib()
+    manifest_url: str
+    manifest_branch: str
+    repo_groups: List[str]
 
-    shallow_clones: bool = attr.ib(default=False)
-    clone_all_repos: bool = attr.ib(default=False)
+    shallow_clones: bool = False
+    clone_all_repos: bool = False
 
-    singular_remote: Optional[str] = attr.ib(default=None)
-
+    singular_remote: Optional[str] = None
 
     @classmethod
     def from_file(cls, cfg_path: Path) -> "WorkspaceConfig":
@@ -35,6 +33,6 @@ class WorkspaceConfig:
         cfg_path.parent.mkdir(parents=True, exist_ok=True)
         yaml = ruamel.yaml.YAML(typ="rt")
         yaml.register_class(Path)
-        as_dict = attr.asdict(self)
+        as_dict = asdict(self)
         with cfg_path.open("w") as fp:
             yaml.dump(as_dict, fp)
