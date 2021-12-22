@@ -1,9 +1,9 @@
 import abc
 import os
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 
-import attr
 import cli_ui as ui
 
 from tsrc.errors import Error
@@ -19,11 +19,11 @@ class FileSystemOperation(metaclass=abc.ABCMeta):
         pass
 
 
-@attr.s(frozen=True)
+@dataclass(frozen=True)
 class Copy(FileSystemOperation):
-    repo: str = attr.ib()
-    src: str = attr.ib()
-    dest: str = attr.ib()
+    repo: str
+    src: str
+    dest: str
 
     def describe(self, workspace_path: Path) -> str:
         src_path = workspace_path / self.repo / self.src
@@ -36,11 +36,11 @@ class Copy(FileSystemOperation):
         shutil.copy(src_path, dest_path)
 
 
-@attr.s(frozen=True)
+@dataclass(frozen=True)
 class Link(FileSystemOperation):
-    repo: str = attr.ib()
-    source: str = attr.ib()
-    target: str = attr.ib()
+    repo: str
+    source: str
+    target: str
 
     def describe(self, workspace_path: Path) -> str:
         source = workspace_path / self.source

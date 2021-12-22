@@ -1,26 +1,25 @@
 """ Repo objects. """
+from dataclasses import dataclass
 from typing import List, Optional
 
-import attr
 
-
-@attr.s(frozen=True)
+@dataclass(frozen=True)
 class Remote:
-    name: str = attr.ib()
-    url: str = attr.ib()
+    name: str
+    url: str
 
 
-@attr.s(frozen=True)
+@dataclass(frozen=True)
 class Repo:
-    dest: str = attr.ib()
+    dest: str
     # Note: a repo has at least one remote called 'origin' by default -
     # other remotes may be configured explicitly in the manifest file.
-    remotes: List[Remote] = attr.ib()
-    branch: str = attr.ib(default="master")
-    sha1: Optional[str] = attr.ib(default=None)
-    tag: Optional[str] = attr.ib(default=None)
-    shallow: bool = attr.ib(default=False)
-    ignore_submodules: bool = attr.ib(default=False)
+    remotes: List[Remote]
+    branch: str = "master"
+    sha1: Optional[str] = None
+    tag: Optional[str] = None
+    shallow: bool = False
+    ignore_submodules: bool = False
 
     @property
     def clone_url(self) -> str:
