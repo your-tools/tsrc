@@ -42,7 +42,7 @@ def mypy(c, machine_readable=False):
 @task
 def test(c):
     print("Running pytest")
-    c.run("pytest -n auto")
+    c.run("pytest -n auto", pty=True)
 
 
 @task(
