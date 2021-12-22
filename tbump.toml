@@ -35,4 +35,4 @@ cmd = "grep -q {new_version} docs/changelog.md"
 
 [[after_push]]
 name = "Publish project on Pypi"
-cmd = "./publish.sh"
+cmd = "poetry publish --build"
