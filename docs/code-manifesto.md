@@ -117,7 +117,7 @@ a = "ok" if foo else "nope"
 
 ```python
 # Yes
-if value in ["option1", "option2"]:
+if value in ("option1", "option2"):
    ...
 
 # No
