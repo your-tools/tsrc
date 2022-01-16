@@ -41,10 +41,11 @@ Note
 Installation
 -------------
 
-tsrc is `available on pypi <https://pypi.org/project/tsrc>`_ and can be installed via ``pipx``.
-(Or ``pip`` if you know what you are doing).
+The recommended way to install ``tsrc`` is to use `pipx <https://pipxproject.github.io/pipx/>`_
 
-It requires **Python 3.7** or later.
+* Make sure to have Python **3.7** or later installed.
+* Install ``pipx``
+* Run ``pipx install tsrc``.
 
 
 Usage Example
