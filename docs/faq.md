@@ -1,5 +1,11 @@
 # FAQ
 
+## What does the name mean?
+
+The `t` stands for `tool` and `src` for `sources`.
+
+If you speak French, you can also remember the name as "tes sources".
+
 ## Why not repo?
 
 We used [repo](https://android.googlesource.com/tools/repo/) for a while, but
