@@ -123,6 +123,12 @@ $ git push
 
 ## Additional notes
 
+* It is **not** advised to edit the file in
+  `.tsrc/manifest/manifest.yml` directly, because `tsrc sync` will
+  silently undo any local changes made to this file. This is a known bug,
+  see [#279](https://github.com/dmerejkowsky/tsrc/issues/279) for details.
+
+
 * It is common to place the manifest repo itself in the manifest - so it's easy to edit or read:
 
 ```yaml
@@ -138,6 +144,11 @@ repos:
      dest: bar
 ```
 
-* It is not advised to edit the file in `.tsrc/manifest/manifest.yml`
-  directly, because `tsrc sync` will silently
-  undo any local changes made to this file.
+In that case, you would use:
+
+```
+$ tsrc apply-manifest <workspace>/manifest/manifest.yml
+```
+
+to check changes before pushing them.
+
