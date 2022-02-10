@@ -55,6 +55,7 @@ described here:
 * [Sync algorithm](ref/sync.md)
 * [Manifest configuration](ref/manifest-config.md)
 * [Workspace configuration](ref/workspace-config.md)
+* [Using tsrc with continuous integration](ref/ci.md)
 
 ## Contributing
 
