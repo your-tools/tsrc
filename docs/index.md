@@ -48,6 +48,7 @@ described here:
 * [Using fixed git references](guide/fixed-refs.md)
 * [Performing file system operations](guide/fs.md)
 * [Running a command for each repo in the workspace](guide/foreach.md)
+* [Using tsrc with continuous integration](guide/ci.md)
 
 ### Reference
 
@@ -55,7 +56,6 @@ described here:
 * [Sync algorithm](ref/sync.md)
 * [Manifest configuration](ref/manifest-config.md)
 * [Workspace configuration](ref/workspace-config.md)
-* [Using tsrc with continuous integration](ref/ci.md)
 
 ## Contributing
 

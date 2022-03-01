@@ -31,6 +31,7 @@ nav:
   - Using fixed git references: guide/fixed-refs.md
   - Performing file system operations: guide/fs.md
   - Running a command for each repo in the workspace: guide/foreach.md
+  - Using tsrc with continuous integration: guide/ci.md
 
 - Reference:
   - Command line usage: ref/cli.md
