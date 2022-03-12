@@ -113,7 +113,7 @@ class Workspace:
         operator = FileSystemOperator(self.root_path, repos)
         operations = manifest.file_system_operations
         known_repos = [x.dest for x in repos]
-        operations = [x for x in operations if x.repo in known_repos]  # type: ignore
+        operations = [x for x in operations if x.get_repo() in known_repos]
         if operations:
             ui.info_2("Performing filesystem operations")
             # Not sure it's a good idea to have FileSystemOperations running in parallel

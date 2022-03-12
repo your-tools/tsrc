@@ -18,12 +18,19 @@ class FileSystemOperation(metaclass=abc.ABCMeta):
     def perform(self, workspace_path: Path) -> None:
         pass
 
+    @abc.abstractmethod
+    def get_repo(self) -> str:
+        pass
+
 
 @dataclass(frozen=True)
 class Copy(FileSystemOperation):
     repo: str
     src: str
     dest: str
+
+    def get_repo(self) -> str:
+        return self.repo
 
     def describe(self, workspace_path: Path) -> str:
         src_path = workspace_path / self.repo / self.src
@@ -41,6 +48,9 @@ class Link(FileSystemOperation):
     repo: str
     source: str
     target: str
+
+    def get_repo(self) -> str:
+        return self.repo
 
     def describe(self, workspace_path: Path) -> str:
         source = workspace_path / self.source
