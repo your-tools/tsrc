@@ -54,11 +54,11 @@ jobs:
         tsrc sync
 ```
 
-This script will run on the latest Ubuntu Docker and trigs two steps:
+This script will run on the latest Ubuntu Docker and triggers steps:
 - The first step named `Installing tsrc tool` allows to install python3 and then
   tsrc.
 - The second step named `Cloning private github repos` creates a folder named
-  `your_project` for your workspace and call the initialisation and
+  `your_project` for your workspace and call the initialization and
   synchronization of your repositories.
 
 The important command is:
@@ -66,7 +66,7 @@ The important command is:
 git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com/".insteadOf git@github.com:
 ```
 
-which allows to replace the SSH syntax by the HTTPS syntax on your GitHub repository names.
+which allows to replace the SSH syntax by the HTTPs syntax on your GitHub repository names.
 
 ### Step 3: Create the GitHub secret
 
@@ -80,7 +80,7 @@ the GitHub repository holding the GitHub workflows files.
 
 ### Step 4: Enjoy
 
-In the menu `Actions` of your repository you can trig the worflow. In this
+In the menu `Actions` of your repository you can trig the workflow. In this
 example we used `workflow_dispatch` to perform manual triggers. So click on the
 button to start the process. Once this step done with success, you can update
 your workflow yaml to complete your CI work: compilation of your project, run
