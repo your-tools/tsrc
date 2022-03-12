@@ -35,8 +35,10 @@ class CLI:
     def run_and_fail(self, *args: str) -> Error:
         jobs = os.environ.get("TSRC_TEST_JOBS")
         if jobs:
-            args = [*args, "-j", jobs]  # type: ignore
-        ui.info(">", ui.bold, "tsrc", *args, end="")
+            info_args = [*args, "-j", jobs]
+        else:
+            info_args = [*args]
+        ui.info(">", ui.bold, "tsrc", *info_args, end="")
         ui.info(ui.red, " (expecting failure)")
         with pytest.raises(Error) as e:
             testable_main(args)

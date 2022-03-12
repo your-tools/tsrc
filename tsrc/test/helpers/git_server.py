@@ -88,7 +88,7 @@ class BareRepo(BaseTestRepo):
         )
 
     def get_sha1(self) -> str:
-        return self._repo.head.target.hex  # type: ignore
+        return self._repo.head.target.hex  # type: ignore [no-any-return]
 
 
 class TestRepo(BaseTestRepo):
