@@ -68,7 +68,7 @@ def testable_main(args: ArgsList) -> None:
 
 
 def main_impl(args: ArgsList = None) -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog="tsrc")
     parser.add_argument("--version", action="version", version="tsrc " + __version__)
 
     parser.add_argument("--verbose", help="show debug messages", action="store_true")
