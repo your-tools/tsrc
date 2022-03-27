@@ -1,0 +1,2078 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../img/tsrc-logo.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.7">
+    
+    
+      
+        <title>Changelog - tsrc documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.9d5733d3.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="tsrc documentation" class="md-header__button md-logo" aria-label="tsrc documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            tsrc documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dmerejkowsky/tsrc/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="tsrc documentation" class="md-nav__button md-logo" aria-label="tsrc documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    tsrc documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dmerejkowsky/tsrc/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Guides
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/manifest/" class="md-nav__link">
+        Editing the manifest safely
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/workspace-config/" class="md-nav__link">
+        Editing workspace configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/groups/" class="md-nav__link">
+        Using groups
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/remotes/" class="md-nav__link">
+        Using several remotes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/fixed-refs/" class="md-nav__link">
+        Using fixed git references
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/fs/" class="md-nav__link">
+        Performing file system operations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/foreach/" class="md-nav__link">
+        Running a command for each repo in the workspace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ci/" class="md-nav__link">
+        Using tsrc with continuous integration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/cli/" class="md-nav__link">
+        Command line usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/sync/" class="md-nav__link">
+        Sync algorithm
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/manifest-config/" class="md-nav__link">
+        Manifest configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ref/workspace-config/" class="md-nav__link">
+        Workspace configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Contributing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Contributing" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Contributing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/issues/" class="md-nav__link">
+        Using the issue tracker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/dev/" class="md-nav__link">
+        Suggesting changes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code-manifesto/" class="md-nav__link">
+        Code manifesto
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Changelog
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Changelog
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#260_2023-03-27" class="md-nav__link">
+    2.6.0 (2023-03-27)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#250_2022-12-21" class="md-nav__link">
+    2.5.0 (2022-12-21)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5.0 (2022-12-21)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    Highlights
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    Other
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#241_2021-11-05" class="md-nav__link">
+    2.4.1 (2021-11-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#240_2021-08-22" class="md-nav__link">
+    2.4.0 (2021-08-22)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4.0 (2021-08-22)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#highlights_1" class="md-nav__link">
+    Highlights
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking_changes" class="md-nav__link">
+    Breaking changes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug_fixes" class="md-nav__link">
+    Bug fixes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal_changes" class="md-nav__link">
+    Internal changes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#231_2021-06-28" class="md-nav__link">
+    2.3.1 (2021-06-28)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.1 (2021-06-28)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug_fixes_and_small_improvements" class="md-nav__link">
+    Bug fixes and small improvements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal_changes_1" class="md-nav__link">
+    Internal changes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#230_2021-05-31" class="md-nav__link">
+    2.3.0 (2021-05-31)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.0 (2021-05-31)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repo_selection" class="md-nav__link">
+    Repo selection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_support_for_submodules" class="md-nav__link">
+    Add support for submodules
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misc" class="md-nav__link">
+    Misc
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#221_2021-04-10" class="md-nav__link">
+    2.2.1 (2021-04-10)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#220_2020-07-17" class="md-nav__link">
+    2.2.0 (2020-07-17)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2.0 (2020-07-17)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_symlink_support" class="md-nav__link">
+    Add symlink support
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes_related_to_groups" class="md-nav__link">
+    Changes related to groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misc_1" class="md-nav__link">
+    Misc
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#210_2020-05-27" class="md-nav__link">
+    2.1.0 (2020-05-27)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1.0 (2020-05-27)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking_changes_1" class="md-nav__link">
+    Breaking changes
+  </a>
+  
+    <nav class="md-nav" aria-label="Breaking changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#change_in_manifest_syntax" class="md-nav__link">
+    Change in manifest syntax
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported_python_versions" class="md-nav__link">
+    Supported Python versions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new_features" class="md-nav__link">
+    New features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug_fixes_1" class="md-nav__link">
+    Bug fixes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other_1" class="md-nav__link">
+    Other
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v200_-_2020-04-06" class="md-nav__link">
+    v2.0.0 - (2020-04-06)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v103_-_2020-02-05" class="md-nav__link">
+    v1.0.3 - (2020-02-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v102_-_2020-01-29" class="md-nav__link">
+    v1.0.2 - (2020-01-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v101_-_2020-01-21" class="md-nav__link">
+    v1.0.1 - (2020-01-21)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v100_-_2020-01-09" class="md-nav__link">
+    v1.0.0 - (2020-01-09)
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.0 - (2020-01-09)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#revamp_group_ux" class="md-nav__link">
+    Revamp group UX
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new_configuration_file" class="md-nav__link">
+    New configuration file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes_in_command_line_syntax" class="md-nav__link">
+    Changes in command line syntax
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other_fixes" class="md-nav__link">
+    Other fixes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v092_-_2019-09-30" class="md-nav__link">
+    v0.9.2 - (2019-09-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v091_-_2019-09-23" class="md-nav__link">
+    v0.9.1 - (2019-09-23)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v090_-_2019-08-13" class="md-nav__link">
+    v0.9.0 - (2019-08-13)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v080_-_2019-08-12" class="md-nav__link">
+    v0.8.0 - (2019-08-12)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v071_-_2019-08-02" class="md-nav__link">
+    v0.7.1 - (2019-08-02)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v070_2019-07-08" class="md-nav__link">
+    v0.7.0 (2019-07-08)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v066_2019-04-02" class="md-nav__link">
+    v0.6.6 (2019-04-02)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v065_2019-04-0" class="md-nav__link">
+    v0.6.5 (2019-04-0)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v064_2019-01-07" class="md-nav__link">
+    v0.6.4 (2019-01-07)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v063_2018-11-04" class="md-nav__link">
+    v0.6.3 (2018-11-04)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v062_2018-10-19" class="md-nav__link">
+    v0.6.2 (2018-10-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v061_2018-10-10" class="md-nav__link">
+    v0.6.1 (2018-10-10)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v060_2018-10-09" class="md-nav__link">
+    v0.6.0 (2018-10-09)
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.6.0 (2018-10-09)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_support_for_multiple_remotes" class="md-nav__link">
+    Add support for multiple remotes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tsrc_foreach" class="md-nav__link">
+    tsrc foreach
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other_fixes_1" class="md-nav__link">
+    Other fixes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v050_2018-08-14" class="md-nav__link">
+    v0.5.0 (2018-08-14)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#260_2023-03-27" class="md-nav__link">
+    2.6.0 (2023-03-27)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#250_2022-12-21" class="md-nav__link">
+    2.5.0 (2022-12-21)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5.0 (2022-12-21)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    Highlights
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    Other
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#241_2021-11-05" class="md-nav__link">
+    2.4.1 (2021-11-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#240_2021-08-22" class="md-nav__link">
+    2.4.0 (2021-08-22)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4.0 (2021-08-22)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#highlights_1" class="md-nav__link">
+    Highlights
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking_changes" class="md-nav__link">
+    Breaking changes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug_fixes" class="md-nav__link">
+    Bug fixes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal_changes" class="md-nav__link">
+    Internal changes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#231_2021-06-28" class="md-nav__link">
+    2.3.1 (2021-06-28)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.1 (2021-06-28)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug_fixes_and_small_improvements" class="md-nav__link">
+    Bug fixes and small improvements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal_changes_1" class="md-nav__link">
+    Internal changes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#230_2021-05-31" class="md-nav__link">
+    2.3.0 (2021-05-31)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.0 (2021-05-31)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repo_selection" class="md-nav__link">
+    Repo selection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_support_for_submodules" class="md-nav__link">
+    Add support for submodules
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misc" class="md-nav__link">
+    Misc
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#221_2021-04-10" class="md-nav__link">
+    2.2.1 (2021-04-10)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#220_2020-07-17" class="md-nav__link">
+    2.2.0 (2020-07-17)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2.0 (2020-07-17)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_symlink_support" class="md-nav__link">
+    Add symlink support
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes_related_to_groups" class="md-nav__link">
+    Changes related to groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misc_1" class="md-nav__link">
+    Misc
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#210_2020-05-27" class="md-nav__link">
+    2.1.0 (2020-05-27)
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1.0 (2020-05-27)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking_changes_1" class="md-nav__link">
+    Breaking changes
+  </a>
+  
+    <nav class="md-nav" aria-label="Breaking changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#change_in_manifest_syntax" class="md-nav__link">
+    Change in manifest syntax
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported_python_versions" class="md-nav__link">
+    Supported Python versions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new_features" class="md-nav__link">
+    New features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug_fixes_1" class="md-nav__link">
+    Bug fixes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other_1" class="md-nav__link">
+    Other
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v200_-_2020-04-06" class="md-nav__link">
+    v2.0.0 - (2020-04-06)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v103_-_2020-02-05" class="md-nav__link">
+    v1.0.3 - (2020-02-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v102_-_2020-01-29" class="md-nav__link">
+    v1.0.2 - (2020-01-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v101_-_2020-01-21" class="md-nav__link">
+    v1.0.1 - (2020-01-21)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v100_-_2020-01-09" class="md-nav__link">
+    v1.0.0 - (2020-01-09)
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.0 - (2020-01-09)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#revamp_group_ux" class="md-nav__link">
+    Revamp group UX
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new_configuration_file" class="md-nav__link">
+    New configuration file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes_in_command_line_syntax" class="md-nav__link">
+    Changes in command line syntax
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other_fixes" class="md-nav__link">
+    Other fixes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v092_-_2019-09-30" class="md-nav__link">
+    v0.9.2 - (2019-09-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v091_-_2019-09-23" class="md-nav__link">
+    v0.9.1 - (2019-09-23)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v090_-_2019-08-13" class="md-nav__link">
+    v0.9.0 - (2019-08-13)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v080_-_2019-08-12" class="md-nav__link">
+    v0.8.0 - (2019-08-12)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v071_-_2019-08-02" class="md-nav__link">
+    v0.7.1 - (2019-08-02)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v070_2019-07-08" class="md-nav__link">
+    v0.7.0 (2019-07-08)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v066_2019-04-02" class="md-nav__link">
+    v0.6.6 (2019-04-02)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v065_2019-04-0" class="md-nav__link">
+    v0.6.5 (2019-04-0)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v064_2019-01-07" class="md-nav__link">
+    v0.6.4 (2019-01-07)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v063_2018-11-04" class="md-nav__link">
+    v0.6.3 (2018-11-04)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v062_2018-10-19" class="md-nav__link">
+    v0.6.2 (2018-10-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v061_2018-10-10" class="md-nav__link">
+    v0.6.1 (2018-10-10)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v060_2018-10-09" class="md-nav__link">
+    v0.6.0 (2018-10-09)
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.6.0 (2018-10-09)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_support_for_multiple_remotes" class="md-nav__link">
+    Add support for multiple remotes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tsrc_foreach" class="md-nav__link">
+    tsrc foreach
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other_fixes_1" class="md-nav__link">
+    Other fixes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v050_2018-08-14" class="md-nav__link">
+    v0.5.0 (2018-08-14)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/dmerejkowsky/tsrc/edit/master/docs/changelog.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="260_2023-03-27">2.6.0 (2023-03-27)<a class="headerlink" href="#260_2023-03-27" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Allow to use <code>python -m tsrc</code> in addition to just <code>tsrc</code></li>
+<li>Documentation updates</li>
+<li>Bump mypy</li>
+</ul>
+<h2 id="250_2022-12-21">2.5.0 (2022-12-21)<a class="headerlink" href="#250_2022-12-21" title="Permanent link">&para;</a></h2>
+<h3 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Bump minimum supported version to Python <strong>3.7</strong>.</li>
+<li>Introduce <code>ignore_submodules</code> repository option - Patch by Thomas Hiscock.</li>
+<li>When <code>-j</code> is not used, try getting the default <code>jobs</code> value from the
+  <code>TSRC_PARALLEL_JOBS</code> environment variable.  Patch by Marcin Jaworski.</li>
+</ul>
+<h3 id="other">Other<a class="headerlink" href="#other" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Bump mkdocs from 1.2.2 to 1.2.3</li>
+<li>Bump pygit2</li>
+<li>Bump linters (flake8, mypy, black)</li>
+<li>Remove dependency on <code>attr</code></li>
+</ul>
+<h2 id="241_2021-11-05">2.4.1 (2021-11-05)<a class="headerlink" href="#241_2021-11-05" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Ad more guides in the documentation</li>
+<li>Display absolute paths when performing file system operations</li>
+<li><code>tsrc sync</code> now uses parallel jobs by default. Use <code>-j1</code> to force
+  sequential processing. Patch by @gdubicki</li>
+</ul>
+<h2 id="240_2021-08-22">2.4.0 (2021-08-22)<a class="headerlink" href="#240_2021-08-22" title="Permanent link">&para;</a></h2>
+<h3 id="highlights_1">Highlights<a class="headerlink" href="#highlights_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>All of <code>tsrc</code> commands can now be run in parallel. Try for instance <code>tsrc sync -j auto</code>.</p>
+</li>
+<li>
+<p><code>tsrc foreach</code> now sets a bunch of environment variables. This allows
+  developers to add new behaviors to tsrc without having to change its source code. See
+  the <a href="https://dmerejkowsky.github.io/tsrc/guide/foreach">relevant guide</a> for more information.</p>
+</li>
+<li>
+<p>Augment documentation with more use cases and examples (still a work in progress)</p>
+</li>
+</ul>
+<h3 id="breaking_changes">Breaking changes<a class="headerlink" href="#breaking_changes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>Remove <code>tsrc version</code> - Use <code>tsrc --version</code> instead.</p>
+</li>
+<li>
+<p>The 'parallel' feature caused the output of some commands like
+  <code>foreach</code> or <code>log</code> to change slightly. Hopefully
+  <code>tsrc</code> output is now more consistent.</p>
+</li>
+</ul>
+<h3 id="bug_fixes">Bug fixes<a class="headerlink" href="#bug_fixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>Fix crash when running <code>tsrc</code> without any arguments</p>
+</li>
+<li>
+<p>Fix crash when trying to clone repositories in some rare corner cases
+  (like the destination existing but not being a directory)</p>
+</li>
+</ul>
+<h3 id="internal_changes">Internal changes<a class="headerlink" href="#internal_changes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Make all <code>tsrc</code> imports consistent</li>
+<li>Fix error when calling <code>repr</code> on <code>tsrc</code> Errors.</li>
+</ul>
+<h2 id="231_2021-06-28">2.3.1 (2021-06-28)<a class="headerlink" href="#231_2021-06-28" title="Permanent link">&para;</a></h2>
+<h3 id="bug_fixes_and_small_improvements">Bug fixes and small improvements<a class="headerlink" href="#bug_fixes_and_small_improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix #268: <code>tsrc apply-manifest</code> now performs file system operation</li>
+<li>Always display workspace path at the beginning of any action</li>
+<li>Skip "performing file system operations" message if there is no
+  work to be done</li>
+</ul>
+<h3 id="internal_changes_1">Internal changes<a class="headerlink" href="#internal_changes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Bump linters and formatters  (<code>black</code>, <code>mypy</code>, <code>isort</code> ...)</li>
+<li>Use <code>copier</code> to simplify maintenance of tools configuration</li>
+</ul>
+<h2 id="230_2021-05-31">2.3.0 (2021-05-31)<a class="headerlink" href="#230_2021-05-31" title="Permanent link">&para;</a></h2>
+<h3 id="repo_selection">Repo selection<a class="headerlink" href="#repo_selection" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Added -r (regex) and -i (inverse regex) params for filtering repos. Patch by @xzr</li>
+</ul>
+<h3 id="add_support_for_submodules">Add support for submodules<a class="headerlink" href="#add_support_for_submodules" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tsrc</code> calls <code>git clone</code> with <code>--recurse-submodules</code> when adding missing repositories</li>
+<li><code>tsrc</code> calls <code>git submodule update --init --recursive</code> when updating repositories</li>
+</ul>
+<h3 id="misc">Misc<a class="headerlink" href="#misc" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Remove codecov usage</li>
+<li>Rename default branch to <code>main</code>.</li>
+</ul>
+<h2 id="221_2021-04-10">2.2.1 (2021-04-10)<a class="headerlink" href="#221_2021-04-10" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>Project has been moved from <code>TankerHQ</code> organization to <code>dmerejkowsky</code>. New urls are:</p>
+<ul>
+<li><a href="https://github.com/dmerejkowsky/tsrc">github.com/dmerejkowsky/tsrc</a> for the git repository</li>
+<li><a href="https://dmerejkowsky.github.io/tsrc">dmerejkowsky.github.io/tsrc</a> for the documentation</li>
+</ul>
+</li>
+<li>
+<p>Add CI jobs to check this project also works with Python 3.9</p>
+</li>
+<li>Drop <code>Path Pie</code> dependency</li>
+<li>Minor internal fixes</li>
+<li>Add more URLs in the metadata (and pypi.org project page)</li>
+</ul>
+<h2 id="220_2020-07-17">2.2.0 (2020-07-17)<a class="headerlink" href="#220_2020-07-17" title="Permanent link">&para;</a></h2>
+<h3 id="add_symlink_support">Add symlink support<a class="headerlink" href="#add_symlink_support" title="Permanent link">&para;</a></h3>
+<p><code>tsrc sync</code> and <code>tsrc init</code> can now create symlinks as specified in the manifest file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.local:proj1/app</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
+<span class="w">    </span><span class="nt">symlink</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app/some_file</span><span class="w"></span>
+<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../some_file</span><span class="w"></span>
+</code></pre></div>
+<p>In this case, a symlink will be created from <code>&lt;workspace&gt;/app/some_file</code> to <code>&lt;workspace&gt;/some_file</code>.
+(both <code>source</code> and <code>target</code> keys are relative to the repository's destination).</p>
+<h3 id="changes_related_to_groups">Changes related to groups<a class="headerlink" href="#changes_related_to_groups" title="Permanent link">&para;</a></h3>
+<ul>
+<li>log, status, and sync all learned about the <code>--group</code> option and the <code>--all-cloned</code> options</li>
+<li>foreach: remove the <code>--groups-from-config</code> options since this is now the default behavior</li>
+</ul>
+<h3 id="misc_1">Misc<a class="headerlink" href="#misc_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Rework FAQ</li>
+<li>Run black in <code>lint.sh</code></li>
+<li>Fix formatting of some messages</li>
+<li>Update code manifesto to suggest using docstrings in tests</li>
+</ul>
+<h2 id="210_2020-05-27">2.1.0 (2020-05-27)<a class="headerlink" href="#210_2020-05-27" title="Permanent link">&para;</a></h2>
+<h3 id="breaking_changes_1">Breaking changes<a class="headerlink" href="#breaking_changes_1" title="Permanent link">&para;</a></h3>
+<h4 id="change_in_manifest_syntax">Change in manifest syntax<a class="headerlink" href="#change_in_manifest_syntax" title="Permanent link">&para;</a></h4>
+<p>It was discovered that the manifest syntax was confusing for newcomers, so
+we decided to update it.</p>
+<p>In particular, the <code>src</code> key meant both a relative path in the workspace when
+used in the <code>repo</code> config, and a relative path in the a repository when
+using in the <code>repo.copy</code> config.</p>
+<p>Starting with this release, <code>repo.src</code> becomes <code>repo.dest</code> and <code>repo.copy.src</code> becomes
+<code>repo.copy.file</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Before (tsrc &lt; 2.1.0)</span><span class="w"></span>
+<span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme.corp/foo&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="w">  </span><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
+<span class="w">     </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
+<span class="w">     </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># After (tsrc &gt;= 2.1.0)</span><span class="w"></span>
+<span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme.corp/foo&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dest </span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="w">  </span><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
+<span class="w">     </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
+<span class="w">     </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
+</code></pre></div>
+<p>This should make it clearer what <code>tsrc</code> does because:</p>
+<ul>
+<li><code>dest</code> now always refers to a relative path in the workspace (both in <code>repo</code>
+and <code>copy</code>).</li>
+<li>By using <code>repo.copy.file</code> it's obvious that <code>tsrc</code> only supports copying
+  files, not directories.</li>
+</ul>
+<h3 id="supported_python_versions">Supported Python versions<a class="headerlink" href="#supported_python_versions" title="Permanent link">&para;</a></h3>
+<p>Drop support for Python 3.5</p>
+<h3 id="new_features">New features<a class="headerlink" href="#new_features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tsrc init</code> learned a <code>-r, --remote</code> option that pins the remote with the
+   given name as the only remote to be used for cloning and syncing.
+   <code>tsrc</code> expects this remote to be present in the manifest for all repositories.
+   This is useful if you use the same workspace in different physical locations,
+   and one of the remotes is behind a VPN for instance. Patch by @tronje.</li>
+</ul>
+<h3 id="bug_fixes_1">Bug fixes<a class="headerlink" href="#bug_fixes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix <a href="https://github.com/dmerejkowsky/tsrc/issues/217">#217</a>: Preserves file attributes during the <code>copy</code> statements in <code>repos</code></li>
+</ul>
+<h3 id="other_1">Other<a class="headerlink" href="#other_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The whole test suite now runs without errors on Windows - and Windows support is
+  now part of the GitHub actions checks.</li>
+<li>The tests now run faster and with more readable output (this was done by using <code>libgit2</code>
+  instead of running git commands in the tests helpers).</li>
+<li>Add a scheduled GitHub action to run <code>safety</code></li>
+<li>Remove usage of deprecated API of the <code>path</code> library.</li>
+<li>Run tests and linters for external pull requests too.</li>
+</ul>
+<h2 id="v200_-_2020-04-06">v2.0.0 - (2020-04-06)<a class="headerlink" href="#v200_-_2020-04-06" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>Remove the <code>tsrc push</code> command and all review automation features. Please
+  use <a href="https://github.com/github/hub">hub</a>, <a href="https://github.com/zaquestion/lab">lab</a>,
+  or <a href="https://github.com/guyzmo/git-repo">repo</a> instead.
+  See <a href="https://github.com/dmerejkowsky/tsrc/issues/207">#207</a> for the discussion leading
+  to this removal.</p>
+</li>
+<li>
+<p>Implement small improvements on <code>tsrc</code> output messages.</p>
+</li>
+<li>Add <code>tsrc apply-manifest</code>, to apply changes in a manifest file locally, without
+  having to make a commit and push to a server first.</li>
+</ul>
+<h2 id="v103_-_2020-02-05">v1.0.3 - (2020-02-05)<a class="headerlink" href="#v103_-_2020-02-05" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Use <a href="https://python-poetry.org">poetry</a> for dependency management and packaging.</li>
+</ul>
+<h2 id="v102_-_2020-01-29">v1.0.2 - (2020-01-29)<a class="headerlink" href="#v102_-_2020-01-29" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix <code>python_requires</code> value in project metadata</li>
+</ul>
+<h2 id="v101_-_2020-01-21">v1.0.1 - (2020-01-21)<a class="headerlink" href="#v101_-_2020-01-21" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix #196: Do not attempt file copies for non-cloned repositories when using <code>tsrc init</code> with a list of groups.</li>
+</ul>
+<h2 id="v100_-_2020-01-09">v1.0.0 - (2020-01-09)<a class="headerlink" href="#v100_-_2020-01-09" title="Permanent link">&para;</a></h2>
+<p>Starting the new year with a stable release, at last!</p>
+<h3 id="revamp_group_ux">Revamp group UX<a class="headerlink" href="#revamp_group_ux" title="Permanent link">&para;</a></h3>
+<p>The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
+<a href="https://github.com/dmerejkowsky/tsrc/milestone/1">corresponding milestone</a> for the full list.</p>
+<h3 id="new_configuration_file">New configuration file<a class="headerlink" href="#new_configuration_file" title="Permanent link">&para;</a></h3>
+<p>Previously, <code>tsrc</code> stored its permanent configuration in <code>.tsrc/manifest.yml</code> and the file was not supposed to be edited by hand. Instead, users could use <code>tsrc init</code> to modify it, for instance with the <code>--branch</code> argument.</p>
+<p>Starting with this release, the command <code>tsrc init</code> can only be run once per workspace, and you must edit the <code>.tsrc/config.yml</code> file instead.</p>
+<h3 id="changes_in_command_line_syntax">Changes in command line syntax<a class="headerlink" href="#changes_in_command_line_syntax" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tsrc init</code>: remove <code>--file</code> option.</li>
+<li><code>tsrc foreach</code>: instead of repeating the <code>--group</code> option, you can use <code>--groups</code> with a list of groups:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># before</span>
+tsrc init --group foo --group bar
+
+<span class="c1"># after</span>
+tsrc init --groups foo bar
+</code></pre></div>
+<ul>
+<li>
+<p><code>tsrc init</code> learned a <code>--clone-all-repos</code> option to clone all repositories from the manifest,
+  regardless of the groups. Fix #181</p>
+</li>
+<li>
+<p>Remove <code>--file</code> option from <code>tsrc init</code>.</p>
+</li>
+<li>
+<p><code>tsrc foreach</code> learned a <code>--groups-from-config</code> option to use the groups configured in the workspace. Fix #178, #179.</p>
+</li>
+<li>
+<p><code>tsrc push</code> learned a <code>-o, --origin</code> option to specify a remote name different from "origin". Fix #170</p>
+</li>
+</ul>
+<h3 id="other_fixes">Other fixes<a class="headerlink" href="#other_fixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Try and check that GitLab installation support required features before using them -
+  typically, using <code>tsrc push --approvers</code> on GitLab Community Edition. (#165)</li>
+<li>reported by @irizzant.</li>
+<li>Switch to GitHub actions for running tests and linters. Also, publish documentation automatically
+  when something is pushed to the <code>master</code> branch.</li>
+<li><code>tsrc status</code> : add information when local branch does not match manifest
+  configuration. (#190). Feature suggested by @janjachnick</li>
+</ul>
+<h2 id="v092_-_2019-09-30">v0.9.2 - (2019-09-30)<a class="headerlink" href="#v092_-_2019-09-30" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Additional bug fix for #165 - the fix in 0.9.1 was incomplete</li>
+<li>Improve error message when trying to use non-supported GitLab features (like using <code>tsrc push --reviewer</code>
+  on GitLab Community Edition)</li>
+</ul>
+<h2 id="v091_-_2019-09-23">v0.9.1 - (2019-09-23)<a class="headerlink" href="#v091_-_2019-09-23" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Improve error message when <code>tsrc foreach</code> fails to start the process. Suggested by @dlewis-ald in #163</li>
+<li>Fix crash when finding reviewers for a GitLab project not in a group. Reported by @irizzant in #165</li>
+</ul>
+<h2 id="v090_-_2019-08-13">v0.9.0 - (2019-08-13)<a class="headerlink" href="#v090_-_2019-08-13" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Add support for GitHub Enterprise: patch by @sdavids13.</li>
+<li>Improve error message when using creating a merge request in a GitLab repository when the token cannot be found in the <code>tsrc</code> configuration file. Fix #158</li>
+<li>Fix crash when running <code>tsrc status</code> on a workspace with missing repositories (#160) - reported by @blastrock</li>
+</ul>
+<h2 id="v080_-_2019-08-12">v0.8.0 - (2019-08-12)<a class="headerlink" href="#v080_-_2019-08-12" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Implement <code>tsrc sync --force</code>. Currently all it does is running <code>git fetch --force</code> on all repositories. Use with caution. See #152 for details.</li>
+</ul>
+<h2 id="v071_-_2019-08-02">v0.7.1 - (2019-08-02)<a class="headerlink" href="#v071_-_2019-08-02" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix crash in <code>tsrc sync</code> when the <code>repo</code> configuration in the manifest contained neither an URL nor a remote. <code>tsrc</code> now aborts as soon as the misconfiguration of the manifest is detected (Reported by @jongep86)</li>
+</ul>
+<h2 id="v070_2019-07-08">v0.7.0 (2019-07-08)<a class="headerlink" href="#v070_2019-07-08" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Add a <code>--file</code> option to <code>tsrc init</code> so that manifest can be read from
+  a custom path in the file system</li>
+<li>Remove support for Python 3.4</li>
+<li>Switch from <code>xdg</code> to <code>pyxdg</code></li>
+<li>Format the code with <a href="https://github.com/python/black">black</a></li>
+</ul>
+<h2 id="v066_2019-04-02">v0.6.6 (2019-04-02)<a class="headerlink" href="#v066_2019-04-02" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Remove raw HTML from README.rst</li>
+</ul>
+<h2 id="v065_2019-04-0">v0.6.5 (2019-04-0)<a class="headerlink" href="#v065_2019-04-0" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Use <code>codecov.io</code> to measure coverage</li>
+<li>Prettify README</li>
+</ul>
+<h2 id="v064_2019-01-07">v0.6.4 (2019-01-07)<a class="headerlink" href="#v064_2019-01-07" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Remove support for Python 3.3.</li>
+<li>Use new and shiny <a href="https://pypi.org/project/cli-ui/">cli-ui</a> package instead of old <code>python-cli-ui</code>.</li>
+</ul>
+<h2 id="v063_2018-11-04">v0.6.3 (2018-11-04)<a class="headerlink" href="#v063_2018-11-04" title="Permanent link">&para;</a></h2>
+<ul>
+<li>GitHub organization is now <code>TankerHQ</code></li>
+<li>We now use <a href="https://github.com/dmerejkowsky/dmenv">dmenv</a> for dependencies management</li>
+</ul>
+<h2 id="v062_2018-10-19">v0.6.2 (2018-10-19)<a class="headerlink" href="#v062_2018-10-19" title="Permanent link">&para;</a></h2>
+<p>Fix crash when using <code>tsrc push</code> on a GitHub repository for the first time.</p>
+<h2 id="v061_2018-10-10">v0.6.1 (2018-10-10)<a class="headerlink" href="#v061_2018-10-10" title="Permanent link">&para;</a></h2>
+<p>Fix weird output when configuring remotes.</p>
+<h2 id="v060_2018-10-09">v0.6.0 (2018-10-09)<a class="headerlink" href="#v060_2018-10-09" title="Permanent link">&para;</a></h2>
+<h3 id="add_support_for_multiple_remotes">Add support for multiple remotes<a class="headerlink" href="#add_support_for_multiple_remotes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># still valid (implicit &#39;origin&#39; remote)</span><span class="w"></span>
+<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com/foo</span><span class="w"></span>
+
+<span class="c1"># also valid (two explicit remotes)</span><span class="w"></span>
+<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="nt">remotes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">origin</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">john/foo</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">upstream</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">foo/foo</span><span class="p p-Indicator">}</span><span class="w"></span>
+
+<span class="c1"># not valid (ambiguous)</span><span class="w"></span>
+<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:john/foo</span><span class="w"></span>
+<span class="nt">remotes</span><span class="p">:</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">upstream</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">foo/foo</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
+</code></pre></div>
+<p>Thanks @tst2005 and @cgestes for their help with the configuration format.</p>
+<h3 id="tsrc_foreach">tsrc foreach<a class="headerlink" href="#tsrc_foreach" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tsrc foreach</code>: add a <code>--group</code> option to select the repositories to run the command on. Fix #40</li>
+</ul>
+<h3 id="other_fixes_1">Other fixes<a class="headerlink" href="#other_fixes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix <a href="https://github.com/dmerejkowsky/tsrc/issues/113">#113</a>: do not hide branch when showing tag status.</li>
+<li>Add support for Python 3.7</li>
+</ul>
+<h2 id="v050_2018-08-14">v0.5.0 (2018-08-14)<a class="headerlink" href="#v050_2018-08-14" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Add support for setting approvers with the <code>-r,--approvers</code> option in <code>tsrc push</code> (GitLab Enterprise Edition only).</li>
+</ul>
+<h1 id="v041_2018-04-27">v0.4.1 (2018-04-27)<a class="headerlink" href="#v041_2018-04-27" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Fixed regression: <code>tsrc push</code> was no longer able to create a merge request on GitLab if <code>--target</code> was not set.</li>
+</ul>
+<h1 id="v040_2018-04-26">v0.4.0 (2018-04-26)<a class="headerlink" href="#v040_2018-04-26" title="Permanent link">&para;</a></h1>
+<h2 id="highlights_2">Highlights<a class="headerlink" href="#highlights_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Preliminary GitHub support</li>
+<li><code>tsrc push</code>: new features and bug fixes</li>
+<li>Improved fixed reference handling</li>
+<li>Support for shallow clones</li>
+</ul>
+<p>See below for the details.</p>
+<h2 id="preliminary_github_support">Preliminary GitHub support<a class="headerlink" href="#preliminary_github_support" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Added support for creating merge requests on GitHub. No configuration required. Just make sure you are using <code>tsrc</code> from a repository which has a URL starting with <code>git@github.com</code>.</li>
+</ul>
+<p><code>tsrc</code> will prompt you once for your login and password and then store an API token.</p>
+<p>Afterwards, you'll be able to use <code>tsrc</code> push to:</p>
+<ul>
+<li>Create a pull request (or update it if it already exists)</li>
+<li>Assign people to the request (with the <code>-a/--assignee</code> option)</li>
+<li>Request reviewers (with the <code>--reviewers</code> option)</li>
+<li>Merge the pull request (with the <code>--merge</code> option)</li>
+</ul>
+<p>This change has no impact if you were already using <code>GitLab</code>.</p>
+<h2 id="tsrc_push_new_features_and_bug_fixes"><code>tsrc push</code>: new features and bug fixes<a class="headerlink" href="#tsrc_push_new_features_and_bug_fixes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Add <code>--close</code> option.</li>
+<li><strong>Breaking change</strong>: <code>-m/--message</code> option is gone, use <code>--title</code> instead. There's a concept of "description" or "message" for pull requests and merge requests, but the value of the option was only used to update the <em>title</em>, so it had to be renamed.</li>
+<li>Do not assume local and remote tracking branch have the same name.</li>
+<li>Allow using <code>tsrc push &lt;local&gt;:&lt;remote&gt;</code> to explicitly specify local and remote branch names.</li>
+<li>Fix bugs when target is not specified on the command line. See <a href="https://github.com/dmerejkowsky/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d">this commit</a> for details.</li>
+<li>Fix missing merge requests in <code>tsrc push</code> (see <a href="https://github.com/dmerejkowsky/tsrc/issues/80">issue #80</a>). Patch by @maximerety.</li>
+</ul>
+<h2 id="improve_fixed_reference_handling">Improve fixed reference handling<a class="headerlink" href="#improve_fixed_reference_handling" title="Permanent link">&para;</a></h2>
+<p><strong>Breaking change</strong>: Instead of using <code>fixed_ref</code> in the manifest, you should now use <code>tag</code> or <code>sha1</code>:</p>
+<p><em>old</em>:
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@example.com/foo</span><span class="w"></span>
+<span class="w">    </span><span class="nt">fixed_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42a70</span><span class="w"></span>
+</code></pre></div></p>
+<p><em>new</em>:
+<div class="highlight"><pre><span></span><code>repos:
+  - src: git@example.com/foo
+    tag: v0.1
+</code></pre></div></p>
+<p>See the <a href="../ref/workspace-config/#repos">dedicated section about manifest format</a> and the <a href="https://github.com/dmerejkowsky/tsrc/pull/57">#57 pull request discussion</a> for the details.</p>
+<p>This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.</p>
+<h2 id="support_for_shallow_clones">Support for shallow clones<a class="headerlink" href="#support_for_shallow_clones" title="Permanent link">&para;</a></h2>
+<p>To save time and space, you can use <code>tsrc init --shallow</code> to only have shallow clones in your workspace.</p>
+<p>Note that due to limitations in <code>git</code> itself, the <code>shallow</code> option cannot be used with a fixed SHA1. If you need this, prefer using a <code>tag</code> instead.</p>
+<h2 id="misc_2">Misc<a class="headerlink" href="#misc_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>Organization <code>TankerApp</code> was renamed to <code>TankerHQ</code>. New urls are:</p>
+<ul>
+<li><a href="https://github.com/TankerHQ/tsrc">github.com/TankerHQ/tsrc</a> for the git repository</li>
+<li><a href="https://TankerHQ.github.io/tsrc">TankerHQ.github.io/tsrc</a> for the documentation</li>
+</ul>
+</li>
+<li>
+<p>We now use <a href="https://docs.pipenv.org/">pipenv</a> for dependency handling.</p>
+</li>
+</ul>
+<h1 id="v032_2017-11-02">v0.3.2 (2017-11-02)<a class="headerlink" href="#v032_2017-11-02" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Improve <code>tsrc status</code> to handle tags. Patch by @arnaudgelas.</li>
+<li>Fix crash when running <code>tsrc version</code>.</li>
+</ul>
+<h1 id="v031_2017-10-06">v0.3.1 (2017-10-06)<a class="headerlink" href="#v031_2017-10-06" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Improve <code>tsrc status</code> output. Now also shows number of commits ahead and behind, and display a short SHA-1 when not on any branch. Initial patch by @arnaudgelas.</li>
+</ul>
+<h1 id="v030_2017-09-22">v0.3.0 (2017-09-22)<a class="headerlink" href="#v030_2017-09-22" title="Permanent link">&para;</a></h1>
+<p><em>Breaking change</em>: Add support for groups (#30). Reported by @arnaudgelas.</p>
+<p>See the <a href="../ref/manifest-config/#groups">dedicated section about manifest format</a> for details.</p>
+<p><strong>Upgrading from v0.2.4</strong>:</p>
+<p>To upgrade from an older version of <code>tsrc</code>, you should re-run <code>tsrc init</code> with the correct url:</p>
+<div class="highlight"><pre><span></span><code><span class="gp"># </span>Check manifest URL:
+<span class="gp">$ </span><span class="nb">cd</span> &lt;workspace&gt;/.tsrc/manifest
+<span class="gp">$ </span>git remote get-url origin
+<span class="gp"># </span>Note the url, <span class="k">for</span> instance ssh://git@example.com:manifest.git
+<span class="gp">$ </span><span class="nb">cd</span> &lt;workspace&gt;
+<span class="gp">$ </span>tsrc init &lt;manifest-url&gt;
+</code></pre></div>
+<p>This is required to create the <code>&lt;workspace&gt;/.tsrc/manifest.yml</code> file which is later used by <code>tsrc sync</code> and other commands.</p>
+<h1 id="v024_2017-07-13">v0.2.4 (2017-07-13)<a class="headerlink" href="#v024_2017-07-13" title="Permanent link">&para;</a></h1>
+<ul>
+<li><code>tsrc push --assignee</code>: fix when there are more than 50 GitLab users (#25). Reported by @arnaudgelas</li>
+</ul>
+<h1 id="v023_2017-09-01">v0.2.3 (2017-09-01)<a class="headerlink" href="#v023_2017-09-01" title="Permanent link">&para;</a></h1>
+<ul>
+<li>
+<p>Split user interface functionality into its own project: <a href="https://github.com/dmerejkowsky/python-cli-ui">python-cli-ui</a>.</p>
+</li>
+<li>
+<p>Add <code>--quiet</code> and <code>--color</code> global options.</p>
+</li>
+</ul>
+<h1 id="v022_2017-08-22">v0.2.2 (2017-08-22)<a class="headerlink" href="#v022_2017-08-22" title="Permanent link">&para;</a></h1>
+<p>Bug fix release.</p>
+<ul>
+<li><code>tsrc init</code>: Fix crash when a repository is empty (#17). Reported by @nicolasbrechet</li>
+<li><code>tsrc push</code>: Fix rude message when credentials are missing (#20). Reported by @cgestes</li>
+</ul>
+<h1 id="v021_2017-08-10">v0.2.1 (2017-08-10)<a class="headerlink" href="#v021_2017-08-10" title="Permanent link">&para;</a></h1>
+<p>Packaging fixes.</p>
+<h1 id="v020_2017-08-09">v0.2.0 (2017-08-09)<a class="headerlink" href="#v020_2017-08-09" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Support for specifying custom branches in the manifest</li>
+<li>Support for specifying fixed refs (tags or hashes) in the manifest</li>
+</ul>
+<p>New syntax is:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.com:proj/foo</span><span class="w"></span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">next</span><span class="w"></span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span><span class="w"></span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.com:proj/bar</span><span class="w"></span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span><span class="w"></span>
+<span class="w">    </span><span class="nt">fixed_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span><span class="w"></span>
+</code></pre></div>
+<p>Note that <code>branch</code> is still required.</p>
+<ul>
+<li>You can now skip the <code>dest</code> part of the <code>copy</code> section if <code>src</code> and <code>dest</code> are
+  equal:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src:foo</span><span class="w"></span>
+
+<span class="c1"># same thing as</span><span class="w"></span>
+<span class="nt">copy</span><span class="p">:</span><span class="w"></span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="w">   </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+</code></pre></div>
+<h1 id="v014_2017-08-04">v0.1.4 (2017-08-04)<a class="headerlink" href="#v014_2017-08-04" title="Permanent link">&para;</a></h1>
+<p>Support for Python 3.3, 3.4, 3.5 and 3.6</p>
+<h1 id="v011_2017-08-02">v0.1.1 (2017-08-02)<a class="headerlink" href="#v011_2017-08-02" title="Permanent link">&para;</a></h1>
+<p>First public release</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../faq/" class="md-footer__link md-footer__link--prev" aria-label="Previous: FAQ" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              FAQ
+            </div>
+          </div>
+        </a>
+      
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.5e67fbfe.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e87a5f81.min.js"></script>
+      
+    
+  </body>
+</html>
