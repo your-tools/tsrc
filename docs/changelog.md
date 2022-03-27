@@ -3,6 +3,8 @@
 ## 2.6.0 (2023-03-27)
 
 * Allow to use `python -m tsrc` in addition to just `tsrc`
+* Documentation updates
+* Bump mypy
 
 ## 2.5.0 (2022-12-21)
 
