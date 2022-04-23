@@ -23,6 +23,16 @@ def test_add_repo_can_clone(workspace_path: Path, git_server: GitServer) -> None
     assert (workspace_path / "bar").exists()
 
 
+def test_can_set_remote_head(tmp_path: Path, git_server: GitServer) -> None:
+    git_server.add_repo("foo")
+    git_server.manifest.change_branch("main")
+    git_server.manifest.set_head("main")
+
+    run_git(tmp_path, "clone", git_server.manifest_url, "manifest")
+
+    assert get_current_branch(tmp_path / "manifest") == "main"
+
+
 def test_can_add_copies(workspace_path: Path, git_server: GitServer) -> None:
     git_server.add_repo("foo")
     git_server.manifest.set_file_copy("foo", "foo.txt", "top.txt")

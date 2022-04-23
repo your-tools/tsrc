@@ -59,6 +59,9 @@ class BareRepo(BaseTestRepo):
             ref = self._repo.create_reference(name, self._repo.head.target)
         return ref
 
+    def set_head(self, new_head: str) -> None:
+        self._repo.set_head("refs/heads/" + new_head)
+
     def commit_file(
         self,
         name: str,
@@ -155,7 +158,6 @@ class ManifestHandler:
     """
 
     def __init__(self, repo: BareRepo) -> None:
-
         self.repo = repo
         self.data: Dict[str, Any] = {"repos": []}
         self.branch = "master"
@@ -164,6 +166,9 @@ class ManifestHandler:
     def change_branch(self, new_branch: str) -> None:
         self.repo.ensure_ref("refs/heads/" + new_branch)
         self.branch = new_branch
+
+    def set_head(self, new_head: str) -> None:
+        self.repo.set_head(new_head)
 
     def write_changes(self, message: str) -> None:
         to_write = ruamel.yaml.dump(self.data)
