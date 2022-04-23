@@ -14,6 +14,7 @@ from tsrc.cli import (
 from tsrc.errors import Error
 from tsrc.workspace import Workspace
 from tsrc.workspace.config import WorkspaceConfig
+from tsrc.workspace.local_manifest import LocalManifest
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -23,7 +24,6 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "--branch",
         help="use this branch for the manifest",
-        default="master",
         dest="manifest_branch",
     )
     parser.add_argument(
@@ -59,19 +59,22 @@ def run(args: argparse.Namespace) -> None:
 
     ui.info_1("Configuring workspace in", ui.bold, workspace_path)
 
+    clone_path = workspace_path / ".tsrc/manifest"
+    local_manifest = LocalManifest(clone_path)
+    local_manifest.init(url=args.manifest_url, branch=args.manifest_branch)
+    manifest_branch = local_manifest.current_branch()
+
     workspace_config = WorkspaceConfig(
         manifest_url=args.manifest_url,
-        manifest_branch=args.manifest_branch,
+        manifest_branch=manifest_branch,
         clone_all_repos=args.clone_all_repos,
         repo_groups=args.groups or [],
         shallow_clones=args.shallow_clones,
         singular_remote=args.singular_remote,
     )
-
     workspace_config.save_to_file(cfg_path)
 
     workspace = Workspace(workspace_path)
-    workspace.update_manifest()
     manifest = workspace.get_manifest()
     workspace.repos = repos_from_config(manifest, workspace_config)
     workspace.clone_missing(num_jobs=num_jobs)

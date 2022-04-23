@@ -1,6 +1,7 @@
 from pathlib import Path
+from typing import Optional
 
-from tsrc.git import run_git
+from tsrc.git import get_current_branch, run_git
 from tsrc.manifest import Manifest, load_manifest
 
 
@@ -24,16 +25,23 @@ class LocalManifest:
     def __init__(self, clone_path: Path) -> None:
         self.clone_path = clone_path
 
-    def update(self, url: str, *, branch: str) -> None:
-        if self.clone_path.exists():
-            self._reset_manifest_clone(url, branch=branch)
-        else:
-            self._clone_manifest(url, branch=branch)
+    def current_branch(self) -> str:
+        return get_current_branch(self.clone_path)
+
+    def init(self, url: str, *, branch: Optional[str]) -> None:
+        parent = self.clone_path.parent
+        name = self.clone_path.name
+        parent.mkdir(parents=True, exist_ok=True)
+        cmd = ["clone", url]
+        if branch:
+            cmd += ["--branch", branch]
+        cmd += [name]
+        run_git(self.clone_path.parent, *cmd)
 
     def get_manifest(self) -> Manifest:
         return load_manifest(self.clone_path / "manifest.yml")
 
-    def _reset_manifest_clone(self, url: str, *, branch: str) -> None:
+    def update(self, url: str, *, branch: str) -> None:
         run_git(self.clone_path, "remote", "set-url", "origin", url)
         run_git(self.clone_path, "fetch")
         run_git(self.clone_path, "checkout", "-B", branch)
@@ -42,9 +50,3 @@ class LocalManifest:
         )
         ref = f"origin/{branch}"
         run_git(self.clone_path, "reset", "--hard", ref)
-
-    def _clone_manifest(self, url: str, *, branch: str) -> None:
-        parent = self.clone_path.parent
-        name = self.clone_path.name
-        parent.mkdir(parents=True, exist_ok=True)
-        run_git(self.clone_path.parent, "clone", url, "--branch", branch, name)

@@ -22,15 +22,33 @@ def assert_not_cloned(workspace_path: Path, repo: str) -> None:
     assert not repo_exists(workspace_path, repo)
 
 
-def test_init_simple(
+def test_init_manifest_head_is_master(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    git_server.add_repo("foo/bar")
-    git_server.add_repo("spam/eggs")
+    git_server.add_repo("foo")
+    git_server.add_repo("bar")
     manifest_url = git_server.manifest_url
     tsrc_cli.run("init", manifest_url)
-    assert_cloned(workspace_path, "foo/bar")
-    assert_cloned(workspace_path, "spam/eggs")
+
+    assert_cloned(workspace_path, "foo")
+    assert_cloned(workspace_path, "bar")
+    manifest_clone = workspace_path / ".tsrc/manifest"
+    manifest_branch = get_current_branch(manifest_clone)
+    assert manifest_branch == "master"
+
+
+def test_init_manifest_head_is_main(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    git_server.add_repo("foo")
+    git_server.manifest.change_branch("main")
+    git_server.manifest.set_head("main")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    manifest_clone = workspace_path / ".tsrc/manifest"
+    manifest_branch = get_current_branch(manifest_clone)
+    assert manifest_branch == "main"
 
 
 def test_init_with_args(
