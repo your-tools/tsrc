@@ -34,7 +34,7 @@ def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) 
     assert new_txt_path.exists(), "foo should have been updated"
 
 
-def test_sync_parallel(
+def test_sync_sequential(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """
@@ -55,7 +55,7 @@ def test_sync_parallel(
     git_server.push_file("bar", "bar1")
     git_server.push_file("bar", "bar2", contents="two\nlines\n")
 
-    tsrc_cli.run("sync", "-j", "2")
+    tsrc_cli.run("sync", "-j", "1")
 
 
 def test_sync_with_errors(
