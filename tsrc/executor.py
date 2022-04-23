@@ -200,7 +200,7 @@ class Task(Generic[T], metaclass=abc.ABCMeta):
         is captured if the task is run in parallel with other tasks.
         """
         if self.parallel:
-            run_git(working_path, *args, verbose=False)
+            run_git(working_path, *args, show_output=False)
         else:
             run_git(working_path, *args)
 
