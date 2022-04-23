@@ -282,7 +282,7 @@ def test_no_remote_named_origin(
 def test_repo_default_branch_not_master(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
-    git_server.add_repo("foo", default_branch="devel")
+    git_server.add_repo("foo", initial_branch="devel")
 
     tsrc_cli.run("init", git_server.manifest_url)
 

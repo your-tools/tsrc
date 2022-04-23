@@ -80,8 +80,10 @@ def test_get_sha1(workspace_path: Path, git_server: GitServer) -> None:
     assert type(actual) == str
 
 
-def test_default_branch_devel(workspace_path: Path, git_server: GitServer) -> None:
-    foo_url = git_server.add_repo("foo", default_branch="devel")
+def test_explicit_devel_branch(workspace_path: Path, git_server: GitServer) -> None:
+    foo_url = git_server.add_repo(
+        "foo", initial_branch="devel", manifest_branch="devel"
+    )
     run_git(workspace_path, "clone", foo_url)
     foo_path = workspace_path / "foo"
     cloned_branch = get_current_branch(foo_path)

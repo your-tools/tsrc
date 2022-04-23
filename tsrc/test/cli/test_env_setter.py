@@ -17,7 +17,7 @@ def test_set_project_dest_and_branch(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     git_server.add_repo("foo")
-    git_server.add_repo("bar", default_branch="devel")
+    git_server.add_repo("bar", initial_branch="devel", manifest_branch="devel")
 
     tsrc_cli.run("init", git_server.manifest_url)
     bar_path = workspace_path / "bar"

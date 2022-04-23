@@ -172,9 +172,9 @@ class ManifestHandler:
             "manifest.yml", contents=to_write, message=message, branch=self.branch
         )
 
-    def add_repo(self, name: str, url: str, branch: str = "master") -> None:
+    def add_repo(self, name: str, url: str, branch: Optional[str] = None) -> None:
         repo_config = {"url": str(url), "dest": name}
-        if branch != "master":
+        if branch:
             repo_config["branch"] = branch
         self.data["repos"].append(repo_config)
         self.write_changes(message=f"add {name}")
@@ -311,13 +311,14 @@ class GitServer:
         self,
         name: str,
         empty: bool = False,
-        default_branch: str = "master",
+        initial_branch: str = "master",
+        manifest_branch: Optional[str] = None,
         add_to_manifest: bool = True,
     ) -> str:
-        self._create_repo(name, empty=empty, branch=default_branch)
+        self._create_repo(name, empty=empty, branch=initial_branch)
         url = self.get_url(name)
         if add_to_manifest:
-            self.manifest.add_repo(name, url, branch=default_branch)
+            self.manifest.add_repo(name, url, branch=manifest_branch)
         return url
 
     def add_group(self, group_name: str, repos: List[str]) -> None:
