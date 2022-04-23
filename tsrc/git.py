@@ -184,7 +184,7 @@ class GitStatus:
 
 
 def run_git(
-    working_path: Path, *cmd: str, check: bool = True, verbose: bool = True
+    working_path: Path, *cmd: str, check: bool = True, show_output: bool = True
 ) -> None:
     """Run git `cmd` in given `working_path`.
 
@@ -195,7 +195,7 @@ def run_git(
     git_cmd.insert(0, "git")
 
     ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
-    if verbose:
+    if show_output:
         process = subprocess.run(git_cmd, cwd=working_path, universal_newlines=True)
     else:
         process = subprocess.run(
