@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.0 (2023-03-27)
+## 2.6.0 (2022-03-27)
 
 * Allow to use `python -m tsrc` in addition to just `tsrc`
 * Documentation updates
