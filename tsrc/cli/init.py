@@ -12,9 +12,9 @@ from tsrc.cli import (
     repos_from_config,
 )
 from tsrc.errors import Error
+from tsrc.local_manifest import LocalManifest
 from tsrc.workspace import Workspace
-from tsrc.workspace.config import WorkspaceConfig
-from tsrc.workspace.local_manifest import LocalManifest
+from tsrc.workspace_config import WorkspaceConfig
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:

@@ -7,17 +7,17 @@ from typing import List, Optional
 import cli_ui as ui
 import ruamel.yaml
 
+from tsrc.cloner import Cloner
 from tsrc.errors import Error
 from tsrc.executor import process_items
+from tsrc.file_system_operator import FileSystemOperator
 from tsrc.git import is_git_repository
+from tsrc.local_manifest import LocalManifest
 from tsrc.manifest import Manifest
+from tsrc.remote_setter import RemoteSetter
 from tsrc.repo import Repo
-from tsrc.workspace.cloner import Cloner
-from tsrc.workspace.config import WorkspaceConfig
-from tsrc.workspace.file_system_operator import FileSystemOperator
-from tsrc.workspace.local_manifest import LocalManifest
-from tsrc.workspace.remote_setter import RemoteSetter
-from tsrc.workspace.syncer import Syncer
+from tsrc.syncer import Syncer
+from tsrc.workspace_config import WorkspaceConfig
 
 
 def copy_cfg_path_if_needed(root_path: Path) -> None:

@@ -6,7 +6,7 @@ import ruamel.yaml
 from tsrc.cli import resolve_repos
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
-from tsrc.workspace.config import WorkspaceConfig
+from tsrc.workspace_config import WorkspaceConfig
 
 
 def create_manifest(
