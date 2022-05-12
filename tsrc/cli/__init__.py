@@ -14,7 +14,7 @@ from tsrc.errors import Error
 from tsrc.manifest import Manifest
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
-from tsrc.workspace.config import WorkspaceConfig
+from tsrc.workspace_config import WorkspaceConfig
 
 
 def add_workspace_arg(parser: argparse.ArgumentParser) -> None:

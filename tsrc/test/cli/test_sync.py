@@ -11,7 +11,7 @@ from tsrc.groups import GroupNotFound
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 from tsrc.workspace import SyncError
-from tsrc.workspace.config import WorkspaceConfig
+from tsrc.workspace_config import WorkspaceConfig
 
 
 def test_sync_happy(tsrc_cli: CLI, git_server: GitServer, workspace_path: Path) -> None:
