@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.7.0 (2022-05-14)
+
+* Show which git commands are run by default.
+* `tsrc init`: fix order of operations - clone the local manifest *before*
+  writing the workspace configuration. Fixes #344, where users could not run `init` a second
+  time if the previous call failed. Bug report by @cgestes.
+* `tsrc init`: do not assume the default branch of the manifest is `master`. Note that `master` is still hard-coded in a few places. See #347 for details.
+* When using `-j 1`, do not sort repositories by lexical order of destination, but preserve
+  the order in which they were specified in the manifest. Suggested by @raabf.
+
 ## 2.6.0 (2022-03-27)
 
 * Allow to use `python -m tsrc` in addition to just `tsrc`
