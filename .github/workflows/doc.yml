@@ -25,7 +25,8 @@ jobs:
          poetry run mkdocs build
 
     - name: Deploy to GitHub pages
-      uses: maxheld83/ghpages@v0.1.1
-      env:
-        BUILD_DIR: site
-        GH_PAT: ${{ secrets.GH_PAT }}
+      uses: JamesIves/github-pages-deploy-action@v4.3.3
+      with:
+        token: ${{ secrets.GH_PAT }}
+        branch: gh-pages
+        folder: site
