@@ -2,7 +2,6 @@
 
 # TODO: check for absolute paths in _handle_copies, _handle_links
 
-import operator
 from pathlib import Path
 from typing import Any, List, Optional
 
@@ -98,7 +97,7 @@ class Manifest:
             self.file_system_operations.append(link)
 
     def _handle_groups(self, groups_config: Any) -> None:
-        elements = {repo.dest for repo in self._repos}
+        elements = [repo.dest for repo in self._repos]
         self.group_list = GroupList(elements=elements)
         if not groups_config:
             return
@@ -131,7 +130,7 @@ class Manifest:
         res = []
         for dest in elements:
             res.append(self.get_repo(dest))
-        return sorted(res, key=operator.attrgetter("dest"))
+        return res
 
     def get_repo(self, dest: str) -> Repo:
         for repo in self._repos:
