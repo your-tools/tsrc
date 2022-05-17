@@ -262,7 +262,7 @@ groups:
       includes: [b_group]
 """
     repos_getter.contents = contents
-    assert repos_getter.get_repos(groups=["c_group"]) == ["c", "b", "a"]
+    assert repos_getter.get_repos(groups=["c_group"]) == ["a", "b", "c"]
 
 
 def test_all_repos(repos_getter: ReposGetter) -> None:
