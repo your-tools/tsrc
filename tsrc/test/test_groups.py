@@ -8,7 +8,7 @@ def test_happy_grouping() -> None:
     group_list.add("default", ["a", "b"])
     group_list.add("other", ["c"], includes=["default"])
     actual = group_list.get_elements(groups=["other"])
-    assert actual == ["c", "a", "b"]
+    assert actual == ["a", "b", "c"]
 
 
 def test_unknown_element() -> None:
@@ -37,7 +37,7 @@ def test_diamond() -> None:
     group_list.add("right", ["c"], includes=["top"])
     group_list.add("bottom", ["d"], includes=["left", "right"])
     actual = group_list.get_elements(groups=["bottom"])
-    assert actual == ["d", "b", "a", "c"]
+    assert actual == ["a", "b", "c", "d"]
 
 
 def test_ping_pong() -> None:
@@ -45,7 +45,7 @@ def test_ping_pong() -> None:
     group_list.add("ping", ["a"], includes=["pong"])
     group_list.add("pong", ["b"], includes=["ping"])
     actual = group_list.get_elements(groups=["ping"])
-    assert actual == ["a", "b"]
+    assert actual == ["b", "a"]
 
 
 def test_circle() -> None:
@@ -54,7 +54,7 @@ def test_circle() -> None:
     group_list.add("b", ["b"], includes=["c"])
     group_list.add("c", ["c"], includes=["a"])
     actual = group_list.get_elements(groups=["a"])
-    assert actual == ["a", "b", "c"]
+    assert actual == ["c", "b", "a"]
 
 
 def test_unknown_group() -> None:

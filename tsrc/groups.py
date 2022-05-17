@@ -91,7 +91,7 @@ class GroupList(Generic[T]):
             if group_name not in self.groups:
                 raise GroupNotFound(group_name, parent_group=parent_group)
             group = self.groups[group_name]
-            for element in group.elements:
-                res.append(element)
             self._groups_seen.append(group.name)
             self._rec_get_elements(res, group.includes, parent_group=group)
+            for element in group.elements:
+                res.append(element)
