@@ -78,12 +78,20 @@ class GroupList(Generic[T]):
         # This algorithms allows to have groups that include each other
         # without creating infinite loops.
         self._groups_seen = []
-        res: List[T] = []
+        # Note: we need to keep the result free of duplicates *and*
+        # in the correct order.
+        # There's no OrderedSet in the stdlib, so we use a dict instead
+        # where keys don't matter
+        res: Dict[T, bool] = {}
         self._rec_get_elements(res, groups, parent_group=None)
-        return res
+        return list(res.keys())
 
     def _rec_get_elements(
-        self, res: List[T], group_names: List[str], *, parent_group: Optional[Group[T]]
+        self,
+        res: Dict[T, bool],
+        group_names: List[str],
+        *,
+        parent_group: Optional[Group[T]],
     ) -> None:
         for group_name in group_names:
             if group_name in self._groups_seen:
@@ -94,4 +102,4 @@ class GroupList(Generic[T]):
             self._groups_seen.append(group.name)
             self._rec_get_elements(res, group.includes, parent_group=group)
             for element in group.elements:
-                res.append(element)
+                res[element] = True
