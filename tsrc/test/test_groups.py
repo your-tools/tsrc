@@ -4,7 +4,7 @@ from tsrc.groups import GroupList, GroupNotFound, UnknownGroupElement
 
 
 def test_happy_grouping() -> None:
-    group_list = GroupList(elements=["a", "b", "b", "c"])
+    group_list = GroupList(elements=["a", "b", "c"])
     group_list.add("default", ["a", "b"])
     group_list.add("other", ["c"], includes=["default"])
     actual = group_list.get_elements(groups=["other"])
