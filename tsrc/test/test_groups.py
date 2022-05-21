@@ -11,6 +11,15 @@ def test_happy_grouping() -> None:
     assert actual == ["a", "b", "c"]
 
 
+def test_remove_duplicates() -> None:
+    group_list = GroupList(elements=["a", "b", "c", "z"])
+    group_list.add("one", ["a", "z"])
+    group_list.add("two", ["b", "z"])
+    group_list.add("all", ["c"], includes=["one", "two"])
+    actual = group_list.get_elements(groups=["all"])
+    assert actual == ["a", "z", "b", "c"]
+
+
 def test_unknown_element() -> None:
     group_list = GroupList(elements=["a", "b", "c"])
     with pytest.raises(UnknownGroupElement) as e:
