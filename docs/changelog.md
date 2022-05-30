@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.1 (2022-05-30)
+
+* In addition to preserve the order repos are listed in the manifest,
+  `tsrc` now makes sure repos included via groups are processed before
+  the other repos. See #356 for details. Thanks to @raabf for the bug report
+  and code review.
+
 ## 2.7.0 (2022-05-14)
 
 * Show which git commands are run by default.
@@ -7,7 +14,7 @@
   writing the workspace configuration. Fixes #344, where users could not run `init` a second
   time if the previous call failed. Bug report by @cgestes.
 * `tsrc init`: do not assume the default branch of the manifest is `master`. Note that `master` is still hard-coded in a few places. See #347 for details.
-* When using `-j 1`, do not sort repositories by lexical order of destination, but preserve
+* **Breaking**: When using `-j 1`, do not sort repositories by lexical order of destination, but preserve
   the order in which they were specified in the manifest. Suggested by @raabf.
 
 ## 2.6.0 (2022-03-27)
