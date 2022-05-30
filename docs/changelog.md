@@ -2,10 +2,10 @@
 
 ## 2.7.1 (2022-05-30)
 
-* In addition to preserve the order repos are listed in the manifest,
+* In addition to preserving the order repos are listed in the manifest,
   `tsrc` now makes sure repos included via groups are processed before
   the other repos. See #356 for details. Thanks to @raabf for the bug report
-  and code review.
+  and code review!
 
 ## 2.7.0 (2022-05-14)
 
