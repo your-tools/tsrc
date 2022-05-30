@@ -593,6 +593,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#271_2022-05-30" class="md-nav__link">
+    2.7.1 (2022-05-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#270_2022-05-14" class="md-nav__link">
     2.7.0 (2022-05-14)
   </a>
@@ -1073,6 +1080,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#271_2022-05-30" class="md-nav__link">
+    2.7.1 (2022-05-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#270_2022-05-14" class="md-nav__link">
     2.7.0 (2022-05-14)
   </a>
@@ -1537,6 +1551,13 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="271_2022-05-30">2.7.1 (2022-05-30)<a class="headerlink" href="#271_2022-05-30" title="Permanent link">&para;</a></h2>
+<ul>
+<li>In addition to preserve the order repos are listed in the manifest,
+  <code>tsrc</code> now makes sure repos included via groups are processed before
+  the other repos. See #356 for details. Thanks to @raabf for the bug report
+  and code review.</li>
+</ul>
 <h2 id="270_2022-05-14">2.7.0 (2022-05-14)<a class="headerlink" href="#270_2022-05-14" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Show which git commands are run by default.</li>
@@ -1544,7 +1565,7 @@
   writing the workspace configuration. Fixes #344, where users could not run <code>init</code> a second
   time if the previous call failed. Bug report by @cgestes.</li>
 <li><code>tsrc init</code>: do not assume the default branch of the manifest is <code>master</code>. Note that <code>master</code> is still hard-coded in a few places. See #347 for details.</li>
-<li>When using <code>-j 1</code>, do not sort repositories by lexical order of destination, but preserve
+<li><strong>Breaking</strong>: When using <code>-j 1</code>, do not sort repositories by lexical order of destination, but preserve
   the order in which they were specified in the manifest. Suggested by @raabf.</li>
 </ul>
 <h2 id="260_2022-03-27">2.6.0 (2022-03-27)<a class="headerlink" href="#260_2022-03-27" title="Permanent link">&para;</a></h2>
