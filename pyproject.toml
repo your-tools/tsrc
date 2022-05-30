@@ -3,7 +3,7 @@ profile = "black"
 
 [tool.poetry]
 name = "tsrc"
-version = "2.7.0"
+version = "2.7.1"
 description = "Manage groups of git repositories"
 authors = ["Dimitri Merejkowsky <dimitri@dmerej.info>"]
 readme = "README.rst"
