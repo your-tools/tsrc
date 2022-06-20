@@ -16,8 +16,14 @@ repos:
 
 groups:
   default:
-    g1: [one, two]
-    g2: [three]
+    repos: []
+  g1:
+    repos:
+      - one
+      - two
+  g2:
+    repos:
+      - three
 ```
 
 Here we define a `g1` group that contains repositories named `one` and `two`,
