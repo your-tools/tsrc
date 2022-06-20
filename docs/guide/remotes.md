@@ -17,8 +17,7 @@ But sometimes you need several remotes. Let's see a few use cases.
 
 ## Mirroring open-source projects
 
-If you want some repos in your organization that to be open source, you
-may need:
+If you want some repos in your organization to be open source, you may need:
 
 * a remote named 'origin' containing for the private repository on your GitLab instance
 * a remote named 'github' for the public repository on GitHub
@@ -27,7 +26,7 @@ In that case, you can use an alternative syntax:
 
 ```yaml
 repos:
-  # foo is open source and thus needs to remotes:
+  # foo is open source and thus needs two remotes:
   - dest: foo
   - remotes:
     - name: origin
@@ -47,7 +46,8 @@ remotes will be fetched when using `tsrc sync`.
 
 ## Using a VPN
 
-Sometimes you will need to remotes, because depending the physical location of your developers, they need to use either:
+Sometimes you will need two remotes, because depending the physical location of
+your developers, they need to use either:
 
 * a 'normal' remote, when they are in the office
 * a 'vpn' remote, when they are working at home

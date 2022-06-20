@@ -338,7 +338,7 @@ def test_singular_remote(
        ('origin' and 'vpn')
      * Make sure that the `origin` URL is valid but the `vpn`
        URL is not.
-     * Run `tsrc init --remote origin`
+     * Run `tsrc init --singular-remote origin`
      * Check that foo only has one remote called 'origin'
     """
     foo_url = git_server.add_repo("foo")
