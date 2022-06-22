@@ -687,15 +687,14 @@ origin:</p>
 </code></pre></div>
 <p>But sometimes you need several remotes. Let's see a few use cases.</p>
 <h2 id="mirroring_open-source_projects">Mirroring open-source projects<a class="headerlink" href="#mirroring_open-source_projects" title="Permanent link">&para;</a></h2>
-<p>If you want some repos in your organization that to be open source, you
-may need:</p>
+<p>If you want some repos in your organization to be open source, you may need:</p>
 <ul>
 <li>a remote named 'origin' containing for the private repository on your GitLab instance</li>
 <li>a remote named 'github' for the public repository on GitHub</li>
 </ul>
 <p>In that case, you can use an alternative syntax:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># foo is open source and thus needs to remotes:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># foo is open source and thus needs two remotes:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remotes</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">origin</span><span class="w"></span>
@@ -712,7 +711,8 @@ may need:</p>
 remotes will be created in the <code>foo</code> repo if they don't exist, and both
 remotes will be fetched when using <code>tsrc sync</code>.</p>
 <h2 id="using_a_vpn">Using a VPN<a class="headerlink" href="#using_a_vpn" title="Permanent link">&para;</a></h2>
-<p>Sometimes you will need to remotes, because depending the physical location of your developers, they need to use either:</p>
+<p>Sometimes you will need two remotes, because depending the physical location of
+your developers, they need to use either:</p>
 <ul>
 <li>a 'normal' remote, when they are in the office</li>
 <li>a 'vpn' remote, when they are working at home</li>

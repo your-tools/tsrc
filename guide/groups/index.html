@@ -715,8 +715,14 @@ example.</p>
 
 <span class="nt">groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">g1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">one</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">two</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">    </span><span class="nt">g2</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">three</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">g1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">two</span><span class="w"></span>
+<span class="w">  </span><span class="nt">g2</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">three</span><span class="w"></span>
 </code></pre></div>
 <p>Here we define a <code>g1</code> group that contains repositories named <code>one</code> and <code>two</code>,
 and a <code>g2</code> group that contains the repository named <code>three</code>.</p>
