@@ -39,8 +39,8 @@ tsrc init git@gitlab.local:acme/manifest --group g1
 
 ## Filtering repositories in groups with regular expressions
 
-You can utilize inclusive regular expression with the `-r`-flag and
-exclusive regular expression with the `-i`-flag. This allows you to filter
+You can utilize inclusive regular expression with the `-i`-flag and
+exclusive regular expression with the `-e`-flag. This allows you to filter
 repositories within a group or a set of groups for the given action.
 
 
@@ -48,7 +48,7 @@ To include all repositories in the group g1 matching "config" and excluding "tem
 you can do the following:
 
 ```
-tsrc init git@gitlab.local:acme/manifest --group g1 -r config -i template
+tsrc init git@gitlab.local:acme/manifest --group g1 -i config -e template
 ```
 
 
