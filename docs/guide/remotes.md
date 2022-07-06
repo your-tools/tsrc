@@ -28,7 +28,7 @@ In that case, you can use an alternative syntax:
 repos:
   # foo is open source and thus needs two remotes:
   - dest: foo
-  - remotes:
+    remotes:
     - name: origin
       url: git@gitlab.acme.com/your-team/foo
     - name: github
