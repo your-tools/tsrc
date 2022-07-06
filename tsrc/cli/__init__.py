@@ -142,7 +142,11 @@ def resolve_repos(
     if singular_remote:
         filtered_repos = []
         for repo in repos:
-            remotes = [remote for remote in repo.remotes if re.search(singular_remote, remote.name)]
+            remotes = [
+                remote
+                for remote in repo.remotes
+                if re.search(singular_remote, remote.name)
+            ]
             if remotes:
                 filtered_repos.append(repo)
         repos = filtered_repos
