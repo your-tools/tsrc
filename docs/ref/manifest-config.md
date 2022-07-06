@@ -11,7 +11,7 @@ repos:
     dest: foo
     branch: next
 
-  - remotes:
+    remotes:
       - name: origin
         url: git@gitlab.local:proj1/bar
       - name: upstream
