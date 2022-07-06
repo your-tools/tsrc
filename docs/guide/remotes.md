@@ -57,14 +57,14 @@ In that case, you can create a manifest looking like this:
 ```yaml
 repos:
   - dest: foo
-  - remotes:
+    remotes:
     - name: origin
       url: git@gitlab.local/your-team/foo
     - name: vpn
       url: git@myvpn.com/gitlab/your-team/foo
 
   - dest: bar
-  - remotes:
+    remotes:
     - name: origin
       url: git@gitlab.local/your-team/bar
     - name: vpn
