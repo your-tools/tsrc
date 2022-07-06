@@ -28,6 +28,11 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         dest="update_manifest",
         help="skip updating the manifest before syncing repositories",
     )
+    parser.add_argument(
+        "-r",
+        "--singular-remote",
+        help="only use this remote when cloning repositories",
+    )
     add_num_jobs_arg(parser)
     parser.set_defaults(run=run)
 
@@ -37,6 +42,7 @@ def run(args: argparse.Namespace) -> None:
     update_manifest = args.update_manifest
     groups = args.groups
     all_cloned = args.all_cloned
+    singular_remote = args.singular_remote
     regex = args.regex
     iregex = args.iregex
     workspace = get_workspace(args)
@@ -49,11 +55,18 @@ def run(args: argparse.Namespace) -> None:
         ui.info_2("Not updating manifest")
 
     workspace.repos = resolve_repos(
-        workspace, groups=groups, all_cloned=all_cloned, regex=regex, iregex=iregex
+        workspace,
+        singular_remote=singular_remote,
+        groups=groups,
+        all_cloned=all_cloned,
+        regex=regex,
+        iregex=iregex
     )
 
     workspace.clone_missing(num_jobs=num_jobs)
     workspace.set_remotes(num_jobs=num_jobs)
-    workspace.sync(force=force, num_jobs=num_jobs)
+    workspace.sync(force=force,
+                   singular_remote=singular_remote,
+                   num_jobs=num_jobs)
     workspace.perform_filesystem_operations()
     ui.info_1("Workspace synchronized")
