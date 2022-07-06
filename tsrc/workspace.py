@@ -125,14 +125,25 @@ class Workspace:
                 raise FileSystemOperatorError
 
     def sync(
-        self, *, force: bool = False, num_jobs: int = 1, correct_branch: bool = False
+        self,
+        *,
+        singular_remote: str = "",
+        correct_branch: bool = False,
+        force: bool = False,
+        num_jobs: int = 1,
     ) -> None:
+        remote_name = ""
+        if singular_remote:
+            remote_name = singular_remote
+        elif self.config.singular_remote:
+            remote_name = self.config.singular_remote
         syncer = Syncer(
             self.root_path,
             force=force,
-            remote_name=self.config.singular_remote,
+            remote_name=remote_name,
             correct_branch=correct_branch,
         )
+
         repos = self.repos
         ui.info_2("Synchronizing repos")
         collection = process_items(repos, syncer, num_jobs=num_jobs)

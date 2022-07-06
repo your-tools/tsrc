@@ -75,12 +75,12 @@ def add_repos_selection_args(parser: argparse.ArgumentParser) -> None:
         help="run on all cloned repos",
     )
     parser.add_argument(
-        "-r",
+        "-i",
         dest="regex",
         help="Include only repositories matching the regex",
     )
     parser.add_argument(
-        "-i", dest="iregex", help="Exclude repositories matching the regex"
+        "-e", dest="iregex", help="Exclude repositories matching the regex"
     )
 
 
@@ -116,6 +116,7 @@ def get_workspace_with_repos(namespace: argparse.Namespace) -> Workspace:
 def resolve_repos(
     workspace: Workspace,
     *,
+    singular_remote: str = "",
     groups: Optional[List[str]],
     all_cloned: bool,
     regex: str = "",
@@ -137,6 +138,18 @@ def resolve_repos(
         repos = [repo for repo in repos if (workspace.root_path / repo.dest).exists()]
     else:
         repos = repos_from_config(manifest, workspace.config)
+
+    if singular_remote:
+        filtered_repos = []
+        for repo in repos:
+            remotes = [
+                remote
+                for remote in repo.remotes
+                if re.search(singular_remote, remote.name)
+            ]
+            if remotes:
+                filtered_repos.append(repo)
+        repos = filtered_repos
 
     if regex:
         repos = [repo for repo in repos if re.search(regex, repo.dest)]
