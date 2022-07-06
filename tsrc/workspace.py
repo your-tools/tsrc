@@ -127,7 +127,7 @@ class Workspace:
     def sync(
         self, *, singular_remote: str = "", force: bool = False, num_jobs: int = 1
     ) -> None:
-        remote_name = ''
+        remote_name = ""
         if singular_remote:
             remote_name = singular_remote
         elif self.config.singular_remote:
