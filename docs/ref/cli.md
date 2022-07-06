@@ -58,8 +58,8 @@ tsrc init MANIFEST_URL [--group GROUP1, GROUP2] [--singular-remote SINGULAR_REMO
     The `-g,--groups`  option can be used to specify a list of groups
     to use when cloning repositories.
 
-    The `-r` "inclusive regular expression" and `-i` "exclusive regular expression" options
-    can be combined with the group option to filter for repositories within a group. `-r` takes
+    The `-i` "inclusive regular expression" and `-e` "exclusive regular expression" options
+    can be combined with the group option to filter for repositories within a group. `-i` takes
     precedence if both options are present.
 
     The `-s,--shallow` option can be used to make shallow clone of all repositories.

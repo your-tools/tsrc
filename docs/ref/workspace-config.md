@@ -22,4 +22,8 @@ singular_remote:
 * `shallow_clones`: whether to use only shallow clones when cloning missing repositories
 * `repo_groups`: the list of groups to use - every mentioned group must be present in the `manifest.yml` file (see above)
 * `clone_all_repos`: whether to ignore groups entirely and clone every repository from the manifest instead
-* `singular_remote`: if set to `<remote-name>`, behaves as if `tsrc sync` and `tsrc init` were called with `--singular-remote <remote-name>` option. See the [Using remotes guide](../guide/remotes.md) for details.
+* `singular_remote`: if set to `<remote-name>`, behaves as if `tsrc sync` and
+  `tsrc init` were called with `--singular-remote <remote-name>` option. See the
+  [Using remotes guide](../guide/remotes.md) for details. If `tsrc sync -r
+  <remote-name>` is used, it will take precedence over the file configuration
+  parameter.
