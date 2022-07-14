@@ -32,17 +32,18 @@ Finally, feel free to add your name in the `THANKS` file ;)
 ## Checking your changes
 
 * Install latest [poetry](https://python-poetry.org) version.
+* Install [just](https://just.systems/man/en/)
 * Install development and documentation dependencies:
 
 ```console
-$ poetry install
+$ just setup
 ```
 
 * Run linters and tests:
 
 ```console
-$ poetry run invoke lint
-$ poetry run pytest -n auto
+$ just lint
+$ just test
 ```
 
 
@@ -52,7 +53,7 @@ $ poetry run pytest -n auto
 * Launch the development server locally:
 
 ```bash
-$ poetry run mkdocs serve
+$ just dev-doc
 ```
 
 * Edit the markdown files from the `docs/` folder and review the changes in your browser
