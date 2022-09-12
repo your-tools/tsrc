@@ -41,20 +41,26 @@ Note
 Installation
 -------------
 
-The recommended way to install ``tsrc`` is to use `pipx <https://pipxproject.github.io/pipx/>`_
-
 * Make sure to have Python **3.7** or later installed.
-* Install ``pipx``
+* Run ``pip install tsrc``.
+
+
+Alternatively we recommend to use `pipx <https://pipxproject.github.io/pipx/>`_ if you have it installed.
+
 * Run ``pipx install tsrc``.
+
+
 
 
 Usage Example
 -------------
 
 
-* Create a *manifest* repository. (``git@example.org/manifest``)
+* Create a *manifest* repository. (``git@example.org/manifest.git``)
 
-* Push a file named ``manifest.yml`` looking like:
+* Add a file named ``manifest.yml`` at the root of the *manifest* repository.
+
+``manifest.yml``:
 
 .. code-block:: yaml
 
@@ -65,6 +71,9 @@ Usage Example
      -  url: git@example.com/bar.git
         dest: bar
 
+It is convenient while optional to include the manifest repository itself in your ``manifest.yml``. It will allow you to have a local copy of you manifest repository to easily make changes to it in the future.
+
+* commit your ``manifest.yml`` and push the changes to the manifest repository.
 
 * Create a new workspace with all the repositories listed in the manifest:
 
@@ -81,6 +90,7 @@ Usage Example
     ...
     : Configuring remotes
     Done ✓
+
 
 
 * Synchronize all the repositories in the workspace:
