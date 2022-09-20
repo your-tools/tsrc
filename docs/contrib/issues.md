@@ -1,6 +1,6 @@
 # Using the issue tracker
 
-Reporting bugs and requesting new features is done one the [tsrc issue tracker on GitHub](https://github.com/dmerejkowsky/tsrc/issues).
+Reporting bugs and requesting new features is done one the [tsrc issue tracker on GitHub](https://github.com/your-tools/tsrc/issues).
 
 ## Reporting bugs
 

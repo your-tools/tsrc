@@ -22,7 +22,7 @@ index fe74142..068c35e 100644
 @@ -1,4 +1,4 @@
 -repos:
 +repos
-   - url: git@github.com:dmerejkowsky/bar.git
+   - url: git@github.com:your-tools/bar.git
      dest: bar
 ```
 
@@ -126,7 +126,7 @@ $ git push
 * It is **not** advised to edit the file in
   `.tsrc/manifest/manifest.yml` directly, because `tsrc sync` will
   silently undo any local changes made to this file. This is a known bug,
-  see [#279](https://github.com/dmerejkowsky/tsrc/issues/279) for details.
+  see [#279](https://github.com/your-tools/tsrc/issues/279) for details.
 
 
 * It is common to place the manifest repo itself in the manifest - so it's easy to edit or read:
