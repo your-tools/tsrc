@@ -54,7 +54,7 @@
 
 * `tsrc foreach` now sets a bunch of environment variables. This allows
   developers to add new behaviors to tsrc without having to change its source code. See
-  the [relevant guide](https://dmerejkowsky.github.io/tsrc/guide/foreach) for more information.
+  the [relevant guide](https://your-tools.github.io/tsrc/guide/foreach) for more information.
 
 * Augment documentation with more use cases and examples (still a work in progress)
 
@@ -211,7 +211,7 @@ Drop support for Python 3.5
 
 ### Bug fixes
 
-* Fix [#217](https://github.com/dmerejkowsky/tsrc/issues/217): Preserves file attributes during the `copy` statements in `repos`
+* Fix [#217](https://github.com/your-tools/tsrc/issues/217): Preserves file attributes during the `copy` statements in `repos`
 
 ### Other
 
@@ -228,7 +228,7 @@ Drop support for Python 3.5
 * Remove the `tsrc push` command and all review automation features. Please
   use [hub](https://github.com/github/hub), [lab](https://github.com/zaquestion/lab),
   or [repo](https://github.com/guyzmo/git-repo) instead.
-  See [#207](https://github.com/dmerejkowsky/tsrc/issues/207) for the discussion leading
+  See [#207](https://github.com/your-tools/tsrc/issues/207) for the discussion leading
   to this removal.
 
 * Implement small improvements on `tsrc` output messages.
@@ -254,7 +254,7 @@ Starting the new year with a stable release, at last!
 ### Revamp group UX
 
 The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
-[corresponding milestone](https://github.com/dmerejkowsky/tsrc/milestone/1) for the full list.
+[corresponding milestone](https://github.com/your-tools/tsrc/milestone/1) for the full list.
 
 ### New configuration file
 
@@ -387,7 +387,7 @@ Thanks @tst2005 and @cgestes for their help with the configuration format.
 
 ### Other fixes
 
-* Fix [#113](https://github.com/dmerejkowsky/tsrc/issues/113): do not hide branch when showing tag status.
+* Fix [#113](https://github.com/your-tools/tsrc/issues/113): do not hide branch when showing tag status.
 * Add support for Python 3.7
 
 ## v0.5.0 (2018-08-14)
@@ -431,8 +431,8 @@ This change has no impact if you were already using `GitLab`.
 * **Breaking change**: `-m/--message` option is gone, use `--title` instead. There's a concept of "description" or "message" for pull requests and merge requests, but the value of the option was only used to update the *title*, so it had to be renamed.
 * Do not assume local and remote tracking branch have the same name.
 * Allow using `tsrc push <local>:<remote>` to explicitly specify local and remote branch names.
-* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/dmerejkowsky/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
-* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/dmerejkowsky/tsrc/issues/80)). Patch by @maximerety.
+* Fix bugs when target is not specified on the command line. See [this commit](https://github.com/your-tools/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d) for details.
+* Fix missing merge requests in `tsrc push` (see [issue #80](https://github.com/your-tools/tsrc/issues/80)). Patch by @maximerety.
 
 
 ## Improve fixed reference handling
@@ -453,7 +453,7 @@ repos:
     tag: v0.1
 ```
 
-See the [dedicated section about manifest format](ref/workspace-config.md#repos) and the [#57 pull request discussion](https://github.com/dmerejkowsky/tsrc/pull/57) for the details.
+See the [dedicated section about manifest format](ref/workspace-config.md#repos) and the [#57 pull request discussion](https://github.com/your-tools/tsrc/pull/57) for the details.
 
 This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.
 
@@ -512,7 +512,7 @@ This is required to create the `<workspace>/.tsrc/manifest.yml` file which is la
 
 # v0.2.3 (2017-09-01)
 
-* Split user interface functionality into its own project: [python-cli-ui](https://github.com/dmerejkowsky/python-cli-ui).
+* Split user interface functionality into its own project: [python-cli-ui](https://github.com/your-tools/python-cli-ui).
 
 * Add `--quiet` and `--color` global options.
 

@@ -1,6 +1,6 @@
 # Suggesting changes
 
-All the development happens on [GitHub](https://github.com/dmerejkowsky/tsrc).
+All the development happens on [GitHub](https://github.com/your-tools/tsrc).
 
 You are free to open a pull request for anything you want to change on `tsrc`.
 
@@ -17,7 +17,7 @@ ask that:
 * The new feature comes with appropriate tests
 * The Git History is easy to review
 
-See the [GitHub actions workflows](https://github.com/dmerejkowsky/tsrc/blob/main/.github/workflows)
+See the [GitHub actions workflows](https://github.com/your-tools/tsrc/blob/main/.github/workflows)
 to see what exactly what commands are run and the Python versions we
 support.
 
