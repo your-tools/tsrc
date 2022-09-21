@@ -706,7 +706,7 @@ manifest, using a branch called <code>broken</code> for the sake of the example)
 <span class="gu">@@ -1,4 +1,4 @@</span><span class="w"></span>
 <span class="gd">-repos:</span><span class="w"></span>
 <span class="gi">+repos</span><span class="w"></span>
-<span class="w"> </span>  - url: git@github.com:dmerejkowsky/bar.git<span class="w"></span>
+<span class="w"> </span>  - url: git@github.com:your-tools/bar.git<span class="w"></span>
 <span class="w"> </span>    dest: bar<span class="w"></span>
 </code></pre></div>
 <p>After this change is push,  anyone using the <code>broken</code> branch of the
@@ -788,7 +788,7 @@ $ git push
 <p>It is <strong>not</strong> advised to edit the file in
   <code>.tsrc/manifest/manifest.yml</code> directly, because <code>tsrc sync</code> will
   silently undo any local changes made to this file. This is a known bug,
-  see <a href="https://github.com/dmerejkowsky/tsrc/issues/279">#279</a> for details.</p>
+  see <a href="https://github.com/your-tools/tsrc/issues/279">#279</a> for details.</p>
 </li>
 <li>
 <p>It is common to place the manifest repo itself in the manifest - so it's easy to edit or read:</p>

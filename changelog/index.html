@@ -1605,7 +1605,7 @@
 <li>
 <p><code>tsrc foreach</code> now sets a bunch of environment variables. This allows
   developers to add new behaviors to tsrc without having to change its source code. See
-  the <a href="https://dmerejkowsky.github.io/tsrc/guide/foreach">relevant guide</a> for more information.</p>
+  the <a href="https://your-tools.github.io/tsrc/guide/foreach">relevant guide</a> for more information.</p>
 </li>
 <li>
 <p>Augment documentation with more use cases and examples (still a work in progress)</p>
@@ -1751,7 +1751,7 @@ and <code>copy</code>).</li>
 </ul>
 <h3 id="bug_fixes_1">Bug fixes<a class="headerlink" href="#bug_fixes_1" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Fix <a href="https://github.com/dmerejkowsky/tsrc/issues/217">#217</a>: Preserves file attributes during the <code>copy</code> statements in <code>repos</code></li>
+<li>Fix <a href="https://github.com/your-tools/tsrc/issues/217">#217</a>: Preserves file attributes during the <code>copy</code> statements in <code>repos</code></li>
 </ul>
 <h3 id="other_1">Other<a class="headerlink" href="#other_1" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1769,7 +1769,7 @@ and <code>copy</code>).</li>
 <p>Remove the <code>tsrc push</code> command and all review automation features. Please
   use <a href="https://github.com/github/hub">hub</a>, <a href="https://github.com/zaquestion/lab">lab</a>,
   or <a href="https://github.com/guyzmo/git-repo">repo</a> instead.
-  See <a href="https://github.com/dmerejkowsky/tsrc/issues/207">#207</a> for the discussion leading
+  See <a href="https://github.com/your-tools/tsrc/issues/207">#207</a> for the discussion leading
   to this removal.</p>
 </li>
 <li>
@@ -1794,7 +1794,7 @@ and <code>copy</code>).</li>
 <p>Starting the new year with a stable release, at last!</p>
 <h3 id="revamp_group_ux">Revamp group UX<a class="headerlink" href="#revamp_group_ux" title="Permanent link">&para;</a></h3>
 <p>The changes below in the configuration file and command line syntax allow for better UX regarding groups. See the
-<a href="https://github.com/dmerejkowsky/tsrc/milestone/1">corresponding milestone</a> for the full list.</p>
+<a href="https://github.com/your-tools/tsrc/milestone/1">corresponding milestone</a> for the full list.</p>
 <h3 id="new_configuration_file">New configuration file<a class="headerlink" href="#new_configuration_file" title="Permanent link">&para;</a></h3>
 <p>Previously, <code>tsrc</code> stored its permanent configuration in <code>.tsrc/manifest.yml</code> and the file was not supposed to be edited by hand. Instead, users could use <code>tsrc init</code> to modify it, for instance with the <code>--branch</code> argument.</p>
 <p>Starting with this release, the command <code>tsrc init</code> can only be run once per workspace, and you must edit the <code>.tsrc/config.yml</code> file instead.</p>
@@ -1915,7 +1915,7 @@ tsrc init --groups foo bar
 </ul>
 <h3 id="other_fixes_1">Other fixes<a class="headerlink" href="#other_fixes_1" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Fix <a href="https://github.com/dmerejkowsky/tsrc/issues/113">#113</a>: do not hide branch when showing tag status.</li>
+<li>Fix <a href="https://github.com/your-tools/tsrc/issues/113">#113</a>: do not hide branch when showing tag status.</li>
 <li>Add support for Python 3.7</li>
 </ul>
 <h2 id="v050_2018-08-14">v0.5.0 (2018-08-14)<a class="headerlink" href="#v050_2018-08-14" title="Permanent link">&para;</a></h2>
@@ -1954,8 +1954,8 @@ tsrc init --groups foo bar
 <li><strong>Breaking change</strong>: <code>-m/--message</code> option is gone, use <code>--title</code> instead. There's a concept of "description" or "message" for pull requests and merge requests, but the value of the option was only used to update the <em>title</em>, so it had to be renamed.</li>
 <li>Do not assume local and remote tracking branch have the same name.</li>
 <li>Allow using <code>tsrc push &lt;local&gt;:&lt;remote&gt;</code> to explicitly specify local and remote branch names.</li>
-<li>Fix bugs when target is not specified on the command line. See <a href="https://github.com/dmerejkowsky/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d">this commit</a> for details.</li>
-<li>Fix missing merge requests in <code>tsrc push</code> (see <a href="https://github.com/dmerejkowsky/tsrc/issues/80">issue #80</a>). Patch by @maximerety.</li>
+<li>Fix bugs when target is not specified on the command line. See <a href="https://github.com/your-tools/tsrc/pull/107/commits/5940f96284fe13d9977fafbb05fcc3dad15ac32d">this commit</a> for details.</li>
+<li>Fix missing merge requests in <code>tsrc push</code> (see <a href="https://github.com/your-tools/tsrc/issues/80">issue #80</a>). Patch by @maximerety.</li>
 </ul>
 <h2 id="improve_fixed_reference_handling">Improve fixed reference handling<a class="headerlink" href="#improve_fixed_reference_handling" title="Permanent link">&para;</a></h2>
 <p><strong>Breaking change</strong>: Instead of using <code>fixed_ref</code> in the manifest, you should now use <code>tag</code> or <code>sha1</code>:</p>
@@ -1969,7 +1969,7 @@ tsrc init --groups foo bar
   - src: git@example.com/foo
     tag: v0.1
 </code></pre></div></p>
-<p>See the <a href="../ref/workspace-config/#repos">dedicated section about manifest format</a> and the <a href="https://github.com/dmerejkowsky/tsrc/pull/57">#57 pull request discussion</a> for the details.</p>
+<p>See the <a href="../ref/workspace-config/#repos">dedicated section about manifest format</a> and the <a href="https://github.com/your-tools/tsrc/pull/57">#57 pull request discussion</a> for the details.</p>
 <p>This allow us to implement different behaviors depending on whether or not the fixed ref is a tag or just a sha1.</p>
 <h2 id="support_for_shallow_clones">Support for shallow clones<a class="headerlink" href="#support_for_shallow_clones" title="Permanent link">&para;</a></h2>
 <p>To save time and space, you can use <code>tsrc init --shallow</code> to only have shallow clones in your workspace.</p>
@@ -2016,7 +2016,7 @@ tsrc init --groups foo bar
 <h1 id="v023_2017-09-01">v0.2.3 (2017-09-01)<a class="headerlink" href="#v023_2017-09-01" title="Permanent link">&para;</a></h1>
 <ul>
 <li>
-<p>Split user interface functionality into its own project: <a href="https://github.com/dmerejkowsky/python-cli-ui">python-cli-ui</a>.</p>
+<p>Split user interface functionality into its own project: <a href="https://github.com/your-tools/python-cli-ui">python-cli-ui</a>.</p>
 </li>
 <li>
 <p>Add <code>--quiet</code> and <code>--color</code> global options.</p>

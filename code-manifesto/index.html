@@ -1063,7 +1063,7 @@ After such a change, the line <code>foo(42, False)</code> which used to call <co
 <li>When using external code (from the standard library or a third-party library), you should catch the exceptions and optionally re-raise them.</li>
 </ul>
 <h1 id="output_messages_to_the_user">Output messages to the user<a class="headerlink" href="#output_messages_to_the_user" title="Permanent link">&para;</a></h1>
-<p>Do not use <code>print</code>, use <a href="https://dmerejkowsky.github.io/python-cli-ui#api">python-cli-ui functions</a> instead. This makes it easier to distinguish between real messages and the throw-away <code>print</code> statements you add for debugging.</p>
+<p>Do not use <code>print</code>, use <a href="https://your-tools.github.io/python-cli-ui#api">python-cli-ui functions</a> instead. This makes it easier to distinguish between real messages and the throw-away <code>print</code> statements you add for debugging.</p>
 <p>Also, using "high-level" methods such as <code>ui.info_1()</code> or <code>ui.warning()</code> will make it easier to have a consistent user interface.</p>
 <h1 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h1>
 <h2 id="docstrings">Docstrings<a class="headerlink" href="#docstrings" title="Permanent link">&para;</a></h2>
