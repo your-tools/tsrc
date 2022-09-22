@@ -47,7 +47,7 @@ class Manifest:
 
     def _handle_repo(self, repo_config: Any) -> None:
         dest = repo_config["dest"]
-        branch = repo_config.get("branch", "master")
+        branch = repo_config.get("branch")
         tag = repo_config.get("tag")
         sha1 = repo_config.get("sha1")
         url = repo_config.get("url")

@@ -9,6 +9,7 @@ from tsrc.git import get_current_branch, run_git, run_git_captured
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 from tsrc.workspace import ClonerError
+import pytest
 
 
 def repo_exists(workspace_path: Path, repo: str) -> bool:
@@ -66,6 +67,16 @@ def test_display_cloning_errors(
         tsrc_cli.run("init", manifest_url)
 
     message_recorder.find("Fatal: remote branch no-such not found")
+
+
+def test_init_cloning_repo_using_main(
+    tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
+) -> None:
+    foo_url = git_server.add_repo("foo", default_branch="main", add_to_manifest=False)
+    git_server.manifest.add_repo("foo", url=foo_url)
+    manifest_url = git_server.manifest_url
+
+    tsrc_cli.run("init", manifest_url)
 
 
 def test_init_with_args(
