@@ -80,14 +80,13 @@ class Cloner(Task[Repo]):
         if not repo.ignore_submodules:
             clone_args.append("--recurse-submodules")
         clone_args.append(name)
-        try:
-            self.run_git(parent, *clone_args)
-            summary = f"{repo.dest} cloned from {remote_url}"
-            if ref:
-                summary += f" (on {ref})"
-            return summary
-        except Error:
-            raise Error("Cloning failed")
+
+        self.run_git(parent, *clone_args)
+
+        summary = f"{repo.dest} cloned from {remote_url}"
+        if ref:
+            summary += f" (on {ref})"
+        return summary
 
     def reset_repo(self, repo: Repo) -> str:
         ref = repo.sha1

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import pytest
 from cli_ui.tests import MessageRecorder
 
 from tsrc.git import get_current_branch, run_git, run_git_captured
@@ -49,6 +50,22 @@ def test_init_manifest_head_is_main(
     manifest_clone = workspace_path / ".tsrc/manifest"
     manifest_branch = get_current_branch(manifest_clone)
     assert manifest_branch == "main"
+
+
+def test_display_cloning_errors(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    git_server.add_repo("foo")
+    git_server.manifest.configure_repo("foo", "branch", "no-such")
+    manifest_url = git_server.manifest_url
+
+    with pytest.raises(Exception):
+        tsrc_cli.run("init", manifest_url)
+
+    message_recorder.find("Fatal: remote branch no-such not found")
 
 
 def test_init_with_args(
