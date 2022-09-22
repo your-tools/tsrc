@@ -77,4 +77,4 @@ class RemoteSetter(Task[Repo]):
             ui.bold, remote.name, ui.reset, ui.brown, f"({remote.url})"
         )
         # fmt: on
-        run_git(full_path, "remote", "add", remote.name, remote.url)
+        self.run_git(full_path, "remote", "add", remote.name, remote.url)
