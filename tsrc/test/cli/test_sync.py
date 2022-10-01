@@ -402,6 +402,59 @@ def test_changing_branch(
     assert message_recorder.find("does not match")
 
 
+def test_changing_branch_with_correct_branch(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """Scenario:
+    * Create a manifest with a foo repo
+    * Initialize a workspace from this manifest
+    * Create a new branch named `next` on the foo repo
+    * Update foo branch in the manifest
+    * Run `tsrc sync --correct-brach`
+    * Command succeeds
+    """
+    git_server.add_repo("foo")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    git_server.push_file("foo", "next.txt", branch="next")
+    git_server.manifest.set_repo_branch("foo", "next")
+
+    tsrc_cli.run("sync", "--correct-branch")
+
+
+def test_changing_branch_with_correct_branch_but_dirty_repo(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """Scenario:
+    * Create a manifest with a foo repo
+    * Initialize a workspace from this manifest
+    * Create a new branch named `next` on the foo repo
+    * Make the repo dirty - create a file but don't push it
+    * Run `tsrc sync --correct-brach`
+    * Check that the command fails because the repo
+      is dirty
+    """
+    git_server.add_repo("foo")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    git_server.push_file("foo", "next.txt", branch="next")
+    git_server.manifest.set_repo_branch("foo", "next")
+
+    unpushed_file_path = workspace_path / "foo" / "unpushed_file.txt"
+    unpushed_file_path.touch()
+
+    tsrc_cli.run_and_fail("sync", "--correct-branch")
+    assert message_recorder.find("dirty")
+
+
 def test_tags_are_not_updated(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
