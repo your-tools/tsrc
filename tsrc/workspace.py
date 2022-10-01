@@ -124,9 +124,14 @@ class Workspace:
                 collection.print_errors()
                 raise FileSystemOperatorError
 
-    def sync(self, *, force: bool = False, num_jobs: int = 1) -> None:
+    def sync(
+        self, *, force: bool = False, num_jobs: int = 1, correct_branch: bool = False
+    ) -> None:
         syncer = Syncer(
-            self.root_path, force=force, remote_name=self.config.singular_remote
+            self.root_path,
+            force=force,
+            remote_name=self.config.singular_remote,
+            correct_branch=correct_branch,
         )
         repos = self.repos
         ui.info_2("Synchronizing repos")

@@ -10,10 +10,15 @@ from tsrc.repo import Remote, Repo
 
 
 class IncorrectBranch(Error):
-    def __init__(self, *, actual: str, expected: str):
-        self.message = (
-            f"Current branch: '{actual}' does not match expected branch: '{expected}'"
-        )
+    def __init__(self, *, actual: Optional[str], expected: str):
+        self.actual = actual
+        if actual:
+            self.message = (
+                f"Current branch: '{actual}' "
+                f"does not match expected branch: '{expected}'"
+            )
+        else:
+            self.message = f"Not on any branch. Expected branch: '{expected}'"
 
 
 class Syncer(Task[Repo]):
@@ -23,10 +28,12 @@ class Syncer(Task[Repo]):
         *,
         force: bool = False,
         remote_name: Optional[str] = None,
+        correct_branch: bool = False,
     ) -> None:
         self.workspace_path = workspace_path
         self.force = force
         self.remote_name = remote_name
+        self.correct_branch = correct_branch
 
     def describe_item(self, item: Repo) -> str:
         return item.dest
@@ -65,7 +72,8 @@ class Syncer(Task[Repo]):
             summary_lines += [repo.dest, "-" * len(repo.dest)]
             summary_lines += [f"Reset to {ref}"]
         else:
-            error, current_branch = self.check_branch(repo)
+            error, current_branch = self.check_or_change_branch(repo)
+
             self.info_3("Updating branch:", current_branch)
             sync_summary = self.sync_repo_to_branch(repo, current_branch=current_branch)
             if sync_summary:
@@ -80,34 +88,52 @@ class Syncer(Task[Repo]):
         summary = "\n".join(summary_lines)
         return Outcome(error=error, summary=summary)
 
-    def check_branch(self, repo: Repo) -> Tuple[Optional[Error], str]:
+    def check_or_change_branch(self, repo: Repo) -> Tuple[Optional[Error], str]:
         """Check that the current branch:
             * exists
             * matches the one in the manifest
 
-        * Raise Error if the branch does not exist (because we can't
-          do anything else in that case)
+        If it does, do nothing.
 
-        * _Return_ on Error if the current branch does not match the
-          one in the manifest - because we still want to run
-          `git merge @upstream` in that case
+        If not but the repo is clean and the correct_branch flag is set,
+        switch to the configured branch."""
+        error = None
+        current_branch = None
 
-        * Otherwise, return the current branch
+        try:
+            current_branch = self.check_branch(repo)
+        except IncorrectBranch as e:
+            current_branch = e.actual
+
+            if self.correct_branch:
+                self.checkout_branch(repo)
+                current_branch = repo.branch
+            else:
+                error = e
+
+            if not current_branch:
+                raise
+
+        return error, current_branch
+
+    def check_branch(self, repo: Repo) -> str:
+        """Check that the current branch:
+            * exists
+            * matches the one in the manifest
+
+        Return the current branch.
         """
         repo_path = self.workspace_path / repo.dest
         current_branch = None
         try:
             current_branch = get_current_branch(repo_path)
         except Error:
-            raise Error("Not on any branch")
+            raise IncorrectBranch(actual=None, expected=repo.branch)
 
         if current_branch and current_branch != repo.branch:
-            return (
-                IncorrectBranch(actual=current_branch, expected=repo.branch),
-                current_branch,
-            )
-        else:
-            return None, current_branch
+            raise IncorrectBranch(actual=current_branch, expected=repo.branch)
+
+        return current_branch
 
     def _pick_remotes(self, repo: Repo) -> List[Remote]:
         if self.remote_name:
@@ -140,6 +166,16 @@ class Syncer(Task[Repo]):
             self.run_git(repo_path, "reset", "--hard", ref)
         except Error:
             raise Error("updating ref failed")
+
+    def checkout_branch(self, repo: Repo) -> None:
+        repo_path = self.workspace_path / repo.dest
+        status = get_git_status(repo_path)
+        if status.dirty:
+            raise Error(f"git repo is dirty: cannot checkout: {repo.branch}")
+        try:
+            self.run_git(repo_path, "checkout", repo.branch)
+        except Error:
+            raise Error("checking out failed")
 
     def update_submodules(self, repo: Repo) -> str:
         repo_path = self.workspace_path / repo.dest
