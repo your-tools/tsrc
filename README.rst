@@ -1,17 +1,17 @@
-.. image:: https://img.shields.io/github/license/dmerejkowsky/tsrc.svg
-   :target: https://github.com/dmerejkowsky/tsrc/blob/main/LICENSE
+.. image:: https://img.shields.io/github/license/your-tools/tsrc.svg
+   :target: https://github.com/your-tools/tsrc/blob/main/LICENSE
 
-.. image:: https://github.com/dmerejkowsky/tsrc/workflows/tests/badge.svg
-   :target: https://github.com/dmerejkowsky/tsrc/actions
+.. image:: https://github.com/your-tools/tsrc/workflows/tests/badge.svg
+   :target: https://github.com/your-tools/tsrc/actions
 
-.. image:: https://github.com/dmerejkowsky/tsrc/workflows/linters/badge.svg
-   :target: https://github.com/dmerejkowsky/tsrc/actions
+.. image:: https://github.com/your-tools/tsrc/workflows/linters/badge.svg
+   :target: https://github.com/your-tools/tsrc/actions
 
 .. image:: https://img.shields.io/pypi/v/tsrc.svg
    :target: https://pypi.org/project/tsrc/
 
 .. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
-     :target: https://github.com/dmerejkowsky/tsrc/actions
+     :target: https://github.com/your-tools/tsrc/actions
 
 tsrc: manage groups of git repositories
 =======================================
@@ -36,7 +36,7 @@ It can be `seen in action on asciinema.org <https://asciinema.org/a/131625>`_.
 Note
 -----
 
-`tsrc` does not adhere strictly to the `semver specification <https://semver.org/>`_. So before upgrading to a new version, please take the time to read the `Changelog <https://dmerejkowsky.github.io/tsrc/changelog/>`_ first!
+`tsrc` does not adhere strictly to the `semver specification <https://semver.org/>`_. So before upgrading to a new version, please take the time to read the `Changelog <https://your-tools.github.io/tsrc/changelog/>`_ first!
 
 Installation
 -------------
@@ -52,9 +52,11 @@ Usage Example
 -------------
 
 
-* Create a *manifest* repository. (``git@example.org/manifest``)
+* Create a *manifest* repository. (``git@example.org/manifest.git``)
 
-* Push a file named ``manifest.yml`` looking like:
+* Add a file named ``manifest.yml`` at the root of the *manifest* repository.
+
+``manifest.yml``:
 
 .. code-block:: yaml
 
@@ -65,6 +67,9 @@ Usage Example
      -  url: git@example.com/bar.git
         dest: bar
 
+It is convenient while optional to include the manifest repository itself in your ``manifest.yml``. It will allow you to have a local copy of you manifest repository to easily make changes to it in the future.
+
+* commit your ``manifest.yml`` and push the changes to the manifest repository.
 
 * Create a new workspace with all the repositories listed in the manifest:
 
@@ -81,6 +86,7 @@ Usage Example
     ...
     : Configuring remotes
     Done ✓
+
 
 
 * Synchronize all the repositories in the workspace:
@@ -109,21 +115,21 @@ Usage Example
 Documentation
 --------------
 
-For more details and examples, please refer to `tsrc documentation <https://dmerejkowsky.github.io/tsrc/>`_.
+For more details and examples, please refer to `tsrc documentation <https://your-tools.github.io/tsrc/>`_.
 
 Release notes
 -------------
 
-Detailed changes for each release are documented in the `changelog <https://dmerejkowsky.github.io/tsrc/changelog/>`_.
+Detailed changes for each release are documented in the `changelog <https://your-tools.github.io/tsrc/changelog/>`_.
 
 Contributing
 ------------
 
-We welcome feedback, `bug reports <https://github.com/dmerejkowsky/tsrc/issues>`_, and bug fixes in the form of `pull requests <https://github.com/dmerejkowsky/tsrc/pulls>`_.
+We welcome feedback, `bug reports <https://github.com/your-tools/tsrc/issues>`_, and bug fixes in the form of `pull requests <https://github.com/your-tools/tsrc/pulls>`_.
 
-Detailed instructions can be found `in the documentation <https://dmerejkowsky.github.io/tsrc>`_.
+Detailed instructions can be found `in the documentation <https://your-tools.github.io/tsrc>`_.
 
 License
 -------
 
-tsrc is licensed under a `BSD 3-Clause license <https://github.com/dmerejkowsky/tsrc/blob/main/LICENSE>`_.
+tsrc is licensed under a `BSD 3-Clause license <https://github.com/your-tools/tsrc/blob/main/LICENSE>`_.

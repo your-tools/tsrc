@@ -90,7 +90,7 @@ repos:
 
   - dest: common
     url: git@acme.com:team/commont
-    link:
+    symlink:
     - source: .clang-format
       target: common/clang-format
 ```
