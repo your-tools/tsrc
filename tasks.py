@@ -57,6 +57,3 @@ def lint(c):
     pass
 
 
-@task
-def safety_check(c):
-    c.run("safety check")
