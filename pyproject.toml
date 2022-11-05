@@ -54,9 +54,6 @@ mypy = "0.960"
 mkdocs = "1.4.0"
 mkdocs-material = "8.2.7"
 
-# Deps scanning
-safety = "^1.9.0"
-
 [tool.poetry.scripts]
 tsrc = "tsrc.cli.main:main"
 
