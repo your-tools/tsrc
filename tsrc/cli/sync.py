@@ -73,6 +73,11 @@ def run(args: argparse.Namespace) -> None:
 
     workspace.clone_missing(num_jobs=num_jobs)
     workspace.set_remotes(num_jobs=num_jobs)
-    workspace.sync(force=force, num_jobs=num_jobs, correct_branch=correct_branch, singular_remote=singular_remote)
+    workspace.sync(
+        force=force,
+        num_jobs=num_jobs,
+        correct_branch=correct_branch,
+        singular_remote=singular_remote,
+    )
     workspace.perform_filesystem_operations()
     ui.info_1("Workspace synchronized")
