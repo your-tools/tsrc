@@ -17,13 +17,15 @@ repositories.
 
 It can be [seen in action on asciinema.org](https://asciinema.org/a/131625).
 
+## Requirements
+
+Python **3.7** or later
+
 ## Installation
 
-The recommended way to install `tsrc` is to use [pipx](https://pipxproject.github.io/pipx/).
+Use `pipx` (recommended) or `pip` (ok, if you know what you're doing) to install.
 
-* Make sure to have Python **3.7** or later installed.
-* Install `pipx`
-* Run `pipx install tsrc`.
+Please see the [installation docs](https://your-tools.github.io/tsrc/getting-started/#installing_tsrc) for more info.
 
 ## Usage Example
 
