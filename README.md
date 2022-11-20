@@ -23,10 +23,6 @@ repositories.
 
 It can be [seen in action on asciinema.org](https://asciinema.org/a/131625).
 
-## Note
-
-<span class="title-ref">tsrc</span> does not adhere strictly to the [semver specification](https://semver.org/). So before upgrading to a new version, please take the time to read the [Changelog](https://your-tools.github.io/tsrc/changelog/) first!
-
 ## Installation
 
 The recommended way to install `tsrc` is to use [pipx](https://pipxproject.github.io/pipx/).
