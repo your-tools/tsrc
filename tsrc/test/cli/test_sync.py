@@ -182,9 +182,9 @@ def test_sync_not_on_master(
     * Initialize a workspace from this manifest
     * Checkout a different branch on foo, tracking an existing remote
     * Run `tsrc sync`
-    * Check that:
+    * Check that
        * foo is updated
-       * but the command fails because foo was not an the expected branch
+       * and the command succeeds
     """
     git_server.add_repo("foo")
     git_server.add_repo("bar")
@@ -197,10 +197,11 @@ def test_sync_not_on_master(
     run_git(foo_path, "checkout", "-B", "devel")
     run_git(foo_path, "branch", "--set-upstream-to", "origin/devel")
 
-    tsrc_cli.run_and_fail("sync")
+    tsrc_cli.run("sync")
 
-    assert (foo_path / "devel.txt").exists(), "foo should have been updated"
-    assert message_recorder.find("does not match")
+    assert not (
+        foo_path / "devel.txt"
+    ).exists(), "branch should have been changed, but it's not"
 
 
 def test_sync_with_force(
@@ -388,8 +389,7 @@ def test_changing_branch(
     * Create a new branch named `next` on the foo repo
     * Update foo branch in the manifest
     * Run `tsrc sync`
-    * Check that the command fails because `foo` is no
-      longer on the expected branch
+    * Command succeeds
     """
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
@@ -398,11 +398,10 @@ def test_changing_branch(
     git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
-    tsrc_cli.run_and_fail("sync")
-    assert message_recorder.find("does not match")
+    tsrc_cli.run("sync")
 
 
-def test_changing_branch_with_correct_branch(
+def test_not_changing_branch_with_a_flag(
     tsrc_cli: CLI,
     git_server: GitServer,
     workspace_path: Path,
@@ -413,8 +412,8 @@ def test_changing_branch_with_correct_branch(
     * Initialize a workspace from this manifest
     * Create a new branch named `next` on the foo repo
     * Update foo branch in the manifest
-    * Run `tsrc sync --correct-brach`
-    * Command succeeds
+    * Run `tsrc sync --no-correct-brach`
+    * Command fails, because the flag is set
     """
     git_server.add_repo("foo")
     manifest_url = git_server.manifest_url
@@ -423,10 +422,11 @@ def test_changing_branch_with_correct_branch(
     git_server.push_file("foo", "next.txt", branch="next")
     git_server.manifest.set_repo_branch("foo", "next")
 
-    tsrc_cli.run("sync", "--correct-branch")
+    tsrc_cli.run_and_fail("sync", "--no-correct-branch")
+    assert message_recorder.find("does not match")
 
 
-def test_changing_branch_with_correct_branch_but_dirty_repo(
+def test_not_changing_branch_with_a_dirty_repo(
     tsrc_cli: CLI,
     git_server: GitServer,
     workspace_path: Path,
@@ -437,7 +437,7 @@ def test_changing_branch_with_correct_branch_but_dirty_repo(
     * Initialize a workspace from this manifest
     * Create a new branch named `next` on the foo repo
     * Make the repo dirty - create a file but don't push it
-    * Run `tsrc sync --correct-brach`
+    * Run `tsrc sync`
     * Check that the command fails because the repo
       is dirty
     """
@@ -451,7 +451,7 @@ def test_changing_branch_with_correct_branch_but_dirty_repo(
     unpushed_file_path = workspace_path / "foo" / "unpushed_file.txt"
     unpushed_file_path.touch()
 
-    tsrc_cli.run_and_fail("sync", "--correct-branch")
+    tsrc_cli.run_and_fail("sync")
     assert message_recorder.find("dirty")
 
 
