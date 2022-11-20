@@ -167,7 +167,7 @@ def test_filter_inclusive(tmp_path: Path) -> None:
     * A repo named 'other' in the manifest
     * Workspace configured with repo_group=[group]
     * --group group1 used on the command line
-    * -r foo used on the command line
+    * -i foo used on the command line
 
     Should return repos foo and foo2 from group1
     """
@@ -177,7 +177,9 @@ def test_filter_inclusive(tmp_path: Path) -> None:
     )
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
 
-    actual = resolve_repos(workspace, groups=["group1"], all_cloned=False, regex="foo")
+    actual = resolve_repos(
+        workspace, groups=["group1"], all_cloned=False, include_regex="foo"
+    )
     assert repo_names(actual) == ["foo", "foo2"]
 
 
@@ -187,7 +189,7 @@ def test_filter_exclusive(tmp_path: Path) -> None:
     * A repo named 'other' in the manifest
     * Workspace configured with repo_group=[group]
     * --group group1 used on the command line
-    * -i foo used on the command line
+    * -e foo used on the command line
 
     Should return repos bar and bar2 from group1
     """
@@ -197,7 +199,9 @@ def test_filter_exclusive(tmp_path: Path) -> None:
     )
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
 
-    actual = resolve_repos(workspace, groups=["group1"], all_cloned=False, iregex="foo")
+    actual = resolve_repos(
+        workspace, groups=["group1"], all_cloned=False, exclude_regex="foo"
+    )
     assert repo_names(actual) == ["bar", "bar2"]
 
 
@@ -207,8 +211,8 @@ def test_filter_inclusive_exclusive(tmp_path: Path) -> None:
     * A repo named 'other' in the manifest
     * Workspace configured with repo_group=[group]
     * --group group1 used on the command line
-    * -r foo used on the command line
-    * -i 2 used on the command line
+    * -i foo used on the command line
+    * -e 2 used on the command line
 
     Should return repo foo from group1
     """
@@ -219,6 +223,10 @@ def test_filter_inclusive_exclusive(tmp_path: Path) -> None:
     workspace = create_workspace(tmp_path, repo_groups=["group1"])
 
     actual = resolve_repos(
-        workspace, groups=["group1"], all_cloned=False, regex="foo", iregex="2"
+        workspace,
+        groups=["group1"],
+        all_cloned=False,
+        include_regex="foo",
+        exclude_regex="2",
     )
     assert repo_names(actual) == ["foo"]
