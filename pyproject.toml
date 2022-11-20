@@ -38,7 +38,10 @@ pytest-cov = "^2.10"
 pytest-xdist = "^1.32.0"
 # cached-property is required by pygit2 for old Pythons
 cached-property = { version = "^1.5.2", python = "< 3.8" }
-pygit2 = { version = "^1.7.1" }
+pygit2 = [
+    { version = "1.10.1", python = "< 3.8" },
+    { version = "^1.11.1", python = ">= 3.8" },
+]
 
 # Linters
 black = "^22.3"
