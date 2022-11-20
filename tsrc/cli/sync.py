@@ -49,8 +49,8 @@ def run(args: argparse.Namespace) -> None:
     groups = args.groups
     all_cloned = args.all_cloned
     singular_remote = args.singular_remote
-    regex = args.regex
-    iregex = args.iregex
+    include_regex = args.include_regex
+    exclude_regex = args.exclude_regex
     correct_branch = args.correct_branch
     workspace = get_workspace(args)
     num_jobs = get_num_jobs(args)
@@ -66,8 +66,8 @@ def run(args: argparse.Namespace) -> None:
         singular_remote=singular_remote,
         groups=groups,
         all_cloned=all_cloned,
-        regex=regex,
-        iregex=iregex,
+        include_regex=include_regex,
+        exclude_regex=exclude_regex,
     )
 
     workspace.clone_missing(num_jobs=num_jobs)

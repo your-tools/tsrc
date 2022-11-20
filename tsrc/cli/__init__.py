@@ -76,11 +76,11 @@ def add_repos_selection_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "-i",
-        dest="regex",
+        dest="include_regex",
         help="Include only repositories matching the regex",
     )
     parser.add_argument(
-        "-e", dest="iregex", help="Exclude repositories matching the regex"
+        "-e", dest="exclude_regex", help="Exclude repositories matching the regex"
     )
 
 
@@ -107,8 +107,8 @@ def get_workspace_with_repos(namespace: argparse.Namespace) -> Workspace:
         workspace,
         groups=namespace.groups,
         all_cloned=namespace.all_cloned,
-        regex=namespace.regex,
-        iregex=namespace.iregex,
+        include_regex=namespace.include_regex,
+        exclude_regex=namespace.exclude_regex,
     )
     return workspace
 
@@ -119,8 +119,8 @@ def resolve_repos(
     singular_remote: str = "",
     groups: Optional[List[str]],
     all_cloned: bool,
-    regex: str = "",
-    iregex: str = "",
+    include_regex: str = "",
+    exclude_regex: str = "",
 ) -> List[Repo]:
     """
     Given a workspace with its config and its local manifest,
@@ -151,11 +151,11 @@ def resolve_repos(
                 filtered_repos.append(repo)
         repos = filtered_repos
 
-    if regex:
-        repos = [repo for repo in repos if re.search(regex, repo.dest)]
+    if include_regex:
+        repos = [repo for repo in repos if re.search(include_regex, repo.dest)]
 
-    if iregex:
-        repos = [repo for repo in repos if not re.search(iregex, repo.dest)]
+    if exclude_regex:
+        repos = [repo for repo in repos if not re.search(exclude_regex, repo.dest)]
 
     # At this point, nothing was requested on the command line, time to
     # use the workspace configuration:
