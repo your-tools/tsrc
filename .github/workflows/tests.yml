@@ -18,10 +18,10 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2.2.2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -36,6 +36,9 @@ jobs:
         # a proper git identity for that
         git config --global user.email "test@tsrc-tests.com"
         git config --global user.name "Tasty Test"
+        # this is needed since git 2.38.1 for submodule tests
+        # using protocol "file"
+        git config --global protocol.file.allow always
 
     # Note: for some reason pytest --cov fails on Windows
     - name: Run tests (unix)

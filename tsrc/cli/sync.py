@@ -18,7 +18,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser = subparser.add_parser("sync")
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
-    parser.set_defaults(update_manifest=True, force=False)
+    parser.set_defaults(update_manifest=True, force=False, correct_branch=False)
     parser.add_argument(
         "--force", help="use `git fetch --force` while syncing", action="store_true"
     )
@@ -27,6 +27,13 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         action="store_false",
         dest="update_manifest",
         help="skip updating the manifest before syncing repositories",
+    )
+    parser.add_argument(
+        "--correct-branch",
+        "-c",
+        action="store_true",
+        dest="correct_branch",
+        help="go back to the configured branch, if the repo is clean",
     )
     parser.add_argument(
         "-r",
@@ -45,6 +52,7 @@ def run(args: argparse.Namespace) -> None:
     singular_remote = args.singular_remote
     regex = args.regex
     iregex = args.iregex
+    correct_branch = args.correct_branch
     workspace = get_workspace(args)
     num_jobs = get_num_jobs(args)
 
@@ -65,6 +73,6 @@ def run(args: argparse.Namespace) -> None:
 
     workspace.clone_missing(num_jobs=num_jobs)
     workspace.set_remotes(num_jobs=num_jobs)
-    workspace.sync(force=force, singular_remote=singular_remote, num_jobs=num_jobs)
+    workspace.sync(force=force, num_jobs=num_jobs, correct_branch=correct_branch, singular_remote=singular_remote)
     workspace.perform_filesystem_operations()
     ui.info_1("Workspace synchronized")
