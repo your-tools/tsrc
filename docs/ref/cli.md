@@ -97,10 +97,10 @@ tsrc status
     * Shows dirty repositories
     * Shows repositories not on the expected branch
 
-tsrc sync [--correct-branch/-c]
+tsrc sync [--no-correct-branch]
 :   Updates all the repositories and shows a summary at the end.
     If any of the repositories is not on the configured branch, but it is clean
-    and the `--correct-branch`/`-c` flag is set, then the branch is changed to
+    and the `--no-correct-branch` flag is NOT set, then the branch is changed to
     the configured one and then the repository is updated. Otherwise that repository
     will not be not updated.
 

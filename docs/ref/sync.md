@@ -7,9 +7,10 @@ Here's the algorithm that is used:
 
 * Run `git fetch --tags --prune`
 * Check if the repository is on a branch
-* Check if the currently checked out branch matches the one configured in
-  the manifest. If it does not but the `--correct-branch` flag is set
-  and the repository is clean, the branch is changed to the configured one. 
+* Check if the currently checked out branch matches the one configured
+  in the manifest. If it does not, the repository is clean and the
+  `--no-correct-branch` flag is NOT set, the branch is changed to the
+  configured one.
 * Check if the repository is dirty
 * Try and run a fast-forward merge
 
