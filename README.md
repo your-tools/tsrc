@@ -10,12 +10,6 @@
 
 # tsrc: manage groups of git repositories
 
-[Overview](#overview) · [Installation](#installation) · [Usage example](#usage-example) · [Documentation](#documentation) · [Release notes](#release-notes) · [Contributing](#contributing) · [License](#license)
-
-## Note
-
-This project was originally hosted on the [TankerHQ](https://github.com/TankerHQ) organization, which was my employer from 2016 to 2021. They kindly agreed to give back ownership of this project to me. Thanks!
-
 ## Overview
 
 tsrc is a command-line tool that helps you manage groups of several git
@@ -39,12 +33,12 @@ The recommended way to install `tsrc` is to use [pipx](https://pipxproject.githu
 
 `manifest.yml`:
 
-``` yaml
+```yaml
 repos:
   - url: git@example.com/foo.git
     dest: foo
 
- -  url: git@example.com/bar.git
+  - url: git@example.com/bar.git
     dest: bar
 ```
 
@@ -55,7 +49,7 @@ It is convenient while optional to include the manifest repository itself in you
   - Create a new workspace with all the repositories listed in the
     manifest:
 
-``` console
+```console
 $ tsrc init git@git.local/manifest.git
 
 :: Configuring workspace in /path/to/work
@@ -71,7 +65,7 @@ Done ✓
 
   - Synchronize all the repositories in the workspace:
 
-``` console
+```console
 $ tsrc sync
 => Updating manifest
 ...
@@ -108,3 +102,7 @@ Detailed instructions can be found [in the documentation](https://your-tools.git
 ## License
 
 tsrc is licensed under a [BSD 3-Clause license](https://github.com/your-tools/tsrc/blob/main/LICENSE).
+
+## History
+
+This project was originally hosted on the [TankerHQ](https://github.com/TankerHQ) organization, which was [dmerejkowsky](https://github.com/dmerejkowsky)'s employer from 2016 to 2021. They kindly agreed to give back ownership of this project to Dimitri in 2021 - thanks! Dimitri later on shared this project even more by moving it to the [your-tools](https://github.com/your-tools) organization.
