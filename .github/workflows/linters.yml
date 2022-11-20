@@ -25,8 +25,17 @@ jobs:
         python -m pip install poetry
         python -m poetry install
 
-    - name: Run linters
-      run: python -m poetry run invoke lint
+    - name: Run black
+      run: python -m poetry run black tsrc --check
+
+    - name: Run isort
+      run: python -m poetry run isort tsrc --check
+
+    - name: Run flake8
+      run: python -m poetry run flake8 tsrc
+
+    - name: Run pypy
+      run: python -m poetry run mypy  --color-output --pretty
 
     - name: Check that doc builds without warnings
       run: python -m poetry run mkdocs build

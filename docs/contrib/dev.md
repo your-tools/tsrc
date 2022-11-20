@@ -38,7 +38,7 @@ Finally, feel free to add your name in the `THANKS` file ;)
 $ poetry install
 ```
 
-* Run linters and tests:
+* Run linters and tests (note: `invoke` doesn't support Python 3.11 as of now, see [this](https://github.com/pyinvoke/invoke/issues/833) for more info)
 
 ```console
 $ poetry run invoke lint
