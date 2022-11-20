@@ -1,14 +1,24 @@
 # Getting started
 
+## Requirements
+
+Python 3.7 or later
+
 ## Installing tsrc
 
-The recommended way to install `tsrc` is to use [pipx](https://pypa.github.io/pipx/)
+The recommended way to install `tsrc` is to use [pipx](https://pypa.github.io/pipx/). This is because `pipx` automatically creates isolated environment for each app, so you won't get into dependencies versions conflicts and won't have to deal with manual virtualenvs management. 
 
-* Make sure to have Python 3.7 or later installed.
-* Install pipx
-* Run `pipx install tsrc`
+`pip` will also work, but it will not give you these benefits.
 
-You can also install `tsrc` with `pip` if you know what you are doing :)
+Recommended:
+```shell
+pipx install tsrc
+```
+
+Acceptable, if you know what you are doing:
+```shell
+pip install tsrc
+```
 
 ## Checking tsrc installation
 
