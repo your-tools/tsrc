@@ -1684,13 +1684,13 @@
 <h2 id="220_2020-07-17">2.2.0 (2020-07-17)<a class="headerlink" href="#220_2020-07-17" title="Permanent link">&para;</a></h2>
 <h3 id="add_symlink_support">Add symlink support<a class="headerlink" href="#add_symlink_support" title="Permanent link">&para;</a></h3>
 <p><code>tsrc sync</code> and <code>tsrc init</code> can now create symlinks as specified in the manifest file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.local:proj1/app</span><span class="w"></span>
-<span class="w">    </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span><span class="w"></span>
-<span class="w">    </span><span class="nt">symlink</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app/some_file</span><span class="w"></span>
-<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../some_file</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.local:proj1/app</span>
+<span class="w">    </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
+<span class="w">    </span><span class="nt">symlink</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app/some_file</span>
+<span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../some_file</span>
 </code></pre></div>
 <p>In this case, a symlink will be created from <code>&lt;workspace&gt;/app/some_file</code> to <code>&lt;workspace&gt;/some_file</code>.
 (both <code>source</code> and <code>target</code> keys are relative to the repository's destination).</p>
@@ -1716,21 +1716,21 @@ used in the <code>repo</code> config, and a relative path in the a repository wh
 using in the <code>repo.copy</code> config.</p>
 <p>Starting with this release, <code>repo.src</code> becomes <code>repo.dest</code> and <code>repo.copy.src</code> becomes
 <code>repo.copy.file</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Before (tsrc &lt; 2.1.0)</span><span class="w"></span>
-<span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme.corp/foo&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="w">  </span><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
-<span class="w">     </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Before (tsrc &lt; 2.1.0)</span>
+<span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme.corp/foo&quot;</span>
+<span class="w">  </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="w">  </span><span class="nt">copy</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span>
+<span class="w">     </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1"># After (tsrc &gt;= 2.1.0)</span><span class="w"></span>
-<span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme.corp/foo&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="nt">dest </span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="w">  </span><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
-<span class="w">     </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># After (tsrc &gt;= 2.1.0)</span>
+<span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme.corp/foo&quot;</span>
+<span class="w">  </span><span class="nt">dest </span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="w">  </span><span class="nt">copy</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span>
+<span class="w">     </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-file</span>
 </code></pre></div>
 <p>This should make it clearer what <code>tsrc</code> does because:</p>
 <ul>
@@ -1804,10 +1804,10 @@ and <code>copy</code>).</li>
 <li><code>tsrc foreach</code>: instead of repeating the <code>--group</code> option, you can use <code>--groups</code> with a list of groups:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># before</span>
-tsrc init --group foo --group bar
+tsrc<span class="w"> </span>init<span class="w"> </span>--group<span class="w"> </span>foo<span class="w"> </span>--group<span class="w"> </span>bar
 
 <span class="c1"># after</span>
-tsrc init --groups foo bar
+tsrc<span class="w"> </span>init<span class="w"> </span>--groups<span class="w"> </span>foo<span class="w"> </span>bar
 </code></pre></div>
 <ul>
 <li>
@@ -1892,21 +1892,21 @@ tsrc init --groups foo bar
 <p>Fix weird output when configuring remotes.</p>
 <h2 id="v060_2018-10-09">v0.6.0 (2018-10-09)<a class="headerlink" href="#v060_2018-10-09" title="Permanent link">&para;</a></h2>
 <h3 id="add_support_for_multiple_remotes">Add support for multiple remotes<a class="headerlink" href="#add_support_for_multiple_remotes" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># still valid (implicit &#39;origin&#39; remote)</span><span class="w"></span>
-<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com/foo</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># still valid (implicit &#39;origin&#39; remote)</span>
+<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com/foo</span>
 
-<span class="c1"># also valid (two explicit remotes)</span><span class="w"></span>
-<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="nt">remotes</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">origin</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">john/foo</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">upstream</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">foo/foo</span><span class="p p-Indicator">}</span><span class="w"></span>
+<span class="c1"># also valid (two explicit remotes)</span>
+<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="nt">remotes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">origin</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">john/foo</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">upstream</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">foo/foo</span><span class="p p-Indicator">}</span>
 
-<span class="c1"># not valid (ambiguous)</span><span class="w"></span>
-<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:john/foo</span><span class="w"></span>
-<span class="nt">remotes</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">upstream</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">foo/foo</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
+<span class="c1"># not valid (ambiguous)</span>
+<span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:john/foo</span>
+<span class="nt">remotes</span><span class="p">:</span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">upstream</span><span class="p p-Indicator">,</span><span class="nt"> url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@github.com</span><span class="p p-Indicator">:</span><span class="nv">foo/foo</span><span class="w"> </span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <p>Thanks @tst2005 and @cgestes for their help with the configuration format.</p>
 <h3 id="tsrc_foreach">tsrc foreach<a class="headerlink" href="#tsrc_foreach" title="Permanent link">&para;</a></h3>
@@ -1960,9 +1960,9 @@ tsrc init --groups foo bar
 <h2 id="improve_fixed_reference_handling">Improve fixed reference handling<a class="headerlink" href="#improve_fixed_reference_handling" title="Permanent link">&para;</a></h2>
 <p><strong>Breaking change</strong>: Instead of using <code>fixed_ref</code> in the manifest, you should now use <code>tag</code> or <code>sha1</code>:</p>
 <p><em>old</em>:
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@example.com/foo</span><span class="w"></span>
-<span class="w">    </span><span class="nt">fixed_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42a70</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@example.com/foo</span>
+<span class="w">    </span><span class="nt">fixed_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42a70</span>
 </code></pre></div></p>
 <p><em>new</em>:
 <div class="highlight"><pre><span></span><code>repos:
@@ -2001,12 +2001,12 @@ tsrc init --groups foo bar
 <p>See the <a href="../ref/manifest-config/#groups">dedicated section about manifest format</a> for details.</p>
 <p><strong>Upgrading from v0.2.4</strong>:</p>
 <p>To upgrade from an older version of <code>tsrc</code>, you should re-run <code>tsrc init</code> with the correct url:</p>
-<div class="highlight"><pre><span></span><code><span class="gp"># </span>Check manifest URL:
-<span class="gp">$ </span><span class="nb">cd</span> &lt;workspace&gt;/.tsrc/manifest
-<span class="gp">$ </span>git remote get-url origin
-<span class="gp"># </span>Note the url, <span class="k">for</span> instance ssh://git@example.com:manifest.git
-<span class="gp">$ </span><span class="nb">cd</span> &lt;workspace&gt;
-<span class="gp">$ </span>tsrc init &lt;manifest-url&gt;
+<div class="highlight"><pre><span></span><code><span class="gp"># </span>Check<span class="w"> </span>manifest<span class="w"> </span>URL:
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>&lt;workspace&gt;/.tsrc/manifest
+<span class="gp">$ </span>git<span class="w"> </span>remote<span class="w"> </span>get-url<span class="w"> </span>origin
+<span class="gp"># </span>Note<span class="w"> </span>the<span class="w"> </span>url,<span class="w"> </span><span class="k">for</span><span class="w"> </span>instance<span class="w"> </span>ssh://git@example.com:manifest.git
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>&lt;workspace&gt;
+<span class="gp">$ </span>tsrc<span class="w"> </span>init<span class="w"> </span>&lt;manifest-url&gt;
 </code></pre></div>
 <p>This is required to create the <code>&lt;workspace&gt;/.tsrc/manifest.yml</code> file which is later used by <code>tsrc sync</code> and other commands.</p>
 <h1 id="v024_2017-07-13">v0.2.4 (2017-07-13)<a class="headerlink" href="#v024_2017-07-13" title="Permanent link">&para;</a></h1>
@@ -2036,28 +2036,28 @@ tsrc init --groups foo bar
 <li>Support for specifying fixed refs (tags or hashes) in the manifest</li>
 </ul>
 <p>New syntax is:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.com:proj/foo</span><span class="w"></span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">next</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.com:proj/foo</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">next</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.com:proj/bar</span><span class="w"></span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span><span class="w"></span>
-<span class="w">    </span><span class="nt">fixed_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.com:proj/bar</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span>
+<span class="w">    </span><span class="nt">fixed_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.1</span>
 </code></pre></div>
 <p>Note that <code>branch</code> is still required.</p>
 <ul>
 <li>You can now skip the <code>dest</code> part of the <code>copy</code> section if <code>src</code> and <code>dest</code> are
   equal:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src:foo</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">copy</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src:foo</span>
 
-<span class="c1"># same thing as</span><span class="w"></span>
-<span class="nt">copy</span><span class="p">:</span><span class="w"></span>
-<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="w">   </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="c1"># same thing as</span>
+<span class="nt">copy</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="w">   </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
 </code></pre></div>
 <h1 id="v014_2017-08-04">v0.1.4 (2017-08-04)<a class="headerlink" href="#v014_2017-08-04" title="Permanent link">&para;</a></h1>
 <p>Support for Python 3.3, 3.4, 3.5 and 3.6</p>

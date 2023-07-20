@@ -708,21 +708,21 @@ of repositories grows and if you have people in different teams work on differen
 <h2 id="defining_groups_in_the_manifest">Defining groups in the manifest<a class="headerlink" href="#defining_groups_in_the_manifest" title="Permanent link">&para;</a></h2>
 <p>The first step is to edit the <code>manifest.yml</code> file to describe the groups. Here's an
 example.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@gitlab.local</span><span class="p p-Indicator">:</span><span class="nv">acme/one</span><span class="p p-Indicator">,</span><span class="nt">   dest</span><span class="p">:</span><span class="w"> </span><span class="nv">one</span><span class="p p-Indicator">}</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@gitlab.local</span><span class="p p-Indicator">:</span><span class="nv">acme/two</span><span class="p p-Indicator">,</span><span class="nt">   dest</span><span class="p">:</span><span class="w"> </span><span class="nv">two</span><span class="p p-Indicator">}</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@gitlab.local</span><span class="p p-Indicator">:</span><span class="nv">acme/three</span><span class="p p-Indicator">,</span><span class="nt"> dest</span><span class="p">:</span><span class="w"> </span><span class="nv">three</span><span class="p p-Indicator">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@gitlab.local</span><span class="p p-Indicator">:</span><span class="nv">acme/one</span><span class="p p-Indicator">,</span><span class="nt">   dest</span><span class="p">:</span><span class="w"> </span><span class="nv">one</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@gitlab.local</span><span class="p p-Indicator">:</span><span class="nv">acme/two</span><span class="p p-Indicator">,</span><span class="nt">   dest</span><span class="p">:</span><span class="w"> </span><span class="nv">two</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="nv">git@gitlab.local</span><span class="p p-Indicator">:</span><span class="nv">acme/three</span><span class="p p-Indicator">,</span><span class="nt"> dest</span><span class="p">:</span><span class="w"> </span><span class="nv">three</span><span class="p p-Indicator">}</span>
 
-<span class="nt">groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"></span>
-<span class="w">  </span><span class="nt">g1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">two</span><span class="w"></span>
-<span class="w">  </span><span class="nt">g2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">three</span><span class="w"></span>
+<span class="nt">groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">default</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">  </span><span class="nt">g1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">two</span>
+<span class="w">  </span><span class="nt">g2</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">three</span>
 </code></pre></div>
 <p>Here we define a <code>g1</code> group that contains repositories named <code>one</code> and <code>two</code>,
 and a <code>g2</code> group that contains the repository named <code>three</code>.</p>
@@ -740,10 +740,10 @@ you can do the following:</p>
 </code></pre></div>
 <h2 id="updating_workspace_configuration">Updating workspace configuration<a class="headerlink" href="#updating_workspace_configuration" title="Permanent link">&para;</a></h2>
 <p>Alternatively, you can edit the <code>.tsrc/config.yml</code> file, like this:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">manifest_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.local:acme/manifest.git</span><span class="w"></span>
-<span class="nt">manifest_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span><span class="w"></span>
-<span class="nt">repo_groups</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">g1</span><span class="w">   </span><span class="c1"># &lt;- specify the list of groups to use</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">manifest_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.local:acme/manifest.git</span>
+<span class="nt">manifest_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span>
+<span class="nt">repo_groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">g1</span><span class="w">   </span><span class="c1"># &lt;- specify the list of groups to use</span>
 </code></pre></div>
 <p>You can use this technique to change the groups used in a given workspace -
 the above method using <code>init</code> only works to <em>create</em> new workspaces.</p>

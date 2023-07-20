@@ -754,13 +754,13 @@
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># Yes</span>
 <span class="k">def</span> <span class="nf">bar</span><span class="p">():</span>
-   <span class="sd">&quot;&quot;&quot; bar stuff &quot;&quot;&quot;</span>
+<span class="w">   </span><span class="sd">&quot;&quot;&quot; bar stuff &quot;&quot;&quot;</span>
    <span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span>
 
 
 <span class="c1"># No</span>
 <span class="k">def</span> <span class="nf">bar</span><span class="p">():</span>
-   <span class="sd">&#39;&#39;&#39; bar stuff &#39;&#39;&#39;</span>
+<span class="w">   </span><span class="sd">&#39;&#39;&#39; bar stuff &#39;&#39;&#39;</span>
    <span class="n">a</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 
 <span class="c1"># Exception</span>
@@ -1071,7 +1071,7 @@ After such a change, the line <code>foo(42, False)</code> which used to call <co
 of the test scenario in the doc string.</p>
 <p>For instance:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_sync_with_errors</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;&quot; Scenario:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot; Scenario:</span>
 <span class="sd">    * Create a manifest with two repos (foo and bar)</span>
 <span class="sd">    * Initialize a workspace from this manifest</span>
 <span class="sd">    * Push a new file to the foo repo</span>

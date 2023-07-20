@@ -680,7 +680,7 @@ the same command for each repo in the workspace.</p>
 <p>This can be used for several things. For instance, if you are building
 an artifact from a group of repositories, you may want to put a tag on
 each repo that was used to produce it:</p>
-<div class="highlight"><pre><span></span><code>$ tsrc foreach git tag v1.2
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span>foreach<span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>v1.2
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>:: Using workspace in /path/to/work
 :: Running `git tag v1.1` on 2 repos
@@ -711,7 +711,7 @@ foreach</code>.</p>
 <p>Let's take an example, where you have a manifest containing <code>foo</code> and <code>bar</code> and both
 repos are configured to use a <code>master</code> branch.</p>
 <p>Here's what happens if you run <code>tsrc sync</code> with <code>bar</code> on the correct branch (<code>master</code>), and <code>foo</code> on an incorrect branch (<code>devel</code>):</p>
-<div class="highlight"><pre><span></span><code>$ tsrc sync
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span>sync
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>:: Using workspace in /path/to/work
 =&gt; Updating manifest
@@ -734,7 +734,7 @@ Error: Failed to synchronize the following repos:
 </code></pre></div>
 <p>If this happens with multiple repos, you may want a command to checkout the correct branch automatically.</p>
 <p>Here's one way to do it:</p>
-<div class="highlight"><pre><span></span><code>$ tsrc foreach -c <span class="s1">&#39;git checkout $TSRC_PROJECT_MANIFEST_BRANCH&#39;</span>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span>foreach<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;git checkout $TSRC_PROJECT_MANIFEST_BRANCH&#39;</span>
 </code></pre></div>
 <p>Here we take advantage of the fact that <code>tsrc</code> sets the <code>TSRC_PROJECT_MANIFEST_BRANCH</code>
 environment variable correctly for each repository before running the command.</p>
@@ -812,13 +812,13 @@ environment variable correctly for each repository before running the command.</
 <p>You can implement more complex behavior using the environment variables above, for instance:</p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># in switch-and-pull</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">TSRC_PROJECT_STATUS_DIRTY</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">=</span> <span class="s2">&quot;true&quot;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
-  <span class="nb">echo</span> Error: project is dirty
-  <span class="nb">exit</span> <span class="m">1</span>
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">TSRC_PROJECT_STATUS_DIRTY</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span>Error:<span class="w"> </span>project<span class="w"> </span>is<span class="w"> </span>dirty
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
 <span class="k">fi</span>
 
-git switch <span class="nv">$TSRC_PROJECT_MANIFEST_BRANCH</span>
-git pull
+git<span class="w"> </span>switch<span class="w"> </span><span class="nv">$TSRC_PROJECT_MANIFEST_BRANCH</span>
+git<span class="w"> </span>pull
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>$ tsrc foreach switch-and-pull
 :: Running `switch-and-pull` on 2 repos

@@ -703,20 +703,20 @@ support.</p>
 <li>Install latest <a href="https://python-poetry.org">poetry</a> version.</li>
 <li>Install development and documentation dependencies:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="gp">$ </span>poetry install
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>poetry<span class="w"> </span>install
 </code></pre></div>
 <ul>
 <li>Run linters and tests:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="gp">$ </span>poetry run invoke lint
-<span class="gp">$ </span>poetry run pytest -n auto
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>invoke<span class="w"> </span>lint
+<span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-n<span class="w"> </span>auto
 </code></pre></div>
 <h2 id="adding_documentation">Adding documentation<a class="headerlink" href="#adding_documentation" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Follow the steps from the above section to setup your python environment</li>
 <li>Launch the development server locally:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>$ poetry run mkdocs serve
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve
 </code></pre></div>
 <ul>
 <li>Edit the markdown files from the <code>docs/</code> folder and review the changes in your browser</li>

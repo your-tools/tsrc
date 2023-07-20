@@ -705,14 +705,14 @@
 <h1 id="using_fixed_git_references">Using fixed git references<a class="headerlink" href="#using_fixed_git_references" title="Permanent link">&para;</a></h1>
 <p>By default, <code>tsrc sync</code> synchronize projects using <em>branches names</em>.</p>
 <p>Usually, one would use the same branch name for several git repositories, like this:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.acme.com/your-team/foo</span><span class="w"></span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.acme.com/your-team/foo</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.acme.com/your-team/bar</span><span class="w"></span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@gitlab.acme.com/your-team/bar</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
 </code></pre></div>
 <p>The assumption here is that <code>foo</code> and <code>bar</code> evolve "at the same time", so when the
 <code>main</code> branch of <code>foo</code> is updated, the <code>main</code> branch of <code>bar</code> much change too.</p>
@@ -721,20 +721,20 @@
 <h2 id="using_a_tag">Using a tag<a class="headerlink" href="#using_a_tag" title="Permanent link">&para;</a></h2>
 <p>One way to solve this is to push a v1.0 tag in the <code>foo</code> repository, and change
 the manifest too look like this:</p>
-<div class="highlight"><pre><span></span><code><span class="w">repos:</span>
-<span class="w"> </span> - dest: foo<span class="w"></span>
-<span class="w"> </span>   url: git@gitlab.acme.com/your-team/foo<span class="w"></span>
-<span class="gd">-    branch: main</span><span class="w"></span>
-<span class="gi">+    tag: v1.0</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code>repos:
+<span class="w"> </span> - dest: foo
+<span class="w"> </span>   url: git@gitlab.acme.com/your-team/foo
+<span class="gd">-    branch: main</span>
+<span class="gi">+    tag: v1.0</span>
 </code></pre></div>
 <h2 id="using_a_sha1">Using a sha1<a class="headerlink" href="#using_a_sha1" title="Permanent link">&para;</a></h2>
 <p>An other way is to put the SHA1 of the relevant git commit in the <code>foo</code> repository in the
 manifest:</p>
-<div class="highlight"><pre><span></span><code><span class="w">repos:</span>
-<span class="w"> </span> - dest: foo<span class="w"></span>
-<span class="w"> </span>   url: git@gitlab.acme.com/your-team/foo<span class="w"></span>
-<span class="w"> </span>   branch: main<span class="w"></span>
-<span class="gi">+    sha1: ad2b68539c78e749a372414165acdf2a1bb68203</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code>repos:
+<span class="w"> </span> - dest: foo
+<span class="w"> </span>   url: git@gitlab.acme.com/your-team/foo
+<span class="w"> </span>   branch: main
+<span class="gi">+    sha1: ad2b68539c78e749a372414165acdf2a1bb68203</span>
 </code></pre></div>
 <h2 id="cloning_repos_using_fixed_refs">Cloning repos using fixed refs<a class="headerlink" href="#cloning_repos_using_fixed_refs" title="Permanent link">&para;</a></h2>
 <ul>

@@ -723,26 +723,26 @@ consider using <em>git submodules</em> instead.</p>
 <h2 id="copying_a_file">Copying a file<a class="headerlink" href="#copying_a_file" title="Permanent link">&para;</a></h2>
 <p>One solution is to put the <code>.clang-format</code> configuration file in a repo named
 <code>common</code> and then tell <code>tsrc</code> to copy it at the root of the workspace:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_1</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_1</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_1</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_1</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_2</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_2</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_2</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">common</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/commont</span><span class="w"></span>
-<span class="w">    </span><span class="nt">copy</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clang-format</span><span class="w"></span>
-<span class="w">      </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.clang-format</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">common</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/commont</span>
+<span class="w">    </span><span class="nt">copy</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clang-format</span>
+<span class="w">      </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.clang-format</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>$ tsrc <span class="nv">sync</span>
-<span class="o">=</span>&gt; Cloning missing repos
-* <span class="o">(</span><span class="m">1</span>/1<span class="o">)</span> Cloning common
-Cloning into <span class="s1">&#39;common&#39;</span>...
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span><span class="nv">sync</span>
+<span class="o">=</span>&gt;<span class="w"> </span>Cloning<span class="w"> </span>missing<span class="w"> </span>repos
+*<span class="w"> </span><span class="o">(</span><span class="m">1</span>/1<span class="o">)</span><span class="w"> </span>Cloning<span class="w"> </span>common
+Cloning<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;common&#39;</span>...
 ...
-<span class="o">=</span>&gt; Performing filesystem operations
-* <span class="o">(</span><span class="m">1</span>/1<span class="o">)</span> Copy /path/to/work/common/clang-format -&gt; /path/to/work/.clang-format
+<span class="o">=</span>&gt;<span class="w"> </span>Performing<span class="w"> </span>filesystem<span class="w"> </span>operations
+*<span class="w"> </span><span class="o">(</span><span class="m">1</span>/1<span class="o">)</span><span class="w"> </span>Copy<span class="w"> </span>/path/to/work/common/clang-format<span class="w"> </span>-&gt;<span class="w"> </span>/path/to/work/.clang-format
 </code></pre></div>
 <p>Notes:</p>
 <ul>
@@ -753,24 +753,24 @@ Cloning into <span class="s1">&#39;common&#39;</span>...
 <h2 id="creating_a_symlink">Creating a symlink<a class="headerlink" href="#creating_a_symlink" title="Permanent link">&para;</a></h2>
 <p>The above method works fine if the file does not change too often - if not, you may want to create
 a symbolic link instead:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_1</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_1</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_1</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_1</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_2</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_2</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/project_2</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">common</span><span class="w"></span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/commont</span><span class="w"></span>
-<span class="w">    </span><span class="nt">symlink</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.clang-format</span><span class="w"></span>
-<span class="w">      </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">common/clang-format</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">common</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:team/commont</span>
+<span class="w">    </span><span class="nt">symlink</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.clang-format</span>
+<span class="w">      </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">common/clang-format</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>$ tsrc <span class="nv">sync</span>
-<span class="o">=</span>&gt; Cloning missing repos
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span><span class="nv">sync</span>
+<span class="o">=</span>&gt;<span class="w"> </span>Cloning<span class="w"> </span>missing<span class="w"> </span>repos
 ...
-<span class="o">=</span>&gt; Performing filesystem operations
-* <span class="o">(</span><span class="m">1</span>/1<span class="o">)</span> Lint /path/to/work/.clang-format -&gt; common/.clang-format
+<span class="o">=</span>&gt;<span class="w"> </span>Performing<span class="w"> </span>filesystem<span class="w"> </span>operations
+*<span class="w"> </span><span class="o">(</span><span class="m">1</span>/1<span class="o">)</span><span class="w"> </span>Lint<span class="w"> </span>/path/to/work/.clang-format<span class="w"> </span>-&gt;<span class="w"> </span>common/.clang-format
 </code></pre></div>
 <p>Notes:</p>
 <ul>

@@ -695,23 +695,23 @@ organization - now need to make sure to not break anyone's workflow.</p>
 <p>Let's see what could go wrong if you make mistakes while editing the
 manifest, using a branch called <code>broken</code> for the sake of the example).</p>
 <p>First, let's see what happens if you break the YAML syntax:</p>
-<div class="highlight"><pre><span></span><code><span class="w">commit 1633c5a6 (HEAD -&gt; broken, origin/broken)</span>
+<div class="highlight"><pre><span></span><code>commit 1633c5a6 (HEAD -&gt; broken, origin/broken)
 
-<span class="w"> </span>   Break the manifest syntax<span class="w"></span>
+<span class="w"> </span>   Break the manifest syntax
 
-<span class="gh">diff --git a/manifest.yml b/manifest.yml</span><span class="w"></span>
-<span class="gh">index fe74142..068c35e 100644</span><span class="w"></span>
-<span class="gd">--- a/manifest.yml</span><span class="w"></span>
-<span class="gi">+++ b/manifest.yml</span><span class="w"></span>
-<span class="gu">@@ -1,4 +1,4 @@</span><span class="w"></span>
-<span class="gd">-repos:</span><span class="w"></span>
-<span class="gi">+repos</span><span class="w"></span>
-<span class="w"> </span>  - url: git@github.com:your-tools/bar.git<span class="w"></span>
-<span class="w"> </span>    dest: bar<span class="w"></span>
+<span class="gh">diff --git a/manifest.yml b/manifest.yml</span>
+<span class="gh">index fe74142..068c35e 100644</span>
+<span class="gd">--- a/manifest.yml</span>
+<span class="gi">+++ b/manifest.yml</span>
+<span class="gu">@@ -1,4 +1,4 @@</span>
+<span class="gd">-repos:</span>
+<span class="gi">+repos</span>
+<span class="w"> </span>  - url: git@github.com:your-tools/bar.git
+<span class="w"> </span>    dest: bar
 </code></pre></div>
 <p>After this change is push,  anyone using the <code>broken</code> branch of the
 manifest will be faced with this kind of error message:</p>
-<div class="highlight"><pre><span></span><code>$ tsrc sync
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span>sync
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>=&gt; Updating manifest
 Reset branch &#39;broken&#39;
@@ -725,22 +725,22 @@ not allowed here :
            ^ (line: 2)
 </code></pre></div>
 <p>Similarly, if you put an invalid URL in the manifest, like this:</p>
-<div class="highlight"><pre><span></span><code><span class="w">commit ccfb902 (HEAD -&gt; broken, origin/broken)</span>
+<div class="highlight"><pre><span></span><code>commit ccfb902 (HEAD -&gt; broken, origin/broken)
 
-<span class="w"> </span>   Use invalid URL for bar repo<span class="w"></span>
+<span class="w"> </span>   Use invalid URL for bar repo
 
-<span class="gh">diff --git a/manifest.yml b/manifest.yml</span><span class="w"></span>
-<span class="gh">index fe74142..068c35e 100644</span><span class="w"></span>
-<span class="gd">--- a/manifest.yml</span><span class="w"></span>
-<span class="gi">+++ b/manifest.yml</span><span class="w"></span>
-<span class="gu">@@ -1,4 +1,4 @@</span><span class="w"></span>
-<span class="w">repos:</span>
-<span class="gd">-  - url: git@gitlab.acme.com:your-team/bar</span><span class="w"></span>
-<span class="gi">+  - url: git@gitlab.acme.com:your-team/invalid</span><span class="w"></span>
-<span class="w"> </span>    dest: bar<span class="w"></span>
+<span class="gh">diff --git a/manifest.yml b/manifest.yml</span>
+<span class="gh">index fe74142..068c35e 100644</span>
+<span class="gd">--- a/manifest.yml</span>
+<span class="gi">+++ b/manifest.yml</span>
+<span class="gu">@@ -1,4 +1,4 @@</span>
+repos:
+<span class="gd">-  - url: git@gitlab.acme.com:your-team/bar</span>
+<span class="gi">+  - url: git@gitlab.acme.com:your-team/invalid</span>
+<span class="w"> </span>    dest: bar
 </code></pre></div>
 <p>Users will get:</p>
-<div class="highlight"><pre><span></span><code>$ tsrc sync
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>tsrc<span class="w"> </span>sync
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>:: Using workspace in /path/to/work
 =&gt; Updating manifest
@@ -773,13 +773,13 @@ will <em>definitely</em> confuse them.</p>
 <p>If you have a file on your machine containing the manifest changes, you
 can use <code>tsrc apply-manifest</code> to check those changes against your own
 workspace:</p>
-<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /path/to/work
-$ tsrc apply-manifest /path/to/manifest-repo/manifest.yml
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/path/to/work
+$<span class="w"> </span>tsrc<span class="w"> </span>apply-manifest<span class="w"> </span>/path/to/manifest-repo/manifest.yml
 <span class="c1"># Check that the changes are OK</span>
 <span class="c1"># If so, commit and push manifest changes:</span>
-$ <span class="nb">cd</span> path/to/manifest-repo
-$ git commit -a -m <span class="s2">&quot;...&quot;</span>
-$ git push
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>path/to/manifest-repo
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-a<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;...&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push
 <span class="c1"># Now you know that everyone can safely run `tsrc sync`</span>
 </code></pre></div>
 <h2 id="additional_notes">Additional notes<a class="headerlink" href="#additional_notes" title="Permanent link">&para;</a></h2>
@@ -794,16 +794,16 @@ $ git push
 <p>It is common to place the manifest repo itself in the manifest - so it's easy to edit or read:</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># In acme.com:your-team/manifest - manifest.yml</span><span class="w"></span>
-<span class="nt">repos</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:your-team/manifest</span><span class="w"></span>
-<span class="w">     </span><span class="l l-Scalar l-Scalar-Plain">dest</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifest</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># In acme.com:your-team/manifest - manifest.yml</span>
+<span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:your-team/manifest</span>
+<span class="w">     </span><span class="l l-Scalar l-Scalar-Plain">dest</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifest</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:your-team/foo</span><span class="w"></span>
-<span class="w">     </span><span class="l l-Scalar l-Scalar-Plain">dest</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:your-team/foo</span>
+<span class="w">     </span><span class="l l-Scalar l-Scalar-Plain">dest</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:your-team/bar</span><span class="w"></span>
-<span class="w">     </span><span class="l l-Scalar l-Scalar-Plain">dest</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@acme.com:your-team/bar</span>
+<span class="w">     </span><span class="l l-Scalar l-Scalar-Plain">dest</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span>
 </code></pre></div>
 <p>In that case, you would use:</p>
 <div class="highlight"><pre><span></span><code>$ tsrc apply-manifest &lt;workspace&gt;/manifest/manifest.yml

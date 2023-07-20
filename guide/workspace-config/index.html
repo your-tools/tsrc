@@ -685,23 +685,23 @@ will be written in the <code>.tsrc/config.yml</code>.</p>
 <div class="highlight"><pre><span></span><code>tsrc init git@github.com:dmerejkowsky/dummy-manifest
 </code></pre></div>
 <p>generates this file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">manifest_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:dmerejkowsky/dummy-manifest</span><span class="w"></span>
-<span class="nt">manifest_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span><span class="w"></span>
-<span class="nt">repo_groups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"></span>
-<span class="nt">shallow_clones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">clone_all_repos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">singular_remote</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">manifest_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:dmerejkowsky/dummy-manifest</span>
+<span class="nt">manifest_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span>
+<span class="nt">repo_groups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">shallow_clones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">clone_all_repos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">singular_remote</span><span class="p">:</span>
 </code></pre></div>
 <p>But</p>
 <div class="highlight"><pre><span></span><code>tsrc init git@github.com:dmerejkowsky/dummy-manifest --branch main
 </code></pre></div>
 <p>generates this instead:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">manifest_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:dmerejkowsky/dummy-manifest</span><span class="w"></span>
-<span class="nt">manifest_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
-<span class="nt">repo_groups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"></span>
-<span class="nt">shallow_clones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">clone_all_repos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">singular_remote</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">manifest_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@github.com:dmerejkowsky/dummy-manifest</span>
+<span class="nt">manifest_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="nt">repo_groups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">shallow_clones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">clone_all_repos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">singular_remote</span><span class="p">:</span>
 </code></pre></div>
 <h2 id="editing">Editing<a class="headerlink" href="#editing" title="Permanent link">&para;</a></h2>
 <p>You can edit the workspace configuration as you please, for instance
