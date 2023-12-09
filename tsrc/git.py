@@ -20,7 +20,12 @@ class GitError(Error):
 
 class GitCommandError(GitError):
     def __init__(
-        self, working_path: Path, cmd: Iterable[str], *, output: Optional[str] = None
+        self,
+        working_path: Path,
+        cmd: Iterable[str],
+        *,
+        output: Optional[str] = None,
+        error: Optional[str] = None,
     ) -> None:
         self.cmd = cmd
         self.working_path = working_path
@@ -29,6 +34,8 @@ class GitCommandError(GitError):
         message = f"`git {cmd_str}` from {working_path} failed"
         if output:
             message += "\n" + output
+        if error:
+            message += "\n" + error
         super().__init__(message)
 
 
@@ -238,18 +245,18 @@ def run_git_captured(
 
     options: Dict[str, Any] = {}
     options["stdout"] = subprocess.PIPE
-    options["stderr"] = subprocess.STDOUT
+    options["stderr"] = subprocess.PIPE
+    options["text"] = True
 
     ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
     process = subprocess.Popen(git_cmd, cwd=working_path, **options)
-    out, _ = process.communicate()
-    out = out.decode("utf-8")
+    out, err = process.communicate()
     if out.endswith("\n"):
         out = out.strip("\n")
     returncode = process.returncode
     ui.debug(ui.lightgray, "[", returncode, "]", ui.reset, out)
     if check and returncode != 0:
-        raise GitCommandError(working_path, cmd, output=out)
+        raise GitCommandError(working_path, cmd, output=out, error=err)
     return returncode, out
 
 
