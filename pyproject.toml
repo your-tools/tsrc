@@ -29,7 +29,7 @@ unidecode = "^1.1.1"
 
 [tool.poetry.dev-dependencies]
 # Task runner
-invoke = "^1.5.0"
+invoke = "^2.2"
 
 # Tests
 coverage = ">= 6.0b1"
