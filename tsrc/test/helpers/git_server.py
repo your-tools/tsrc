@@ -4,12 +4,13 @@ that contains valid git URLs.
 It is mostly used by the end-to-end tests in tsrc/test/cli/.
 """
 
+from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pygit2
 import pytest
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 RepoConfig = Dict[str, Any]
 CopyConfig = Tuple[str, str]
@@ -171,7 +172,10 @@ class ManifestHandler:
         self.repo.set_head(new_head)
 
     def write_changes(self, message: str) -> None:
-        to_write = ruamel.yaml.dump(self.data)
+        yaml = YAML(typ="safe", pure=True)
+        stream = StringIO()
+        yaml.dump(self.data, stream)
+        to_write = stream.getvalue()
         assert to_write
         self.repo.commit_file(
             "manifest.yml", contents=to_write, message=message, branch=self.branch

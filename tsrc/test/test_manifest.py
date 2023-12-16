@@ -1,4 +1,5 @@
 import textwrap
+from io import StringIO
 from pathlib import Path
 from typing import List, Optional
 
@@ -9,6 +10,14 @@ from tsrc.errors import Error, InvalidConfig
 from tsrc.file_system import Copy, Link
 from tsrc.manifest import Manifest, RepoNotFound, load_manifest
 from tsrc.repo import Remote, Repo
+
+
+def parse_manifest(contents: str) -> Manifest:
+    manifest = Manifest()
+    yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+    parsed = yaml.load(StringIO(contents))
+    manifest.apply_config(parsed)
+    return manifest
 
 
 def test_load() -> None:
@@ -35,9 +44,7 @@ repos:
         target: some_target
     ignore_submodules: true
 """
-    manifest = Manifest()
-    parsed = ruamel.yaml.safe_load(contents)
-    manifest.apply_config(parsed)
+    manifest = parse_manifest(contents)
     assert manifest.get_repos() == [
         Repo(
             remotes=[Remote(name="origin", url="git@example.com:foo.git")],
@@ -80,9 +87,7 @@ repos:
   - dest: bar
     url: git@example.com:proj_two/bar
 """
-    manifest = Manifest()
-    parsed = ruamel.yaml.safe_load(contents)
-    manifest.apply_config(parsed)
+    manifest = parse_manifest(contents)
 
     def assert_clone_url(dest: str, url: str) -> None:
         repo = manifest.get_repo(dest)
@@ -104,9 +109,7 @@ repos:
       - name: upstream
         url: git@upstream.com/foo
 """
-    manifest = Manifest()
-    parsed = ruamel.yaml.safe_load(contents)
-    manifest.apply_config(parsed)
+    manifest = parse_manifest(contents)
     one_repo = manifest.get_repo("foo")
     assert len(one_repo.remotes) == 1
 
