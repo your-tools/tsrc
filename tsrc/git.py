@@ -183,6 +183,18 @@ class GitStatus:
         return res
 
 
+def get_git_cmd(*args: str) -> List[str]:
+    git_cmd = ["git"]
+    testing = os.environ.get("TSRC_TESTING")
+    if testing:
+        # We need to check that `tsrc` works well with submodules and we
+        # need to use the file:// protocol during tests This is disabled
+        # by default for security reasons, so only allow it when testing
+        git_cmd = git_cmd + ["-c", "protocol.file.allow=always"]
+    git_cmd += list(args)
+    return git_cmd
+
+
 def run_git(
     working_path: Path,
     *cmd: str,
@@ -194,9 +206,7 @@ def run_git(
 
     Raise GitCommandError if return code is non-zero and `check` is True.
     """
-    assert_working_path(working_path)
-    git_cmd = list(cmd)
-    git_cmd.insert(0, "git")
+    git_cmd = get_git_cmd(*cmd)
 
     if show_cmd:
         ui.info(ui.blue, "$", ui.reset, *git_cmd)
@@ -224,8 +234,8 @@ def run_git_captured(
     Raise GitCommandError if return code is non-zero and check is True.
     """
     assert_working_path(working_path)
-    git_cmd = list(cmd)
-    git_cmd.insert(0, "git")
+    git_cmd = get_git_cmd(*cmd)
+
     options: Dict[str, Any] = {}
     options["stdout"] = subprocess.PIPE
     options["stderr"] = subprocess.STDOUT
