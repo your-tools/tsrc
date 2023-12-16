@@ -12,6 +12,25 @@ Previously, `tsrc sync` would print an error and *not* checkout the branch.
 
 To have `tsrc sync` behave like this, use the new `--no-correct-branch` flag.
 
+### Breaking: add --singular-remote argument to tsrc sync too
+
+In `tsrc 2.7` you could use `-r` in `tsrc init` to only use one
+remote. But you had no way to pass the same option to `tsrc sync`.
+
+In this version, you can use `-r` or `--singular-remote` for both
+`tsrc init` and `tsrc sync`
+
+Unfortunately , this  means you must now use `-i, --include <regex>`
+instead of of `-r <regex>` when selecting repositories based on a regex.
+
+Implemented by:
+
+* Albert De La Fuente Vigliotti
+* Greg Dubicki
+* Dimitri Merejkowsky
+
+Original issue reportedy by Maxime Réty
+
 ### Other changes
 
 * When running git commands, don't capture standard error along side standard out - fixes
