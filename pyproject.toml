@@ -48,8 +48,8 @@ types-mock = "^0.1.1"
 mypy = "0.960"
 
 # Docs
-mkdocs = "1.4.0"
-mkdocs-material = "8.2.7"
+mkdocs = "^1.5"
+mkdocs-material = "^9.5"
 
 [tool.poetry.scripts]
 tsrc = "tsrc.cli.main:main"
