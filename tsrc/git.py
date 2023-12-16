@@ -218,7 +218,7 @@ def run_git(
             cwd=working_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True,
+            text=True,
         )
     if process.returncode != 0 and check:
         raise GitCommandError(working_path, cmd, output=process.stdout)

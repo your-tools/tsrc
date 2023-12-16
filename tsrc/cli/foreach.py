@@ -206,7 +206,7 @@ class CmdRunner(Task[Repo]):
             if self.parallel:
                 kwargs["stdout"] = subprocess.PIPE
                 kwargs["stderr"] = subprocess.STDOUT
-            process = subprocess.run(self.command, **kwargs, universal_newlines=True)
+            process = subprocess.run(self.command, **kwargs, text=True)
         except OSError as e:
             raise CouldNotStartProcess("Error when starting process:", e)
         if process.returncode != 0:
