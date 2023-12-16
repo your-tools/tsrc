@@ -1,5 +1,6 @@
 """ Fixtures for tsrc testing. """
 
+import os
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -9,6 +10,11 @@ from cli_ui.tests import MessageRecorder
 from tsrc.test.helpers.cli import tsrc_cli  # noqa: F401
 from tsrc.test.helpers.git_server import git_server  # noqa: F401
 from tsrc.workspace import Workspace
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_test_env() -> None:
+    os.environ["TSRC_TESTING"] = "true"
 
 
 @pytest.fixture()
