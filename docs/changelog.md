@@ -1,6 +1,6 @@
 # Changelog
 
-## Unrelased
+## 3.0.0
 
 ### Breaking: correct branch on sync
 
