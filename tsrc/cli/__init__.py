@@ -145,7 +145,7 @@ def resolve_repos(
             remotes = [
                 remote
                 for remote in repo.remotes
-                if re.search(singular_remote, remote.name)
+                if singular_remote.lower() == remote.name.lower()
             ]
             if remotes:
                 filtered_repos.append(repo)
