@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from typing import Any
 
-import ruamel.yaml
 from cli_ui.tests import MessageRecorder
+from ruamel.yaml import YAML
 
 from tsrc.errors import Error
 from tsrc.git import get_sha1, run_git, run_git_captured
@@ -237,10 +237,9 @@ def add_repo_unstaged(name: str, git_server: GitServer, workspace_path: Path) ->
     manifest_data = git_server.manifest.data.copy()
     manifest_data["repos"].append(repo_config)
     manifest_path = workspace_path / ".tsrc" / "manifest" / "manifest.yml"
-    with open(manifest_path, "w") as manifest:
-        to_write = ruamel.yaml.dump(manifest_data)
-        assert to_write
-        manifest.write(to_write)
+    yaml = YAML(typ="safe", pure=True)
+    with open(manifest_path, "w") as stream:
+        yaml.dump(manifest_data, stream)
 
 
 def test_sync_discards_local_manifest_changes(

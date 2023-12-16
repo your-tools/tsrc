@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import ruamel.yaml
+from ruamel.yaml import YAML
 
 from tsrc.cli import resolve_repos
 from tsrc.repo import Repo
@@ -20,9 +20,9 @@ def create_manifest(
     manifest_path = tmp_path / ".tsrc/manifest"
     manifest_path.mkdir(parents=True, exist_ok=True)
     dump_path = manifest_path / "manifest.yml"
-    to_write = ruamel.yaml.dump(config)
-    assert to_write
-    dump_path.write_text(to_write)
+    yaml = YAML(typ="safe", pure=True)
+    with dump_path.open("w") as stream:
+        yaml.dump(config, stream)
 
 
 def create_workspace(
