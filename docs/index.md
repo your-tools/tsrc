@@ -25,7 +25,7 @@ You can then use:
 
 * `tsrc sync` to synchronize all repos in the workspace.
 
-* ... and many more commands. Run `tsrc help` to list them, or read the [command line reference](/ref/cli.md)
+* ... and many more commands. Run `tsrc help` to list them, or read the [command line reference](ref/cli.md)
 
 ## Tutorial
 
