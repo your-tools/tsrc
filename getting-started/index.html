@@ -251,6 +251,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#installing_tsrc" class="md-nav__link">
     Installing tsrc
   </a>
@@ -676,6 +683,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#installing_tsrc" class="md-nav__link">
     Installing tsrc
   </a>
@@ -743,14 +757,17 @@
 
 
 <h1 id="getting_started">Getting started<a class="headerlink" href="#getting_started" title="Permanent link">&para;</a></h1>
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<p>Python 3.7 or later</p>
 <h2 id="installing_tsrc">Installing tsrc<a class="headerlink" href="#installing_tsrc" title="Permanent link">&para;</a></h2>
-<p>The recommended way to install <code>tsrc</code> is to use <a href="https://pypa.github.io/pipx/">pipx</a></p>
-<ul>
-<li>Make sure to have Python 3.7 or later installed.</li>
-<li>Install pipx</li>
-<li>Run <code>pipx install tsrc</code></li>
-</ul>
-<p>You can also install <code>tsrc</code> with <code>pip</code> if you know what you are doing :)</p>
+<p>The recommended way to install <code>tsrc</code> is to use <a href="https://pypa.github.io/pipx/">pipx</a>. This is because <code>pipx</code> automatically creates isolated environment for each app, so you won't get into dependencies versions conflicts and won't have to deal with manual virtualenvs management. </p>
+<p><code>pip</code> will also work, but it will not give you these benefits.</p>
+<p>Recommended:
+<div class="highlight"><pre><span></span><code>pipx<span class="w"> </span>install<span class="w"> </span>tsrc
+</code></pre></div></p>
+<p>Acceptable, if you know what you are doing:
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>tsrc
+</code></pre></div></p>
 <h2 id="checking_tsrc_installation">Checking tsrc installation<a class="headerlink" href="#checking_tsrc_installation" title="Permanent link">&para;</a></h2>
 <p>Run:</p>
 <div class="highlight"><pre><span></span><code>$ tsrc --version
