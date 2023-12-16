@@ -789,9 +789,10 @@
 <ul>
 <li>Run <code>git fetch --tags --prune</code></li>
 <li>Check if the repository is on a branch</li>
-<li>Check if the currently checked out branch matches the one configured in
-  the manifest. If it does not but the <code>--correct-branch</code> flag is set
-  and the repository is clean, the branch is changed to the configured one. </li>
+<li>Check if the currently checked out branch matches the one configured
+  in the manifest. If it does not, the repository is clean and the
+  <code>--no-correct-branch</code> flag is NOT set, the branch is changed to the
+  configured one.</li>
 <li>Check if the repository is dirty</li>
 <li>Try and run a fast-forward merge</li>
 </ul>
