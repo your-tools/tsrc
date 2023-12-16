@@ -1,5 +1,27 @@
 # Changelog
 
+## Unrelased
+
+### Optionnal correct branch on sync
+
+If any of the repositories is not on the configured branch, but it is clean
+and the `--correct-branch`/`-c` flag is set, then the branch is changed to
+the configured one and then the repository is updated. Otherwise that repository
+will not be not updated.
+
+Implemented by Greg Dubicki
+
+### Other changes
+
+* When running git commands, don't capture standard error along side standard out - fixes
+  #381, reported by Patrick Decat.
+* Bump minimum supported version to Python **3.8**.
+* Add support for Python 3.12.
+* Bump `ruamel.yaml`, `dparse`.
+* Don't hide cloning errors when running in parallel.
+* Doc improvements (patches by Henry Chang).
+
+
 ## 2.7.1 (2022-05-30)
 
 * In addition to preserving the order repos are listed in the manifest,
