@@ -45,7 +45,7 @@ flake8-comprehensions = "^3.4.0"
 pep8-naming = "^0.11.1"
 isort = "^5.7.0"
 types-mock = "^0.1.1"
-mypy = "0.960"
+mypy = "^1.7"
 
 # Docs
 mkdocs = "^1.5"
