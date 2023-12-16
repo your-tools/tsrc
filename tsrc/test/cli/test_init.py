@@ -359,16 +359,16 @@ def test_singular_remote(
      * Check that foo only has one remote called 'origin'
     """
     foo_url = git_server.add_repo("foo")
-    vpn_url = "/does/not/exist"
-    # fmt: off
     git_server.manifest.set_repo_remotes(
         "foo",
-        [("origin", foo_url),
-         ("vpn", vpn_url)])
-    # fmt: on
+        [
+            ("origin", foo_url),
+            ("vpn", "/does/not/exist"),
+        ],
+    )
 
     # only use "origin" remote
-    tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
+    tsrc_cli.run("init", git_server.manifest_url, "--singular-remote", "origin")
 
     foo_path = workspace_path / "foo"
     _, output = run_git_captured(foo_path, "remote", "show", check=True)

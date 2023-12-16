@@ -742,14 +742,14 @@ def test_sync_with_singular_remote(
     * Check that 'tsrc sync' does not try and fetch the 'vpn' remote
     """
     foo_url = git_server.add_repo("foo")
-    vpn_url = "/does/not/exist"
-    # fmt: off
     git_server.manifest.set_repo_remotes(
         "foo",
-        [("origin", foo_url),
-         ("vpn", vpn_url)])
-    # fmt: on
-    tsrc_cli.run("init", git_server.manifest_url, "-r", "origin")
+        [
+            ("origin", foo_url),
+            ("vpn", "/does/not/exist"),
+        ],
+    )
+    tsrc_cli.run("init", git_server.manifest_url, "--singular-remote", "origin")
 
     tsrc_cli.run("sync")
 
