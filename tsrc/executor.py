@@ -153,7 +153,7 @@ class OutcomeCollection:
             ui.info(summary)
 
     def print_errors(self) -> None:
-        for (item, error) in self.errors.items():
+        for item, error in self.errors.items():
             ui.info(ui.red, "*", ui.reset, item, ":", error)
 
 

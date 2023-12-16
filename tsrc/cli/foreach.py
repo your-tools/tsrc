@@ -94,7 +94,7 @@ def run(args: argparse.Namespace) -> None:
         ui.error(f"Command failed for {len(errors)} repo(s)")
         if cmd_runner.parallel:
             # Print output of failed commands that were hidden
-            for (item, error) in errors.items():
+            for item, error in errors.items():
                 ui.info(item)
                 ui.info("-" * len(item))
                 ui.info(error)

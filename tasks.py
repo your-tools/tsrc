@@ -55,5 +55,3 @@ def test(c):
 )
 def lint(c):
     pass
-
-
