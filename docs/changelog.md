@@ -2,14 +2,15 @@
 
 ## Unrelased
 
-### Optionnal correct branch on sync
+### Breaking: correct branch on sync
 
-If any of the repositories is not on the configured branch, but it is clean
-and the `--correct-branch`/`-c` flag is set, then the branch is changed to
-the configured one and then the repository is updated. Otherwise that repository
-will not be not updated.
+If any of the repositories is not on the configured branch, but it is
+clean then the branch is changed to the configured one and then the
+repository is updated. Otherwise that repository will not be not updated.
 
-Implemented by Greg Dubicki
+Previously, `tsrc sync` would print an error and *not* checkout the branch.
+
+To have `tsrc sync` behave like this, use the new `--no-correct-branch` flag.
 
 ### Other changes
 
