@@ -766,19 +766,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#unrelased" class="md-nav__link">
+  <a href="#300" class="md-nav__link">
     <span class="md-ellipsis">
-      Unrelased
+      3.0.0
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Unrelased">
+    <nav class="md-nav" aria-label="3.0.0">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optionnal_correct_branch_on_sync" class="md-nav__link">
+  <a href="#breaking_correct_branch_on_sync" class="md-nav__link">
     <span class="md-ellipsis">
-      Optionnal correct branch on sync
+      Breaking: correct branch on sync
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking_add_--singular-remote_argument_to_tsrc_sync_too" class="md-nav__link">
+    <span class="md-ellipsis">
+      Breaking: add --singular-remote argument to tsrc sync too
     </span>
   </a>
   
@@ -1400,19 +1409,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#unrelased" class="md-nav__link">
+  <a href="#300" class="md-nav__link">
     <span class="md-ellipsis">
-      Unrelased
+      3.0.0
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Unrelased">
+    <nav class="md-nav" aria-label="3.0.0">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optionnal_correct_branch_on_sync" class="md-nav__link">
+  <a href="#breaking_correct_branch_on_sync" class="md-nav__link">
     <span class="md-ellipsis">
-      Optionnal correct branch on sync
+      Breaking: correct branch on sync
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking_add_--singular-remote_argument_to_tsrc_sync_too" class="md-nav__link">
+    <span class="md-ellipsis">
+      Breaking: add --singular-remote argument to tsrc sync too
     </span>
   </a>
   
@@ -2018,13 +2036,27 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
-<h2 id="unrelased">Unrelased<a class="headerlink" href="#unrelased" title="Permanent link">&para;</a></h2>
-<h3 id="optionnal_correct_branch_on_sync">Optionnal correct branch on sync<a class="headerlink" href="#optionnal_correct_branch_on_sync" title="Permanent link">&para;</a></h3>
-<p>If any of the repositories is not on the configured branch, but it is clean
-and the <code>--correct-branch</code>/<code>-c</code> flag is set, then the branch is changed to
-the configured one and then the repository is updated. Otherwise that repository
-will not be not updated.</p>
-<p>Implemented by Greg Dubicki</p>
+<h2 id="300">3.0.0<a class="headerlink" href="#300" title="Permanent link">&para;</a></h2>
+<h3 id="breaking_correct_branch_on_sync">Breaking: correct branch on sync<a class="headerlink" href="#breaking_correct_branch_on_sync" title="Permanent link">&para;</a></h3>
+<p>If any of the repositories is not on the configured branch, but it is
+clean then the branch is changed to the configured one and then the
+repository is updated. Otherwise that repository will not be not updated.</p>
+<p>Previously, <code>tsrc sync</code> would print an error and <em>not</em> checkout the branch.</p>
+<p>To have <code>tsrc sync</code> behave like this, use the new <code>--no-correct-branch</code> flag.</p>
+<h3 id="breaking_add_--singular-remote_argument_to_tsrc_sync_too">Breaking: add --singular-remote argument to tsrc sync too<a class="headerlink" href="#breaking_add_--singular-remote_argument_to_tsrc_sync_too" title="Permanent link">&para;</a></h3>
+<p>In <code>tsrc 2.7</code> you could use <code>-r</code> in <code>tsrc init</code> to only use one
+remote. But you had no way to pass the same option to <code>tsrc sync</code>.</p>
+<p>In this version, you can use <code>-r</code> or <code>--singular-remote</code> for both
+<code>tsrc init</code> and <code>tsrc sync</code></p>
+<p>Unfortunately , this  means you must now use <code>-i, --include &lt;regex&gt;</code>
+instead of of <code>-r &lt;regex&gt;</code> when selecting repositories based on a regex.</p>
+<p>Implemented by:</p>
+<ul>
+<li>Albert De La Fuente Vigliotti</li>
+<li>Greg Dubicki</li>
+<li>Dimitri Merejkowsky</li>
+</ul>
+<p>Original issue reportedy by Maxime Réty</p>
 <h3 id="other_changes">Other changes<a class="headerlink" href="#other_changes" title="Permanent link">&para;</a></h3>
 <ul>
 <li>When running git commands, don't capture standard error along side standard out - fixes

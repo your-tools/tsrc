@@ -922,12 +922,12 @@ and a <code>g2</code> group that contains the repository named <code>three</code
 <div class="highlight"><pre><span></span><code>tsrc init git@gitlab.local:acme/manifest --group g1
 </code></pre></div>
 <h2 id="filtering_repositories_in_groups_with_regular_expressions">Filtering repositories in groups with regular expressions<a class="headerlink" href="#filtering_repositories_in_groups_with_regular_expressions" title="Permanent link">&para;</a></h2>
-<p>You can utilize inclusive regular expression with the <code>-r</code>-flag and
-exclusive regular expression with the <code>-i</code>-flag. This allows you to filter
+<p>You can utilize inclusive regular expression with the <code>-i</code>-flag and
+exclusive regular expression with the <code>-e</code>-flag. This allows you to filter
 repositories within a group or a set of groups for the given action.</p>
 <p>To include all repositories in the group g1 matching "config" and excluding "template",
 you can do the following:</p>
-<div class="highlight"><pre><span></span><code>tsrc init git@gitlab.local:acme/manifest --group g1 -r config -i template
+<div class="highlight"><pre><span></span><code>tsrc init git@gitlab.local:acme/manifest --group g1 -i config -e template
 </code></pre></div>
 <h2 id="updating_workspace_configuration">Updating workspace configuration<a class="headerlink" href="#updating_workspace_configuration" title="Permanent link">&para;</a></h2>
 <p>Alternatively, you can edit the <code>.tsrc/config.yml</code> file, like this:</p>
