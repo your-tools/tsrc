@@ -1,7 +1,7 @@
 strict: true
 
 site_name: tsrc documentation
-repo_url: https://github.com/dmerejkowsky/tsrc/
+repo_url: https://github.com/your-tools/tsrc/
 
 theme:
   name: material
