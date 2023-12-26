@@ -1,6 +1,11 @@
 # Changelog
 
-## 3.0.0
+## 3.0.1 (2023-26-12)
+
+Fix some incorrect URLs in the project's metadata
+and some other places.
+
+## 3.0.0 (2023-26-12)
 
 ### Breaking: correct branch on sync
 
