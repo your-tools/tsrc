@@ -2,7 +2,7 @@
 
 import argparse
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import cli_ui as ui
 
@@ -27,17 +27,16 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         "--from", dest="from_ref", metavar="FROM", help="run `git log` from this ref"
     )
     parser.add_argument(
-        "--to",
-        dest="to_ref",
-        default="HEAD",
-        help="run `git log` until this ref",
+        "--to", dest="to_ref", metavar="TO", help="run `git log` until this ref"
     )
     add_num_jobs_arg(parser)
     parser.set_defaults(run=run)
 
 
 class LogCollector(Task[Repo]):
-    def __init__(self, workspace_path: Path, *, from_ref: str, to_ref: str) -> None:
+    def __init__(
+        self, workspace_path: Path, *, from_ref: Optional[str], to_ref: Optional[str]
+    ) -> None:
         self.workspace_path = workspace_path
         self.from_ref = from_ref
         self.to_ref = to_ref
@@ -65,12 +64,14 @@ class LogCollector(Task[Repo]):
         # The main reason for the `git log` command to fail is if `self.from_ref` or
         # `self.to_ref` references are not found for the repo, so check for this case
         # explicitly
-        rc, _ = run_git_captured(repo_path, "rev-parse", self.from_ref, check=False)
-        if rc != 0:
-            raise Error(f"{self.from_ref} not found")
-        rc, _ = run_git_captured(repo_path, "rev-parse", self.to_ref, check=False)
-        if rc != 0:
-            raise Error(f"{self.to_ref} not found")
+        if self.from_ref:
+            rc, _ = run_git_captured(repo_path, "rev-parse", self.from_ref, check=False)
+            if rc != 0:
+                raise Error(f"{self.from_ref} not found")
+        if self.to_ref:
+            rc, _ = run_git_captured(repo_path, "rev-parse", self.to_ref, check=False)
+            if rc != 0:
+                raise Error(f"{self.to_ref} not found")
 
         colors = ["green", "reset", "yellow", "reset", "bold blue", "reset"]
         log_format = "%m {}%h{} - {}%d{} %s {}<%an>{}"
@@ -79,8 +80,10 @@ class LogCollector(Task[Repo]):
             "log",
             "--color=always",
             f"--pretty=format:{log_format}",
-            f"{self.from_ref}...{self.to_ref}",
         ]
+        if self.from_ref or self.to_ref:
+            range_args = f"{self.from_ref or ''}...{self.to_ref or ''}"
+            cmd.append(range_args)
         rc, out = run_git_captured(repo_path, *cmd, check=True)
         if out:
             lines = [repo.dest, "-" * len(repo.dest), out]
@@ -92,8 +95,8 @@ class LogCollector(Task[Repo]):
 def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
     num_jobs = get_num_jobs(args)
-    from_ref = args.from_ref
-    to_ref = args.to_ref
+    from_ref: Optional[str] = args.from_ref
+    to_ref: Optional[str] = args.to_ref
     repos = workspace.repos
     log_collector = LogCollector(workspace.root_path, from_ref=from_ref, to_ref=to_ref)
     collection = process_items(repos, log_collector, num_jobs=num_jobs)
