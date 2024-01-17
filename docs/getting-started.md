@@ -45,7 +45,7 @@ The first step is to create *a dedicated repository* for the manifest. I know it
 wasteful ("I have already 100 repositories to manage, and you want me to create yet an other one?"),
 but, trust me, it's worth it.
 
-So, if your company uses a GitLab instance at `gitlab.acme.com` and you want to crate a manifest
+So, if your company uses a GitLab instance at `gitlab.acme.com` and you want to create a manifest
 for your team, you may start by creating a new repository at `https://gitlab.acme.com/your-team/manifest`.
 
 Inside this repository, create a file named `manifest.yml` looking like this:
