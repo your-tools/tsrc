@@ -101,7 +101,7 @@ def test_copy_files_happy(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """Scenario:
-    * Crate a manifest with a 'top' repo
+    * Create a manifest with a 'top' repo
     * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
     * Push `top.cmake` to the `top` repo
     * Run `tsrc init`
@@ -126,7 +126,7 @@ def test_copy_files_source_does_not_exist(
     message_recorder: MessageRecorder,
 ) -> None:
     """Scenario:
-    * Crate a manifest with a 'top' repo
+    * Create a manifest with a 'top' repo
     * Configure the 'top' repo with a file copy from 'top.cmake' to 'CMakeLists.txt'
     * Check that `tsrc init` fails (the `top.cmake` file is missing from the
       'top' repo)
@@ -155,7 +155,7 @@ def test_create_symlink(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """Scenario:
-    * Crate a manifest with a 'foo' repo
+    * Create a manifest with a 'foo' repo
     * Push 'foo.txt' to the 'foo' repo
     * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
     * Run `tsrc init`

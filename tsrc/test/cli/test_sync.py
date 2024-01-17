@@ -351,7 +351,7 @@ def test_update_symlink(
     tsrc_cli: CLI, git_server: GitServer, workspace_path: Path
 ) -> None:
     """Scenario:
-    * Crate a manifest with a 'foo' repo
+    * Create a manifest with a 'foo' repo
     * Push 'foo.txt' to the 'foo' repo
     * Configure the 'foo' repo with a symlink copy from 'foo.link' to 'foo/foo.txt'
     * Run `tsrc init`
@@ -411,7 +411,7 @@ def test_not_changing_branch_with_a_flag(
     * Initialize a workspace from this manifest
     * Create a new branch named `next` on the foo repo
     * Update foo branch in the manifest
-    * Run `tsrc sync --no-correct-brach`
+    * Run `tsrc sync --no-correct-branch`
     * Command fails, because the flag is set
     """
     git_server.add_repo("foo")

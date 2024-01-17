@@ -34,7 +34,7 @@ Implemented by:
 * Greg Dubicki
 * Dimitri Merejkowsky
 
-Original issue reportedy by Maxime Réty
+Original issue reported by Maxime Réty
 
 ### Other changes
 
