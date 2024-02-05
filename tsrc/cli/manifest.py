@@ -38,14 +38,11 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
-    workspace_path = args.workspace_path or Path.cwd()
     workspace = get_workspace_with_repos(args)
 
-    cfg_path = workspace_path / ".tsrc" / "config.yml"
-    clone_path = workspace_path / ".tsrc/manifest"
-    local_manifest = LocalManifest(clone_path)
-    manifest_branch = local_manifest.current_branch()
-    workspace_config = WorkspaceConfig.from_file(cfg_path)
+    cfg_path = workspace.cfg_path
+    manifest_branch = workspace.local_manifest.current_branch()
+    workspace_config = workspace.config
 
     status_collector = StatusCollector(workspace)
     repos = workspace.repos
