@@ -15,7 +15,7 @@ from tsrc.cli import (
 )
 from tsrc.errors import MissingRepo
 from tsrc.executor import Outcome, Task, process_items
-from tsrc.git import GitStatus, get_git_status
+from tsrc.git import GitStatus, get_git_status, run_git_captured
 from tsrc.manifest import Manifest
 from tsrc.repo import Repo
 from tsrc.utils import erase_last_line
@@ -43,10 +43,35 @@ def run(args: argparse.Namespace) -> None:
     erase_last_line()
     ui.info_2("Workspace status:")
     statuses = status_collector.statuses
+
+    """detect same Manifest's repository in the workspace repositories"""
+    """and also check if there is missing upstream"""
+    same_manifest_dest = None
+    same_manifest_branch = None
+    missing_upstream = []
+    for x in repos:
+        this_dest = x.dest
+        this_branch = x.branch
+        git_txt = "branch.{}.remote"
+        rc, _ = run_git_captured(workspace.root_path / x.dest, "config", "--get", git_txt.format(x.branch), check=False )
+        if rc == 1:
+            missing_upstream.append(x.dest)
+        for y in x.remotes:
+            if y.url == workspace.config.manifest_url:
+                same_manifest_dest = this_dest
+                if this_branch == workspace.local_manifest.current_branch():
+                    same_manifest_branch = this_branch
+
     max_dest = max(len(x) for x in statuses.keys())
     for dest, status in statuses.items():
         message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
         message += describe_status(status)
+        if dest in missing_upstream:
+            message += [ui.red, "(missing upstream)"]
+        if dest == same_manifest_dest:
+            message += [ui.purple, "<---", "MANIFEST"]
+            if same_manifest_branch:
+                message += [ui.reset, "::", ui.green, same_manifest_branch]
         ui.info(*message)
 
 
