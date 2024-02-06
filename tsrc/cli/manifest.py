@@ -48,31 +48,32 @@ def run(args: argparse.Namespace) -> None:
     repos = workspace.repos
     process_items(repos, status_collector, num_jobs=1)
 
-    this_dest = None
-    this_branch = None
-    is_in_workspace = None
+    this_manifest_dest = None
+    this_manifest_branch = None
+    manifest_is_in_workspace = False
     for x in repos:
-        this_dest = x.dest
-        this_branch = x.branch
         for y in x.remotes:
             if y.url == workspace.config.manifest_url:
-                is_in_workspace = True
+                manifest_is_in_workspace = True
+                this_manifest_dest = x.dest
+                this_manifest_branch = x.branch
+
 
     ui.info_1("Manifest's URL: ", ui.purple, workspace_config.manifest_url, ui.reset)
 
-    if is_in_workspace:
+    if manifest_is_in_workspace:
         ui.info_2("Integrated into Workspace:")
-        ui.info(ui.green, "*", ui.reset, this_dest, ui.green, this_branch, ui.reset)
+        ui.info(ui.green, "*", ui.reset, this_manifest_dest, ui.green, this_manifest_branch, ui.reset)
 
     if args.manifest_branch:
         ui.info_2("Using new branch: ", ui.green, args.manifest_branch, ui.reset)
         workspace_config.manifest_branch = args.manifest_branch
         workspace_config.save_to_file(cfg_path)
         ui.info_1("Workspace updated")
-        if is_in_workspace and this_branch != workspace_config.manifest_branch:
+        if manifest_is_in_workspace and this_manifest_branch != workspace_config.manifest_branch:
             ui.info_2("After sync the branch will", ui.red, "differ", ui.reset)
     else:
-        if is_in_workspace and this_branch != workspace_config.manifest_branch:
+        if manifest_is_in_workspace and this_manifest_branch != workspace_config.manifest_branch:
             ui.info_2("Current branch", ui.red, "(differ):", ui.green, workspace_config.manifest_branch, ui.reset)
         else:
             ui.info_2("Current branch: ", ui.green, workspace_config.manifest_branch, ui.reset)
