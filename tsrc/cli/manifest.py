@@ -23,6 +23,7 @@ from tsrc.workspace_config import WorkspaceConfig
 from tsrc.executor import Outcome, Task, process_items
 from tsrc.repo import Repo
 from tsrc.utils import erase_last_line
+from tsrc.git import run_git_captured
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -66,12 +67,33 @@ def run(args: argparse.Namespace) -> None:
         ui.info(ui.green, "*", ui.reset, this_manifest_dest, ui.green, this_manifest_branch, ui.reset)
 
     if args.manifest_branch:
-        ui.info_2("Using new branch: ", ui.green, args.manifest_branch, ui.reset)
-        workspace_config.manifest_branch = args.manifest_branch
-        workspace_config.save_to_file(cfg_path)
-        ui.info_1("Workspace updated")
-        if manifest_is_in_workspace and this_manifest_branch != workspace_config.manifest_branch:
-            ui.info_2("After sync the branch will", ui.red, "differ", ui.reset)
+        """ first we need to check if such branch exists in order this to work on 'sync' """
+        vrf_tmp_ref = "{}@{{upstream}}"
+        rc_is_on_remote, _ = run_git_captured(workspace.root_path / this_manifest_dest, "rev-parse", "--symbolic-full-name", "--abbrev-ref", f"{args.manifest_branch}@{{upstream}}", check=False)
+        if rc_is_on_remote != 0:
+            """ we have not found remote branch. is there at least local one? """
+            if manifest_is_in_workspace:
+                found_local_branch = False
+                _, full_list_of_branches = run_git_captured(workspace.root_path / this_manifest_dest, "branch", '--format="%(refname:short)"', check=False)
+                for line in full_list_of_branches.splitlines():
+                    if line.startswith('"' + args.manifest_branch + '"'):
+                        found_local_branch = True
+                        break
+
+        if rc_is_on_remote == 0 or found_local_branch:
+            """ we are good to set new branch """
+            ui.info_2("Using new branch: ", ui.green, args.manifest_branch, ui.reset)
+            workspace_config.manifest_branch = args.manifest_branch
+            workspace_config.save_to_file(cfg_path)
+            ui.info_1("Workspace updated")
+            if manifest_is_in_workspace:
+                if rc_is_on_remote == 0:
+                    if this_manifest_branch != workspace_config.manifest_branch:
+                        ui.info_2("After sync the branch will", ui.red, "differ", ui.reset)
+                else:
+                    ui.info_2("You need to", ui.red, "'git push'", ui.reset, "this branch to remote in order", ui.blue, "'sync'", ui.reset, "to work")
+        else:
+            ui.error(f"Cannot use '{args.manifest_branch}' as new branch as it does not exist. You need to create it first.")
     else:
         if manifest_is_in_workspace and this_manifest_branch != workspace_config.manifest_branch:
             ui.info_2("Current branch", ui.red, "(differ):", ui.green, workspace_config.manifest_branch, ui.reset)
