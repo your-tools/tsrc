@@ -46,25 +46,27 @@ def run(args: argparse.Namespace) -> None:
 
     """detect same Manifest's repository in the workspace repositories"""
     """and also check if there is missing upstream"""
-    same_manifest_dest = None
-    same_manifest_branch = None
+    static_manifest_manifest_dest = None    # "static" as it cannot be changed, "manifest_manifest" = Manifest repo in Manifest.yml; this may not exist but if it does, it will be the 'dest'intion == "direcory_name"
+    static_manifest_manifest_branch = None  # "static" as it cannot be changed, "manifest_manifest" = Manifest repo in Manifest.yml; this may not exist, but if it does, it will be the (git) 'branch'
+    workspace_manifest_repo_branch = None   # Workspace's > Manifest_repo's > branch
     for x in repos:
         this_dest = x.dest
         this_branch = x.branch
         for y in x.remotes:
             if y.url == workspace.config.manifest_url:
-                same_manifest_dest = this_dest
-                if this_branch == workspace.local_manifest.current_branch():
-                    same_manifest_branch = this_branch
+                static_manifest_manifest_dest = this_dest
+                workspace_manifest_repo_branch = workspace.local_manifest.current_branch()
+                static_manifest_manifest_branch = this_branch
 
     max_dest = max(len(x) for x in statuses.keys())
     for dest, status in statuses.items():
         message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
         message += describe_status(status)
-        if dest == same_manifest_dest:
-            message += [ui.purple, "<---", "MANIFEST"]
-            if same_manifest_branch:
-                message += [ui.reset, "::", ui.green, same_manifest_branch]
+        if dest == static_manifest_manifest_dest:
+            message += [ui.purple, "<---", "MANIFEST:"]
+            message += [ui.green, static_manifest_manifest_branch]
+            if workspace.config.manifest_branch != static_manifest_manifest_branch:
+                message += [ui.reset, "~~~>", ui.green, workspace.config.manifest_branch]
         ui.info(*message)
 
 
