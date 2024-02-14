@@ -48,14 +48,9 @@ def run(args: argparse.Namespace) -> None:
     """and also check if there is missing upstream"""
     same_manifest_dest = None
     same_manifest_branch = None
-    missing_upstream = []
     for x in repos:
         this_dest = x.dest
         this_branch = x.branch
-        git_txt = "branch.{}.remote"
-        rc, _ = run_git_captured(workspace.root_path / x.dest, "config", "--get", git_txt.format(x.branch), check=False )
-        if rc == 1:
-            missing_upstream.append(x.dest)
         for y in x.remotes:
             if y.url == workspace.config.manifest_url:
                 same_manifest_dest = this_dest
@@ -66,8 +61,6 @@ def run(args: argparse.Namespace) -> None:
     for dest, status in statuses.items():
         message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
         message += describe_status(status)
-        if dest in missing_upstream:
-            message += [ui.red, "(missing upstream)"]
         if dest == same_manifest_dest:
             message += [ui.purple, "<---", "MANIFEST"]
             if same_manifest_branch:
@@ -82,6 +75,7 @@ class ManifestStatus:
         self.repo = repo
         self.manifest = manifest
         self.incorrect_branch: Optional[Tuple[str, str]] = None
+        self.missing_upstream = None
 
     def update(self, git_status: GitStatus) -> None:
         """Set self.incorrect_branch if the local git status
@@ -91,6 +85,7 @@ class ManifestStatus:
         actual_branch = git_status.branch
         if actual_branch and actual_branch != expected_branch:
             self.incorrect_branch = (actual_branch, expected_branch)
+        self.missing_upstream = not git_status.upstreamed
 
     def describe(self) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info()`."""
@@ -99,6 +94,8 @@ class ManifestStatus:
         if incorrect_branch:
             actual, expected = incorrect_branch
             res += [ui.red, "(expected: " + expected + ")"]
+        if self.missing_upstream:
+            res += [ui.red, "(missing upstream)"]
         return res
 
 
