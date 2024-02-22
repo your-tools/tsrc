@@ -20,6 +20,7 @@ from tsrc.manifest import Manifest
 from tsrc.repo import Repo
 from tsrc.utils import erase_last_line
 from tsrc.workspace import Workspace
+from tsrc.status_endpoint import StatusCollector, ManifestStatus, describe_status
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
