@@ -11,7 +11,6 @@ from tsrc.repo import Repo
 from tsrc.utils import erase_last_line
 from tsrc.workspace import Workspace
 
-
 class ManifestStatus:
     """Represent the status of a repo w.r.t the manifest."""
 
@@ -49,7 +48,6 @@ class Status:
     def __init__(self, *, git: GitStatus, manifest: ManifestStatus):
         self.git = git
         self.manifest = manifest
-
 
 class StatusCollector(Task[Repo]):
     """Implement a Task to collect local git status and
@@ -89,6 +87,7 @@ class StatusCollector(Task[Repo]):
         if not self.parallel:
             erase_last_line()
         return Outcome.empty()
+
 
 
 StatusOrError = Union[Status, Exception]
