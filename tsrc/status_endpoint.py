@@ -92,7 +92,7 @@ class StatusCollector(Task[Repo]):
 
 
 StatusOrError = Union[Status, Exception]
-# CollectedStatuses = Dict[str, StatusOrError]
+CollectedStatuses = Dict[str, StatusOrError]
 
 
 def describe_status(status: StatusOrError) -> List[ui.Token]:
