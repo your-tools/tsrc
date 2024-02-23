@@ -19,7 +19,7 @@ class ManifestStatus:
         self.repo = repo
         self.manifest = manifest
         self.incorrect_branch: Optional[Tuple[str, str]] = None
-        self.missing_upstream = True
+        self.missing_upstream = None
 
     def update(self, git_status: GitStatus) -> None:
         """Set self.incorrect_branch if the local git status
