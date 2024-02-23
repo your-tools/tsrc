@@ -57,7 +57,6 @@ class ManifestStatus:
         self.repo = repo
         self.manifest = manifest
         self.incorrect_branch: Optional[Tuple[str, str]] = None
-        self.missing_upstream = None
 
     def update(self, git_status: GitStatus) -> None:
         """Set self.incorrect_branch if the local git status
@@ -67,7 +66,6 @@ class ManifestStatus:
         actual_branch = git_status.branch
         if actual_branch and actual_branch != expected_branch:
             self.incorrect_branch = (actual_branch, expected_branch)
-        self.missing_upstream = not git_status.upstreamed
 
     def describe(self) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info()`."""
@@ -76,8 +74,6 @@ class ManifestStatus:
         if incorrect_branch:
             actual, expected = incorrect_branch
             res += [ui.red, "(expected: " + expected + ")"]
-        if self.missing_upstream:
-            res += [ui.red, "(missing upstream)"]
         return res
 
 
