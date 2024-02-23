@@ -18,9 +18,9 @@ from tsrc.executor import Outcome, Task, process_items
 from tsrc.git import GitStatus, get_git_status
 from tsrc.manifest import Manifest
 from tsrc.repo import Repo
-from tsrc.status_endpoint import ManifestStatus, StatusCollector, describe_status
 from tsrc.utils import erase_last_line
 from tsrc.workspace import Workspace
+from tsrc.status_endpoint import StatusCollector, ManifestStatus, describe_status
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
