@@ -1,8 +1,6 @@
 """ Entry point for tsrc status """
 
 import argparse
-import collections
-from typing import Dict, List, Optional, Tuple, Union
 
 import cli_ui as ui
 
@@ -13,14 +11,9 @@ from tsrc.cli import (
     get_num_jobs,
     get_workspace_with_repos,
 )
-from tsrc.errors import MissingRepo
-from tsrc.executor import Outcome, Task, process_items
-from tsrc.git import GitStatus, get_git_status
-from tsrc.manifest import Manifest
-from tsrc.repo import Repo
-from tsrc.status_endpoint import ManifestStatus, StatusCollector, describe_status
+from tsrc.executor import process_items
+from tsrc.status_endpoint import StatusCollector, describe_status
 from tsrc.utils import erase_last_line
-from tsrc.workspace import Workspace
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
