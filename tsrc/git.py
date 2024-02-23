@@ -1,6 +1,5 @@
 """ git tools """
 
-
 import os
 import subprocess
 from pathlib import Path
@@ -139,7 +138,13 @@ class GitStatus:
                 self.dirty = True
 
     def update_upstreamed(self) -> None:
-        rc, _ = run_git_captured(self.working_path, "config", "--get", f"branch.{self.branch}.remote", check=False)
+        rc, _ = run_git_captured(
+            self.working_path,
+            "config",
+            "--get",
+            f"branch.{self.branch}.remote",
+            check=False,
+        )
         if rc == 0:
             self.upstreamed = True
 
