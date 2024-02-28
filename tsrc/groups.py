@@ -1,4 +1,5 @@
 """ Support for groups of elements """
+
 # Note that groups are allowed to include other groups.
 
 from typing import Any, Dict, Generic, List, Optional, TypeVar

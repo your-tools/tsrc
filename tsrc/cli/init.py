@@ -1,4 +1,5 @@
 """ Entry point for `tsrc init`. """
+
 import argparse
 from pathlib import Path
 

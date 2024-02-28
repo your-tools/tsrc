@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Optional
@@ -28,6 +29,12 @@ class WorkspaceConfig:
     def from_file(cls, cfg_path: Path) -> "WorkspaceConfig":
         yaml = ruamel.yaml.YAML(typ="rt")
         parsed = yaml.load(cfg_path.read_text())
+        if not parsed.get("manifest_branch_0"):
+            """compatibility fix for older version.
+            usefull when transitioning with Workspace initialized
+            by older version"""
+            parsed["manifest_branch_0"] = parsed.get("manifest_branch")
+            parsed = OrderedDict(sorted(parsed.items()))
         return cls(**parsed)
 
     def save_to_file(self, cfg_path: Path) -> None:
