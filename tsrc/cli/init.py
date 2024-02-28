@@ -67,6 +67,7 @@ def run(args: argparse.Namespace) -> None:
     workspace_config = WorkspaceConfig(
         manifest_url=args.manifest_url,
         manifest_branch=manifest_branch,
+        manifest_branch_0=manifest_branch,
         clone_all_repos=args.clone_all_repos,
         repo_groups=args.groups or [],
         shallow_clones=args.shallow_clones,
