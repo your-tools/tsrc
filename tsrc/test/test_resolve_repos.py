@@ -34,6 +34,7 @@ def create_workspace(
     config = WorkspaceConfig(
         manifest_url="git@acme.org/manifest.git",
         manifest_branch="master",
+        manifest_branch_0="master",
         shallow_clones=False,
         clone_all_repos=clone_all_repos,
         repo_groups=repo_groups or [],

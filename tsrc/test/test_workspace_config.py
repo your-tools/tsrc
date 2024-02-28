@@ -13,6 +13,7 @@ def test_save(tmp_path: Path) -> None:
     config = WorkspaceConfig(
         manifest_url="https://gitlab.example",
         manifest_branch="stable",
+        manifest_branch_0="stable",
         shallow_clones=True,
         repo_groups=["default", "a-team"],
         clone_all_repos=False,
