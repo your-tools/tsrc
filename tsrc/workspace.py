@@ -68,6 +68,9 @@ class Workspace:
     def update_manifest(self) -> None:
         manifest_url = self.config.manifest_url
         manifest_branch = self.config.manifest_branch
+        self.config.manifest_branch_0 = manifest_branch
+        self.config.save_to_file(self.cfg_path)
+
         self.local_manifest.update(url=manifest_url, branch=manifest_branch)
 
     def clone_missing(self, *, num_jobs: int = 1) -> None:

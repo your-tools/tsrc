@@ -16,6 +16,7 @@ class WorkspaceConfig:
 
     manifest_url: str
     manifest_branch: str
+    manifest_branch_0: str
     repo_groups: List[str]
 
     shallow_clones: bool = False
