@@ -30,6 +30,7 @@ def copy_cfg_path_if_needed(root_path: Path) -> None:
         old_dict = yaml.load(old_path.read_text())
         new_config = WorkspaceConfig(
             manifest_branch=old_dict.get("branch"),
+            manifest_branch_0=old_dict.get("branch"),
             manifest_url=old_dict["url"],
             repo_groups=old_dict.get("groups"),
             shallow_clones=old_dict.get("shallow"),
