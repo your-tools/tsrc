@@ -18,8 +18,8 @@ from tsrc.repo import Repo
 from tsrc.status_endpoint import (
     Status,
     StatusCollector,
+    WorkspaceReposSummary,
     get_l_and_r_sha1_of_branch,
-    workspace_repositories_summary,
 )
 from tsrc.workspace_config import WorkspaceConfig
 
@@ -40,7 +40,6 @@ def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
 
     cfg_path = workspace.cfg_path
-    # manifest_branch = workspace.local_manifest.current_branch()
     workspace_config = workspace.config
 
     ui.info_1("Manifest's URL:", ui.purple, workspace_config.manifest_url, ui.reset)
@@ -60,13 +59,12 @@ def run(args: argparse.Namespace) -> None:
     ) = is_manifest_in_workspace(repos, workspace.config.manifest_url)
 
     """current: Workspace's > Manifest_repo's > branch"""
-    current_workspace_manifest_repo_branch = None
+    current_workspace_manifest_repo = None
 
     if static_manifest_manifest_dest:
         ui.info_2("Current integration into Workspace:")
 
-    # statuses_items = statuses.items()
-    current_workspace_manifest_repo_branch = workspace_repositories_summary(
+    wrs = WorkspaceReposSummary(
         workspace.root_path,
         statuses,
         static_manifest_manifest_dest,
@@ -74,6 +72,8 @@ def run(args: argparse.Namespace) -> None:
         workspace.config.manifest_branch,
         only_manifest=True,
     )
+
+    current_workspace_manifest_repo = wrs.summary()
 
     mi = ManifestReport(
         workspace_config,
@@ -83,7 +83,7 @@ def run(args: argparse.Namespace) -> None:
         args.manifest_branch,
         static_manifest_manifest_dest,
         static_manifest_manifest_branch,
-        current_workspace_manifest_repo_branch,
+        current_workspace_manifest_repo,
     )
 
     mi.report()
@@ -99,7 +99,7 @@ class ManifestReport:
         set_manifest_branch: str,
         static_manifest_manifest_dest: Union[str, None],
         static_manifest_manifest_branch: Union[str, None],
-        current_workspace_manifest_repo_branch: Union[str, None],
+        current_workspace_manifest_repo: Union[Repo, None],
     ):
         self.w_c = workspace_config
         self.cfg_path = cfg_path
@@ -108,7 +108,7 @@ class ManifestReport:
         self.set_manifest_branch = set_manifest_branch
         self.s_m_m_dest = static_manifest_manifest_dest
         self.static_manifest_manifest_branch = static_manifest_manifest_branch
-        self.c_w_m_r_branch = current_workspace_manifest_repo_branch
+        self.c_w_m_repo = current_workspace_manifest_repo
 
     def report(self) -> None:
         if self.set_manifest_branch:
@@ -141,7 +141,8 @@ class ManifestReport:
                 self.w_c.save_to_file(self.cfg_path)
                 """workspace is now updated"""
                 self.uip_workspace_updated()
-                workspace_repositories_summary(
+
+                wrs = WorkspaceReposSummary(
                     self.workspace_root_path,
                     self.statuses,
                     self.s_m_m_dest,
@@ -150,7 +151,9 @@ class ManifestReport:
                     do_update=True,
                     only_manifest=True,
                 )
-                self.report_what_wha_sync()
+
+                wrs.summary()
+                self.report_what_after_sync()
         else:
             """branch is nowhere to be found"""
             if self.s_m_m_dest:
@@ -162,9 +165,9 @@ class ManifestReport:
 
     def on_default_display(self) -> None:
         """just report final status of current state, do not update anything"""
-        self.report_what_wha_sync()
+        self.report_what_after_sync()
 
-    def report_what_wha_sync(self) -> None:
+    def report_what_after_sync(self) -> None:
         """report what will_happen_after sync with Manifest"""
         if self.s_m_m_dest:
             self.report_iro_m_branch_in_w()
@@ -180,24 +183,31 @@ class ManifestReport:
 
     def report_iro_m_branch_in_w(self) -> None:
         """report in regards of Manifest branch in Workspace (has change or not)"""
-        if self.c_w_m_r_branch != self.w_c.manifest_branch:
+        c_w_m_repo_branch = None
+        if self.c_w_m_repo:
+            c_w_m_repo_branch = self.c_w_m_repo.branch
+        if c_w_m_repo_branch != self.w_c.manifest_branch:
             self.uip_branch_will_change_after_sync(self.w_c.manifest_branch)
         else:
-            deep_m_branch = self.get_w_d_m_branch()
-            if deep_m_branch:
-                if deep_m_branch != self.w_c.manifest_branch:
+            deep_m_repo = self.get_w_d_m_repo()
+            if deep_m_repo:
+                if deep_m_repo.branch != self.w_c.manifest_branch:
                     self.uip_branch_will_change_after_sync(self.w_c.manifest_branch)
                 else:
-                    self.uip_ok_after_sync_same_branch()
+                    # manifest repo should have only one remote, thus: [0]
+                    if deep_m_repo.remotes[0].url != self.w_c.manifest_url:
+                        self.uip_same_branch_different_url(deep_m_repo.remotes[0].url)
+                    else:
+                        self.uip_ok_after_sync_same_branch()
 
-    def get_w_d_m_branch(self) -> Union[str, None]:
+    def get_w_d_m_repo(self) -> Union[Repo, None]:
         """get Workspace-deep manifest branch. This means:
         Workspace:Manifest repository:Manifest file:Manifest repository:branch"""
         if isinstance(self.s_m_m_dest, str):
             deep_manifest = load_manifest(
                 self.workspace_root_path / self.s_m_m_dest / "manifest.yml"
             )
-            return deep_manifest.get_repo(self.s_m_m_dest).branch
+            return deep_manifest.get_repo(self.s_m_m_dest)
         else:
             return None
 
@@ -219,6 +229,10 @@ class ManifestReport:
             "(differ)",
             ui.reset,
         )
+
+    def uip_same_branch_different_url(self, url: str) -> None:
+        ui.info_2("Deep manifest is using different remote URL")
+        ui.info_1("Deep Manifest's URL:", url)
 
     def uip_ok_after_sync_same_branch(self) -> None:
         """check if repository is clean,
