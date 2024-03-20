@@ -38,7 +38,7 @@ pytest-xdist = "^3.5.0"
 pygit2 = "^1.13"
 
 # Linters
-black = "^22.3"
+black = "^24.3"
 flake8 = "3.9.2"
 flake8-bugbear = "^21.4.3"
 flake8-comprehensions = "^3.4.0"
