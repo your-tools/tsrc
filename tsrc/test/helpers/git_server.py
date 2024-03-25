@@ -329,6 +329,17 @@ class GitServer:
             self.manifest.add_repo(name, url, branch=default_branch)
         return url
 
+    def add_manifest_repo(
+        self,
+        name: str,
+        default_branch: str = "master",
+        add_to_manifest: bool = True,
+    ) -> str:
+        url = self.manifest_url
+        if add_to_manifest:
+            self.manifest.add_repo(name, url, branch=default_branch)
+        return url
+
     def add_group(self, group_name: str, repos: List[str]) -> None:
         for repo in repos:
             self.add_repo(repo)
