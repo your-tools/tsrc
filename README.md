@@ -19,7 +19,7 @@ It can be [seen in action on asciinema.org](https://asciinema.org/a/131625).
 
 ## Requirements
 
-Python **3.7** or later
+Python **3.8** or later
 
 ## Installation
 
