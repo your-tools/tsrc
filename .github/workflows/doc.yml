@@ -25,7 +25,7 @@ jobs:
          poetry run mkdocs build
 
     - name: Deploy to GitHub pages
-      uses: JamesIves/github-pages-deploy-action@v4.3.3
+      uses: JamesIves/github-pages-deploy-action@v4.5.0
       with:
         token: ${{ secrets.GH_PAT }}
         branch: gh-pages
