@@ -1,13 +1,16 @@
 from pathlib import Path
 from shutil import copyfile
-from typing import List
 
-import ruamel.yaml
+import pytest
 from cli_ui.tests import MessageRecorder
 
 from tsrc.git import run_git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
+from tsrc.test.helpers.manifest_file import (
+    ad_hoc_deep_manifest_manifest_branch,
+    ad_hoc_deep_manifest_manifest_url,
+)
 from tsrc.workspace_config import WorkspaceConfig
 
 
@@ -123,7 +126,7 @@ def test_deep_manifest_on_change_after_sync(
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(
-        r"\* manifest \[ devel \]= devel \(expected: master\) <—— MANIFEST: master ~~> devel"
+        r"\* manifest \[ devel \]= devel \(expected: master\) <——{ MANIFEST } master ~~> devel"
     )
     assert message_recorder.find(
         "=> OK: After 'sync', Manifest repository will stays on the same branch"
@@ -134,11 +137,70 @@ def test_deep_manifest_on_change_after_sync(
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(
-        r"\* manifest \[ devel \]\= devel \<\—\— MANIFEST: devel"
+        r"\* manifest \[ devel \]= devel <——{ MANIFEST } devel"
     )
     assert message_recorder.find(
         "=> OK: After 'sync', Manifest repository will stays on the same branch"
     )
+
+
+@pytest.mark.last
+def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """Scenario:
+    * 1st: create repo, create (own) manifest repo and init workspace
+    * 2nd: add another "m2" repo
+    * 3rd: copy 'manifest.yml' from manfiest repo to "m2"
+    * 4th: change file 'manifest.yml' in manifest repo to use different url
+        for 'manifest' record
+    * 5th: check if 'manifest' report dirty manifest repository
+    * 6th: fix dirty: git add, commit, push
+    * 7th: let us see now if 'manifest' command report this state correctly
+    """
+    # 1st: create repo, create (own) manifest repo and init workspace
+    git_server.add_repo("dummy_repo")
+    git_server.push_file("dummy_repo", "CMakeList.txt")
+    git_server.add_manifest_repo("manifest")
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", manifest_url)
+
+    # 2nd: add another "m2" repo
+    manifest_path = workspace_path / "manifest"
+    m2_url = git_server.add_repo("m2")
+    tsrc_cli.run("sync")
+    tsrc_cli.run("manifest")
+
+    # 3rd: copy 'manifest.yml' to new "m2" directory
+    m2_path = workspace_path / "m2"
+    copyfile(manifest_path / "manifest.yml", m2_path / "manifest.yml")
+
+    # 4th: change file 'manifest.yml' in manifest repo to use different url
+    #    for 'manifest' record
+    ad_hoc_deep_manifest_manifest_url(workspace_path, m2_url)
+
+    # 5th: check if 'manifest' report dirty manifest repository
+    message_recorder.reset()
+    tsrc_cli.run("manifest")
+    assert message_recorder.find("=> Clean Manifest repository before calling 'sync'")
+
+    # 6th: fix dirty: git add, commit, push
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(
+        manifest_path, "commit", "-m", "manifest.yml: changing url for manifest repo"
+    )
+    run_git(manifest_path, "push", "origin", "master")
+
+    # 7th: let us see now if 'manifest' command report this state correctly
+    message_recorder.reset()
+    tsrc_cli.run("manifest")
+    assert message_recorder.find(
+        "=> Deep manifest is using different remote URL for its manifest"
+    )
+    assert message_recorder.find(":: Deep Manifest's manifest repo URL:")
 
 
 def test_manifest_changing_upstream_remote(
@@ -204,26 +266,3 @@ def test_manifest_changing_upstream_remote(
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find("=> Remote branch does not have same HEAD")
-
-
-"""helper function(s) follows:
-these functions do not take part on testing by itself alone"""
-
-
-def ad_hoc_deep_manifest_manifest_branch(
-    workspace_path: Path,
-    branch: str,
-) -> None:
-    manifest_path = workspace_path / "manifest" / "manifest.yml"
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    yaml = ruamel.yaml.YAML(typ="rt")
-    parsed = yaml.load(manifest_path.read_text())
-    for _, value in parsed.items():
-        if isinstance(value, List):
-            for x in value:
-                if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "manifest":
-                        x.insert(2, "branch", branch)
-
-    with open(manifest_path, "w") as file:
-        yaml.dump(parsed, file)

@@ -102,30 +102,41 @@ class WorkspaceReposSummary:
         self,
         workspace: Workspace,
         statuses: Dict[str, StatusOrError],
-        st_m_m_dest: Union[str, None],
-        st_m_m_branch: Union[str, None],
+        sm: Union[StaticManifest, None],
         w_c_m_branch: str,
+        groups: Union[List[str], None],
         do_update: bool = False,
         only_manifest: bool = False,
     ) -> None:
         self.workspace = workspace
         self.statuses = statuses
-        self.st_m_m_dest = st_m_m_dest
-        self.st_m_m_branch = st_m_m_branch
+        self.sm = sm
         self.w_c_m_branch = w_c_m_branch
+        self.groups = groups
         self.do_update = do_update
         self.only_manifest = only_manifest
         # local variables
         self.d_m_root_point = False
+        if groups:
+            self.all_groups = False
+        else:
+            self.all_groups = True
+
+        self.clone_all_repos = False
+        if self.workspace.config.clone_all_repos is True:
+            self.clone_all_repos = True
+
+        # protect agains the case when there is not a single
+        # Deep Manifest repository found (for alignment)
+        self.d_m_repo_found_some = False
 
     def summary(self) -> Union[Repo, None]:
 
         # calculate all Deep_Manifest max branch name length
         # and if Deep_Manifest is found, return it as well
-        deep_manifest = None
         max_m_branch, deep_manifest = self._max_len_manifest_branch(
             self.workspace,
-            self.st_m_m_dest,
+            self.sm,
             self.statuses,
         )
 
@@ -140,7 +151,7 @@ class WorkspaceReposSummary:
         has_d_m_d = collections.OrderedDict()
         for dest in o_stats.keys():
             # following condition is only here to minimize execution
-            if self.only_manifest is False or dest == self.st_m_m_dest:
+            if self.only_manifest is False or (self.sm and dest == self.sm.dest):
                 # produce just [True|False] to be used as key in sorting items
                 d_m_repo_found, _ = self._repo_matched_d_m_dest(
                     self.workspace,
@@ -148,6 +159,8 @@ class WorkspaceReposSummary:
                     dest,
                 )
                 has_d_m_d[dest] = d_m_repo_found
+                if d_m_repo_found is True:
+                    self.d_m_repo_found_some = True
 
         s_has_d_m_d = collections.OrderedDict()
 
@@ -158,8 +171,7 @@ class WorkspaceReposSummary:
         # let us now print the full list of all repos
         cur_w_m_repo = None
         if deep_manifest:
-            # prepare to take care of letfovers from deep_manifest (later)
-            d_m_repos = deep_manifest.get_repos()
+            d_m_repos = self._manifest_get_repos(deep_manifest, self.groups)
 
             # print main part with current workspace repositories
             cur_w_m_repo = self._core_message_print(
@@ -170,8 +182,8 @@ class WorkspaceReposSummary:
                 d_m_repos,
             )
 
+            # recollect leftovers only if there is full list
             if self.only_manifest is False:
-                # recollect leftovers only if there is full list
                 self._describe_deep_manifest_leftovers(
                     d_m_repos,
                     max_dest,
@@ -180,10 +192,10 @@ class WorkspaceReposSummary:
 
             # if we did not found current Workspace Manifest repo,
             # create and assign one from Workspace configuration
-            if self.st_m_m_dest and self.st_m_m_branch and not cur_w_m_repo:
+            if self.sm and not cur_w_m_repo:
                 cur_w_st_m = StaticManifest(
-                    dest=self.st_m_m_dest,
-                    branch=self.st_m_m_branch,
+                    dest=self.sm.dest,
+                    branch=self.sm.branch,
                     url=self.workspace.config.manifest_url,
                 )
                 cur_w_m_repo = repo_from_static_manifest(cur_w_st_m)
@@ -226,14 +238,14 @@ class WorkspaceReposSummary:
             d_m_repo_found = False
             d_m_repo = None
             # following condition is only here to minimize execution
-            if self.only_manifest is False or dest == self.st_m_m_dest:
+            if self.only_manifest is False or (self.sm and dest == self.sm.dest):
                 d_m_repo_found, d_m_repo = self._repo_matched_d_m_dest(
                     self.workspace,
                     deep_manifest,
                     dest,
                 )
 
-            if dest == self.st_m_m_dest:
+            if self.sm and dest == self.sm.dest:
                 if self.do_update and self.only_manifest is True:
                     ui.info_2("New state after Workspace update:")
                 if isinstance(status, Status):
@@ -244,7 +256,7 @@ class WorkspaceReposSummary:
 
             message = [ui.green, "*", ui.reset, dest.ljust(max_dest)]
 
-            if deep_manifest:
+            if deep_manifest and self.d_m_repo_found_some is True:
                 # get Deep Manifest repo branch
                 d_m_repo_branch = self._d_m_prepare_for_leftovers(
                     d_m_repo,
@@ -255,21 +267,51 @@ class WorkspaceReposSummary:
                     d_m_repo_found,
                     d_m_repo_branch,
                     dest,
-                    self.st_m_m_dest,
+                    self.sm,
                     max_m_branch,
                 )
 
             message += self._describe_status(status)
 
             # final Manifest-only extra markings
-            if dest == self.st_m_m_dest:
+            if self.sm and dest == self.sm.dest:
                 message += self._describe_on_manifest_repo_status(
-                    self.st_m_m_branch, self.w_c_m_branch
+                    self.sm.branch, self.w_c_m_branch
                 )
 
             ui.info(*message)
 
         return cur_w_m_repo
+
+    """common helpers"""
+
+    def _manifest_get_repos(
+        self,
+        manifest: Manifest,
+        groups: Union[List[str], None],
+    ) -> List[Repo]:
+        found_groups = None
+        found_all_groups = True
+        if manifest.group_list and groups:
+            found_groups = list(set(groups).intersection(manifest.group_list.groups))
+            if groups:
+                found_all_groups = False
+        if self.clone_all_repos is False:
+            found_all_groups = False
+
+        return manifest.get_repos(groups=found_groups, all_=found_all_groups)
+
+    def _compare_repo_regardles_branch(
+        self,
+        repo: Repo,
+        in_repo: List[Repo],
+    ) -> bool:
+        for i in in_repo:
+            if i.dest == repo.dest:
+                for this_remote in repo.remotes:
+                    if this_remote in i.remotes:
+                        return True
+        return False
 
     """Deep Manifest related checks"""
 
@@ -279,6 +321,8 @@ class WorkspaceReposSummary:
         deep_manifest: Union[Manifest, None],
         dest: str,
     ) -> Tuple[bool, Union[Repo, None]]:
+        """checks if repo on given 'dest'
+        matches the repo in Deep Manifest"""
         d_m_repo = None
         if not deep_manifest:
             return False, None
@@ -287,19 +331,43 @@ class WorkspaceReposSummary:
         except RepoNotFound:
             return False, None
 
+        # we have to make sure provided 'groups' does match Deep Manifest
+        d_m_repos = self._manifest_get_repos(deep_manifest, self.groups)
+        if not d_m_repos:
+            return False, None
+
         # to proclaiming 'same repo' we have to have:
+        # * found in Deep Manifest filtered by groups
+        # * (!) ignore Deep Manifest repo branch
         # * same destination,
         # * same remote found as in local_manifest
-        # branch does not have to be the same
+        # * (!) branch does not have to be the same
         if d_m_repo:
             this_manifest = workspace.local_manifest.get_manifest()
-            repos = this_manifest.get_repos()
-            for repo in repos:
+            if (
+                self._d_m_repo_is_same_regardles_branch(
+                    this_manifest, d_m_repo, d_m_repos, dest
+                )
+                is True
+            ):
+                return True, d_m_repo
+        return False, None
+
+    def _d_m_repo_is_same_regardles_branch(
+        self,
+        this_manifest: Manifest,
+        d_m_repo: Repo,
+        d_m_repos: List[Repo],
+        dest: str,
+    ) -> bool:
+        repos = self._manifest_get_repos(this_manifest, self.groups)
+        for repo in repos:
+            if self._compare_repo_regardles_branch(repo, d_m_repos) is True:
                 if repo.dest == dest:
                     for r_remote in repo.remotes:
                         if r_remote in d_m_repo.remotes:
-                            return True, d_m_repo
-        return False, None
+                            return True
+        return False
 
     def _d_m_prepare_for_leftovers(
         self,
@@ -320,12 +388,12 @@ class WorkspaceReposSummary:
         workspace: Workspace,
         statuses: Dict[str, StatusOrError],
         d_m: Manifest,
-        st_m_m_dest: str,
+        sm_dest: str,
     ) -> bool:
         """check just Manifest branch from Deep Manifest,
         in order to decide if '=' will be present in the output"""
         for dest, _status in statuses.items():
-            if dest == st_m_m_dest:
+            if dest == sm_dest:
                 try:
                     d_m.get_repo(dest)
                 except RepoNotFound:
@@ -342,14 +410,15 @@ class WorkspaceReposSummary:
         max_dest = max(len(x) for x in self.statuses.keys())
         max_dest_dm = 0
         if deep_manifest:
-            d_m_repos = deep_manifest.get_repos()
-            max_dest_dm = max(len(x.dest) for x in d_m_repos)
+            d_m_repos = self._manifest_get_repos(deep_manifest, self.groups)
+            if d_m_repos:
+                max_dest_dm = max(len(x.dest) for x in d_m_repos)
         return max(max_dest_dm, max_dest)
 
     def _max_len_manifest_branch(
         self,
         workspace: Workspace,
-        st_m_m_dest: Union[str, None],
+        sm: Union[StaticManifest, None],
         statuses: Dict[str, StatusOrError],
     ) -> Tuple[int, Union[Manifest, None]]:
         """calculate maximum lenght for deep manifest branch (if present)
@@ -357,19 +426,21 @@ class WorkspaceReposSummary:
         detect if Deep Manifest will have a root_point (global variable)"""
         max_m_branch = 0
         d_m = None
-        if st_m_m_dest:
+        if sm:
             try:
                 # we have to load Deep Manifest, so why not also return it
-                d_m = load_manifest(workspace.root_path / st_m_m_dest / "manifest.yml")
+                d_m = load_manifest(workspace.root_path / sm.dest / "manifest.yml")
             except InvalidConfig as error:
                 ui.error("Failed to load Deep Manifest:", error)
                 return 0, None
 
             # side-quest: check Deep Manifest for root point
             self.d_m_root_point = self._check_d_m_root_point(
-                workspace, statuses, d_m, st_m_m_dest
+                workspace, statuses, d_m, sm.dest
             )
-            max_m_branch = max(len(x.branch) for x in d_m.get_repos())
+            d_m_repos = self._manifest_get_repos(d_m, self.groups)
+            if d_m_repos:
+                max_m_branch = max(len(x.branch) for x in d_m_repos)
 
         return max_m_branch, d_m
 
@@ -380,14 +451,14 @@ class WorkspaceReposSummary:
         d_m_r_found: bool,
         d_m_branch: Union[str, None],
         dest: str,
-        st_m_m_dest: Union[str, None],
+        sm: Union[StaticManifest, None],
         max_m_branch: int,
     ) -> List[ui.Token]:
         message = []
         if d_m_r_found is True and isinstance(d_m_branch, str):
             message += [ui.brown, "[", ui.green]
             message += [d_m_branch.ljust(max_m_branch)]
-            if dest == st_m_m_dest:
+            if sm and dest == sm.dest:
                 if self.d_m_root_point is True:
                     message += [ui.brown, "]=", ui.reset]
                 else:
@@ -429,34 +500,33 @@ class WorkspaceReposSummary:
         self, s_branch: Union[str, None], c_branch: str
     ) -> List[ui.Token]:
         # exactly on Manifest repository integrated into Workspace
-        message = [ui.purple, "<——", "MANIFEST:"]
-        message += [ui.green, s_branch]
-        if c_branch != s_branch:
-            message += [
-                ui.reset,
-                "~~>",
-                ui.green,
-                c_branch,
-            ]
+        message = [ui.purple, "<——{ MANIFEST }"]
+        if s_branch:
+            message += [ui.green, s_branch]
+            if c_branch and c_branch != s_branch:
+                message += [
+                    ui.reset,
+                    "~~>",
+                    ui.green,
+                    c_branch,
+                ]
         return message
 
 
 def is_manifest_in_workspace(
     workspace: Workspace,
     repos: List[Repo],
-) -> Tuple[Union[str, None], Union[str, None]]:
-    static_manifest_manifest_dest = None
-    static_manifest_manifest_branch = None
+) -> Union[StaticManifest, None]:
     for x in repos:
         this_dest = x.dest
         this_branch = x.branch
         for y in x.remotes:
-            if y.url == workspace.config.manifest_url:
-                static_manifest_manifest_dest = this_dest
-                static_manifest_manifest_branch = this_branch
+            if y.url and y.url == workspace.config.manifest_url:
                 # go with 1st one found
-                return static_manifest_manifest_dest, static_manifest_manifest_branch
-    return None, None
+                return StaticManifest(
+                    this_dest, this_branch, url=workspace.config.manifest_url
+                )
+    return None
 
 
 def get_l_and_r_sha1_of_branch(
