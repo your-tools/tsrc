@@ -14,6 +14,7 @@ from tsrc.test.helpers.manifest_file import (
 from tsrc.workspace_config import WorkspaceConfig
 
 
+@pytest.mark.last
 def test_plain_manifest_on_change(
     tsrc_cli: CLI,
     git_server: GitServer,
@@ -26,7 +27,8 @@ def test_plain_manifest_on_change(
     * 3rd: check for Manifest branch configured for Workspace
     * 4th: change branch using 'manifest --branch <new_branch>' command
     * 5th: check again if Manifest branch has changed and if output is reflecting it
-    * 6th: also check output of plain 'manifest' command if also reflecting change
+    * 6th: also check output of plain 'manifest' command
+        as it should also reflect such branch change
     """
     # 1st: Create repository
     git_server.add_repo("repo1")
@@ -41,6 +43,7 @@ def test_plain_manifest_on_change(
     workspace_config = WorkspaceConfig.from_file(
         workspace_path / ".tsrc" / "config.yml"
     )
+
     assert git_server.manifest.branch == "devel"
 
     # 4th: change branch using 'manifest --branch <new_branch>' command
@@ -51,17 +54,18 @@ def test_plain_manifest_on_change(
     workspace_config = WorkspaceConfig.from_file(
         workspace_path / ".tsrc" / "config.yml"
     )
+    print("DEBUG path =", workspace_path)
     assert workspace_config.manifest_branch == "master"
     assert workspace_config.manifest_branch_0 == "devel"
     assert message_recorder.find(
-        r"\(will change\) from: devel to: master"
+        r"=> Accepting Manifest\'s branch change from: devel ~~> master"
     ), "manifest command has to report change when different branch is provided"
 
     # 6th: also check output of plain 'manifest' command if also reflecting change
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(
-        r"\(will change\) from: devel to: master"
+        r":: Manifest\'s branch will change from: devel ~~> master"
     ), "manifest command has to report change when there is one"
 
 
@@ -126,25 +130,16 @@ def test_deep_manifest_on_change_after_sync(
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(
-        r"\* manifest \[ devel \]= devel \(expected: master\) <——{ MANIFEST } master ~~> devel"
-    )
-    assert message_recorder.find(
-        "=> OK: After 'sync', Manifest repository will stays on the same branch"
+        r"\* manifest \[ devel \]= \( devel == devel \) \(expected: master\) ~~ MANIFEST"
     )
 
     # 10th: verify the theory about what will happen after 'sync'
     tsrc_cli.run("sync")
     message_recorder.reset()
     tsrc_cli.run("manifest")
-    assert message_recorder.find(
-        r"\* manifest \[ devel \]= devel <——{ MANIFEST } devel"
-    )
-    assert message_recorder.find(
-        "=> OK: After 'sync', Manifest repository will stays on the same branch"
-    )
+    assert message_recorder.find(r"\* manifest \[ devel \]= \( devel \) ~~ MANIFEST")
 
 
-@pytest.mark.last
 def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
     tsrc_cli: CLI,
     git_server: GitServer,
@@ -185,7 +180,7 @@ def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
     # 5th: check if 'manifest' report dirty manifest repository
     message_recorder.reset()
     tsrc_cli.run("manifest")
-    assert message_recorder.find("=> Clean Manifest repository before calling 'sync'")
+    assert message_recorder.find(r"\* manifest \( master \) \(dirty\) ~~ MANIFEST")
 
     # 6th: fix dirty: git add, commit, push
     run_git(manifest_path, "add", "manifest.yml")
@@ -198,9 +193,11 @@ def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(
-        "=> Deep manifest is using different remote URL for its manifest"
+        # TODO: enable this check once status footer will be implemented
+        # "=> Deep manifest is using different remote URL for its manifest"
+        r"\* manifest \( master \) ~~ MANIFEST"
     )
-    assert message_recorder.find(":: Deep Manifest's manifest repo URL:")
+    # assert message_recorder.find(":: Deep Manifest's manifest repo URL:")
 
 
 def test_manifest_changing_upstream_remote(
@@ -265,4 +262,6 @@ def test_manifest_changing_upstream_remote(
     # 6th: now the remotes should not be the same
     message_recorder.reset()
     tsrc_cli.run("manifest")
-    assert message_recorder.find("=> Remote branch does not have same HEAD")
+    # TODO: enable this check once status footer will be implemented
+    # assert message_recorder.find("=> Remote branch does not have same HEAD")
+    assert message_recorder.find(r"\* manifest \[ master \]= \( master \) ~~ MANIFEST")

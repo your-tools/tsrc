@@ -107,7 +107,10 @@ class Manifest:
             self.group_list.add(name, elements, includes=includes)
 
     def get_repos(
-        self, groups: Optional[List[str]] = None, all_: bool = False
+        self,
+        groups: Optional[List[str]] = None,
+        all_: bool = False,
+        ignore_if_group_not_found: bool = False,
     ) -> List[Repo]:
         if all_:
             return self._repos
@@ -118,15 +121,21 @@ class Manifest:
             else:
                 return self._repos
 
-        return self._get_repos_in_groups(groups)
+        return self._get_repos_in_groups(groups, ignore_if_group_not_found)
 
     def _has_default_group(self) -> bool:
         assert self.group_list
         return self.group_list.get_group("default") is not None
 
-    def _get_repos_in_groups(self, groups: List[str]) -> List[Repo]:
+    def _get_repos_in_groups(
+        self,
+        groups: List[str],
+        ignore_if_group_not_found: bool = False,
+    ) -> List[Repo]:
         assert self.group_list
-        elements = self.group_list.get_elements(groups=groups)
+        elements = self.group_list.get_elements(
+            groups=groups, ignore_if_group_not_found=ignore_if_group_not_found
+        )
         res = []
         for dest in elements:
             res.append(self.get_repo(dest))

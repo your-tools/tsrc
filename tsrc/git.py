@@ -158,6 +158,12 @@ class GitStatus:
         res += self.describe_dirty()
         return res
 
+    def describe_pre_branch(self) -> List[ui.Token]:
+        res: List[ui.Token] = []
+        if self.empty:
+            return [ui.red, "empty"]
+        return res
+
     def describe_branch(self) -> List[ui.Token]:
         res: List[ui.Token] = []
         if self.branch:
@@ -166,6 +172,12 @@ class GitStatus:
             res += [ui.red, self.sha1, ui.reset]
         if self.tag:
             res += [ui.brown, "on", self.tag, ui.reset]
+        return res
+
+    def describe_post_branch(self) -> List[ui.Token]:
+        res: List[ui.Token] = []
+        res += self.describe_position()
+        res += self.describe_dirty()
         return res
 
     @staticmethod

@@ -87,7 +87,7 @@ def test_tag(workspace_path: Path, git_server: GitServer) -> None:
 def test_get_sha1(workspace_path: Path, git_server: GitServer) -> None:
     git_server.add_repo("foo")
     actual = git_server.get_sha1("foo")
-    assert type(actual) == str
+    assert isinstance(actual, str)
 
 
 def test_default_branch_devel(workspace_path: Path, git_server: GitServer) -> None:

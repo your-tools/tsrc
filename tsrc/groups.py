@@ -60,6 +60,9 @@ class GroupList(Generic[T]):
         self.all_elements = elements
         self._groups_seen: List[str] = []
 
+    def get_groups_seen(self) -> List[str]:
+        return self._groups_seen
+
     def add(
         self, name: str, elements: List[T], includes: Optional[List[str]] = None
     ) -> None:
@@ -71,7 +74,11 @@ class GroupList(Generic[T]):
     def get_group(self, name: str) -> Optional[Group[T]]:
         return self.groups.get(name)
 
-    def get_elements(self, groups: List[str]) -> List[T]:
+    def get_elements(
+        self,
+        groups: List[str],
+        ignore_if_group_not_found: bool = False,
+    ) -> List[T]:
         # Note: to get all elements in a group, recursively parse
         # the groups and their includes, while making sure no
         # group is processed twice.
@@ -84,7 +91,12 @@ class GroupList(Generic[T]):
         # There's no OrderedSet in the stdlib, so we use a dict instead
         # where keys don't matter
         res: Dict[T, bool] = {}
-        self._rec_get_elements(res, groups, parent_group=None)
+        self._rec_get_elements(
+            res,
+            groups,
+            parent_group=None,
+            ignore_if_group_not_found=ignore_if_group_not_found,
+        )
         return list(res.keys())
 
     def _rec_get_elements(
@@ -93,11 +105,14 @@ class GroupList(Generic[T]):
         group_names: List[str],
         *,
         parent_group: Optional[Group[T]],
+        ignore_if_group_not_found: bool = False,
     ) -> None:
         for group_name in group_names:
             if group_name in self._groups_seen:
                 return
             if group_name not in self.groups:
+                if ignore_if_group_not_found is True:
+                    continue
                 raise GroupNotFound(group_name, parent_group=parent_group)
             group = self.groups[group_name]
             self._groups_seen.append(group.name)
