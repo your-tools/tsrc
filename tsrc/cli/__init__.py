@@ -54,9 +54,10 @@ def get_num_jobs(args: argparse.Namespace) -> int:
         sys.exit(f"error: argument -j/--jobs: invalid value: {value}")
 
 
-def get_workspace(namespace: argparse.Namespace) -> Workspace:
+def get_workspace(namespace: argparse.Namespace, silent: bool = False) -> Workspace:
     workspace_path = namespace.workspace_path or find_workspace_path()
-    ui.info_1("Using workspace in", ui.bold, workspace_path)
+    if silent is False:
+        ui.info_1("Using workspace in", ui.bold, workspace_path)
     return Workspace(workspace_path)
 
 
@@ -101,16 +102,58 @@ def find_workspace_path() -> Path:
     raise Error("Could not find current workspace")
 
 
-def get_workspace_with_repos(namespace: argparse.Namespace) -> Workspace:
-    workspace = get_workspace(namespace)
+def get_workspace_with_repos(
+    namespace: argparse.Namespace,
+    ignore_if_group_not_found: bool = False,
+) -> Workspace:
+    workspace = get_workspace(namespace, silent=ignore_if_group_not_found)
     workspace.repos = resolve_repos(
         workspace,
         groups=namespace.groups,
         all_cloned=namespace.all_cloned,
         include_regex=namespace.include_regex,
         exclude_regex=namespace.exclude_regex,
+        ignore_if_group_not_found=ignore_if_group_not_found,
     )
     return workspace
+
+
+def simulate_get_workspace_with_repos(
+    namespace: argparse.Namespace,
+) -> List[str]:
+    workspace = get_workspace(namespace, silent=True)
+    return simulate_resolve_repos(
+        workspace,
+        groups=namespace.groups,
+        all_cloned=namespace.all_cloned,
+        include_regex=namespace.include_regex,
+        exclude_regex=namespace.exclude_regex,
+        ignore_if_group_not_found=True,
+    )
+
+
+def simulate_resolve_repos(
+    workspace: Workspace,
+    *,
+    singular_remote: str = "",
+    groups: Optional[List[str]],
+    all_cloned: bool,
+    include_regex: str = "",
+    exclude_regex: str = "",
+    ignore_if_group_not_found: bool = False,
+) -> List[str]:
+    """
+    just to obatin 'groups_seen'
+    as if we hit the exception, we may miss some groups
+    """
+    # Handle --all-cloned and --groups
+    manifest = workspace.get_manifest()
+
+    if groups:
+        manifest.get_repos(groups=groups, ignore_if_group_not_found=True)
+        if manifest.group_list:
+            return manifest.group_list.get_groups_seen()
+    return []
 
 
 def resolve_repos(
@@ -121,6 +164,7 @@ def resolve_repos(
     all_cloned: bool,
     include_regex: str = "",
     exclude_regex: str = "",
+    ignore_if_group_not_found: bool = False,
 ) -> List[Repo]:
     """
     Given a workspace with its config and its local manifest,
@@ -132,12 +176,16 @@ def resolve_repos(
     repos = []
 
     if groups:
-        repos = manifest.get_repos(groups=groups)
+        repos = manifest.get_repos(
+            groups=groups, ignore_if_group_not_found=ignore_if_group_not_found
+        )
     elif all_cloned:
         repos = manifest.get_repos(all_=True)
         repos = [repo for repo in repos if (workspace.root_path / repo.dest).exists()]
     else:
-        repos = repos_from_config(manifest, workspace.config)
+        repos = repos_from_config(
+            manifest, workspace.config, silent=ignore_if_group_not_found
+        )
 
     if singular_remote:
         filtered_repos = []
@@ -163,7 +211,9 @@ def resolve_repos(
 
 
 def repos_from_config(
-    manifest: Manifest, workspace_config: WorkspaceConfig
+    manifest: Manifest,
+    workspace_config: WorkspaceConfig,
+    silent: bool = False,
 ) -> List[Repo]:
     """
     Given a workspace config, returns a list of repos.
@@ -179,10 +229,11 @@ def repos_from_config(
     if repo_groups:
         # workspace config contains some groups, use that,
         # fmt: off
-        ui.info(
-            ui.green, "*", ui.reset, "Using groups from workspace config:",
-            ", ".join(repo_groups),
-        )
+        if silent is False:
+            ui.info(
+                ui.green, "*", ui.reset, "Using groups from workspace config:",
+                ", ".join(repo_groups),
+            )
         # fmt: on
         return manifest.get_repos(groups=repo_groups)
     else:

@@ -1,8 +1,6 @@
 """ Entry point for `tsrc manifest`. """
 
 import argparse
-from pathlib import Path
-from typing import Dict, Tuple, Union
 
 import cli_ui as ui
 
@@ -10,26 +8,19 @@ from tsrc.cli import (
     add_repos_selection_args,
     add_workspace_arg,
     get_workspace_with_repos,
+    simulate_get_workspace_with_repos,
 )
-from tsrc.errors import InvalidConfig
+from tsrc.config_data import ConfigUpdateData, ConfigUpdateType
 from tsrc.executor import process_items
-from tsrc.git import get_git_status, run_git_captured
-from tsrc.manifest import load_manifest
-
-# from tsrc.overall_w_r_stat import OverallWRStat, StatusFooterUseCaseMode
-from tsrc.repo import Repo
-from tsrc.static_manifest import StaticManifest
-from tsrc.status_endpoint import (
-    Status,
-    StatusCollector,
-    WorkspaceReposSummary,
-    get_l_and_r_sha1_of_branch,
-    is_manifest_in_workspace,
-)
+from tsrc.groups import GroupNotFound
+from tsrc.groups_to_find import GroupsToFind
+from tsrc.manifest_common import ManifestGroupNotFound
+from tsrc.pcs_repo import get_deep_manifest_pcsrepo, get_workspace_manifest_pcsrepo
+from tsrc.status_endpoint import StatusCollector
 
 # from tsrc.status_footer import StatusFooter
-from tsrc.workspace import Workspace
-from tsrc.workspace_config import WorkspaceConfig
+from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
+from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
@@ -45,60 +36,98 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
-    workspace = get_workspace_with_repos(args)
+    gtf = GroupsToFind(args.groups)
+    groups_seen = simulate_get_workspace_with_repos(args)
+    gtf.found_these(groups_seen)
 
-    cfg_path = workspace.cfg_path
+    try:
+        workspace = get_workspace_with_repos(args)
+    except GroupNotFound:
+        # try to obtain workspace ignoring group error
+        # if group is found in Future Manifest, do not report it
+        # if not, than raise exception again
+        workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
+
+    wrs = WorkspaceReposSummary(workspace, gtf)
+
     workspace_config = workspace.config
 
-    ui.info_1("Manifest's URL:", ui.purple, workspace_config.manifest_url, ui.reset)
+    status_header = StatusHeader(
+        workspace,
+        # display both: 'url' and 'branch'
+        [StatusHeaderDisplayMode.URL, StatusHeaderDisplayMode.BRANCH],
+    )
+    if args.manifest_branch:
+        cfg_update_data = ConfigUpdateData(manifest_branch=args.manifest_branch)
+        status_header.register_change(
+            cfg_update_data, [ConfigUpdateType.MANIFEST_BRANCH]
+        )
+    status_header.display()
 
     status_collector = StatusCollector(workspace)
-    repos = workspace.repos
-    # TODO: we may want to process just one Repo: Manifest Repo
-    #       other repos can be ignored
+
+    """Go get Deep Manifest if there is one"""
+    all_repos = workspace.repos
+    # get repos to process, in this case it will be just 1
+    repos, dm = get_deep_manifest_pcsrepo(all_repos, workspace_config.manifest_url)
+
+    # num_jobs=1 as we will have only (max) 1 repo to process
     process_items(repos, status_collector, num_jobs=1)
 
     statuses = status_collector.statuses
 
-    """If Manifest repo in in the Workspace,
-    we can use this so called 'static' Manifest.
-    It is 'static' as it cannot be changed (till the 'sync')
-    If it does not exist, it is None.
-    """
-    sm = is_manifest_in_workspace(workspace, repos)
+    sm = get_workspace_manifest_pcsrepo(statuses, workspace_config.manifest_url)
 
-    """current: Workspace's > Manifest_repo's > branch"""
-    current_workspace_manifest_repo = None
+    if sm and dm:
+        ui.info_2(
+            # TODO: unfortunately this is not enough. there is possibility that
+            # Deep Manifest will not be displayed even if it exist.
+            # Groups may select only such repos, that does not have any
+            # repo that is currently in the workspace.
+            "Current integration into Workspace, including [Deep Manifest branches]:"
+        )
+    else:
+        if sm:
+            ui.info_2("Current integration into Workspace:")
+        else:
+            wrs.dry_check_future_manifest(only_manifest=True)
 
-    if sm:
-        ui.info_2("Current integration into Workspace:")
-
-    wrs = WorkspaceReposSummary(
-        workspace,
+    wrs.ready_data(
         statuses,
-        sm,
-        workspace.config.manifest_branch,
-        args.groups,
+        dm,
         only_manifest=True,
+        apprise=True,
     )
 
-    current_workspace_manifest_repo = wrs.summary()
+    wrs.summary()
 
-    mi = ManifestReport(
-        workspace,
-        workspace_config,
-        cfg_path,
-        workspace.root_path,
-        statuses,
-        args.manifest_branch,
-        sm,
-        current_workspace_manifest_repo,
-    )
-
-    # print main Manifest status
-    mi.report()
+    try:
+        wrs.must_match_all_groups()
+    except ManifestGroupNotFound as e:
+        ui.error(e)
+        return
 
 
+#    dm_repo = None
+#    if dm:
+#        dm_repo = repo_from_pcsrepo(dm)
+#
+#    mi = ManifestReport(
+#        workspace,
+#        workspace_config,
+#        cfg_path,
+#        workspace.root_path,
+#        statuses,
+#        args.manifest_branch,
+#        sm,
+#        dm_repo,
+#    )
+#
+#    # print main Manifest status
+#    mi.report()
+
+
+#
 #    # hand-over data
 #    footer = StatusFooter(mi.ready_footer())
 #
@@ -106,315 +135,4 @@ def run(args: argparse.Namespace) -> None:
 #    footer.report()
 
 
-class ManifestReport:
-    def __init__(
-        self,
-        workspace: Workspace,
-        workspace_config: WorkspaceConfig,
-        cfg_path: Path,
-        workspace_root_path: Path,
-        statuses: Dict[str, Union[Status, Exception]],
-        set_manifest_branch: str,
-        sm: Union[StaticManifest, None],
-        current_workspace_manifest_repo: Union[Repo, None],
-    ):
-        self.workspace = workspace
-        self.w_c = workspace_config
-        self.cfg_path = cfg_path
-        self.workspace_root_path = workspace_root_path
-        self.statuses = statuses
-        self.set_manifest_branch = set_manifest_branch
-        self.sm = sm
-        self.c_w_m_repo = current_workspace_manifest_repo
-
-    #    def ready_footer(self) -> OverallWRStat:
-    #        """gather data for footer to be decided"""
-    #        return OverallWRStat(
-    #            self.w_c.manifest_branch,
-    #            self.w_c.manifest_branch_0,
-    #            mode=StatusFooterUseCaseMode.MANIFEST,
-    #        )
-
-    def report(self) -> None:
-        if self.set_manifest_branch:
-            self.on_set_branch()
-        else:
-            self.on_default_display()
-
-    def on_set_branch(self) -> None:
-        """first we need to check if such branch exists in order this to work on 'sync'"""
-        rc_is_on_remote = -1
-        found_local_branch = False
-        if self.sm:
-            rc_is_on_remote, found_local_branch = manifest_branch_exist(
-                self.w_c.manifest_url,
-                self.workspace_root_path / self.sm.dest,
-                self.sm.dest,
-                self.set_manifest_branch,
-            )
-        else:
-            rc_is_on_remote = manifest_remote_branch_exist(
-                self.w_c.manifest_url, self.set_manifest_branch
-            )
-        if rc_is_on_remote == 0 or found_local_branch:
-            """we are good to set new branch"""
-            self._uip_using_new_branch(self.set_manifest_branch)
-            if self.w_c.manifest_branch == self.set_manifest_branch:
-                self._uip_skip_set_branch()
-            else:
-                self.w_c.manifest_branch = self.set_manifest_branch
-                self.w_c.save_to_file(self.cfg_path)
-                """workspace is now updated"""
-                self._uip_workspace_updated()
-
-                wrs = WorkspaceReposSummary(
-                    self.workspace,
-                    self.statuses,
-                    self.sm,
-                    self.w_c.manifest_branch,
-                    None,
-                    do_update=True,
-                    only_manifest=True,
-                )
-
-                wrs.summary()
-                self.report_what_after_sync()
-        else:
-            """branch is nowhere to be found"""
-            if self.sm:
-                """when there is Manifest repository in the Workspace"""
-                self._uie_cannot_set_branch_create_first(self.set_manifest_branch)
-            else:
-                """Workspace without Manifest repository"""
-                self._uie_cannot_set_branch_git_push_first(self.set_manifest_branch)
-
-    def on_default_display(self) -> None:
-        """just report final status of current state, do not update anything"""
-        self.report_what_after_sync()
-
-    def report_what_after_sync(self) -> None:
-        """report what will_happen_after sync with Manifest"""
-        if self.sm:
-            self.report_iro_m_branch_in_w()
-        else:
-            """use 'manifest_branch_0' to determine if brach will change"""
-            if self.w_c.manifest_branch != self.w_c.manifest_branch_0:
-                self._uip_branch_will_change_after_sync(
-                    self.w_c.manifest_branch,
-                    self.w_c.manifest_branch_0,
-                )
-            else:
-                self._uip_branch_will_stay_the_same_after_sync(self.w_c.manifest_branch)
-
-    def report_iro_m_branch_in_w(self) -> None:
-        """report in regards of Manifest branch in Workspace (has change or not)"""
-        c_w_m_repo_branch = None
-        # check if ready
-        if self._m_repo_status_ready() is False:
-            self._uip_manifest_repo_not_ready()
-            return
-
-        if self.c_w_m_repo:
-            c_w_m_repo_branch = self.c_w_m_repo.branch
-        if c_w_m_repo_branch:
-            if c_w_m_repo_branch != self.w_c.manifest_branch:
-                self._uip_branch_will_change_after_sync(self.w_c.manifest_branch)
-            else:
-                deep_m_repo = self.get_w_d_m_repo()
-                if deep_m_repo:
-                    if deep_m_repo.branch != self.w_c.manifest_branch:
-                        self._uip_branch_will_change_after_sync(
-                            self.w_c.manifest_branch
-                        )
-                    else:
-                        # manifest repo should have only one remote, thus: [0]
-                        if deep_m_repo.remotes[0].url != self.w_c.manifest_url:
-                            self._uip_same_branch_different_url(
-                                deep_m_repo.remotes[0].url
-                            )
-                        else:
-                            self._uip_ok_after_sync_same_branch()
-        else:
-            self._uip_do_not_know()
-
-    def get_w_d_m_repo(self) -> Union[Repo, None]:
-        """get Workspace-deep manifest branch. This means:
-        Workspace:Manifest repository:Manifest file:Manifest repository:branch"""
-        if self.sm:
-            try:
-                deep_manifest = load_manifest(
-                    self.workspace_root_path / self.sm.dest / "manifest.yml"
-                )
-            except InvalidConfig as error:
-                ui.error("Failed to load Deep Manifest:", error)
-                return None
-            return deep_manifest.get_repo(self.sm.dest)
-        else:
-            return None
-
-    def _m_repo_status_ready(self) -> bool:
-        if self.sm:
-            m_g_status = get_git_status(self.workspace_root_path / self.sm.dest)
-            return (
-                m_g_status.dirty is False  # noqa: W503
-                and m_g_status.ahead == 0  # noqa: W503
-                and m_g_status.behind == 0  # noqa: W503
-                and m_g_status.upstreamed is True  # noqa: W503
-            )
-        else:
-            return False
-
-    """ui prints|errors segment follows:"""
-
-    def _uip_skip_set_branch(self) -> None:
-        ui.info_1("Skipping configuring the same branch")
-
-    def _uip_using_new_branch(self, branch: str) -> None:
-        ui.info_2("Using new branch:", ui.green, branch, ui.reset)
-
-    def _uip_workspace_updated(self) -> None:
-        ui.info_1("Workspace updated")
-
-    def _uip_do_not_know(self) -> None:
-        ui.info_2("It is not yet clear what will happen after 'sync'")
-
-    def _uip_after_sync_branch_change(self) -> None:
-        ui.info_2(
-            "After 'sync' the branch will",
-            ui.red,
-            "(differ)",
-            ui.reset,
-        )
-
-    def _uip_same_branch_different_url(self, url: str) -> None:
-        ui.info_2("Deep manifest is using different remote URL for its manifest")
-        ui.info_1("Deep Manifest's manifest repo URL:", url)
-
-    def _uip_ok_after_sync_same_branch(self) -> None:
-        """check if repository is clean,
-        and also if remote commit SHA1 is same as local commit SHA1,
-        as only then we can say for sure, it will stays the same"""
-        if self.sm:
-            l_m_sha, r_m_sha = get_l_and_r_sha1_of_branch(
-                self.workspace_root_path,
-                self.sm.dest,
-                self.w_c.manifest_branch,
-            )
-            if r_m_sha and l_m_sha != r_m_sha:
-                ui.info_2("Remote branch does not have same HEAD")
-                return
-        ui.info_2(
-            ui.blue,
-            "OK: After 'sync', Manifest repository will stays on the same branch",
-        )
-
-    def _uip_push_first_for_sync_to_work(self) -> None:
-        ui.info_2(
-            "You need to",
-            ui.red,
-            "'git push'",
-            ui.reset,
-            "this branch to remote in order",
-            ui.blue,
-            "'sync'",
-            ui.reset,
-            "to work",
-        )
-
-    def _uie_cannot_set_branch_create_first(self, branch: str) -> None:
-        ui.error(
-            f"Cannot set branch '{branch}' as a new branch as it does not exist. "
-            "You need to create it first."
-        )
-
-    def _uie_cannot_set_branch_git_push_first(self, branch: str) -> None:
-        ui.error(
-            f"Cannot set branch '{branch}' as a new branch as it does not exist. "
-            "You need to 'git push' it first."
-        )
-
-    def _uip_branch_will_change_after_sync(
-        self, branch: str, branch_0: str = ""
-    ) -> None:
-        message = [
-            "Currently configured branch on next 'sync':",
-            ui.red,
-            "(will change)",
-        ]
-        if branch_0 != "":
-            message += [ui.reset, "from:", ui.green, branch_0]
-        message += [
-            ui.reset,
-            "to:",
-            ui.green,
-            branch,
-            ui.reset,
-        ]
-        ui.info_2(*message)
-
-    def _uip_branch_will_stay_the_same_after_sync(self, branch: str) -> None:
-        ui.info_2(
-            "Currently configured branch on next 'sync' will",
-            ui.blue,
-            "(stays the same)",
-            ui.reset,
-            "on:",
-            ui.green,
-            branch,
-            ui.reset,
-        )
-
-    """already moved to StatusFooter"""
-
-    def _uip_manifest_repo_not_ready(self) -> None:
-        ui.info_2("Clean Manifest repository before calling 'sync'")
-
-
-StatusOrError = Union[Status, Exception]
-
-
-def manifest_remote_branch_exist(url: str, branch: str) -> int:
-    """check for manifest remote branch, as only if it exist,
-    we should allow to set it. as you can see, there is
-    no real path to repository out there"""
-    p = Path(".")
-    rc, _ = run_git_captured(
-        p,
-        "ls-remote",
-        "--exit-code",
-        "--heads",
-        url,
-        f"refs/heads/{branch}",
-        check=False,
-    )
-    return rc
-
-
-def manifest_branch_exist(
-    manifest_url: str,
-    full_path: Path,
-    static_manifest_manifest_dest: str,
-    provided_branch: str,
-) -> Tuple[int, bool]:
-    """if there is Manifest repository in the workspace, we can
-    check for both remote and local branch if it is exist.
-    as only if it is exist, we should allow to set it.
-
-    return 'rc_is_on_remote: Int' and 'found_local_branch: Bool'"""
-    found_local_branch = False
-    rc_is_on_remote = manifest_remote_branch_exist(manifest_url, provided_branch)
-
-    if rc_is_on_remote != 0:
-        """we have not found remote branch. is there at least local one?"""
-        if static_manifest_manifest_dest:
-            _, full_list_of_branches = run_git_captured(
-                full_path,
-                "branch",
-                '--format="%(refname:short)"',
-                check=False,
-            )
-            for line in full_list_of_branches.splitlines():
-                if line.startswith('"' + provided_branch + '"'):
-                    found_local_branch = True
-                    break
-    return rc_is_on_remote, found_local_branch
+# StatusOrError = Union[Status, Exception]

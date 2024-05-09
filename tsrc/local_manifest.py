@@ -28,7 +28,14 @@ class LocalManifest:
     def current_branch(self) -> str:
         return get_current_branch(self.clone_path)
 
-    def init(self, url: str, *, branch: Optional[str]) -> None:
+    def init(
+        self,
+        url: str,
+        *,
+        branch: Optional[str],
+        show_output: bool = True,
+        show_cmd: bool = True,
+    ) -> None:
         parent = self.clone_path.parent
         name = self.clone_path.name
         parent.mkdir(parents=True, exist_ok=True)
@@ -36,17 +43,49 @@ class LocalManifest:
         if branch:
             cmd += ["--branch", branch]
         cmd += [name]
-        run_git(self.clone_path.parent, *cmd)
+        run_git(
+            self.clone_path.parent, *cmd, show_output=show_output, show_cmd=show_cmd
+        )
 
     def get_manifest(self) -> Manifest:
         return load_manifest(self.clone_path / "manifest.yml")
 
-    def update(self, url: str, *, branch: str) -> None:
-        run_git(self.clone_path, "remote", "set-url", "origin", url)
-        run_git(self.clone_path, "fetch")
-        run_git(self.clone_path, "checkout", "-B", branch)
+    def update(
+        self, url: str, *, branch: str, show_output: bool = True, show_cmd: bool = True
+    ) -> None:
         run_git(
-            self.clone_path, "branch", branch, "--set-upstream-to", f"origin/{branch}"
+            self.clone_path,
+            "remote",
+            "set-url",
+            "origin",
+            url,
+            show_output=show_output,
+            show_cmd=show_cmd,
+        )
+        run_git(self.clone_path, "fetch", show_output=show_output, show_cmd=show_cmd)
+        run_git(
+            self.clone_path,
+            "checkout",
+            "-B",
+            branch,
+            show_output=show_output,
+            show_cmd=show_cmd,
+        )
+        run_git(
+            self.clone_path,
+            "branch",
+            branch,
+            "--set-upstream-to",
+            f"origin/{branch}",
+            show_output=show_output,
+            show_cmd=show_cmd,
         )
         ref = f"origin/{branch}"
-        run_git(self.clone_path, "reset", "--hard", ref)
+        run_git(
+            self.clone_path,
+            "reset",
+            "--hard",
+            ref,
+            show_output=show_output,
+            show_cmd=show_cmd,
+        )
