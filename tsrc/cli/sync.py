@@ -29,6 +29,12 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="skip updating the manifest before syncing repositories",
     )
     parser.add_argument(
+        "--no-update-config",
+        action="store_false",
+        dest="update_config_repo_groups",
+        help="leave configured repo_groups intact when no groups are provided",
+    )
+    parser.add_argument(
         "--no-correct-branch",
         action="store_false",
         dest="correct_branch",
@@ -46,6 +52,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 def run(args: argparse.Namespace) -> None:
     force = args.force
     update_manifest = args.update_manifest
+    update_config_repo_groups = args.update_config_repo_groups
     groups = args.groups
     all_cloned = args.all_cloned
     singular_remote = args.singular_remote
@@ -58,6 +65,11 @@ def run(args: argparse.Namespace) -> None:
     if update_manifest:
         ui.info_2("Updating manifest")
         workspace.update_manifest()
+        if update_config_repo_groups and not groups:
+            ui.info_2("Updating repo_groups")
+            workspace.update_config_repo_groups()
+        else:
+            ui.info_2("Leaving repo_groups intact")
     else:
         ui.info_2("Not updating manifest")
 

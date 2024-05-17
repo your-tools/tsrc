@@ -43,40 +43,47 @@ class WorkspaceReposSummary:
         self,
         workspace: Workspace,
         gtf: GroupsToFind,
+        only_manifest: bool = False,
+        manifest_marker: bool = True,
     ) -> None:
         self.workspace = workspace
         self.gtf = gtf
+        self.is_manifest_marker = manifest_marker
+
         # this variable is possibly obsolete
         self.must_find_all_groups = False  # possibly obsolete
 
         # defaults
         self.statuses: Dict[str, StatusOrError] = {}
         self.dm: Union[PCSRepo, None] = None
-        self.only_manifest: bool = False
+        self.only_manifest = only_manifest
         self.apprise: bool = False
 
         self.lfm: Union[Manifest, None] = None
         self.lfm_repos: Union[Dict[str, Repo], None] = None
 
         # alignment
-        self.max_dest = 0
-        self.max_m_branch = 0
-        self.max_f_branch = 0
+        self.max_dest = 0  # DEST
+        self.max_m_branch = 0  # DM
+        self.max_f_branch = 0  # FM
 
         # for detection of <something> is empty
         self.d_m_repo_found_some = False
+        self.d_m_block_shell_is_shown = False
+        self.f_m_repo_found_some = False
+        self.f_m_leftovers_displayed = (
+            False  # so FM leftovers will be displayed just once
+        )
 
     def ready_data(
         self,
         statuses: Dict[str, StatusOrError],
         dm: Union[PCSRepo, None],
-        only_manifest: bool = False,
         apprise: bool = False,
     ) -> None:
         # provide everything besides 'Workspace'
         self.statuses = statuses
         self.dm = dm
-        self.only_manifest = only_manifest
         self.apprise = apprise
         # local variables
         self.d_m_root_point = False
@@ -104,23 +111,20 @@ class WorkspaceReposSummary:
                 on_manifest_only=True,
                 must_find_all_groups=self.must_find_all_groups,
             )
+
             if self.lfm_repos:
                 f_m_repos = []
                 for dest, repo in self.lfm_repos.items():
                     if dest and repo:
-                        f_m_repos.append(repo)
+                        # filter the case, when we want only to consider Manifest repo
+                        if self.only_manifest is True:
+                            for remote in repo.remotes:
+                                if self.workspace.config.manifest_url == remote.url:
+                                    f_m_repos.append(repo)
+                                    break
+                        else:
+                            f_m_repos.append(repo)
         return f_m_repos
-
-    def _alignment_correction_when_on_only_manifest(
-        self,
-        manifest: Union[Manifest, None],
-        f_m_repos: Union[List[Repo], None],
-    ) -> None:
-        if self.only_manifest is False:
-            self.max_dest = self._correct_max_dest(manifest, f_m_repos)
-        else:
-            self.max_m_branch = 0
-            self.max_f_branch = 0
 
     def dry_check_future_manifest(self, only_manifest: bool = False) -> None:
         # when there is no 'statuses' from Workspace
@@ -128,9 +132,7 @@ class WorkspaceReposSummary:
         f_m_repos = self._ready_f_m_repos(on_manifest_only=True)
         self.max_f_branch = self._max_len_f_m_branch(f_m_repos)
 
-        # zero-out alignment that does not come into consideration
-        # * in here, there cannot be Deep Manifest as there are no normal Workspace Repos
-        self._alignment_correction_when_on_only_manifest(None, f_m_repos)
+        # self._alignment_correction_when_on_only_manifest(None, f_m_repos)
 
         self._describe_future_manifest_leftovers(
             self.workspace, f_m_repos, alone_print=True
@@ -220,8 +222,8 @@ class WorkspaceReposSummary:
                 self.gtf, self.must_find_all_groups
             )
 
-        # zero-out alignment that does not come into consideration
-        self._alignment_correction_when_on_only_manifest(deep_manifest, f_m_repos)
+        # alignment for 'dest'
+        self.max_dest = self._correct_max_dest(deep_manifest, f_m_repos)
 
         # deepcopy before calling 'pop'(s)
         deep_manifest_orig = copy.deepcopy(deep_manifest)
@@ -307,22 +309,12 @@ class WorkspaceReposSummary:
 
             message = [ui.green, "*", ui.reset, dest.ljust(self.max_dest)]
 
-            if deep_manifest and self.d_m_repo_found_some is True:
-                # get Deep Manifest repo
-                # also eliminate from 'd_m_repos'
-                r_d_m_repo = self._m_prepare_for_leftovers_regardles_branch(
-                    d_m_repo,
-                    d_m_repos,
-                )
-                message += self._describe_deep_manifest(
-                    d_m_repo_found,
-                    r_d_m_repo,
-                    dest,
-                    self.dm,
-                    self.max_m_branch,
-                )
+            # describe Deep Manifest field (if present and enabled)
+            message += self._describe_deep_manifest_column(
+                deep_manifest, dest, d_m_repo, d_m_repo_found, d_m_repos
+            )
 
-            is_default_describe = True
+            is_empty_fm_desc = True
             if self.lfm_repos:
                 f_m_repo_found, f_m_repo = self._repo_matched_manifest_dest(
                     self.workspace,
@@ -331,20 +323,55 @@ class WorkspaceReposSummary:
                 )
                 if f_m_repo_found is True and f_m_repo:
                     message += self._describe_status(status, f_m_repo)
-                    is_default_describe = False
+                    is_empty_fm_desc = False
                     # eliminate from 'f_m_repos' as well
                     self._m_prepare_for_leftovers_regardles_branch(
                         f_m_repo,
                         f_m_repos,
                     )
-            if is_default_describe is True:
+            else:
                 message += self._describe_status(status, None)
+                is_empty_fm_desc = False
+
+            if is_empty_fm_desc is True:
+                message += self._describe_status(status, None, fm_dest_is_empty=True)
 
             # final Manifest-only extra markings
-            if self.dm and dest == self.dm.dest:
-                message += self._describe_on_manifest()
+            #            if self.dm and dest == self.dm.dest:
+            #                message += self._describe_on_manifest()
+            if self.is_manifest_marker is True and isinstance(status, Status):
+                for this_remote in status.manifest.repo.remotes:
+                    if this_remote.url == self.workspace.config.manifest_url:
+                        message += self._describe_on_manifest()
+                        break
 
             ui.info(*message)
+
+    def _describe_deep_manifest_column(
+        self,
+        deep_manifest: Union[Manifest, None],
+        dest: str,
+        d_m_repo: Union[Repo, None],
+        d_m_repo_found: bool,
+        d_m_repos: Union[List[Repo], None],
+        # mark
+    ) -> List[ui.Token]:
+        message: List[ui.Token] = []
+        if deep_manifest and self.d_m_repo_found_some is True:
+            # get Deep Manifest repo
+            # also eliminate from 'd_m_repos'
+            r_d_m_repo = self._m_prepare_for_leftovers_regardles_branch(
+                d_m_repo,
+                d_m_repos,
+            )
+            message += self._describe_deep_manifest(
+                d_m_repo_found,
+                r_d_m_repo,
+                dest,
+                self.dm,
+                self.max_m_branch,
+            )
+        return message
 
     """common helpers"""
 
@@ -372,7 +399,7 @@ class WorkspaceReposSummary:
         dest: str,
     ) -> Tuple[bool, Union[Repo, None]]:
         """checks if repo on given 'dest'
-        matches the repo in Deep Manifest"""
+        matches the repo in referenced Manifest"""
         d_m_repo = None
         if not ref_manifest:
             return False, None
@@ -483,17 +510,29 @@ class WorkspaceReposSummary:
         max_dest_dm = 0
         max_dest_fm = 0
         if self.statuses:
+            # this is correct regardles of 'self.only_manifest'
             max_dest = max(len(x) for x in self.statuses.keys())
+
         if deep_manifest:
             mgr = ManifestGetRepos(self.workspace, deep_manifest)
             d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )
             if d_m_repos:
-                max_dest_dm = max(len(x.dest) for x in d_m_repos)
+                if self.only_manifest is True:
+                    max_dest_dm = 0
+                else:
+                    max_dest_dm = max(len(x.dest) for x in d_m_repos)
+
         if f_m_repos:
-            # TODO: Future Manifest also needs to be checked by 'groups'
-            max_dest_fm = max(len(x.dest) for x in f_m_repos)
+            if self.only_manifest is True:
+                for repo in f_m_repos:
+                    for remote in repo.remotes:
+                        if self.workspace.config.manifest_url == remote.url:
+                            max_dest_fm = len(repo.dest)
+                            break  # do not need go through other repos
+            else:
+                max_dest_fm = max(len(x.dest) for x in f_m_repos)
         return max(max_dest_dm, max_dest, max_dest_fm)
 
     def _max_len_manifest_branch(
@@ -523,8 +562,15 @@ class WorkspaceReposSummary:
             d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )
-            if d_m_repos:
-                max_m_branch = max(x.len_of_describe_branch() for x in d_m_repos)
+            if self.only_manifest is True:
+                if d_m_repos:
+                    for repo in d_m_repos:
+                        for remote in repo.remotes:
+                            if workspace.config.manifest_url == remote.url:
+                                max_m_branch = repo.len_of_describe_branch()
+            else:
+                if d_m_repos:
+                    max_m_branch = max(x.len_of_describe_branch() for x in d_m_repos)
 
         return max_m_branch, d_m
 
@@ -571,7 +617,10 @@ class WorkspaceReposSummary:
         return message
 
     def _describe_status(
-        self, status: StatusOrError, apprise_repo: Union[Repo, None]
+        self,
+        status: StatusOrError,
+        apprise_repo: Union[Repo, None],
+        fm_dest_is_empty: bool = False,
     ) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info()."""
         if isinstance(status, MissingRepo):
@@ -582,7 +631,9 @@ class WorkspaceReposSummary:
         git_status += status.git.describe_pre_branch()
 
         if not git_status:
-            if self.apprise is True:
+            if self.apprise is True and self.max_f_branch > 0:
+                if fm_dest_is_empty is True:
+                    apprise_repo = None
                 git_status += self._describe_status_apprise_branch(
                     status.git.describe_branch(), apprise_repo
                 )
@@ -609,8 +660,9 @@ class WorkspaceReposSummary:
             else:
                 git_status += [ui.blue, "<<"]
         else:
-            if self.lfm and self.only_manifest is False and self.max_f_branch > 0:
-                git_status += [" ".ljust(self.max_f_branch + 3)]  # 3 == len("<< ")
+            if self.lfm and self.max_f_branch > 0:
+                # git_status += [" ".ljust(self.max_f_branch + 3)]  # 3 == len("<< ")
+                git_status += [" ".ljust(self.max_f_branch), "<<"]  # 3 == len("<< ")
         git_status += ui_branch
         git_status += [ui.cyan, ")", ui.reset]
         return git_status
@@ -664,8 +716,14 @@ class WorkspaceReposSummary:
         f_m_repos: Union[List[Repo], None],
         alone_print: bool = False,
     ) -> None:
-        if alone_print is True:
+        if self.f_m_leftovers_displayed is True:
+            return
+        if alone_print is True and self.f_m_repo_found_some is True:
             if f_m_repos:
+                # TODO: we need to have marker if there is some FM repos
+                # that will be printed out
+                # if not, we should not print bellow messages
+                # (if self.only_manifest is False:)
                 if len(f_m_repos) == 1:
                     ui.info_2("Future Manifest's Repo found:")
                 else:
@@ -674,30 +732,40 @@ class WorkspaceReposSummary:
                 ui.info_2("Empty on Future Manifest's Repo(s)")
         if f_m_repos:
             for leftover in f_m_repos:
-                is_future_manifest = False
-                for remote in leftover.remotes:
-                    if workspace.config.manifest_url == remote.url:
-                        is_future_manifest = True
-                        break
-                # if self.only_manifest is True and do_skip is True:
-                if self.only_manifest is True and is_future_manifest is False:
-                    continue
+                self._describe_future_manifest_leftover_repo(
+                    workspace,
+                    leftover,
+                )
+        self.f_m_leftovers_displayed = True
 
-                message = [ui.reset, "*", ui.cyan, leftover.dest.ljust(self.max_dest)]
-                message += self._describe_future_manifest_leftovers_empty_space(
-                    self.max_m_branch
-                )
-                # ":::" is one of few not valid branch name,
-                # therefore is suitable to be mark for N/A
-                message += self._describe_status_apprise_branch(
-                    [ui.reset, ":::"], leftover
-                )
-                if is_future_manifest is True:
-                    # add Manifest mark with proper color
-                    message += self._describe_on_manifest(
-                        TypeOfDataInRegardOfTime.FUTURE
-                    )
-                ui.info(*message)
+    def _describe_future_manifest_leftover_repo(
+        self,
+        workspace: Workspace,
+        leftover: Repo,
+    ) -> None:
+        #
+        is_future_manifest = False
+        for remote in leftover.remotes:
+            if workspace.config.manifest_url == remote.url:
+                is_future_manifest = True
+                break
+        # if self.only_manifest is True and do_skip is True:
+        if self.only_manifest is True and is_future_manifest is False:
+            return
+
+        message = [ui.reset, "*", ui.cyan, leftover.dest.ljust(self.max_dest)]
+        if self.max_m_branch > 0:
+            message += self._describe_future_manifest_leftovers_empty_space(
+                self.max_m_branch
+            )
+        if self.apprise is True:
+            # ":::" is one of few not valid branch name,
+            # therefore is suitable to be mark for N/A
+            message += self._describe_status_apprise_branch([ui.reset, ":::"], leftover)
+        if self.is_manifest_marker is True and is_future_manifest is True:
+            # add Manifest mark with proper color
+            message += self._describe_on_manifest(TypeOfDataInRegardOfTime.FUTURE)
+        ui.info(*message)
 
     def _describe_future_manifest_leftovers_empty_space(
         self,

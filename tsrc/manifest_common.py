@@ -1,8 +1,10 @@
-"""obtain Repo(s):
-get provided Manifest and local configured groups
-and obtain its items (Repos).
-return only such that are intersection of these two
-when adhering policy in regard of handling group"""
+"""
+Manifest Common
+
+see:
+* 'ManifestGetRepos.by_groups()'
+is main reason this file was created
+"""
 
 import functools
 import sys
@@ -16,6 +18,7 @@ from tsrc.manifest import Manifest
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 
+# for compatibility reasons
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
@@ -162,7 +165,6 @@ class ManifestGetRepos:
         else:
             # take all groups from config
             if self.manifest.group_list and self.manifest.group_list.groups:
-                # print("DEBUG: ==here== size =", len(self.manifest.group_list.groups))
                 m_group_items = self.manifest.group_list.get_elements(
                     list(self.manifest.group_list.groups)
                 )
@@ -179,8 +181,6 @@ class ManifestGetRepos:
                     )
                 else:
                     return self._local_m.get_repos(all_=True)
-                #                    for i in self._local_m.get_repos(all_=True):
-                #                        w_group_items += i.dest
                 found_items = list(set(w_group_items).intersection(m_group_items))
 
         repos: List[Repo] = []

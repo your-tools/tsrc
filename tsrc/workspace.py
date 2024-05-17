@@ -74,6 +74,12 @@ class Workspace:
 
         self.local_manifest.update(url=manifest_url, branch=manifest_branch)
 
+    def update_config_repo_groups(self) -> None:
+        local_manifest = self.local_manifest.get_manifest()
+        if local_manifest.group_list:
+            self.config.repo_groups = list(local_manifest.group_list.groups)
+            self.config.save_to_file(self.cfg_path)
+
     def clone_missing(self, *, num_jobs: int = 1) -> None:
         to_clone = []
         for repo in self.repos:
