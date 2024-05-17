@@ -9,9 +9,9 @@ import cli_ui as ui
 
 @unique
 class TypeOfDescribeBranch(Enum):
-    COMMON = 1
-    DM = 2
-    FM = 3
+    COMMON = 1  # for (common) workspace repos
+    DM = 2  # Deep Manifest
+    FM = 3  # Future Manifest
 
 
 @dataclass(frozen=True)
@@ -43,8 +43,8 @@ class Repo:
         self, ljust: int = 0, tod: TypeOfDescribeBranch = TypeOfDescribeBranch.COMMON
     ) -> Tuple[List[ui.Token], List[ui.Token]]:
         """returns:
-        1st: is properly left-adjusted: for print
-        2nd: is not: for 1:1 comparsion"""
+        1st: is properly left-align: for print
+        2nd: is NOT align: for 1:1 comparsion"""
         cb = ui.green  # color (for) branch
         cs = ui.red  # color (for) SHA1
         ct = ui.brown  # color (for) tag

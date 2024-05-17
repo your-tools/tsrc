@@ -93,14 +93,3 @@ class StatusCollector(Task[Repo]):
 
 StatusOrError = Union[Status, Exception]
 CollectedStatuses = Dict[str, StatusOrError]
-
-
-def describe_status(status: StatusOrError) -> List[ui.Token]:
-    """Return a list of tokens suitable for ui.info()."""
-    if isinstance(status, MissingRepo):
-        return [ui.red, "error: missing repo"]
-    if isinstance(status, Exception):
-        return [ui.red, "error: ", status]
-    git_status = status.git.describe()
-    manifest_status = status.manifest.describe()
-    return git_status + manifest_status

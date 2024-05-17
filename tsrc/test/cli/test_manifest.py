@@ -1,7 +1,7 @@
 from pathlib import Path
 from shutil import copyfile
 
-import pytest
+# import pytest
 from cli_ui.tests import MessageRecorder
 
 from tsrc.git import run_git
@@ -14,7 +14,6 @@ from tsrc.test.helpers.manifest_file import (
 from tsrc.workspace_config import WorkspaceConfig
 
 
-@pytest.mark.last
 def test_plain_manifest_on_change(
     tsrc_cli: CLI,
     git_server: GitServer,
@@ -54,7 +53,6 @@ def test_plain_manifest_on_change(
     workspace_config = WorkspaceConfig.from_file(
         workspace_path / ".tsrc" / "config.yml"
     )
-    print("DEBUG path =", workspace_path)
     assert workspace_config.manifest_branch == "master"
     assert workspace_config.manifest_branch_0 == "devel"
     assert message_recorder.find(
@@ -137,7 +135,7 @@ def test_deep_manifest_on_change_after_sync(
     tsrc_cli.run("sync")
     message_recorder.reset()
     tsrc_cli.run("manifest")
-    assert message_recorder.find(r"\* manifest \[ devel \]= \( devel \) ~~ MANIFEST")
+    assert message_recorder.find(r"\* manifest \[ devel \]= devel ~~ MANIFEST")
 
 
 def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
@@ -180,7 +178,7 @@ def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
     # 5th: check if 'manifest' report dirty manifest repository
     message_recorder.reset()
     tsrc_cli.run("manifest")
-    assert message_recorder.find(r"\* manifest \( master \) \(dirty\) ~~ MANIFEST")
+    assert message_recorder.find(r"\* manifest master \(dirty\) ~~ MANIFEST")
 
     # 6th: fix dirty: git add, commit, push
     run_git(manifest_path, "add", "manifest.yml")
@@ -195,7 +193,7 @@ def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
     assert message_recorder.find(
         # TODO: enable this check once status footer will be implemented
         # "=> Deep manifest is using different remote URL for its manifest"
-        r"\* manifest \( master \) ~~ MANIFEST"
+        r"\* manifest master ~~ MANIFEST"
     )
     # assert message_recorder.find(":: Deep Manifest's manifest repo URL:")
 
@@ -264,4 +262,4 @@ def test_manifest_changing_upstream_remote(
     tsrc_cli.run("manifest")
     # TODO: enable this check once status footer will be implemented
     # assert message_recorder.find("=> Remote branch does not have same HEAD")
-    assert message_recorder.find(r"\* manifest \[ master \]= \( master \) ~~ MANIFEST")
+    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")

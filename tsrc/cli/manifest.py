@@ -48,7 +48,7 @@ def run(args: argparse.Namespace) -> None:
         # if not, than raise exception again
         workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
 
-    wrs = WorkspaceReposSummary(workspace, gtf)
+    wrs = WorkspaceReposSummary(workspace, gtf, only_manifest=True)
 
     workspace_config = workspace.config
 
@@ -95,7 +95,6 @@ def run(args: argparse.Namespace) -> None:
     wrs.ready_data(
         statuses,
         dm,
-        only_manifest=True,
         apprise=True,
     )
 
