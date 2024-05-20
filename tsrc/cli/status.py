@@ -79,6 +79,7 @@ def run(args: argparse.Namespace) -> None:
         workspace,
         gtf,
         manifest_marker=not args.no_manifest_marker,
+        future_manifest=not args.no_future_manifest,
     )
 
     status_header = StatusHeader(
@@ -105,11 +106,10 @@ def run(args: argparse.Namespace) -> None:
     _, dm = get_deep_manifest_pcsrepo(repos, workspace.config.manifest_url)
 
     sm = None
-    if args.no_deep_manifest is False:
-        sm = is_manifest_in_workspace(workspace, repos)
     if args.no_deep_manifest is True:
-        print("DEBUG ::--no-dm::")
         dm = None
+    else:
+        sm = is_manifest_in_workspace(workspace, repos)
 
     if sm:
         # TODO: unfortunately this is not enough. there is possibility that
@@ -122,19 +122,10 @@ def run(args: argparse.Namespace) -> None:
 
     statuses = status_collector.statuses
 
-    # TODO: apprise should be set by input parameter
-    #    wrs = WorkspaceReposSummary(
-    #        workspace,
-    #        statuses,
-    #        dm,
-    #        args.groups,
-    #        apprise=True,
-    #    )
     wrs.ready_data(
         statuses,
         dm,
         apprise=not args.no_future_manifest,
-        # apprise=False,
     )
     wrs.summary()
     try:

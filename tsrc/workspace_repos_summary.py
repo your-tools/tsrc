@@ -45,10 +45,12 @@ class WorkspaceReposSummary:
         gtf: GroupsToFind,
         only_manifest: bool = False,
         manifest_marker: bool = True,
+        future_manifest: bool = True,
     ) -> None:
         self.workspace = workspace
         self.gtf = gtf
         self.is_manifest_marker = manifest_marker
+        self.is_future_manifest = future_manifest
 
         # this variable is possibly obsolete
         self.must_find_all_groups = False  # possibly obsolete
@@ -99,6 +101,7 @@ class WorkspaceReposSummary:
         if (
             self.workspace.config.manifest_branch
             != self.workspace.config.manifest_branch_0  # noqa: W503
+            and self.is_future_manifest is True  # noqa: W503
         ):
             (
                 self.lfm,
@@ -354,7 +357,6 @@ class WorkspaceReposSummary:
         d_m_repo: Union[Repo, None],
         d_m_repo_found: bool,
         d_m_repos: Union[List[Repo], None],
-        # mark
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
         if deep_manifest and self.d_m_repo_found_some is True:
@@ -700,12 +702,13 @@ class WorkspaceReposSummary:
                 )
                 if this_repo:
                     # found Future Manifest leftovers in Deep Manifest Leftovers
-                    message += self._describe_status_apprise_branch(
-                        # ":::" is one of few not valid branch name,
-                        # therefore is suitable to be mark for N/A
-                        [ui.reset, ":::"],
-                        self.lfm_repos[leftover.dest],
-                    )
+                    if self.is_future_manifest is True:
+                        message += self._describe_status_apprise_branch(
+                            # ":::" is one of few not valid branch name,
+                            # therefore is suitable to be mark for N/A
+                            [ui.reset, ":::"],
+                            self.lfm_repos[leftover.dest],
+                        )
                     self._m_prepare_for_leftovers_regardles_branch(this_repo, f_m_repos)
 
             ui.info(*message)
@@ -743,7 +746,10 @@ class WorkspaceReposSummary:
         workspace: Workspace,
         leftover: Repo,
     ) -> None:
-        #
+        # do not display FM leftovers when FM is disabled
+        if self.is_future_manifest is False:
+            return
+
         is_future_manifest = False
         for remote in leftover.remotes:
             if workspace.config.manifest_url == remote.url:
