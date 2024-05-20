@@ -1,10 +1,15 @@
 """
 Local Future Manifest
 
-Obtains information from already checkouted
-(thus 'Local')
-Future Manifest in:
+Obtains information about Future Manifest
+by init or update Manifest repository
+to *local* directory.
+
+Local Future Manifest will be in:
 root_path / ".tsrc" / "future_manifest"
+
+This way we can see how Workspace will transform
+after the 'sync'.
 """
 
 from typing import Dict, Tuple, Union

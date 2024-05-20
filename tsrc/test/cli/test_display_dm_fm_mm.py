@@ -13,9 +13,9 @@ contains:
 """
 
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
-import pytest
+# import pytest
 import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
@@ -95,7 +95,6 @@ def test_status_2_x_mm(
     )
 
     # 9th: see status output
-    print("DEBUG path =", workspace_path)
     message_recorder.reset()
     tsrc_cli.run("status")
     assert message_recorder.find(
@@ -129,7 +128,6 @@ def ad_hoc_update_dm_dest(
         yaml.dump(parsed, file)
 
 
-@pytest.mark.last
 def test_status_dm_fm(
     tsrc_cli: CLI,
     git_server: GitServer,
@@ -144,6 +142,7 @@ def test_status_dm_fm(
     And how it will be shown, where there is just DM leftover
     without FM relation:
     '* repo3    [ master ]'
+    And also test how it will end up when DM is disabled.
 
     Scenario:
     * 1st: Create repository
@@ -158,6 +157,10 @@ def test_status_dm_fm(
     while FM is also pointing to new branch <devel>)
     * 8th: add another DM that does not have FM
     (and test output)
+    * 9th: filtering test
+        We now have 2 DM leftovers. One is also in FM.
+        When we disable DM by '--no-dm' we should still
+        have report from one that is in FM (as FM)
     """
 
     # 1st: Create repository
@@ -203,6 +206,17 @@ def test_status_dm_fm(
         r"\* repo3    \[ master \]  \("
     ), "repo3 cannot have FM block included"
 
+    # 9th: filtering test
+    message_recorder.reset()
+    tsrc_cli.run("status", "--no-dm")
+    assert message_recorder.find(
+        r"\* manifest \( master << devel \) \(dirty\) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"\* repo1    \( master == master \)")
+    assert message_recorder.find(
+        r"\* repo2    \( master << ::: \)"
+    ), "it does not find FM leftover"
+
 
 def ad_hoc_update_dm(
     workspace_path: Path,
@@ -212,7 +226,7 @@ def ad_hoc_update_dm(
     yaml = ruamel.yaml.YAML(typ="rt")
     parsed = yaml.load(manifest_path.read_text())
 
-    keep_url: str
+    keep_url: Union[str, None] = None
     for _, value in parsed.items():
         if isinstance(value, List):
             for x in value:
@@ -221,15 +235,10 @@ def ad_hoc_update_dm(
                         if x["url"]:
                             keep_url = x["url"]
 
-    print("DEBUG keep_url =", keep_url)
-
-    for _, value in parsed.items():
-        if isinstance(value, List):
-            value.append({"dest": "repo2", "url": keep_url})
-            # value.append({'dest': 'repo3', 'url': keep_url})
-            # print("DEBUG  value =", value)
-            # for x in value:
-            #    print("DEBUG         x =", x)
+    if keep_url:
+        for _, value in parsed.items():
+            if isinstance(value, List):
+                value.append({"dest": "repo2", "url": keep_url})
 
     # write the file down
     with open(manifest_path, "w") as file:
@@ -244,7 +253,7 @@ def ad_hoc_update_dm_2(
     yaml = ruamel.yaml.YAML(typ="rt")
     parsed = yaml.load(manifest_path.read_text())
 
-    keep_url: str
+    keep_url: Union[str, None] = None
     for _, value in parsed.items():
         if isinstance(value, List):
             for x in value:
@@ -253,15 +262,10 @@ def ad_hoc_update_dm_2(
                         if x["url"]:
                             keep_url = x["url"]
 
-    print("DEBUG keep_url =", keep_url)
-
-    for _, value in parsed.items():
-        if isinstance(value, List):
-            # value.append({'dest': 'repo2', 'url': keep_url})
-            value.append({"dest": "repo3", "url": keep_url})
-            # print("DEBUG  value =", value)
-            # for x in value:
-            #    print("DEBUG         x =", x)
+    if keep_url:
+        for _, value in parsed.items():
+            if isinstance(value, List):
+                value.append({"dest": "repo3", "url": keep_url})
 
     # write the file down
     with open(manifest_path, "w") as file:
@@ -339,44 +343,43 @@ def test_status_cmd_param_3xm(
 
     # 9th:
     #   A: status output without MANIFEST marker
-    print("DEBUG path =", workspace_path)
     message_recorder.reset()
     tsrc_cli.run("status", "--no-mm")
     assert message_recorder.find(
         r"\* repo1_long_long_long_name \[ master \]  \( master == master \)"
-    )
+    ), "issue on option: A"
     assert message_recorder.find(
         r"\* manifest                  \[ master \]= \(        << master \)"
-    )
+    ), "issue on option: A"
     assert message_recorder.find(
         r"\* FM_destination                        \( master << ::: \)"
-    )
+    ), "issue on option: A"
 
     #   B: status output without Future Manifest
     message_recorder.reset()
     tsrc_cli.run("status", "--no-fm")
-    assert message_recorder.find(r"\* repo1_long_long_long_name \[ master \]  master")
+    assert message_recorder.find(
+        r"\* repo1_long_long_long_name \[ master \]  master"
+    ), "issue on option: B"
     assert message_recorder.find(
         r"\* manifest                  \[ master \]= master ~~ MANIFEST"
-    )
-    assert message_recorder.find(
-        r"\* FM_destination                        ~~ MANIFEST"
-    )
+    ), "issue on option: B"
 
     #   C: status output without Deep Manifest
     message_recorder.reset()
     tsrc_cli.run("status", "--no-dm")
-    assert message_recorder.find(r"\* repo1_long_long_long_name \( master == master \)")
+    assert message_recorder.find(
+        r"\* repo1_long_long_long_name \( master == master \)"
+    ), "issue on option: C"
     assert message_recorder.find(
         r"\* manifest                  \(        << master \) ~~ MANIFEST"
-    )
+    ), "issue on option: C"
     assert message_recorder.find(
         r"\* FM_destination            \( master << ::: \) ~~ MANIFEST"
-    )
+    ), "issue on option: C"
 
     #       D: B + C
     message_recorder.reset()
     tsrc_cli.run("status", "--no-dm", "--no-fm")
     assert message_recorder.find(r"\* repo1_long_long_long_name master")
     assert message_recorder.find(r"\* manifest                  master ~~ MANIFEST")
-    assert message_recorder.find(r"\* FM_destination            ~~ MANIFEST")
