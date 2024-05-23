@@ -1,6 +1,7 @@
 """ Entry point for `tsrc sync` """
 
 import argparse
+from typing import List
 
 import cli_ui as ui
 
@@ -35,6 +36,12 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="leave configured repo_groups intact when no groups are provided",
     )
     parser.add_argument(
+        "--ignore-missing-groups",
+        action="store_true",
+        dest="ignore_if_group_not_found",
+        help="ignore configured group(s) if it is not found in groups defined in manifest",
+    )
+    parser.add_argument(
         "--no-correct-branch",
         action="store_false",
         dest="correct_branch",
@@ -62,12 +69,33 @@ def run(args: argparse.Namespace) -> None:
     workspace = get_workspace(args)
     num_jobs = get_num_jobs(args)
 
+    ignore_if_group_not_found: bool = False
+    report_update_repo_groups: bool = False
+
     if update_manifest:
         ui.info_2("Updating manifest")
         workspace.update_manifest()
+
+        # check if groups needs to be ignored
+        if groups and args.ignore_if_group_not_found is True:
+            local_manifest = workspace.local_manifest.get_manifest()
+            found_groups: List[str] = []
+            if local_manifest.group_list and local_manifest.group_list.groups:
+                found_groups = list(
+                    set(groups).intersection(local_manifest.group_list.groups)
+                )
+                # workspace.update_config_repo_groups_provided(found_groups)
+                workspace.update_config_repo_groups(groups=found_groups)
+                report_update_repo_groups = True
+
+        if update_config_repo_groups is True and args.ignore_if_group_not_found is True:
+            ignore_if_group_not_found = True
         if update_config_repo_groups and not groups:
+            workspace.update_config_repo_groups(groups=None)
+            report_update_repo_groups = True
+
+        if report_update_repo_groups is True:
             ui.info_2("Updating repo_groups")
-            workspace.update_config_repo_groups()
         else:
             ui.info_2("Leaving repo_groups intact")
     else:
@@ -80,6 +108,7 @@ def run(args: argparse.Namespace) -> None:
         all_cloned=all_cloned,
         include_regex=include_regex,
         exclude_regex=exclude_regex,
+        ignore_if_group_not_found=ignore_if_group_not_found,
     )
 
     workspace.clone_missing(num_jobs=num_jobs)
