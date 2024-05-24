@@ -64,6 +64,9 @@ class WorkspaceReposSummary:
         self.lfm: Union[Manifest, None] = None
         self.lfm_repos: Union[Dict[str, Repo], None] = None
 
+        # helpers
+        self.clone_all_repos = workspace.config.clone_all_repos
+
         # alignment
         self.max_dest = 0  # DEST
         self.max_m_branch = 0  # DM
@@ -134,8 +137,11 @@ class WorkspaceReposSummary:
         self.only_manifest = only_manifest
         f_m_repos = self._ready_f_m_repos(on_manifest_only=True)
         self.max_f_branch = self._max_len_f_m_branch(f_m_repos)
+        if self.max_f_branch > 0:
+            self.apprise = True
 
-        # self._alignment_correction_when_on_only_manifest(None, f_m_repos)
+        # calculate max_dest
+        self.max_dest = self._correct_max_dest(None, f_m_repos)
 
         self._describe_future_manifest_leftovers(
             self.workspace, f_m_repos, alone_print=True
@@ -220,7 +226,9 @@ class WorkspaceReposSummary:
         # prepare 'd_m_repos' to be used for leftovers
         d_m_repos: Union[List[Repo], None] = None
         if deep_manifest:
-            mgr = ManifestGetRepos(self.workspace, deep_manifest)
+            mgr = ManifestGetRepos(
+                self.workspace, deep_manifest, clone_all_repos=self.clone_all_repos
+            )
             d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )
@@ -232,7 +240,7 @@ class WorkspaceReposSummary:
         deep_manifest_orig = copy.deepcopy(deep_manifest)
 
         # this should always ensure that items will be sorted by key
-        #        has_d_m_d: OrderedDict[str, bool] = self._prepare_for_sort_on_d_m(
+        #        has_d_m_d: OrderedDict[str, bool] = self._sort_based_on_d_m(
         #            deep_manifest
         #        )
         has_d_m_d: Dict[str, bool] = self._prepare_for_sort_on_d_m(deep_manifest)
@@ -246,7 +254,9 @@ class WorkspaceReposSummary:
         # once again prepare for leftovers
         d_m_repos = None
         if deep_manifest:
-            mgr = ManifestGetRepos(self.workspace, deep_manifest)
+            mgr = ManifestGetRepos(
+                self.workspace, deep_manifest, clone_all_repos=self.clone_all_repos
+            )
             d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )
@@ -312,36 +322,24 @@ class WorkspaceReposSummary:
 
             message = [ui.green, "*", ui.reset, dest.ljust(self.max_dest)]
 
+            # do not report further if there is Error, just print it
+            if isinstance(status, MissingRepo) or isinstance(status, Exception):
+                message += self._describe_deep_manifest(
+                    False, None, dest, None, self.max_m_branch
+                )
+                message += self._describe_status(status, None)
+                ui.info(*message)
+                continue
+
             # describe Deep Manifest field (if present and enabled)
             message += self._describe_deep_manifest_column(
                 deep_manifest, dest, d_m_repo, d_m_repo_found, d_m_repos
             )
 
-            is_empty_fm_desc = True
-            if self.lfm_repos:
-                f_m_repo_found, f_m_repo = self._repo_matched_manifest_dest(
-                    self.workspace,
-                    self.lfm,
-                    dest,
-                )
-                if f_m_repo_found is True and f_m_repo:
-                    message += self._describe_status(status, f_m_repo)
-                    is_empty_fm_desc = False
-                    # eliminate from 'f_m_repos' as well
-                    self._m_prepare_for_leftovers_regardles_branch(
-                        f_m_repo,
-                        f_m_repos,
-                    )
-            else:
-                message += self._describe_status(status, None)
-                is_empty_fm_desc = False
-
-            if is_empty_fm_desc is True:
-                message += self._describe_status(status, None, fm_dest_is_empty=True)
+            # describe Future Manifest (if present and enabled)
+            message += self._describe_future_manifest_column(dest, status, f_m_repos)
 
             # final Manifest-only extra markings
-            #            if self.dm and dest == self.dm.dest:
-            #                message += self._describe_on_manifest()
             if self.is_manifest_marker is True and isinstance(status, Status):
                 for this_remote in status.manifest.repo.remotes:
                     if this_remote.url == self.workspace.config.manifest_url:
@@ -349,6 +347,35 @@ class WorkspaceReposSummary:
                         break
 
             ui.info(*message)
+
+    def _describe_future_manifest_column(
+        self,
+        dest: str,
+        status: StatusOrError,
+        f_m_repos: Union[List[Repo], None] = None,
+    ) -> List[ui.Token]:
+        message: List[ui.Token] = []
+        is_empty_fm_desc = True
+        if self.lfm_repos:
+            f_m_repo_found, f_m_repo = self._repo_matched_manifest_dest(
+                self.workspace,
+                self.lfm,
+                dest,
+            )
+            if f_m_repo_found is True and f_m_repo:
+                message += self._describe_status(status, f_m_repo)
+                is_empty_fm_desc = False
+                # eliminate from 'f_m_repos' as well
+                self._m_prepare_for_leftovers_regardles_branch(
+                    f_m_repo,
+                    f_m_repos,
+                )
+        else:
+            message += self._describe_status(status, None)
+            is_empty_fm_desc = False
+        if is_empty_fm_desc is True:
+            message += self._describe_status(status, None, fm_dest_is_empty=True)
+        return message
 
     def _describe_deep_manifest_column(
         self,
@@ -411,7 +438,9 @@ class WorkspaceReposSummary:
             return False, None
 
         # we have to make sure provided 'groups' does match Deep Manifest
-        mgr = ManifestGetRepos(workspace, ref_manifest)
+        mgr = ManifestGetRepos(
+            workspace, ref_manifest, clone_all_repos=self.clone_all_repos
+        )
         d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
             self.gtf, self.must_find_all_groups
         )
@@ -439,7 +468,9 @@ class WorkspaceReposSummary:
         d_m_repos: List[Repo],
         dest: str,
     ) -> Tuple[bool, Union[Repo, None]]:
-        mgr = ManifestGetRepos(self.workspace, this_manifest)
+        mgr = ManifestGetRepos(
+            self.workspace, this_manifest, clone_all_repos=self.clone_all_repos
+        )
         repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
             self.gtf, self.must_find_all_groups
         )
@@ -516,7 +547,9 @@ class WorkspaceReposSummary:
             max_dest = max(len(x) for x in self.statuses.keys())
 
         if deep_manifest:
-            mgr = ManifestGetRepos(self.workspace, deep_manifest)
+            mgr = ManifestGetRepos(
+                self.workspace, deep_manifest, clone_all_repos=self.clone_all_repos
+            )
             d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )
@@ -560,7 +593,7 @@ class WorkspaceReposSummary:
             self.d_m_root_point = self._check_d_m_root_point(
                 workspace, statuses, d_m, sm.dest
             )
-            mgr = ManifestGetRepos(workspace, d_m)
+            mgr = ManifestGetRepos(workspace, d_m, clone_all_repos=self.clone_all_repos)
             d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )

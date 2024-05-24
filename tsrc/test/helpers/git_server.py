@@ -341,8 +341,14 @@ class GitServer:
         return url
 
     def add_group(self, group_name: str, repos: List[str]) -> None:
+        """
+        adding new group should not be blocked when
+        repositories inside are already exists.
+        """
         for repo in repos:
-            self.add_repo(repo)
+            repo_path = self.bare_path / repo
+            if not repo_path.exists():
+                self.add_repo(repo)
         self.manifest.configure_group(group_name, repos)
 
     def push_file(
