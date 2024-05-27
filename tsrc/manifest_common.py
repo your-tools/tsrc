@@ -96,6 +96,7 @@ class ManifestGetRepos:
 
     def _with_groups(self) -> List[Repo]:
         found_items: List[str] = []
+        m_group_items: List[str] = []
         if (
             self.gtf.groups
             and self.manifest.group_list  # noqa noqa: W503

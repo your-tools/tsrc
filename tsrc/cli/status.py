@@ -16,7 +16,7 @@ from tsrc.executor import process_items
 from tsrc.groups import GroupNotFound
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.manifest_common import ManifestGroupNotFound
-from tsrc.pcs_repo import get_deep_manifest_pcsrepo, is_manifest_in_workspace
+from tsrc.pcs_repo import get_deep_manifest_pcsrepo
 from tsrc.status_endpoint import StatusCollector
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
 
@@ -90,7 +90,6 @@ def run(args: argparse.Namespace) -> None:
     status_collector = StatusCollector(workspace)
     repos = workspace.repos
     if not repos:
-        ui.info_2("Workspace is empty")
         # check if perhaps there is change in
         # manifest branch, thus Future Manifest
         # can be obtained, check if the Future Manifest
@@ -105,20 +104,8 @@ def run(args: argparse.Namespace) -> None:
 
     _, dm = get_deep_manifest_pcsrepo(repos, workspace.config.manifest_url)
 
-    sm = None
     if args.no_deep_manifest is True:
         dm = None
-    else:
-        sm = is_manifest_in_workspace(workspace, repos)
-
-    if sm:
-        # TODO: unfortunately this is not enough. there is possibility that
-        # Deep Manifest will not be displayed even if it exist.
-        # Groups may select only such repos, that does not have any
-        # repo that is currently in the workspace.
-        ui.info_2("Workspace status, including [Deep Manifest branches]:")
-    else:
-        ui.info_2("Workspace status:")
 
     statuses = status_collector.statuses
 

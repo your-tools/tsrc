@@ -74,8 +74,6 @@ class WorkspaceReposSummary:
 
         # for detection of <something> is empty
         self.d_m_repo_found_some = False
-        self.d_m_block_shell_is_shown = False
-        self.f_m_repo_found_some = False
         self.f_m_leftovers_displayed = (
             False  # so FM leftovers will be displayed just once
         )
@@ -132,9 +130,8 @@ class WorkspaceReposSummary:
                             f_m_repos.append(repo)
         return f_m_repos
 
-    def dry_check_future_manifest(self, only_manifest: bool = False) -> None:
+    def dry_check_future_manifest(self) -> None:
         # when there is no 'statuses' from Workspace
-        self.only_manifest = only_manifest
         f_m_repos = self._ready_f_m_repos(on_manifest_only=True)
         self.max_f_branch = self._max_len_f_m_branch(f_m_repos)
         if self.max_f_branch > 0:
@@ -143,9 +140,12 @@ class WorkspaceReposSummary:
         # calculate max_dest
         self.max_dest = self._correct_max_dest(None, f_m_repos)
 
-        self._describe_future_manifest_leftovers(
-            self.workspace, f_m_repos, alone_print=True
-        )
+        if self.max_dest > 0:
+            self._describe_future_manifest_leftovers(
+                self.workspace, f_m_repos, alone_print=True
+            )
+        else:
+            self._describe_workspace_is_empty()
 
     def _sort_based_on_d_m(
         self,
@@ -304,6 +304,8 @@ class WorkspaceReposSummary:
         * '/GIT status/': (optional) anything GIT has to report
         * '~~ MANIFEST ' (optional) (marker for Manifest repo only)
         """
+        self._core_message_header()
+
         for dest in s_has_d_m_d.keys():
 
             status = self.statuses[dest]
@@ -347,6 +349,24 @@ class WorkspaceReposSummary:
                         break
 
             ui.info(*message)
+
+    def _core_message_header(self) -> None:
+        if self.max_dest > 0:
+            if self.statuses:
+                ui.info_2("Before possible GIT statuses, Workspace reports:")
+            else:
+                ui.info_2("Workspace reports:")
+            message: List[ui.Token] = []
+            message += ["Destination"]
+            if self.max_m_branch > 0 and self.d_m_repo_found_some is True:
+                message += ["[Deep Manifest description]"]
+
+            if self.max_f_branch > 0:
+                message += ["(Future Manifest description)"]
+            ui.info_2(*message)
+
+    def _describe_workspace_is_empty(self) -> None:
+        ui.info_2("Workspace is empty")
 
     def _describe_future_manifest_column(
         self,
@@ -754,7 +774,7 @@ class WorkspaceReposSummary:
     ) -> None:
         if self.f_m_leftovers_displayed is True:
             return
-        if alone_print is True and self.f_m_repo_found_some is True:
+        if alone_print is True:
             if f_m_repos:
                 # TODO: we need to have marker if there is some FM repos
                 # that will be printed out

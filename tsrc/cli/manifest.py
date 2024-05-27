@@ -15,7 +15,7 @@ from tsrc.executor import process_items
 from tsrc.groups import GroupNotFound
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.manifest_common import ManifestGroupNotFound
-from tsrc.pcs_repo import get_deep_manifest_pcsrepo, get_workspace_manifest_pcsrepo
+from tsrc.pcs_repo import get_deep_manifest_pcsrepo
 from tsrc.status_endpoint import StatusCollector
 
 # from tsrc.status_footer import StatusFooter
@@ -63,11 +63,16 @@ def run(args: argparse.Namespace) -> None:
             cfg_update_data, [ConfigUpdateType.MANIFEST_BRANCH]
         )
     status_header.display()
-
     status_collector = StatusCollector(workspace)
-
-    """Go get Deep Manifest if there is one"""
     all_repos = workspace.repos
+    if not all_repos:
+        # check if perhaps there is change in
+        # manifest branch, thus Future Manifest
+        # can be obtained, check if the Future Manifest
+        # does not match given group(s) (or default group)
+        wrs.dry_check_future_manifest()
+        return
+
     # get repos to process, in this case it will be just 1
     repos, dm = get_deep_manifest_pcsrepo(all_repos, workspace_config.manifest_url)
 
@@ -75,22 +80,6 @@ def run(args: argparse.Namespace) -> None:
     process_items(repos, status_collector, num_jobs=1)
 
     statuses = status_collector.statuses
-
-    sm = get_workspace_manifest_pcsrepo(statuses, workspace_config.manifest_url)
-
-    if sm and dm:
-        ui.info_2(
-            # TODO: unfortunately this is not enough. there is possibility that
-            # Deep Manifest will not be displayed even if it exist.
-            # Groups may select only such repos, that does not have any
-            # repo that is currently in the workspace.
-            "Current integration into Workspace, including [Deep Manifest branches]:"
-        )
-    else:
-        if sm:
-            ui.info_2("Current integration into Workspace:")
-        else:
-            wrs.dry_check_future_manifest(only_manifest=True)
 
     wrs.ready_data(
         statuses,

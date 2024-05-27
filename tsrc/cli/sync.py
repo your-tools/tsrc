@@ -77,21 +77,20 @@ def run(args: argparse.Namespace) -> None:
         workspace.update_manifest()
 
         # check if groups needs to be ignored
+        found_groups: List[str] = []
         if groups and args.ignore_if_group_not_found is True:
             local_manifest = workspace.local_manifest.get_manifest()
-            found_groups: List[str] = []
             if local_manifest.group_list and local_manifest.group_list.groups:
                 found_groups = list(
                     set(groups).intersection(local_manifest.group_list.groups)
                 )
-                # workspace.update_config_repo_groups_provided(found_groups)
                 workspace.update_config_repo_groups(groups=found_groups)
                 report_update_repo_groups = True
 
-        if update_config_repo_groups is True and args.ignore_if_group_not_found is True:
-            ignore_if_group_not_found = True
-        if update_config_repo_groups and not groups:
-            workspace.update_config_repo_groups(groups=None)
+        if update_config_repo_groups is True:
+            if args.ignore_if_group_not_found is True:
+                ignore_if_group_not_found = True
+            workspace.update_config_repo_groups(groups=found_groups)
             report_update_repo_groups = True
 
         if report_update_repo_groups is True:
