@@ -130,12 +130,20 @@ def test_deep_manifest_on_change_after_sync(
     assert message_recorder.find(
         r"\* manifest \[ devel \]= \( devel == devel \) \(expected: master\) ~~ MANIFEST"
     )
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
 
     # 10th: verify the theory about what will happen after 'sync'
     tsrc_cli.run("sync")
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(r"\* manifest \[ devel \]= devel ~~ MANIFEST")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert not message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    ), "there should not bee any Future Manifest description"
 
 
 def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
@@ -195,6 +203,12 @@ def test_deep_manifest_with_different_remote_url_for_its_manifest_repo(
         # "=> Deep manifest is using different remote URL for its manifest"
         r"\* manifest master ~~ MANIFEST"
     )
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination")
+    # what we should not find
+    assert not message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert not message_recorder.find(r"=> Destination \(Future Manifest description\)")
+
     # assert message_recorder.find(":: Deep Manifest's manifest repo URL:")
 
 
@@ -263,3 +277,10 @@ def test_manifest_changing_upstream_remote(
     # TODO: enable this check once status footer will be implemented
     # assert message_recorder.find("=> Remote branch does not have same HEAD")
     assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    # what we should not find
+    assert not message_recorder.find(r"=> Destination \(Future Manifest description\)")
+    assert not message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )

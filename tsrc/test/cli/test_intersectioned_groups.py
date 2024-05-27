@@ -47,7 +47,8 @@ def test_basic_fm_groups(
     * 11th: now change back to previous branch of Manifest: 'dev'
     * 12th: check status of only 'group_7'
     * 13th: delete group_7 from local Manifest
-    * 14th: check status of only 'group_7' again
+    * 14th: a) check status of only 'group_7' again
+    * 14th: b) check the same, but in 'tsrc manifest'
     * 15th: revert Manifest branch back to 'master'
     * 16th: check status of only 'group_7' again
 
@@ -203,13 +204,23 @@ def test_basic_fm_groups(
     #   we will force only Future Manifest leftovers output
     ad_hoc_update_lm_groups(workspace_path)
 
-    # 14th: check status of only 'group_7' again
+    # 14th: a) check status of only 'group_7' again
     #   As local manifest does no longer have 'group_7'
     #   defined, only option left is Future Manifest
+    #   a) also check header of Workspace report
     message_recorder.reset()
     tsrc_cli.run("status", "--groups", "group_7")
+    assert message_recorder.find(r"=> Future Manifest's Repos found:")
     assert message_recorder.find(r"\* manifest \( master << ::: \) ~~ MANIFEST")
     assert message_recorder.find(r"\* repo_2   \( master << ::: \)")
+
+    # 14th: b) check the same, but in 'tsrc manifest'
+    #   here there should be only single record
+    message_recorder.reset()
+    tsrc_cli.run("manifest", "--groups", "group_7")
+    assert message_recorder.find(r"=> Future Manifest's Repo found:")
+    assert message_recorder.find(r"\* manifest \( master << ::: \) ~~ MANIFEST")
+    assert not message_recorder.find(r"\* repo_2   \( master << ::: \)")
 
     # 15th: revert Manifest branch back to 'master'
     message_recorder.reset()
