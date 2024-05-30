@@ -1,4 +1,13 @@
-"""Status Header Display Mode"""
+"""
+Status Header Display Mode
+
+Keeps information about what data can be displayed
+in the status header of some commands
+
+Currently it is implemented into:
+* status
+* manifest
+"""
 
 from enum import Flag
 
