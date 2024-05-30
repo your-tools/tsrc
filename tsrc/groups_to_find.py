@@ -40,7 +40,7 @@ class GroupsToFind:
             self.found_groups = this_found_groups
 
     def was_found(self, this_group: str) -> bool:
-        """check only single group wheter it was found"""
+        """check only single group whether it was found"""
         if this_group in self.found_groups:
             return True
         return False

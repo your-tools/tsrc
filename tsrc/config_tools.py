@@ -65,12 +65,13 @@ class ConfigTools:
         """
         Q: Why we should not accept
         manifest branch change to branch that does not
-        exists remotely, but it is only in local
+        exists remotely, while it is in local
         (Workspace) Manifest's repository?
         A: because Future Manifest will not work in such case.
         Q: What about Deep Manifest?
         A: Deep Manifest will work when we chage branch
         of Manifest repo by 'git' command.
-        Deep Manifest does not care about configured branch
+        Deep Manifest does not care about
+        Manifest's configured branch in config
         """
         pass

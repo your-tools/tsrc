@@ -19,8 +19,6 @@ from tsrc.manifest_common import ManifestGroupNotFound
 from tsrc.pcs_repo import get_deep_manifest_pcsrepo
 from tsrc.status_endpoint import StatusCollector
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
-
-# from tsrc.status_header import header_manifest_branch
 from tsrc.utils import erase_last_line
 from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
@@ -54,6 +52,12 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="do not display Future Manifest",
         dest="no_future_manifest",
     )
+    parser.add_argument(
+        "--same-fm",
+        action="store_true",
+        help="use buffered Future Manifest to speed-up execution",
+        dest="use_same_future_manifest",
+    )
     parser.set_defaults(run=run)
 
 
@@ -80,6 +84,7 @@ def run(args: argparse.Namespace) -> None:
         gtf,
         manifest_marker=not args.no_manifest_marker,
         future_manifest=not args.no_future_manifest,
+        use_same_future_manifest=args.use_same_future_manifest,
     )
 
     status_header = StatusHeader(

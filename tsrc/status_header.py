@@ -8,7 +8,9 @@ What it does:
 Prints (implemented) configured details
 as per request (see StatusHeaderDisplayMode)
 Currently implemented:
-* Manifest's branch (full report, even on change)"""
+* Manifest's branch (full report, even on change)
+* Manifest's URL
+"""
 
 from typing import List, Union
 

@@ -1,9 +1,12 @@
 """
 Manifest Common
 
-see:
-* 'ManifestGetRepos.by_groups()'
-is main reason this file was created
+Takes control over finding all provided Groups
+in order to report the exception 'GroupNotFound' properly
+(as Groups can be matched on more than 1 place)
+
+Not only finding the Groups, but also obtaining
+proper list of Repositories from them.
 """
 
 import functools
@@ -139,7 +142,7 @@ class ManifestGetRepos:
                 for missing_group in missing_groups:
                     if self.gtf.was_found(missing_group) is False:
                         raise ManifestGroupNotFound(missing_group)
-                        return []
+                        return
 
     def _with_groups_consider_local(self, m_group_items: List[str]) -> List[Repo]:
         if (

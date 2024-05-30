@@ -32,6 +32,13 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="use this branch for the manifest",
         dest="manifest_branch",
     )
+    # same option as in 'status'
+    parser.add_argument(
+        "--same-fm",
+        action="store_true",
+        help="use buffered Future Manifest to speed-up execution",
+        dest="use_same_future_manifest",
+    )
     parser.set_defaults(run=run)
 
 
@@ -48,7 +55,12 @@ def run(args: argparse.Namespace) -> None:
         # if not, than raise exception again
         workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
 
-    wrs = WorkspaceReposSummary(workspace, gtf, only_manifest=True)
+    wrs = WorkspaceReposSummary(
+        workspace,
+        gtf,
+        only_manifest=True,
+        use_same_future_manifest=args.use_same_future_manifest,
+    )
 
     workspace_config = workspace.config
 

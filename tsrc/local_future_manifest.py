@@ -27,8 +27,13 @@ def get_local_future_manifests_manifest_and_repos(
     gtf: GroupsToFind,
     on_manifest_only: bool = False,
     must_find_all_groups: bool = False,
-) -> Tuple[Union[Manifest, None], Union[Dict[str, Repo], None], bool, GroupsToFind]:
+    use_same_future_manifest: bool = False,
+) -> Tuple[
+    Union[Manifest, None], Union[Dict[str, Repo], None], bool, GroupsToFind, bool
+]:
     path = workspace.root_path / ".tsrc" / "future_manifest"
+    path_to_m_file = path / "manifest.yml"
+    report_skip_fm_update: bool = False
 
     # as Manifest.yml by itself does not have configuration, we need to check
     # Workspace config to apply some missing options
@@ -39,12 +44,16 @@ def get_local_future_manifests_manifest_and_repos(
     lfm = LocalManifest(path)
     if path.is_dir():
         # if it is already present
-        lfm.update(
-            url=workspace.config.manifest_url,
-            branch=workspace.config.manifest_branch,
-            show_output=False,
-            show_cmd=False,
-        )
+        if use_same_future_manifest is False or not path_to_m_file.is_file():
+            lfm.update(
+                url=workspace.config.manifest_url,
+                branch=workspace.config.manifest_branch,
+                show_output=False,
+                show_cmd=False,
+            )
+        else:
+            report_skip_fm_update = True
+
     else:
         # first time use
         lfm.init(
@@ -68,4 +77,4 @@ def get_local_future_manifests_manifest_and_repos(
     for repo in repos:
         dict_repos[repo.dest] = repo
 
-    return lfmm, dict_repos, must_find_all_groups, gtf
+    return lfmm, dict_repos, must_find_all_groups, gtf, report_skip_fm_update

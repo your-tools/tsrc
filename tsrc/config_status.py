@@ -5,7 +5,7 @@ Contains all operations and displaying
 in regard of config manipulation.
 
 Some atomic config operation can also be found in:
-ConfigTools
+'ConfigTools' class
 """
 
 from typing import List, Optional, Tuple, Union
@@ -27,8 +27,8 @@ class ConfigStatus:
     ) -> None:
         self.workspace = workspace
         self.shdms = shdms
-        """if related markers will not be here, nothing will be displayed
-        even when there is some issue"""
+        """self.shdms: if related markers will not be here,
+        nothing will be displayed even when there is some issue"""
 
     def pre_check_change(
         self,
