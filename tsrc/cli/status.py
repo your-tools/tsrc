@@ -16,9 +16,11 @@ from tsrc.executor import process_items
 from tsrc.groups import GroupNotFound
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.manifest_common import ManifestGroupNotFound
-from tsrc.pcs_repo import get_deep_manifest_pcsrepo
+from tsrc.pcs_repo import get_deep_manifest_from_local_manifest_pcsrepo
 from tsrc.status_endpoint import StatusCollector
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
+
+# from tsrc.status_header import header_manifest_branch
 from tsrc.utils import erase_last_line
 from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
@@ -79,6 +81,13 @@ def run(args: argparse.Namespace) -> None:
         # if not, than raise exception at the end
         workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
 
+    dm = None
+    if args.no_deep_manifest is False:
+        dm, gtf = get_deep_manifest_from_local_manifest_pcsrepo(
+            workspace,
+            gtf,
+        )
+
     wrs = WorkspaceReposSummary(
         workspace,
         gtf,
@@ -93,6 +102,7 @@ def run(args: argparse.Namespace) -> None:
     )
     status_header.display()
     status_collector = StatusCollector(workspace)
+
     repos = workspace.repos
     if not repos:
         # check if perhaps there is change in
@@ -103,14 +113,10 @@ def run(args: argparse.Namespace) -> None:
         return
 
     ui.info_1(f"Collecting statuses of {len(repos)} repo(s)")
+
     num_jobs = get_num_jobs(args)
     process_items(repos, status_collector, num_jobs=num_jobs)
     erase_last_line()
-
-    _, dm = get_deep_manifest_pcsrepo(repos, workspace.config.manifest_url)
-
-    if args.no_deep_manifest is True:
-        dm = None
 
     statuses = status_collector.statuses
 

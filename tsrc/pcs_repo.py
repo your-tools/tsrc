@@ -13,6 +13,9 @@ into the function, but one.
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Union
 
+from tsrc.git_remote import remote_urls_are_same
+from tsrc.groups_to_find import GroupsToFind
+from tsrc.manifest_common import ManifestGetRepos
 from tsrc.repo import Remote, Repo
 from tsrc.status_endpoint import Status
 from tsrc.workspace import Workspace
@@ -49,6 +52,25 @@ def repo_from_pcsrepo(
 StatusOrError = Union[Status, Exception]
 
 
+def get_deep_manifest_from_local_manifest_pcsrepo(
+    # manifest: Manifest,
+    workspace: Workspace,
+    # groups: Union[List[str], None],
+    gtf: GroupsToFind,
+) -> Tuple[Union[PCSRepo, None], GroupsToFind]:
+    """
+    Returns:
+    * 1st: PCSRepo of Deep Manifest (if found)
+    * 2nd: GroupsToFind: updated for future use
+    """
+    manifest = workspace.local_manifest.get_manifest()
+    mgr = ManifestGetRepos(workspace, manifest, workspace.config.clone_all_repos)
+    all_repos, _, new_gtf = mgr.by_groups(gtf)
+    _, pcs_repo = get_deep_manifest_pcsrepo(all_repos, workspace.config.manifest_url)
+
+    return pcs_repo, new_gtf
+
+
 def get_deep_manifest_pcsrepo(
     all_repos: List[Repo],
     m_url: str,
@@ -61,7 +83,7 @@ def get_deep_manifest_pcsrepo(
         repo_remotes = repo.remotes
         is_found = False
         for remote in repo_remotes:
-            if remote.url and remote.url == m_url:
+            if remote.url and remote_urls_are_same(remote.url, m_url) is True:
                 is_found = True
                 break
         if is_found is True:
@@ -86,7 +108,7 @@ def get_workspace_manifest_pcsrepo(
     for dest, status in statuses.items():
         if isinstance(status, Status):
             for remote in status.manifest.repo.remotes:
-                if remote.url == m_url:
+                if remote_urls_are_same(remote.url, m_url) is True:
                     branch = None
                     if isinstance(status.git.branch, str):
                         branch = status.git.branch
@@ -107,7 +129,13 @@ def is_manifest_in_workspace(
         this_dest = x.dest
         this_branch = x.branch
         for y in x.remotes:
-            if y.url and y.url == workspace.config.manifest_url:
+            if (
+                y.url
+                and remote_urls_are_same(  # noqa: W503
+                    y.url, workspace.config.manifest_url
+                )
+                is True
+            ):
                 # go with 1st one found
                 return PCSRepo(
                     this_dest, this_branch, url=workspace.config.manifest_url

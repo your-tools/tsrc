@@ -174,6 +174,16 @@ class GitStatus:
             res += [ui.brown, "on", self.tag, ui.reset]
         return res
 
+    def len_of_describe_branch(self) -> int:
+        len_: int = 0
+        if self.branch:
+            len_ += len(self.branch)
+        elif self.sha1:
+            len_ += len(self.sha1)
+        if self.tag:
+            len_ += len(self.tag) + 4  # " on "
+        return len_
+
     def describe_post_branch(self) -> List[ui.Token]:
         res: List[ui.Token] = []
         res += self.describe_position()
