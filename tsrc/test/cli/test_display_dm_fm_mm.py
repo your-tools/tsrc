@@ -10,6 +10,7 @@ contains:
 * 'test_status_2_x_mm': rare case of 2 MANIFEST markers
 * 'test_status_dm_fm': general test of DM and FM integrated together
 * 'test_status_cmd_param_3xm': test all '--no-XX' cmd param options
+* 'test_mm_alignment_in_all_types': test Manifest Marker alignment
 """
 
 from pathlib import Path
@@ -74,7 +75,7 @@ def test_status_2_x_mm(
 
     # 5th: update manifest repo:
     #    change 'dest' for Manifest's repository and save
-    ad_hoc_update_dm_dest(workspace_path)
+    ad_hoc_update_dm_dest__for_status_2_x_mm(workspace_path)
 
     # 6th: git push Manifest repo to origin:<devel>
     run_git(manifest_path, "add", "manifest.yml")
@@ -91,7 +92,7 @@ def test_status_2_x_mm(
         r"\* manifest       \[ master \]= \(        << master \) ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* FM_destination             \( master << ::: \) ~~ MANIFEST"
+        r"\* FM_destination             \( master << ::: \)    ~~ MANIFEST"
     )
 
     # 9th: see status output
@@ -104,11 +105,11 @@ def test_status_2_x_mm(
         r"\* manifest                  \[ master \]= \(        << master \) ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* FM_destination                        \( master << ::: \) ~~ MANIFEST"
+        r"\* FM_destination                        \( master << ::: \)    ~~ MANIFEST"
     )
 
 
-def ad_hoc_update_dm_dest(
+def ad_hoc_update_dm_dest__for_status_2_x_mm(
     workspace_path: Path,
 ) -> None:
     """change Manifest's dest"""
@@ -137,10 +138,11 @@ def test_status_dm_fm(
     """
     Reason:
     Perform general test of DM and FM.
-    In particular: see how DM leftovers will have relation to FM:
+    In particular verify:
+    DM leftovers having FM description (apprise block) like:
     '* repo2    [ master ]  ( master << ::: )'
     And how it will be shown, where there is just DM leftover
-    without FM relation:
+    without FM description:
     '* repo3    [ master ]'
     And also test how it will end up when DM is disabled.
 
@@ -181,7 +183,7 @@ def test_status_dm_fm(
     run_git(manifest_path, "checkout", "-B", "devel")
 
     # 5th: put some new repository there and commit and push
-    ad_hoc_update_dm(workspace_path)
+    ad_hoc_update_dm__for_status_dm_fm(workspace_path)
     run_git(manifest_path, "add", "manifest.yml")
     run_git(manifest_path, "commit", "-m", "extending with new repo-2")
     run_git(manifest_path, "push", "-u", "origin", "devel")
@@ -198,7 +200,7 @@ def test_status_dm_fm(
     ), "repo2 is leftover that is also present in Future Manifest"
 
     # 8th: add another DM that does not have FM
-    ad_hoc_update_dm_2(workspace_path)
+    ad_hoc_update_dm_2__for_status_dm_fm(workspace_path)
     message_recorder.reset()
     tsrc_cli.run("status")
     assert message_recorder.find(r"\* repo3    \[ master \]")
@@ -218,7 +220,7 @@ def test_status_dm_fm(
     ), "it does not find FM leftover"
 
 
-def ad_hoc_update_dm(
+def ad_hoc_update_dm__for_status_dm_fm(
     workspace_path: Path,
 ) -> None:
     manifest_path = workspace_path / "manifest" / "manifest.yml"
@@ -245,7 +247,7 @@ def ad_hoc_update_dm(
         yaml.dump(parsed, file)
 
 
-def ad_hoc_update_dm_2(
+def ad_hoc_update_dm_2__for_status_dm_fm(
     workspace_path: Path,
 ) -> None:
     manifest_path = workspace_path / "manifest" / "manifest.yml"
@@ -272,7 +274,7 @@ def ad_hoc_update_dm_2(
         yaml.dump(parsed, file)
 
 
-def test_status_cmd_param_3xm(
+def test_status_cmd_param_3x_no(
     tsrc_cli: CLI,
     git_server: GitServer,
     workspace_path: Path,
@@ -327,8 +329,9 @@ def test_status_cmd_param_3xm(
     run_git(manifest_path, "checkout", "-B", "devel")
 
     # 5th: update manifest repo:
-    #    change 'dest' for Manifest's repository and save
-    ad_hoc_update_dm_dest(workspace_path)
+    #   change 'dest' for Manifest's repository and save
+    #   reusing same Fn as for 'status_2_x_mm'
+    ad_hoc_update_dm_dest__for_status_2_x_mm(workspace_path)
 
     # 6th: git push Manifest repo to origin:<devel>
     run_git(manifest_path, "add", "manifest.yml")
@@ -375,7 +378,7 @@ def test_status_cmd_param_3xm(
         r"\* manifest                  \(        << master \) ~~ MANIFEST"
     ), "issue on option: C"
     assert message_recorder.find(
-        r"\* FM_destination            \( master << ::: \) ~~ MANIFEST"
+        r"\* FM_destination            \( master << ::: \)    ~~ MANIFEST"
     ), "issue on option: C"
 
     #       D: B + C
@@ -383,3 +386,197 @@ def test_status_cmd_param_3xm(
     tsrc_cli.run("status", "--no-dm", "--no-fm")
     assert message_recorder.find(r"\* repo1_long_long_long_name master")
     assert message_recorder.find(r"\* manifest                  master ~~ MANIFEST")
+
+
+def test_mm_alignment_in_all_types(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Reason:
+
+    Test Manifest Marker alignment
+    in all types (LM, DM, FM)
+
+    Manifest Marker should be aligned to
+    * Git Description or
+    * Apprise branch block
+        (if FM is enabled and Manifest branch is in changing state)
+
+    Scenario:
+
+    * 1st: Create repositories and Manifest repository as well
+        (use 'manifest-dm' as 'dest' for Manifest's repo)
+    * 2nd: init Workspace on master
+    * 3rd: Manifest repo: checkout new branch <devel>
+    * 4th: Update Manifest's repo:
+        change 'dest' from 'manifest-dm' to 'manifest'
+    * 5th: Manifest's repo: commit + push
+    * 6th: verify `tsrc status`
+    * 7th: verify `tsrc manifest`
+    * 8th: manifest's repo: checkout new branch <future_b>
+    * 9th: 'manifest.yml': update 'dest' of Manifest's repo
+    * 10th: Manifest's repo: add, commit and push
+    * 11th: enter to Manifest's branch changing state
+    * 12th: check 'status'
+        also change local git branch of Manifest's repo
+        so there can be all 3 Manifest Markers in output
+    * 13th: test alignment of local Manifest's Manifest Marker
+    """
+    # 1st: Create repositories and Manifest repository as well
+    git_server.add_repo("repo1")
+    git_server.push_file("repo1", "CMakeLists.txt")
+    git_server.add_repo("repo2")
+    git_server.push_file("repo2", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 2nd: init Workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 3rd: Manifest repo: checkout new branch <devel>
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-B", "devel")
+
+    # 4th: Update Manifest's repo:
+    ad_hoc_update_to_dm_dest__for_test_mm(workspace_path)
+
+    # 5th: Manifest's repo: commit + push
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "go devel branch")
+    run_git(manifest_path, "push", "-u", "origin", "devel")
+
+    # 6th: verify `tsrc status`
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"\* manifest-dm \[ master \]        ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo2       \[ master \] master")
+    assert message_recorder.find(r"\* repo1       \[ master \] master")
+    assert message_recorder.find(
+        r"\* manifest               devel \(expected: master\) ~~ MANIFEST"
+    )
+
+    # 7th: verify `tsrc manifest`
+    message_recorder.reset()
+    tsrc_cli.run("manifest")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(
+        r"\* manifest               devel \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        # r"\* manifest-dm \[ master \]        ~~ MANIFEST"
+        r"\* manifest-dm \[ master \]       ~~ MANIFEST"
+    )
+
+    # 8th: manifest's repo: checkout new branch <future_b>
+    run_git(manifest_path, "checkout", "-B", "future_b")
+
+    # 9th: 'manifest.yml': update 'dest' of Manifest's repo
+    ad_hoc_update_to_fm_dest__for_test_mm(workspace_path)
+
+    # 10th: Manifest's repo: add, commit and push
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "go devel branch")
+    run_git(manifest_path, "push", "-u", "origin", "future_b")
+
+    # 11th: enter to Manifest's branch changing state
+    message_recorder.reset()
+    tsrc_cli.run("manifest", "--branch", "future_b")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* manifest               \(        << future_b \) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"\* manifest-fm \[ master \] \( master << ::: \) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"")
+
+    # 12th: check 'status'
+    run_git(manifest_path, "checkout", "devel")
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* manifest               \(        << devel \) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"\* repo2       \[ master \] \( master == master \)")
+    assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
+    assert message_recorder.find(
+        r"\* manifest-dm \[ master \]                      ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"\* manifest-fm            \( master << ::: \)    ~~ MANIFEST"
+    )
+
+    # 13th: test alignment of local Manifest's Manifest Marker
+    repo2_path = workspace_path / "repo2"
+    run_git(
+        repo2_path,
+        "checkout",
+        "-B",
+        "too_long_git_branch_to_test_alignment_of_lm_on_mm",
+    )
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"\* manifest               \(        << devel \) \(expected: master\)                          ~~ MANIFEST"  # noqa: E501
+    )
+    assert message_recorder.find(
+        r"\* repo2       \[ master \] \( master << too_long_git_branch_to_test_alignment_of_lm_on_mm \) \(expected: master\) \(missing upstream\)"  # noqa: E501
+    )
+    assert message_recorder.find(
+        r"\* manifest-dm \[ master \]                                                                 ~~ MANIFEST"  # noqa: E501
+    )
+    assert message_recorder.find(
+        r"\* manifest-fm            \( master << ::: \)                                               ~~ MANIFEST"  # noqa: E501
+    )
+    assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
+
+
+def ad_hoc_update_to_dm_dest__for_test_mm(
+    workspace_path: Path,
+) -> None:
+    """change Manifest's dest"""
+    manifest_path = workspace_path / "manifest" / "manifest.yml"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    yaml = ruamel.yaml.YAML(typ="rt")
+    parsed = yaml.load(manifest_path.read_text())
+
+    for _, value in parsed.items():
+        if isinstance(value, List):
+            for x in value:
+                if isinstance(x, ruamel.yaml.comments.CommentedMap):
+                    if x["dest"] == "manifest":
+                        x["dest"] = "manifest-dm"
+    # write the file down
+    with open(manifest_path, "w") as file:
+        yaml.dump(parsed, file)
+
+
+def ad_hoc_update_to_fm_dest__for_test_mm(
+    workspace_path: Path,
+) -> None:
+    """change Manifest's dest"""
+    manifest_path = workspace_path / "manifest" / "manifest.yml"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    yaml = ruamel.yaml.YAML(typ="rt")
+    parsed = yaml.load(manifest_path.read_text())
+
+    for _, value in parsed.items():
+        if isinstance(value, List):
+            for x in value:
+                if isinstance(x, ruamel.yaml.comments.CommentedMap):
+                    if x["dest"] == "manifest-dm":
+                        x["dest"] = "manifest-fm"
+    # write the file down
+    with open(manifest_path, "w") as file:
+        yaml.dump(parsed, file)

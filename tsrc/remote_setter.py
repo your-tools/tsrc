@@ -5,6 +5,7 @@ import cli_ui as ui
 
 from tsrc.executor import Outcome, Task
 from tsrc.git import run_git, run_git_captured
+from tsrc.git_remote import remote_urls_are_same
 from tsrc.repo import Remote, Repo
 
 
@@ -38,7 +39,7 @@ class RemoteSetter(Task[Repo]):
         for remote in repo.remotes:
             existing_remote = self.get_remote(repo, remote.name)
             if existing_remote:
-                if existing_remote.url != remote.url:
+                if remote_urls_are_same(existing_remote.url, remote.url) is False:
                     self.set_remote(repo, remote)
                     summary_lines.append(
                         f"{repo.dest}: remote '{remote.name}' set to '{remote.url}'"

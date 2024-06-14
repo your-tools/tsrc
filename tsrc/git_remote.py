@@ -10,9 +10,39 @@ checks.
 """
 
 from pathlib import Path
-from typing import Tuple, Union
+from typing import List, Tuple, Union
+from urllib.parse import quote, urlparse
 
 from tsrc.git import run_git_captured
+
+
+def remote_urls_are_same(url_1: str, url_2: str) -> bool:
+    """
+    return True if provided URLs are the same
+    """
+    up_1 = urlparse(quote(url_1))
+    up_2 = urlparse(quote(url_2))
+    # Note: do not compare 'netloc' by itself
+    # as it does left ':' behind when port is empty
+    return (
+        up_1.scheme == up_2.scheme
+        and up_1.hostname == up_2.hostname  # noqa: W503
+        and up_1.port == up_2.port  # noqa: W503
+        and _norm_path(up_1.path) == _norm_path(up_2.path)  # noqa: W503
+    )
+
+
+def _norm_path(path: str) -> str:
+    ret: str = ""
+    if path[0] == "/":
+        ret += "/"
+    u_seg: List[str] = []
+    path_split = path.split("/")
+    for seg in path_split:
+        if seg != "":
+            u_seg.append(seg)
+    ret += "/".join(u_seg)
+    return ret
 
 
 def remote_branch_exist(url: str, branch: str) -> int:
