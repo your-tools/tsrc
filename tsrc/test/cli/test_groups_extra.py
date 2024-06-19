@@ -1,11 +1,12 @@
 from pathlib import Path
 from shutil import move
 
-# import pytest
+import pytest
 import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
 from tsrc.git import run_git
+from tsrc.manifest_common import ManifestGroupNotFound
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 from tsrc.workspace_config import WorkspaceConfig
@@ -76,9 +77,10 @@ def test_empty_group_sync__case_a(
     #   therefore there is no DM 'desc' to display in this case
     message_recorder.reset()
     tsrc_cli.run("status", "--groups", "group_3")
-    assert message_recorder.find(r"\* manifest master ~~ MANIFEST")
-    assert message_recorder.find(r"\* repo_3   master")
-    assert message_recorder.find(r"")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo_3   \[ master \]  master")
     # these should not be in output
     assert not message_recorder.find(r"\* repo_1")
     assert not message_recorder.find(r"\* repo_5")
@@ -168,9 +170,10 @@ def test_empty_group_sync__case_b(
     #   therefore there is no DM 'desc' to display in this case
     message_recorder.reset()
     tsrc_cli.run("status", "--groups", "group_3")
-    assert message_recorder.find(r"\* manifest master ~~ MANIFEST")
-    assert message_recorder.find(r"\* repo_3   master")
-    assert message_recorder.find(r"")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo_3   \[ master \]  master")
     # these should not be in output
     assert not message_recorder.find(r"\* repo_1")
     assert not message_recorder.find(r"\* repo_5")
@@ -350,7 +353,6 @@ def test_intersectioned_groups(
     assert message_recorder.find(
         r"\* manifest \[ master \]= dev \(expected: master\) ~~ MANIFEST"
     )
-    assert message_recorder.find(r"")
 
     # 11th: now change back to previous branch of Manifest: 'dev'
     message_recorder.reset()
@@ -394,7 +396,8 @@ def test_intersectioned_groups(
     #   a) also check header of Workspace report
     message_recorder.reset()
     tsrc_cli.run("status", "--groups", "group_7")
-    assert message_recorder.find(r"=> Future Manifest's Repos found:")
+    assert message_recorder.find(r"=> Only leftovers were found, containing:")
+    assert message_recorder.find(r"=> Destination \(Future Manifest description\)")
     assert message_recorder.find(r"\* manifest \( master << ::: \) ~~ MANIFEST")
     assert message_recorder.find(r"\* repo_2   \( master << ::: \)")
 
@@ -402,7 +405,8 @@ def test_intersectioned_groups(
     #   here there should be only single record
     message_recorder.reset()
     tsrc_cli.run("manifest", "--groups", "group_7")
-    assert message_recorder.find(r"=> Future Manifest's Repo found:")
+    assert message_recorder.find(r"=> Only leftovers were found, containing:")
+    assert message_recorder.find(r"=> Destination \(Future Manifest description\)")
     assert message_recorder.find(r"\* manifest \( master << ::: \) ~~ MANIFEST")
     assert not message_recorder.find(r"\* repo_2   \( master << ::: \)")
 
@@ -418,7 +422,9 @@ def test_intersectioned_groups(
     #   ask Manifest branch is not set to change
     #   we rightly end up with the empty Worskpace
     message_recorder.reset()
-    tsrc_cli.run("status", "--groups", "group_7")
+    # "group_7" should not be found
+    with pytest.raises(ManifestGroupNotFound):
+        tsrc_cli.run("status", "--groups", "group_7")
     assert message_recorder.find(r"=> Workspace is empty")
 
 
@@ -444,3 +450,117 @@ def ad_hoc_update_lm_groups(
 
     with open(manifest_path, "w") as file:
         yaml.dump(parsed, file)
+
+
+def test_dm_group_must_match(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Reason:
+
+    Test if Deep Manifest's Group match,
+    even if it is ONLY in Deep Manifest,
+    so ManifestGroupNotFound will not be emited.
+
+    Also test if missing group is reported properly.
+
+    Scenario:
+
+    * 1st: create a bunch of repos
+    * 2nd: add Manifest repo on 'dev'
+    * 3rd: add 'g1' Group to 'dev'
+    * 4th: init Workspace from 'dev' branch
+    * 5th: enter into Manifest branch change to 'master'
+    * 6th: filter by Group 'g1'
+    * 7th: side check: check Exception
+    * 8th: sync, so checkout 'master' branch
+    * 9th: now we should not be able to find 'g1' Group
+        as it is not even in Deep Manifest.
+        But let us see if we can change that in next step
+    * 10th: Manifest Repo: checkout remote branch: 'dev'
+    * 11th: verify status
+    * 12th: Group 'g1' should match Deep Manifst's leftovers only
+    """
+
+    # 1st: create a bunch of repos
+    git_server.add_repo("repo_1")
+    git_server.push_file("repo_1", "my_file_in_repo_1.txt")
+    git_server.add_repo("repo_2")
+    git_server.push_file("repo_2", "my_file_in_repo_2.txt")
+    git_server.add_repo("repo_3")
+    git_server.push_file("repo_3", "my_file_in_repo_3.txt")
+
+    # 2nd: add Manifest repo on 'dev'
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("dev")
+    manifest_url = git_server.manifest_url
+
+    # 3rd: add 'g1' Group to 'dev'
+    git_server.add_group("g1", ["repo_1", "repo_2"])
+
+    # 4th: init Workspace from 'dev' branch
+    tsrc_cli.run("init", manifest_url, "--branch", "dev")
+
+    # 5th: enter into Manifest branch change to 'master'
+    message_recorder.reset()
+    tsrc_cli.run("manifest", "--branch", "master")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* manifest \[ master \]= \( master == master \) ~~ MANIFEST"
+    )
+
+    # 6th: filter by Group 'g1'
+    message_recorder.reset()
+    tsrc_cli.run("status", "-g", "g1")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \(Future Manifest description\)")
+    assert message_recorder.find(r"\* manifest \( master << ::: \)    ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo_3   \( master << ::: \)")
+    assert message_recorder.find(r"\* repo_2   \( master == master \)")
+    assert message_recorder.find(r"\* repo_1   \( master == master \)")
+
+    # 7th: side check: check Exception
+    message_recorder.reset()
+    with pytest.raises(ManifestGroupNotFound):
+        tsrc_cli.run("status", "-g", "not_existent")
+
+    # 8th: sync, so checkout 'master' branch
+    tsrc_cli.run("sync")
+
+    # 9th: now we should not be able to find 'g1' Group
+    with pytest.raises(ManifestGroupNotFound):
+        tsrc_cli.run("status", "-g", "g1")
+
+    # 10th: Manifest Repo: checkout remote branch: 'dev'
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "branch", "dev", "origin/dev")
+    run_git(manifest_path, "checkout", "dev")
+
+    # 11th: verify status
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(
+        r"\* manifest \[ master \]= dev \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"\* repo_1   \[ master \]  master")
+    assert message_recorder.find(r"\* repo_2   \[ master \]  master")
+    assert message_recorder.find(r"\* repo_3   \[ master \]  master")
+
+    # 12th: Group 'g1' should match Deep Manifst's leftovers only
+    message_recorder.reset()
+    tsrc_cli.run("status", "-g", "g1")
+    assert message_recorder.find(r"=> Only leftovers were found, containing:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(r"\* repo_1 \[ master \]")
+    assert message_recorder.find(r"\* repo_2 \[ master \]")
+    # also must exclude
+    assert not message_recorder.find(r"\* repo_3")
+    assert not message_recorder.find(r"\* manifest")

@@ -21,6 +21,7 @@ from tsrc.errors import InvalidConfig, MissingRepo
 from tsrc.git_remote import remote_urls_are_same
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.local_future_manifest import get_local_future_manifests_manifest_and_repos
+from tsrc.local_manifest import LocalManifest
 from tsrc.manifest import Manifest, RepoNotFound, load_manifest
 from tsrc.manifest_common import ManifestGetRepos, ManifestGroupNotFound
 from tsrc.pcs_repo import PCSRepo
@@ -44,6 +45,7 @@ class WorkspaceReposSummary:
         self,
         workspace: Workspace,
         gtf: GroupsToFind,
+        dm: Union[PCSRepo, None],
         only_manifest: bool = False,
         manifest_marker: bool = True,
         future_manifest: bool = True,
@@ -51,13 +53,13 @@ class WorkspaceReposSummary:
     ) -> None:
         self.workspace = workspace
         self.gtf = gtf
+        self.dm = dm  # presence is also a marker
         self.is_manifest_marker = manifest_marker
         self.is_future_manifest = future_manifest
         self.use_same_future_manifest = use_same_future_manifest
 
         # defaults
         self.statuses: Dict[str, StatusOrError] = {}
-        self.dm: Union[PCSRepo, None] = None
         self.only_manifest = only_manifest
         self.apprise: bool = False
 
@@ -75,6 +77,9 @@ class WorkspaceReposSummary:
         self.max_desc = 0  # Description
         self.max_a_block = 0  # aprise block
 
+        # local variables
+        self.d_m_root_point = False
+
         # needed for evaluating of missing Group(s)
         self.must_find_all_groups = False
 
@@ -86,19 +91,35 @@ class WorkspaceReposSummary:
 
     """General use, publicaly callable"""
 
-    def dry_check_future_manifest(self) -> None:
+    def dry_check_for_leftovers(self) -> None:
         """Used when we do not have Repos
         and statuses from Workspace"""
-        # when there is no 'statuses' from Workspace
+
         f_m_repos = self._ready_f_m_repos(on_manifest_only=True)
         self.max_fm_desc = self._check_max_fm_desc(f_m_repos)
         if self.max_fm_desc > 0:
             self.apprise = True
 
+        # check also Deep Manifest leftovers
+        d_m_repos, deep_manifest = self._ready_d_m_repos(
+            self.workspace, on_manifest_only=True
+        )
+        # calculate max len of Deep Manifest's Description
+        self.max_dm_desc = self._check_max_dm_desc(
+            # self.workspace,
+            self.dm,
+            d_m_repos,
+        )
+
         # calculate max_dest
-        self.max_dest = self._check_max_dest(None, f_m_repos)
+        self.max_dest = self._check_max_dest(d_m_repos, f_m_repos)
 
         if self.max_dest > 0:
+            self._core_message_header(is_dry=True)
+            if deep_manifest:
+                self._describe_deep_manifest_leftovers(
+                    self.workspace, deep_manifest, d_m_repos, f_m_repos
+                )
             self._describe_future_manifest_leftovers(
                 self.workspace, f_m_repos, alone_print=True
             )
@@ -108,17 +129,13 @@ class WorkspaceReposSummary:
     def ready_data(
         self,
         statuses: Dict[str, StatusOrError],
-        dm: Union[PCSRepo, None],
         apprise: bool = False,
     ) -> None:
         """Used to fill the data from statuses
         of Workspace Repos"""
         # provide everything besides 'Workspace'
         self.statuses = statuses
-        self.dm = dm  # 'dm' is also a mark if to display Deep Manifest block
         self.apprise = apprise
-        # local variables
-        self.d_m_root_point = False
 
         self.clone_all_repos = False
         if self.workspace.config.clone_all_repos is True:
@@ -162,7 +179,7 @@ class WorkspaceReposSummary:
         )
 
         # alignment for 'dest'
-        self.max_dest = self._check_max_dest(deep_manifest, f_m_repos)
+        self.max_dest = self._check_max_dest(d_m_repos, f_m_repos)
 
         # calculate max apprise block
         if self.apprise is True:
@@ -447,7 +464,48 @@ class WorkspaceReposSummary:
                     self.d_m_repo_found_some = True
         return has_d_m_d
 
-    """Future Manifest (only): gathering"""
+    """Deep Manifest leftovers-only: gathering"""
+
+    def _ready_d_m_repos(
+        self, workspace: Workspace, on_manifest_only: bool = False
+    ) -> Tuple[Union[List[Repo], None], Union[Manifest, None]]:
+        if self.dm:
+            # mark
+            path = workspace.root_path / self.dm.dest
+            ldm = LocalManifest(path)
+            ldmm = ldm.get_manifest()
+
+            #
+            mgr = ManifestGetRepos(
+                workspace, ldmm, on_manifest_only, workspace.config.clone_all_repos
+            )
+
+            # get repos that match Groups provided
+            repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
+                self.gtf, must_find_all_groups=self.must_find_all_groups
+            )
+
+            d_m_repos = []
+            for repo in repos:
+                if self.only_manifest is True:
+                    for remote in repo.remotes:
+                        if (
+                            remote_urls_are_same(
+                                self.workspace.config.manifest_url, remote.url
+                            )
+                            is True
+                        ):
+                            d_m_repos.append(repo)
+                            break
+                else:
+                    d_m_repos.append(repo)
+
+            if d_m_repos:
+                return d_m_repos, ldmm
+
+        return None, None
+
+    """Future Manifest leftovers-only: gathering"""
 
     def _ready_f_m_repos(
         self, on_manifest_only: bool = False
@@ -497,9 +555,12 @@ class WorkspaceReposSummary:
     """alignment calculations part"""
 
     def _check_max_dest(
-        self, deep_manifest: Union[Manifest, None], f_m_repos: Union[List[Repo], None]
+        self, d_m_repos: Union[List[Repo], None], f_m_repos: Union[List[Repo], None]
     ) -> int:
-        """consider for max length calculation:
+        """
+        new: use List[Repo] for both: DM and FM
+
+        consider for max length calculation:
         * 'statuses' to get destination names
             + if not present, just ignore
         * Deep Manifest destination names,
@@ -512,28 +573,25 @@ class WorkspaceReposSummary:
             # this is correct regardles of 'self.only_manifest'
             max_dest = max(len(x) for x in self.statuses.keys())
 
-        if deep_manifest:
-            mgr = ManifestGetRepos(
-                self.workspace, deep_manifest, clone_all_repos=self.clone_all_repos
-            )
-            d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
-                self.gtf, self.must_find_all_groups
-            )
-            if d_m_repos:
-                if self.only_manifest is True:
-                    for d_m_repo in d_m_repos:
-                        for remote in d_m_repo.remotes:
-                            if (
-                                remote_urls_are_same(
-                                    self.workspace.config.manifest_url, remote.url
-                                )
-                                is True
-                            ):
-                                max_dest_dm = len(d_m_repo.dest)
-                                # TODO: break both of the loops
-                                break
-                else:
-                    max_dest_dm = max(len(x.dest) for x in d_m_repos)
+        if d_m_repos:
+            if self.only_manifest is True:
+                m_loop_break: bool = False
+                for d_m_repo in d_m_repos:
+                    if m_loop_break is True:
+                        break
+                    for remote in d_m_repo.remotes:
+                        if (
+                            remote_urls_are_same(
+                                self.workspace.config.manifest_url, remote.url
+                            )
+                            is True
+                        ):
+                            max_dest_dm = len(d_m_repo.dest)
+                            # break both of the loops for optim.
+                            m_loop_break = True
+                            break
+            else:
+                max_dest_dm = max(len(x.dest) for x in d_m_repos)
 
         max_dest_fm = self._check_max_dest_fm_part(f_m_repos)
 
@@ -703,12 +761,15 @@ class WorkspaceReposSummary:
 
             ui.info(*message)
 
-    def _core_message_header(self) -> None:
+    def _core_message_header(self, is_dry: bool = False) -> None:
         if self.max_dest > 0:
-            if self.statuses:
-                ui.info_2("Before possible GIT statuses, Workspace reports:")
+            if is_dry is True:
+                ui.info_2("Only leftovers were found, containing:")
             else:
-                ui.info_2("Workspace reports:")
+                if self.statuses:
+                    ui.info_2("Before possible GIT statuses, Workspace reports:")
+                else:
+                    ui.info_2("Workspace reports:")
             message: List[ui.Token] = []
             message += ["Destination"]
             if self.max_dm_desc > 0:
@@ -995,14 +1056,6 @@ class WorkspaceReposSummary:
     ) -> None:
         if self.f_m_leftovers_displayed is True:
             return
-        if alone_print is True:
-            if f_m_repos:
-                if len(f_m_repos) == 1:
-                    ui.info_2("Future Manifest's Repo found:")
-                else:
-                    ui.info_2("Future Manifest's Repos found:")
-            else:
-                ui.info_2("Empty on Future Manifest's Repo(s)")
         if f_m_repos:
             for leftover in f_m_repos:
                 self._describe_future_manifest_leftover_repo(

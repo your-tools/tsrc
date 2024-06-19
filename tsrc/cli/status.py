@@ -15,7 +15,6 @@ from tsrc.cli import (
 from tsrc.executor import process_items
 from tsrc.groups import GroupNotFound
 from tsrc.groups_to_find import GroupsToFind
-from tsrc.manifest_common import ManifestGroupNotFound
 from tsrc.pcs_repo import get_deep_manifest_from_local_manifest_pcsrepo
 from tsrc.status_endpoint import StatusCollector
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
@@ -91,6 +90,7 @@ def run(args: argparse.Namespace) -> None:
     wrs = WorkspaceReposSummary(
         workspace,
         gtf,
+        dm,
         manifest_marker=not args.no_manifest_marker,
         future_manifest=not args.no_future_manifest,
         use_same_future_manifest=args.use_same_future_manifest,
@@ -104,30 +104,25 @@ def run(args: argparse.Namespace) -> None:
     status_collector = StatusCollector(workspace)
 
     repos = workspace.repos
-    if not repos:
+    if repos:
+        ui.info_1(f"Collecting statuses of {len(repos)} repo(s)")
+
+        num_jobs = get_num_jobs(args)
+        process_items(repos, status_collector, num_jobs=num_jobs)
+        erase_last_line()
+
+        statuses = status_collector.statuses
+
+        wrs.ready_data(
+            statuses,
+            apprise=not args.no_future_manifest,
+        )
+        wrs.summary()
+    else:
         # check if perhaps there is change in
         # manifest branch, thus Future Manifest
         # can be obtained, check if the Future Manifest
         # does not match given group(s) (or default group)
-        wrs.dry_check_future_manifest()
-        return
+        wrs.dry_check_for_leftovers()
 
-    ui.info_1(f"Collecting statuses of {len(repos)} repo(s)")
-
-    num_jobs = get_num_jobs(args)
-    process_items(repos, status_collector, num_jobs=num_jobs)
-    erase_last_line()
-
-    statuses = status_collector.statuses
-
-    wrs.ready_data(
-        statuses,
-        dm,
-        apprise=not args.no_future_manifest,
-    )
-    wrs.summary()
-    try:
-        wrs.must_match_all_groups()  # and if not, throw exception
-    except ManifestGroupNotFound as e:
-        ui.error(e)
-        return
+    wrs.must_match_all_groups()  # and if not, throw exception
