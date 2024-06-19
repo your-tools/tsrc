@@ -541,6 +541,24 @@ def test_mm_alignment_in_all_types(
     )
     assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
 
+    message_recorder.reset()
+    tsrc_cli.run("manifest")
+    """
+* manifest               (        << devel ) (expected: master) ~~ MANIFEST
+* manifest-dm [ master ]                     ~~ MANIFEST
+* manifest-fm            ( master << ::: )   ~~ MANIFEST
+
+    """
+    assert message_recorder.find(
+        r"\* manifest               \(        << devel \) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"\* manifest-dm \[ master \]                     ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"\* manifest-fm            \( master << ::: \)   ~~ MANIFEST"
+    )
+
 
 def ad_hoc_update_to_dm_dest__for_test_mm(
     workspace_path: Path,

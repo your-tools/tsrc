@@ -16,6 +16,7 @@ from typing import Any, Callable, List, Tuple, TypeVar, Union
 import cli_ui as ui
 from mypy_extensions import KwArg, VarArg
 
+from tsrc.errors import Error
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.manifest import Manifest
 from tsrc.repo import Repo
@@ -28,7 +29,12 @@ else:
     from typing_extensions import TypeAlias
 
 
-class ManifestGroupNotFound(Exception):
+class ManifestGroupError(Error):
+    pass
+
+
+# class ManifestGroupNotFound(Exception):
+class ManifestGroupNotFound(ManifestGroupError):
     def __init__(self, nf_group: str):
         self.nf_group = nf_group
         message = f"No such group: '{self.nf_group}'"
@@ -98,8 +104,7 @@ class ManifestGetRepos:
         return repos, self.must_find_all_groups, self.gtf
 
     def _with_groups(self) -> List[Repo]:
-        found_items: List[str] = []
-        m_group_items: List[str] = []
+        m_group_items = []
         if (
             self.gtf.groups
             and self.manifest.group_list  # noqa noqa: W503
@@ -118,18 +123,16 @@ class ManifestGetRepos:
             if groups_for_m:
                 self.gtf.found_these(groups_for_m)
 
-            m_group_items = self.manifest.group_list.get_elements(groups_for_m)
+            m_group_items = list(self.manifest.group_list.get_elements(groups_for_m))
         else:
             for i in self.manifest.get_repos(all_=True):
-                m_group_items += i.dest
+                m_group_items.append(i.dest)
 
-        if self.on_manifest_only is True:
-            found_items = m_group_items
-        else:
+        if self.on_manifest_only is False:
             return self._with_groups_consider_local(m_group_items)
 
         repos: List[Repo] = []
-        for item in found_items:
+        for _, item in enumerate(m_group_items):
             repos.append(self.manifest.get_repo(item))
         return repos
 
@@ -164,28 +167,40 @@ class ManifestGetRepos:
         return repos
 
     def _without_groups(self) -> List[Repo]:
+        found_items = []
         if self.clone_all_repos:
             return self.manifest.get_repos(all_=True)
         else:
-            # take all groups from config
-            if self.manifest.group_list and self.manifest.group_list.groups:
-                m_group_items = self.manifest.group_list.get_elements(
-                    list(self.manifest.group_list.groups)
-                )
-            else:
+            if self.on_manifest_only is True:
+                # in this case, we have nothing to match,
+                # as groups configured in manifest is just that
                 return self.manifest.get_repos(all_=True)
 
-            if self.on_manifest_only is True:
-                found_items = m_group_items
-            else:
-
-                if self._local_m.group_list and self._local_m.group_list.groups:
-                    w_group_items = self._local_m.group_list.get_elements(
-                        self.workspace.config.repo_groups
+            # 1st: check if we have some groups configured for Workspace
+            if self.workspace.config.repo_groups:
+                m_group_items: List[str] = []
+                if self.manifest.group_list and self.manifest.group_list.groups:
+                    m_group_items = self.manifest.group_list.get_elements(
+                        list(self.workspace.config.repo_groups),
+                        ignore_if_group_not_found=True,
                     )
+                    # TODO: if not found any items, should not we use all?
                 else:
-                    return self._local_m.get_repos(all_=True)
-                found_items = list(set(w_group_items).intersection(m_group_items))
+                    # m_group_items = self.manifest.get_repos(all_=True)
+                    for repo in self.manifest.get_repos(all_=True):
+                        m_group_items.append(repo.dest)
+                pass
+            else:
+                # we need to consider all groups in such case
+                return self.manifest.get_repos(all_=True)
+
+            if self._local_m.group_list and self._local_m.group_list.groups:
+                w_group_items = self._local_m.group_list.get_elements(
+                    self.workspace.config.repo_groups
+                )
+            else:
+                return self._local_m.get_repos(all_=True)
+            found_items = list(set(w_group_items).intersection(m_group_items))
 
         repos: List[Repo] = []
         for item in found_items:
