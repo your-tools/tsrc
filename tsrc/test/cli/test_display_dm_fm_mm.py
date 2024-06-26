@@ -92,7 +92,7 @@ def test_status_2_x_mm(
         r"\* manifest       \[ master \]= \(        << master \) ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* FM_destination             \( master << ::: \)    ~~ MANIFEST"
+        r"- FM_destination             \( master << ::: \)    ~~ MANIFEST"
     )
 
     # 9th: see status output
@@ -105,7 +105,7 @@ def test_status_2_x_mm(
         r"\* manifest                  \[ master \]= \(        << master \) ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* FM_destination                        \( master << ::: \)    ~~ MANIFEST"
+        r"- FM_destination                        \( master << ::: \)    ~~ MANIFEST"
     )
 
 
@@ -196,16 +196,16 @@ def test_status_dm_fm(
     message_recorder.reset()
     tsrc_cli.run("status")
     assert message_recorder.find(
-        r"\* repo2    \[ master \]  \( master << ::: \)"
+        r"- repo2    \[ master \]  \( master << ::: \)"
     ), "repo2 is leftover that is also present in Future Manifest"
 
     # 8th: add another DM that does not have FM
     ad_hoc_update_dm_2__for_status_dm_fm(workspace_path)
     message_recorder.reset()
     tsrc_cli.run("status")
-    assert message_recorder.find(r"\* repo3    \[ master \]")
+    assert message_recorder.find(r"- repo3    \[ master \]")
     assert not message_recorder.find(
-        r"\* repo3    \[ master \]  \("
+        r"- repo3    \[ master \]  \("
     ), "repo3 cannot have FM block included"
 
     # 9th: filtering test
@@ -216,7 +216,7 @@ def test_status_dm_fm(
     )
     assert message_recorder.find(r"\* repo1    \( master == master \)")
     assert message_recorder.find(
-        r"\* repo2    \( master << ::: \)"
+        r"- repo2    \( master << ::: \)"
     ), "it does not find FM leftover"
 
 
@@ -355,7 +355,7 @@ def test_status_cmd_param_3x_no(
         r"\* manifest                  \[ master \]= \(        << master \)"
     ), "issue on option: A"
     assert message_recorder.find(
-        r"\* FM_destination                        \( master << ::: \)"
+        r"- FM_destination                        \( master << ::: \)"
     ), "issue on option: A"
 
     #   B: status output without Future Manifest
@@ -378,7 +378,7 @@ def test_status_cmd_param_3x_no(
         r"\* manifest                  \(        << master \) ~~ MANIFEST"
     ), "issue on option: C"
     assert message_recorder.find(
-        r"\* FM_destination            \( master << ::: \)    ~~ MANIFEST"
+        r"- FM_destination            \( master << ::: \)    ~~ MANIFEST"
     ), "issue on option: C"
 
     #       D: B + C
@@ -453,7 +453,7 @@ def test_mm_alignment_in_all_types(
     # 6th: verify `tsrc status`
     message_recorder.reset()
     tsrc_cli.run("status")
-    assert message_recorder.find(r"\* manifest-dm \[ master \]        ~~ MANIFEST")
+    assert message_recorder.find(r"- manifest-dm \[ master \]        ~~ MANIFEST")
     assert message_recorder.find(r"\* repo2       \[ master \] master")
     assert message_recorder.find(r"\* repo1       \[ master \] master")
     assert message_recorder.find(
@@ -468,10 +468,7 @@ def test_mm_alignment_in_all_types(
     assert message_recorder.find(
         r"\* manifest               devel \(expected: master\) ~~ MANIFEST"
     )
-    assert message_recorder.find(
-        # r"\* manifest-dm \[ master \]        ~~ MANIFEST"
-        r"\* manifest-dm \[ master \]       ~~ MANIFEST"
-    )
+    assert message_recorder.find(r"- manifest-dm \[ master \]       ~~ MANIFEST")
 
     # 8th: manifest's repo: checkout new branch <future_b>
     run_git(manifest_path, "checkout", "-B", "future_b")
@@ -494,7 +491,7 @@ def test_mm_alignment_in_all_types(
         r"\* manifest               \(        << future_b \) \(expected: master\) ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* manifest-fm \[ master \] \( master << ::: \) ~~ MANIFEST"
+        r"- manifest-fm \[ master \] \( master << ::: \)      ~~ MANIFEST"
     )
     assert message_recorder.find(r"")
 
@@ -511,10 +508,10 @@ def test_mm_alignment_in_all_types(
     assert message_recorder.find(r"\* repo2       \[ master \] \( master == master \)")
     assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
     assert message_recorder.find(
-        r"\* manifest-dm \[ master \]                      ~~ MANIFEST"
+        r"- manifest-dm \[ master \]                      ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* manifest-fm            \( master << ::: \)    ~~ MANIFEST"
+        r"- manifest-fm            \( master << ::: \)    ~~ MANIFEST"
     )
 
     # 13th: test alignment of local Manifest's Manifest Marker
@@ -534,29 +531,23 @@ def test_mm_alignment_in_all_types(
         r"\* repo2       \[ master \] \( master << too_long_git_branch_to_test_alignment_of_lm_on_mm \) \(expected: master\) \(missing upstream\)"  # noqa: E501
     )
     assert message_recorder.find(
-        r"\* manifest-dm \[ master \]                                                                 ~~ MANIFEST"  # noqa: E501
+        r"- manifest-dm \[ master \]                                                                 ~~ MANIFEST"  # noqa: E501
     )
     assert message_recorder.find(
-        r"\* manifest-fm            \( master << ::: \)                                               ~~ MANIFEST"  # noqa: E501
+        r"- manifest-fm            \( master << ::: \)                                               ~~ MANIFEST"  # noqa: E501
     )
     assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
 
     message_recorder.reset()
     tsrc_cli.run("manifest")
-    """
-* manifest               (        << devel ) (expected: master) ~~ MANIFEST
-* manifest-dm [ master ]                     ~~ MANIFEST
-* manifest-fm            ( master << ::: )   ~~ MANIFEST
-
-    """
     assert message_recorder.find(
         r"\* manifest               \(        << devel \) \(expected: master\) ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* manifest-dm \[ master \]                     ~~ MANIFEST"
+        r"- manifest-dm \[ master \]                     ~~ MANIFEST"
     )
     assert message_recorder.find(
-        r"\* manifest-fm            \( master << ::: \)   ~~ MANIFEST"
+        r"- manifest-fm            \( master << ::: \)   ~~ MANIFEST"
     )
 
 

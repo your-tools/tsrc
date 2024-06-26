@@ -25,7 +25,6 @@ from tsrc.workspace import Workspace
 def get_local_future_manifests_manifest_and_repos(
     workspace: Workspace,
     gtf: GroupsToFind,
-    on_manifest_only: bool = False,
     must_find_all_groups: bool = False,
     use_same_future_manifest: bool = False,
 ) -> Tuple[
@@ -65,7 +64,7 @@ def get_local_future_manifests_manifest_and_repos(
 
     # read manifest file and obtain raw data
     lfmm = lfm.get_manifest()
-    mgr = ManifestGetRepos(workspace, lfmm, on_manifest_only, clone_all_repos)
+    mgr = ManifestGetRepos(workspace, lfmm, True, clone_all_repos)
 
     # get repos that match 'groups'
     repos, must_find_all_groups, gtf = mgr.by_groups(

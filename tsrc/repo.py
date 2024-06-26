@@ -1,17 +1,11 @@
 """ Repo objects. """
 
 from dataclasses import dataclass
-from enum import Enum, unique
 from typing import List, Optional, Tuple
 
 import cli_ui as ui
 
-
-@unique
-class TypeOfDescribeBranch(Enum):
-    COMMON = 1  # for (common) workspace repos
-    DM = 2  # Deep Manifest
-    FM = 3  # Future Manifest
+from tsrc.manifest_common_data import ManifestsTypeOfData, get_main_color
 
 
 @dataclass(frozen=True)
@@ -40,7 +34,7 @@ class Repo:
     """copy from 'git.py'"""
 
     def describe_branch(
-        self, ljust: int = 0, tod: TypeOfDescribeBranch = TypeOfDescribeBranch.COMMON
+        self, ljust: int = 0, tod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL
     ) -> Tuple[List[ui.Token], List[ui.Token]]:
         """returns:
         1st: is properly left-align: for print
@@ -48,10 +42,8 @@ class Repo:
         cb = ui.green  # color (for) branch
         cs = ui.red  # color (for) SHA1
         ct = ui.brown  # color (for) tag
-        if tod == TypeOfDescribeBranch.DM:
-            cb = cs = ui.purple
-        if tod == TypeOfDescribeBranch.FM:
-            cb = cs = ui.cyan
+        if tod == ManifestsTypeOfData.DEEP or tod == ManifestsTypeOfData.FUTURE:
+            cb = cs = get_main_color(tod)
 
         res: List[ui.Token] = []
         able: List[ui.Token] = []
