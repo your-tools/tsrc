@@ -77,14 +77,10 @@ def run(args: argparse.Namespace) -> None:
     try:
         workspace = get_workspace_with_repos(args)
     except GroupNotFound:
-        # TODO: only allow this if there are certain conditions:
-        # * apprise desc is enabled (displaying Future Manifest)
-        # * Manifest branch is about to change => apprise desc
-
         # try to obtain workspace ignoring group error
         # if group is found in Deep Manifest or Future Manifest,
-        # do not report it.
-        # if not, than raise exception at the end
+        # do not report GroupNotFound.
+        # if not, than raise exception at the very end
         workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
 
     dm = None
@@ -136,10 +132,10 @@ def run(args: argparse.Namespace) -> None:
         if workspace.repos:
             wrs.summary()
 
-    # check if perhaps there is change in
-    # manifest branch, thus Future Manifest
-    # can be obtained, check if the Future Manifest
-    # does not match given group(s) (or default group)
+    # if the normal Repo(s) were not found,
+    # there still may be some Deep Manifest or Future manifest leftovers
     wrs.check_for_leftovers()
 
-    wrs.must_match_all_groups()  # and if not, throw exception
+    # check if we have found all Groups (if any provided)
+    # and if not, throw exception ManifestGroupNotFound
+    wrs.must_match_all_groups()

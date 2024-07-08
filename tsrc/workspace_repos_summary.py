@@ -128,11 +128,16 @@ class WorkspaceReposSummary:
         if GIT status is not Error, we can use GIT description later
         in the summary output (that is exactly the goal)
         """
-        out_repo: List[Repo] = []
-        out_repo += self._obtain_leftovers_repos_for_dm(cur_repos)
-        out_repo += self._obtain_leftovers_repos_for_fm(cur_repos)
+        out_repos: List[Repo] = []
+        out_repos += self._obtain_leftovers_repos_for_dm(cur_repos)
+        next_cur_repos: List[Repo] = []
+        if cur_repos:
+            next_cur_repos += cur_repos
+        if out_repos:
+            next_cur_repos += out_repos
+        out_repos += self._obtain_leftovers_repos_for_fm(next_cur_repos)
 
-        return out_repo
+        return out_repos
 
     def ready_data(
         self,
@@ -182,10 +187,6 @@ class WorkspaceReposSummary:
 
         # no need to perform dry run check and calculation
         self.is_dry_run = False
-
-        # if leftover status is present, recalculate
-        if self.leftover_statuses:
-            self.prepare_repos()
 
         # side-quest: check Deep Manifest for root point
         if self.deep_manifest and self.dm:
