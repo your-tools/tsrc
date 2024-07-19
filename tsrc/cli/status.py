@@ -3,8 +3,6 @@
 import argparse
 from copy import deepcopy
 
-import cli_ui as ui
-
 from tsrc.cli import (
     add_num_jobs_arg,
     add_repos_selection_args,
@@ -115,7 +113,7 @@ def run(args: argparse.Namespace) -> None:
 
     if repos:
 
-        ui.info_1(f"Collecting statuses of {len(repos)} repo(s)")
+        status_header.report_collecting(len(repos))
 
         num_jobs = get_num_jobs(args)
         process_items(repos, status_collector, num_jobs=num_jobs)

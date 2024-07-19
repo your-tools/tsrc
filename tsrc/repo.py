@@ -21,6 +21,9 @@ class Repo:
     # other remotes may be configured explicitly in the manifest file.
     remotes: List[Remote]
     branch: str = "master"
+    # want_branch is usefull when syncing using 'ref'
+    # as there is different outcome when 'branch' is provided'
+    want_branch: Optional[str] = None
     sha1: Optional[str] = None
     tag: Optional[str] = None
     shallow: bool = False
@@ -33,7 +36,7 @@ class Repo:
 
     """copy from 'git.py'"""
 
-    def describe_branch(
+    def describe_to_tokens(
         self, ljust: int = 0, tod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL
     ) -> Tuple[List[ui.Token], List[ui.Token]]:
         """returns:
@@ -66,7 +69,7 @@ class Repo:
             able += [ui.brown, "on", self.tag, ui.reset]
         return res, able
 
-    def len_of_describe_branch(self) -> int:
+    def len_of_describe(self) -> int:
         len_: int = 0
         if self.branch:
             len_ += len(self.branch)

@@ -13,7 +13,9 @@ contains:
 * 'test_mm_alignment_in_all_types': test Manifest Marker alignment
 """
 
+import os
 from pathlib import Path
+from shutil import move
 from typing import List, Union
 
 # import pytest
@@ -423,7 +425,8 @@ def test_mm_alignment_in_all_types(
     * 12th: check 'status'
         also change local git branch of Manifest's repo
         so there can be all 3 Manifest Markers in output
-    * 13th: test alignment of local Manifest's Manifest Marker
+    * 13th: A: test alignment of local Manifest's Manifest Marker
+    * 13th: B: same for 'manifest' command
     """
     # 1st: Create repositories and Manifest repository as well
     git_server.add_repo("repo1")
@@ -493,7 +496,6 @@ def test_mm_alignment_in_all_types(
     assert message_recorder.find(
         r"- manifest-fm \[ master \] \( master << ::: \)      ~~ MANIFEST"
     )
-    assert message_recorder.find(r"")
 
     # 12th: check 'status'
     run_git(manifest_path, "checkout", "devel")
@@ -514,7 +516,7 @@ def test_mm_alignment_in_all_types(
         r"- manifest-fm            \( master << ::: \)    ~~ MANIFEST"
     )
 
-    # 13th: test alignment of local Manifest's Manifest Marker
+    # 13th: A: test alignment of local Manifest's Manifest Marker
     repo2_path = workspace_path / "repo2"
     run_git(
         repo2_path,
@@ -538,6 +540,7 @@ def test_mm_alignment_in_all_types(
     )
     assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
 
+    # 13th: B: same for 'manifest' command
     message_recorder.reset()
     tsrc_cli.run("manifest")
     assert message_recorder.find(
@@ -549,6 +552,186 @@ def test_mm_alignment_in_all_types(
     assert message_recorder.find(
         r"- manifest-fm            \( master << ::: \)   ~~ MANIFEST"
     )
+
+
+def test_mm_alignment_in_all_types_2(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Reason:
+
+    Test Manifest Marker alignment
+    in all types (LM, DM, FM)
+
+    Manifest Marker should be aligned to
+    * Git Description or
+    * Apprise branch block
+        (if FM is enabled and Manifest branch is in changing state)
+
+    Scenario:
+
+    * 1st: Create repositories and Manifest repository as well
+        (use 'manifest-dm' as 'dest' for Manifest's repo)
+    * 2nd: init Workspace on master
+    * 3rd: Manifest repo: checkout new branch <devel>
+    * 4th: Update Manifest's repo:
+        change 'dest' from 'manifest-dm' to 'manifest'
+    * 5th: Manifest's repo: commit + push
+    * 6th: verify `tsrc status`
+    * 7th: verify `tsrc manifest`
+    * 8th: manifest's repo: checkout new branch <future_b>
+    * 9th: 'manifest.yml': update 'dest' of Manifest's repo
+    * 10th: Manifest's repo: add, commit and push
+    * 11th: enter to Manifest's branch changing state
+    * 12th: check 'status'
+    * 13th: clone manifest repo to tmp folder
+        and move it to Workspace as: "manifest-dm"
+    * 14th: A: test DM's MM alignment with short branch name
+    * 14th: B: do the same with XLL branch name
+    * 15th: sync
+    * 16th: verify 'status' output after sync for alignment
+    """
+    # 1st: Create repositories and Manifest repository as well
+    git_server.add_repo("repo1")
+    git_server.push_file("repo1", "CMakeLists.txt")
+    git_server.add_repo("repo2")
+    git_server.push_file("repo2", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 2nd: init Workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 3rd: Manifest repo: checkout new branch <devel>
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-B", "devel")
+
+    # 4th: Update Manifest's repo:
+    ad_hoc_update_to_dm_dest__for_test_mm(workspace_path)
+
+    # 5th: Manifest's repo: commit + push
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "go devel branch")
+    run_git(manifest_path, "push", "-u", "origin", "devel")
+
+    # 6th: verify `tsrc status`
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"- manifest-dm \[ master \]        ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo2       \[ master \] master")
+    assert message_recorder.find(r"\* repo1       \[ master \] master")
+    assert message_recorder.find(
+        r"\* manifest               devel \(expected: master\) ~~ MANIFEST"
+    )
+
+    # 7th: verify `tsrc manifest`
+    message_recorder.reset()
+    tsrc_cli.run("manifest")
+    assert message_recorder.find(r"=> Before possible GIT statuses, Workspace reports:")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(
+        r"\* manifest               devel \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"- manifest-dm \[ master \]       ~~ MANIFEST")
+
+    # 8th: manifest's repo: checkout new branch <future_b>
+    run_git(manifest_path, "checkout", "-B", "future_b")
+
+    # 9th: 'manifest.yml': update 'dest' of Manifest's repo
+    ad_hoc_update_to_fm_dest__for_test_mm(workspace_path)
+
+    # 10th: Manifest's repo: add, commit and push
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "go devel branch")
+    run_git(manifest_path, "push", "-u", "origin", "future_b")
+
+    # 11th: enter to Manifest's branch changing state
+    message_recorder.reset()
+    tsrc_cli.run("manifest", "--branch", "future_b")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* manifest               \(        << future_b \) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"- manifest-fm \[ master \] \( master << ::: \)      ~~ MANIFEST"
+    )
+
+    # 12th: check 'status'
+    run_git(manifest_path, "checkout", "devel")
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* manifest               \(        << devel \) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"\* repo2       \[ master \] \( master == master \)")
+    assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
+    assert message_recorder.find(
+        r"- manifest-dm \[ master \]                      ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"- manifest-fm            \( master << ::: \)    ~~ MANIFEST"
+    )
+
+    # 13th: clone manifest repo to tmp folder
+    #   and move it to Workspace as: "manifest-dm"
+    tmp_path: Path = workspace_path / "tmp"
+    os.mkdir(tmp_path)
+    run_git(tmp_path, "clone", manifest_url)
+    dm_path: Path = workspace_path / "manifest-dm"
+    move(tmp_path / "manifest", dm_path)
+
+    # 14th: A: test DM's MM alignment with short branch name
+    run_git(dm_path, "checkout", "-b", "t")
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"\* repo2       \[ master \] \( master == master \)")
+    assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
+    assert message_recorder.find(
+        r"\+ manifest-dm \[ master \] \(        << t \)      ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"\* manifest               \(        << devel \) \(expected: master\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"- manifest-fm            \( master << ::: \)    ~~ MANIFEST"
+    )
+
+    # 14th: B: do the same with XLL branch name
+    run_git(dm_path, "checkout", "-b", "too_long_branch_to_test_that_should_exceed")
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"\* manifest               \(        << devel \) \(expected: master\)                   ~~ MANIFEST"  # noqa: E501
+    )
+    assert message_recorder.find(
+        r"- manifest-fm            \( master << ::: \)                                        ~~ MANIFEST"  # noqa: E501
+    )
+    assert message_recorder.find(
+        r"\+ manifest-dm \[ master \] \(        << too_long_branch_to_test_that_should_exceed \) ~~ MANIFEST"  # noqa: E501
+    )
+    assert message_recorder.find(r"\* repo1       \[ master \] \( master == master \)")
+    assert message_recorder.find(r"\* repo2       \[ master \] \( master == master \)")
+
+    # 15th: sync
+    tsrc_cli.run("sync")
+
+    # 16th: verify 'status' output after sync for alignment
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"\+ manifest    \[ master \] devel  ~~ MANIFEST")
+    assert message_recorder.find(r"\* manifest-fm            master ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo1       \[ master \] master")
+    assert message_recorder.find(r"\* repo2       \[ master \] master")
 
 
 def ad_hoc_update_to_dm_dest__for_test_mm(

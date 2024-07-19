@@ -27,7 +27,7 @@ from tsrc.manifest_common_data import ManifestsTypeOfData, get_main_color
 from tsrc.pcs_repo import PCSRepo
 from tsrc.repo import Repo
 from tsrc.status_endpoint import Status
-from tsrc.utils import len_of_cli_ui
+from tsrc.utils import align_left, len_of_cli_ui
 from tsrc.workspace import Workspace
 
 StatusOrError = Union[Status, Exception]
@@ -100,21 +100,17 @@ class WorkspaceReposSummary:
         Obtain every possible data, that can be safely obtained
         before 'process_items' is called
 
-        This is designed to prepare list of leftovers, that
-        possibly can be added if present to 'process_items'
-        calculation
+        This is designed to prepare list of leftovers
+        (both Deep Manifest's and Future Manifest's),
+        that if present, can be added to 'process_items' calculation
         """
 
-        # future manifest repos
+        # Future Manifest repos (and max len)
         self.f_m_repos = self._ready_f_m_repos()
         self.max_fm_desc = self._check_max_fm_desc(self.f_m_repos)
 
-        # check also Deep Manifest leftovers
-        self.d_m_repos, self.deep_manifest = self._ready_d_m_repos(
-            self.workspace, on_manifest_only=True
-        )
-
-        # calculate max len of Deep Manifest's Description
+        # Deep Manifest repos (and max len)
+        self.d_m_repos, self.deep_manifest = self._ready_d_m_repos()
         self.max_dm_desc = self._check_max_dm_desc(
             self.dm,
             self.d_m_repos,
@@ -171,12 +167,6 @@ class WorkspaceReposSummary:
             for l_dest, _ in self.leftover_statuses.items():
                 if self.statuses:
                     if l_dest in self.statuses.keys():
-                        #        keep_it: bool = False
-                        #        for repo in repos:
-                        #            if repo.dest == l_dest:
-                        #                keep_it = True
-                        #                break
-                        #        if keep_it is False:
                         self.statuses.pop(l_dest)
 
     def summary(self) -> None:
@@ -486,16 +476,16 @@ class WorkspaceReposSummary:
     """Deep Manifest leftovers-only: gathering"""
 
     def _ready_d_m_repos(
-        self, workspace: Workspace, on_manifest_only: bool = False
+        self,
     ) -> Tuple[Union[List[Repo], None], Union[Manifest, None]]:
         if self.dm:
-            path = workspace.root_path / self.dm.dest
+            path = self.workspace.root_path / self.dm.dest
             ldm = LocalManifest(path)
             ldmm = ldm.get_manifest()
 
             #
             mgr = ManifestGetRepos(
-                workspace, ldmm, on_manifest_only, workspace.config.clone_all_repos
+                self.workspace, ldmm, True, self.workspace.config.clone_all_repos
             )
 
             # get repos that match Groups provided
@@ -654,6 +644,27 @@ class WorkspaceReposSummary:
 
         return max(max_dest_dm, max_dest, max_dest_fm)
 
+    def _check_max_dm_desc(
+        self,
+        dm: Union[PCSRepo, None],
+        d_m_repos: Union[List[Repo], None],
+    ) -> int:
+        max_dm_desc = 0
+        if d_m_repos:
+            if self.only_manifest is True:
+                for repo in d_m_repos:
+                    for remote in repo.remotes:
+                        if (
+                            remote_urls_are_same(
+                                self.workspace.config.manifest_url, remote.url
+                            )
+                            is True
+                        ):
+                            return repo.len_of_describe()
+            else:
+                max_dm_desc = max(x.len_of_describe() for x in d_m_repos)
+        return max_dm_desc
+
     def _check_max_dest_fm_part(
         self,
         f_m_repos: Union[List[Repo], None],
@@ -679,39 +690,13 @@ class WorkspaceReposSummary:
                 max_dest_fm = max(len(x.dest) for x in f_m_repos)
         return max_dest_fm
 
-    def _check_max_dm_desc(
-        self,
-        dm: Union[PCSRepo, None],
-        d_m_repos: Union[List[Repo], None],
-    ) -> int:
-        max_dm_desc = 0
-        if d_m_repos:
-            if self.only_manifest is True:
-                for repo in d_m_repos:
-                    for remote in repo.remotes:
-                        if (
-                            remote_urls_are_same(
-                                self.workspace.config.manifest_url, remote.url
-                            )
-                            is True
-                        ):
-                            return repo.len_of_describe_branch()
-            else:
-                max_dm_desc = max(x.len_of_describe_branch() for x in d_m_repos)
-        return max_dm_desc
-
     def _check_max_fm_desc(
         self,
         f_m_repos: Union[List[Repo], None],
     ) -> int:
         max_f_branch = 0
         if f_m_repos:
-            max_f_branch = max(x.len_of_describe_branch() for x in f_m_repos)
-        # len_l_desc: List[int] = []
-        # if self.leftover_statuses:
-        #     for l_dest, l_status in self.leftover_statuses.items():
-        #         if isinstance(l_status, Status):
-        #             len_l_desc.append(l_status.git.len_of_describe_branch())
+            max_f_branch = max(x.len_of_describe() for x in f_m_repos)
 
         return max_f_branch
 
@@ -746,6 +731,24 @@ class WorkspaceReposSummary:
         return max_a_block
 
     """describe part: core"""
+
+    def _core_message_header(self, is_dry: bool = False) -> None:
+        if self.max_dest > 0:
+            if is_dry is True:
+                ui.info_2("Only leftovers were found, containing:")
+            else:
+                if self.statuses:
+                    ui.info_2("Before possible GIT statuses, Workspace reports:")
+                else:
+                    ui.info_2("Workspace reports:")
+            message: List[ui.Token] = []
+            message += ["Destination"]
+            if self.max_dm_desc > 0:
+                message += ["[Deep Manifest description]"]
+
+            if self.max_fm_desc > 0:
+                message += ["(Future Manifest description)"]
+            ui.info_2(*message)
 
     def _core_message_print(
         self,
@@ -826,27 +829,6 @@ class WorkspaceReposSummary:
 
             ui.info(*message)
 
-    def _core_message_header(self, is_dry: bool = False) -> None:
-        if self.max_dest > 0:
-            if is_dry is True:
-                ui.info_2("Only leftovers were found, containing:")
-            else:
-                if self.statuses:
-                    ui.info_2("Before possible GIT statuses, Workspace reports:")
-                else:
-                    ui.info_2("Workspace reports:")
-            message: List[ui.Token] = []
-            message += ["Destination"]
-            if self.max_dm_desc > 0:
-                message += ["[Deep Manifest description]"]
-
-            if self.max_fm_desc > 0:
-                message += ["(Future Manifest description)"]
-            ui.info_2(*message)
-
-    def _describe_workspace_is_empty(self) -> None:
-        ui.info_2("Workspace is empty")
-
     """describe part: columns"""
 
     def _describe_future_manifest_column(
@@ -915,7 +897,7 @@ class WorkspaceReposSummary:
         message: List[ui.Token] = []
         if d_m_r_found is True and isinstance(d_m_repo, Repo):
             message += [ui.brown, "[", ui.green]
-            desc, _ = d_m_repo.describe_branch(self.max_dm_desc)
+            desc, _ = d_m_repo.describe_to_tokens(self.max_dm_desc)
             message += desc
             if sm and dest == sm.dest:
                 if self.d_m_root_point is True:
@@ -953,7 +935,7 @@ class WorkspaceReposSummary:
             if self.is_future_manifest is True and self.max_fm_desc > 0:
                 if fm_dest_is_empty is True:
                     apprise_repo = None
-                git_status += self._describe_status_apprise_branch(
+                git_status += self._describe_status_apprise_part(
                     status.git.describe_branch(),
                     apprise_repo,
                 )
@@ -964,9 +946,9 @@ class WorkspaceReposSummary:
         manifest_status = status.manifest.describe()
         return git_status + manifest_status
 
-    def _describe_status_apprise_branch(
+    def _describe_status_apprise_part(
         self,
-        ui_branch: List[ui.Token],
+        desc_tokens: List[ui.Token],
         apprise_repo: Union[Repo, None],
     ) -> List[ui.Token]:
         """usefull for Future Manifest"""
@@ -974,28 +956,21 @@ class WorkspaceReposSummary:
         message += [get_main_color(ManifestsTypeOfData.FUTURE)]
         message += ["("]
         if apprise_repo:
-            desc, desc_cmp = apprise_repo.describe_branch(
+            desc, desc_cmp = apprise_repo.describe_to_tokens(
                 self.max_fm_desc, ManifestsTypeOfData.FUTURE
             )
             message += desc
-            if self._compare_ui_token(desc_cmp, ui_branch) is True:
+            if self._compare_ui_token(desc_cmp, desc_tokens) is True:
                 message += [ui.blue, "=="]
             else:
                 message += [ui.blue, "<<"]
         else:
             if self.lfm and self.max_fm_desc > 0:
                 message += [" ".ljust(self.max_fm_desc), "<<"]
-        message += ui_branch
+        message += desc_tokens
         message += [get_main_color(ManifestsTypeOfData.FUTURE)]
         message += [")", ui.reset]
         return message
-
-    def _describe_status_apprise_branch_empty_space(
-        self,
-    ) -> List[ui.Token]:
-        if self.max_a_block > 0:
-            return [" ".ljust(self.max_a_block)]
-        return []
 
     """describe part: marker"""
 
@@ -1003,26 +978,31 @@ class WorkspaceReposSummary:
         self,
         tod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL,
         dest_has_apprise_desc: bool = False,
+        consider_align_before: bool = False,
         align_before: int = 0,
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
+        message += [get_main_color(tod)]
+        l_just = 0
+
         if tod == ManifestsTypeOfData.DEEP:
-            # TODO: move this before calling the function
-            # if dest_has_apprise_desc is False and align_before <= 0:
             if align_before > 0 and dest_has_apprise_desc is True:
-                message += [" ".ljust(align_before)]
+                l_just = align_before + 1
             if dest_has_apprise_desc is False:
                 if self.is_future_manifest is True and self.max_fm_desc > 0:
-                    message += self._describe_status_apprise_branch_empty_space()
+                    if self.max_a_block > 0:
+                        l_just = self.max_a_block + 1
                 else:
-                    message += [" ".ljust(self.max_desc)]
+                    if align_before == 0:
+                        if consider_align_before is False:
+                            l_just = self.max_desc + 1
+                    else:
+                        l_just = align_before
         else:
             if align_before > 0:
-                message += [" ".ljust(align_before)]
+                l_just = align_before + 1
 
-        message += [get_main_color(tod)]
-
-        message += ["~~ MANIFEST"]
+        message += align_left(l_just, "~~ MANIFEST")
         return message
 
     """describe part: leftovers"""
@@ -1073,20 +1053,18 @@ class WorkspaceReposSummary:
         # return: 'is_manifest_marker_displayed'
         message: List[ui.Token] = []
 
-        # message += self._describe_deep_manifest_leftovers_repo_dest_column(leftover)
         message += self._describe_leftover_repo_dest_column(
             leftover, ManifestsTypeOfData.DEEP
         )
 
         message += self._describe_deep_manifest_leftovers_repo_dm_column(leftover)
 
-        gd_message: List[ui.Token] = []
-        if self.leftover_statuses and leftover.dest in self.leftover_statuses:
-            status = self.leftover_statuses[leftover.dest]
-            if isinstance(status, Status):
-                gd_message = status.git.describe_branch()
+        # prepare git description for Repo, if there is one
+        gd_message = self._get_desc_of_leftover_statuses(leftover)
 
         dest_has_apprise_desc: bool = False
+        dest_has_apprise_desc_extra: bool = False
+        desc_field_is_empty: bool = False
         if self.lfm_repos and f_m_repos:
             _, this_repo = self._repo_found_regardles_branch(
                 deep_manifest, leftover, f_m_repos, leftover.dest
@@ -1096,7 +1074,8 @@ class WorkspaceReposSummary:
                 if self.is_future_manifest is True:
                     if not gd_message:
                         gd_message = [ui.reset, ":::"]
-                    message += self._describe_status_apprise_branch(
+                        desc_field_is_empty = True
+                    message += self._describe_status_apprise_part(
                         # ":::" is one of few not valid branch name,
                         # therefore is suitable to be mark for N/A
                         gd_message,
@@ -1106,22 +1085,68 @@ class WorkspaceReposSummary:
                 self._m_prepare_for_leftovers_regardles_branch(this_repo, f_m_repos)
 
         if dest_has_apprise_desc is False:
+
+            # check if we should print apprise block anyway
+            if self.lfm_repos and gd_message:
+                gd_message = self._describe_status_apprise_part(gd_message, None)
+                dest_has_apprise_desc = True
+                dest_has_apprise_desc_extra = True
             message += gd_message
 
         if is_manifest_marker is True and is_manifest_marker_displayed is False:
+            a_block_len, consider_align_before = (
+                self._dm_leftovers_calculate_align_before(
+                    gd_message,
+                    dest_has_apprise_desc,
+                    dest_has_apprise_desc_extra,
+                    desc_field_is_empty,
+                )
+            )
+
             # add Manifest mark with proper color
-            a_block_len: int = 0
-            if gd_message:
-                a_block_len = len_of_cli_ui(gd_message) + 1
             message += self._describe_on_manifest(
                 ManifestsTypeOfData.DEEP,
-                align_before=a_block_len,
                 dest_has_apprise_desc=dest_has_apprise_desc,
+                consider_align_before=consider_align_before,
+                align_before=a_block_len,
             )
             is_manifest_marker_displayed = True
 
         ui.info(*message)
         return is_manifest_marker_displayed
+
+    def _dm_leftovers_calculate_align_before(
+        self,
+        gd_message: List[ui.Token],
+        dest_has_apprise_desc: bool,
+        dest_has_apprise_desc_extra: bool,
+        desc_field_is_empty: bool,
+    ) -> Tuple[int, bool]:
+
+        consider_align_before: bool = False
+        a_block_len: int = 0
+        if gd_message:
+            a_block_len = len_of_cli_ui(gd_message) + 1
+            if dest_has_apprise_desc is True:
+                if desc_field_is_empty is True:
+                    a_block_len = self.max_a_block - a_block_len - 3 - self.max_desc - 3
+                else:
+                    if dest_has_apprise_desc_extra is True:
+                        a_block_len = self.max_a_block - a_block_len
+                    else:
+                        a_block_len = self.max_desc - a_block_len
+            else:
+                a_block_len = self.max_desc - a_block_len + 1
+                consider_align_before = True
+        return a_block_len, consider_align_before
+
+    def _get_desc_of_leftover_statuses(self, leftover: Repo) -> List[ui.Token]:
+        gd_message: List[ui.Token] = []
+        if self.leftover_statuses and leftover.dest in self.leftover_statuses:
+            status = self.leftover_statuses[leftover.dest]
+            if isinstance(status, Status):
+                gd_message = status.git.describe_branch()
+        return gd_message
 
     def _describe_deep_manifest_leftovers_repo_dm_column(
         self, leftover: Repo
@@ -1129,7 +1154,9 @@ class WorkspaceReposSummary:
         message: List[ui.Token] = []
         message += [ui.brown, "["]
         message += [get_main_color(ManifestsTypeOfData.DEEP)]
-        desc, _ = leftover.describe_branch(self.max_dm_desc, ManifestsTypeOfData.DEEP)
+        desc, _ = leftover.describe_to_tokens(
+            self.max_dm_desc, ManifestsTypeOfData.DEEP
+        )
         message += desc
         if self.d_m_root_point is True:
             message += [ui.brown, "] ", ui.reset]
@@ -1145,15 +1172,15 @@ class WorkspaceReposSummary:
         if (self.workspace.root_path / leftover.dest).is_dir() is True:
             if leftover.dest in self.leftover_statuses:
                 status = self.leftover_statuses[leftover.dest]
-                if isinstance(status, Status):
+                if isinstance(status, Status) and status.git.empty is False:
                     message += [ui.green]
                 else:
                     message += [ui.reset]
-                message += ["+", main_color]
             else:
-                message += [ui.reset, "-", main_color]
+                message += [ui.reset]
+            message += ["+", main_color]
         else:
-            message += [main_color, "-"]
+            message += [ui.reset, "-", main_color]
         message += [leftover.dest.ljust(self.max_dest)]
         return message
 
@@ -1200,17 +1227,16 @@ class WorkspaceReposSummary:
                 self.max_dm_desc
             )
 
-        a_message: List[ui.Token] = []  # apprise message part
-        this_message, a_message = (
-            self._describe_future_manifest_leftovers_apprise_column(leftover)
-        )
-        message += this_message
+        # apprise message part
+        a_message = self._describe_future_manifest_leftovers_apprise_column(leftover)
+        message += a_message
 
         if self.is_manifest_marker is True and is_future_manifest is True:
             # add Manifest mark with proper color
             a_block_len: int = 0
             if a_message:
                 a_block_len = len_of_cli_ui(a_message) + 1
+
             message += self._describe_on_manifest(
                 ManifestsTypeOfData.FUTURE,
                 align_before=(self.max_a_block - a_block_len),
@@ -1232,9 +1258,9 @@ class WorkspaceReposSummary:
     def _describe_future_manifest_leftovers_apprise_column(
         self,
         leftover: Repo,
-    ) -> Tuple[List[ui.Token], List[ui.Token]]:
+    ) -> List[ui.Token]:
         message: List[ui.Token] = []
-        a_message: List[ui.Token] = []
+        # a_message: List[ui.Token] = []
         if self.is_future_manifest is True:
             # ":::" is one of few not valid branch name,
             # therefore is suitable to be mark for N/A
@@ -1243,6 +1269,10 @@ class WorkspaceReposSummary:
                 status = self.leftover_statuses[leftover.dest]
                 if isinstance(status, Status):
                     gd_message = status.git.describe_branch()
-            a_message = self._describe_status_apprise_branch(gd_message, leftover)
-            message += a_message
-        return message, a_message
+            message = self._describe_status_apprise_part(gd_message, leftover)
+        return message
+
+    """describe part: empty"""
+
+    def _describe_workspace_is_empty(self) -> None:
+        ui.info_2("Workspace is empty")

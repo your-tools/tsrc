@@ -163,9 +163,79 @@ class Syncer(Task[Repo]):
         if status.dirty:
             raise Error(f"git repo is dirty: cannot sync to ref: {ref}")
         try:
-            self.run_git(repo_path, "reset", "--hard", ref)
+            if repo.want_branch:
+                self.sync_repo_to_ref_and_branch(repo, ref, repo.want_branch)
+            else:
+                self.run_git(repo_path, "reset", "--hard", ref)
         except Error:
             raise Error("updating ref failed")
+
+    def sync_repo_to_ref_and_branch(
+        self, repo: Repo, ref: str, want_branch: str
+    ) -> None:
+        # check branches related to 'ref'
+        self.info_3("Taking care of ref while respecting branch:", want_branch)
+        repo_path = self.workspace_path / repo.dest
+        if repo.tag:
+            rc, ret = run_git_captured(repo_path, "rev-list", "-n", "1", repo.tag)
+            if rc == 0:
+                ref = ret
+            else:
+                raise Error(f"cannot determine commit for tag: {repo.tag}")
+
+        # 'ref' now contains SHA1 hash to required commit
+        self.sync_repo_to_sha1_and_branch(repo, ref, want_branch)
+
+    def sync_repo_to_sha1_and_branch(
+        self, repo: Repo, ref: str, want_branch: str
+    ) -> None:
+        repo_path = self.workspace_path / repo.dest
+
+        # obtain all branches that points to SHA1 ref
+        rc, ret = run_git_captured(
+            repo_path, "for-each-ref", "--format=%(refname)", "--points-at", ref
+        )
+        rets: List[str] = ret.splitlines()
+        sel_ref: str = ""
+        for i in rets:
+            # filter only remote refs
+            if i.startswith("refs/remotes/") is True:
+                rps: List[str] = i.split("/")
+                if want_branch == rps[-1]:
+                    sel_ref = i
+                    break  # no need to search any further
+
+        # check if SHA1 and branch are found
+        if not sel_ref:
+            raise Error(
+                f"configured branch: {want_branch} does not contain configured reference: {ref}"
+            )
+
+        # check if we have local branch pointing to remote ref
+        rc, ret = run_git_captured(
+            repo_path, "branch", "--format=%(refname) %(upstream)", "--points-at", ref
+        )
+        ret_lines: List[str] = ret.splitlines()
+        lb_found: str = ""  # local branch (is) found (here)
+        for rl in ret_lines:
+            rfs: List[str] = rl.split()
+            if len(rfs) == 2 and rfs[1] == sel_ref:
+                lb_found = rfs[0].split("/")[-1]
+
+        # determine if we need to checkout remote
+        if not lb_found:
+            self.info_3("Checking out remote branch", want_branch)
+            self.run_git(repo_path, "checkout", "--track", "-b", want_branch, sel_ref)
+        else:
+            _, c_branch = run_git_captured(
+                repo_path, "branch", "--show-current", "--format=%(refname)"
+            )
+            if c_branch != lb_found:
+                self.info_3("Checking out branch", want_branch)
+                self.run_git(repo_path, "checkout", lb_found)
+
+        # now we are ready to reset
+        self.run_git(repo_path, "reset", "--hard", ref)
 
     def checkout_branch(self, repo: Repo) -> None:
         repo_path = self.workspace_path / repo.dest
