@@ -86,15 +86,46 @@ class StatusHeader:
             if StatusHeaderDisplayMode.BRANCH in shdm:
                 if (
                     self._config_update_data
-                    and self._config_update_data.manifest_branch  # noqa noqa: W503
-                    and ConfigUpdateType.MANIFEST_BRANCH  # noqa noqa: W503
-                    in self._config_update_type  # noqa noqa: W503
+                    and self._config_update_data.manifest_branch  # noqa: W503
+                    and ConfigUpdateType.MANIFEST_BRANCH  # noqa: W503
+                    in self._config_update_type  # noqa: W503
                 ):
                     self._header_manifest_branch(
                         self._config_update_data.manifest_branch, self.branch_0
                     )
                 else:
                     self._header_manifest_branch(self.branch, self.branch_0)
+
+    def report_collecting(self, c_all: int) -> None:
+        """report about how much Repos will be processed
+        in order to obatain its Status"""
+        c_w_repos = len(self.workspace.repos)
+        c_w_repos_s = self._is_plural(c_w_repos, "s")
+        c_l_repos = c_all - c_w_repos
+        c_l_repos_s = self._is_plural(c_l_repos, "s")
+        c_all_es = self._is_plural(c_w_repos + c_l_repos, "es")
+
+        if c_w_repos == c_all:  # no leftover repo(s)
+            ui.info_1(
+                f"Collecting status{c_all_es} of {c_w_repos} workspace repo{c_w_repos_s}"
+            )
+        else:  # with leftover repo(s)
+            if c_w_repos == 0:  # without workspace repo(s)
+                ui.info_1(
+                    f"Collecting status{c_all_es} of {c_l_repos} leftover repo{c_l_repos_s}"  # noqa: E501
+                )
+            else:  # combined workspace and leftover repo(s)
+                ui.info_1(
+                    f"Collecting status{c_all_es} of {c_w_repos} workspace repo{c_w_repos_s} + {c_l_repos} leftover repo{c_l_repos_s}"  # noqa: E501
+                )
+
+    """ internal functions """
+
+    def _is_plural(self, value: int, ext: str) -> str:
+        """return plural defined by 'ext' when value > 1"""
+        if value > 1:
+            return ext
+        return ""
 
     def _header_manifest_url(self, url: str) -> None:
         ui.info_1(

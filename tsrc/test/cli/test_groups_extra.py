@@ -417,7 +417,7 @@ def test_intersectioned_groups(
     tsrc_cli.run("status", "--strict", "--groups", "group_7")
     assert message_recorder.find(r"=> Only leftovers were found, containing:")
     assert message_recorder.find(r"=> Destination \(Future Manifest description\)")
-    assert message_recorder.find(r"- manifest \( master << ::: \) ~~ MANIFEST")
+    assert message_recorder.find(r"\+ manifest \( master << ::: \) ~~ MANIFEST")
     assert message_recorder.find(r"- repo_2   \( master << ::: \)")
 
     # 15th: revert Manifest branch back to 'master'
