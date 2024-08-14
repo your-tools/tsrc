@@ -21,6 +21,7 @@ class Repo:
     # other remotes may be configured explicitly in the manifest file.
     remotes: List[Remote]
     branch: str = "master"
+    is_default_branch: bool = True
     # want_branch is usefull when syncing using 'ref'
     # as there is different outcome when 'branch' is provided'
     want_branch: Optional[str] = None
@@ -53,16 +54,19 @@ class Repo:
         first_ljust = ljust
         if self.tag:
             first_ljust = 0
-        if self.branch:
+        if self.branch and (
+            self.is_default_branch is False or (not self.sha1 and not self.tag)
+        ):
             res += [cb, self.branch.ljust(first_ljust), ui.reset]
             able += [ui.green, self.branch, ui.reset]
             if first_ljust == 0:
                 ljust -= len(self.branch) + 1
         elif self.sha1:
-            res += [cs, self.sha1.ljust(first_ljust), ui.reset]
-            able += [ui.red, self.sha1, ui.reset]
+            sha1 = self.sha1[:7]  # artificially shorten
+            res += [cs, sha1.ljust(first_ljust), ui.reset]
+            able += [ui.red, sha1, ui.reset]
             if first_ljust == 0:
-                ljust -= len(self.sha1) + 1
+                ljust -= len(sha1) + 1
         if self.tag:
             # we have to compensate for len("on ")
             res += [ct, "on", self.tag.ljust(ljust - 3), ui.reset]
@@ -71,10 +75,13 @@ class Repo:
 
     def len_of_describe(self) -> int:
         len_: int = 0
-        if self.branch:
+        if self.branch and (
+            self.is_default_branch is False or (not self.sha1 and not self.tag)
+        ):
             len_ += len(self.branch)
         elif self.sha1:
-            len_ += len(self.sha1)
+            sha1 = self.sha1[:7]  # artificially shorten
+            len_ += len(sha1)
         if self.tag:
             len_ += len(self.tag) + 4  # " on "
         return len_

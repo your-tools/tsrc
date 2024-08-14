@@ -896,19 +896,35 @@ class WorkspaceReposSummary:
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
         if d_m_r_found is True and isinstance(d_m_repo, Repo):
-            message += [ui.brown, "[", ui.green]
+            message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "[", ui.green]
             desc, _ = d_m_repo.describe_to_tokens(self.max_dm_desc)
             message += desc
             if sm and dest == sm.dest:
                 if self.d_m_root_point is True:
-                    message += [ui.brown, "]=", ui.reset]
+                    message += [
+                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        "]=",
+                        ui.reset,
+                    ]
                 else:
-                    message += [ui.brown, "]", ui.reset]
+                    message += [
+                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        "]",
+                        ui.reset,
+                    ]
             else:
                 if self.d_m_root_point is True:
-                    message += [ui.brown, "] ", ui.reset]
+                    message += [
+                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        "] ",
+                        ui.reset,
+                    ]
                 else:
-                    message += [ui.brown, "]", ui.reset]
+                    message += [
+                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        "]",
+                        ui.reset,
+                    ]
         else:
             if self.max_dm_desc > 0:
                 if self.d_m_root_point is True:
@@ -1094,13 +1110,14 @@ class WorkspaceReposSummary:
             message += gd_message
 
         if is_manifest_marker is True and is_manifest_marker_displayed is False:
-            a_block_len, consider_align_before = (
-                self._dm_leftovers_calculate_align_before(
-                    gd_message,
-                    dest_has_apprise_desc,
-                    dest_has_apprise_desc_extra,
-                    desc_field_is_empty,
-                )
+            (
+                a_block_len,
+                consider_align_before,
+            ) = self._dm_leftovers_calculate_align_before(
+                gd_message,
+                dest_has_apprise_desc,
+                dest_has_apprise_desc_extra,
+                desc_field_is_empty,
             )
 
             # add Manifest mark with proper color
@@ -1152,16 +1169,16 @@ class WorkspaceReposSummary:
         self, leftover: Repo
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
-        message += [ui.brown, "["]
+        message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "["]
         message += [get_main_color(ManifestsTypeOfData.DEEP)]
         desc, _ = leftover.describe_to_tokens(
             self.max_dm_desc, ManifestsTypeOfData.DEEP
         )
         message += desc
         if self.d_m_root_point is True:
-            message += [ui.brown, "] ", ui.reset]
+            message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "] ", ui.reset]
         else:
-            message += [ui.brown, "]", ui.reset]
+            message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "]", ui.reset]
         return message
 
     def _describe_leftover_repo_dest_column(

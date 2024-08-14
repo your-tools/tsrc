@@ -48,8 +48,10 @@ class Manifest:
     def _handle_repo(self, repo_config: Any) -> None:
         dest = repo_config["dest"]
         want_branch = repo_config.get("branch")
+        is_default_branch: bool = True
         if want_branch:
             branch = want_branch
+            is_default_branch = False
         else:
             branch = "master"
         tag = repo_config.get("tag")
@@ -64,6 +66,7 @@ class Manifest:
         repo = Repo(
             dest=dest,
             branch=branch,
+            is_default_branch=is_default_branch,
             want_branch=want_branch,
             sha1=sha1,
             tag=tag,

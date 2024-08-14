@@ -1,7 +1,7 @@
 from collections import OrderedDict
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import ruamel.yaml
 
@@ -24,6 +24,13 @@ class WorkspaceConfig:
     clone_all_repos: bool = False
 
     singular_remote: Optional[str] = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        # only set those that are present
+        names = {f.name for f in fields(self)}
+        for key, value in kwargs.items():
+            if key in names:
+                setattr(self, key, value)
 
     @classmethod
     def from_file(cls, cfg_path: Path) -> "WorkspaceConfig":
