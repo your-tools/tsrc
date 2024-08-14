@@ -19,13 +19,11 @@ Issues = "https://github.com/your-tools/tsrc/issues"
 # Note: keep this in sync with .github/workflows/tests.yml
 python = "^3.8"
 
-attrs = "^19.3.0"
 cli-ui = "^0.11.0"
 colored_traceback = "^0.3.0"
 ruamel-yaml = "^0.18.5"
 schema = "^0.7.1"
-tabulate = "^0.8.6"
-unidecode = "^1.1.1"
+mypy_extensions = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 # Task runner

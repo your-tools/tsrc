@@ -83,7 +83,15 @@ def main_impl(args: ArgsList = None) -> None:
 
     actions_parser = parser.add_subparsers(help="available actions", dest="action")
 
-    for module in (apply_manifest, foreach, init, log, manifest, status, sync):
+    for module in (
+        apply_manifest,
+        foreach,
+        init,
+        log,
+        manifest,
+        status,
+        sync,
+    ):
         module.configure_parser(actions_parser)
 
     namespace = parser.parse_args(args=args)

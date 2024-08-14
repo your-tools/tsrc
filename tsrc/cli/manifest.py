@@ -25,32 +25,35 @@ from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
-    parser = subparser.add_parser("manifest")
-    add_workspace_arg(parser)
-    add_repos_selection_args(parser)
+    parser = subparser.add_parser(
+        "manifest", description="View and manage top-level Manifest's configuration"
+    )
     parser.add_argument(
+        "-b",
         "--branch",
-        help="use this branch for the manifest",
+        help="change Manifest's branch for future sync",
         dest="manifest_branch",
     )
+    add_workspace_arg(parser)
+    add_repos_selection_args(parser)
     # same option as in 'status'
     parser.add_argument(
         "--no-mm",
         action="store_false",
         help="do not display Manifest marker",
-        dest="no_manifest_marker",
+        dest="use_manifest_marker",
     )
     parser.add_argument(
         "--no-dm",
         action="store_false",
         help="do not display Deep Manifest",
-        dest="no_deep_manifest",
+        dest="use_deep_manifest",
     )
     parser.add_argument(
         "--no-fm",
         action="store_false",
         help="do not display Future Manifest",
-        dest="no_future_manifest",
+        dest="use_future_manifest",
     )
     parser.add_argument(
         "--same-fm",
@@ -82,7 +85,7 @@ def run(args: argparse.Namespace) -> None:
         workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
 
     dm = None
-    if args.no_deep_manifest is True:
+    if args.use_deep_manifest is True:
         dm, gtf = get_deep_manifest_from_local_manifest_pcsrepo(
             workspace,
             gtf,
@@ -93,8 +96,8 @@ def run(args: argparse.Namespace) -> None:
         gtf,
         dm,
         only_manifest=True,
-        manifest_marker=args.no_manifest_marker,
-        future_manifest=args.no_future_manifest,
+        manifest_marker=args.use_manifest_marker,
+        future_manifest=args.use_future_manifest,
         use_same_future_manifest=args.use_same_future_manifest,
     )
 
