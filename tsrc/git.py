@@ -138,11 +138,21 @@ class GitStatus:
                 self.dirty = True
 
     def update_upstreamed(self) -> None:
+        use_branch = self.branch
+        # if there is tag with same name as branch, it gets refered by 'heads/<branch_name>'
+        if use_branch:
+            if use_branch.startswith("heads/") is True:
+                use_branch = use_branch[6:]
+        else:
+            self.upstreamed = False
+            # skip git check if upstreamed when there is no branch
+            return
+
         rc, _ = run_git_captured(
             self.working_path,
             "config",
             "--get",
-            f"branch.{self.branch}.remote",
+            f"branch.{use_branch}.remote",
             check=False,
         )
         if rc == 0:

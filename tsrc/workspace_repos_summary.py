@@ -16,7 +16,7 @@ from typing import Dict, List, Tuple, Union
 
 import cli_ui as ui
 
-from tsrc.errors import MissingRepo
+from tsrc.errors import MissingRepoError
 from tsrc.git_remote import remote_urls_are_same
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.local_future_manifest import get_local_future_manifests_manifest_and_repos
@@ -259,9 +259,7 @@ class WorkspaceReposSummary:
 
             # recollect Future Manifest leftovers
             if self.f_m_repos:
-                self._describe_future_manifest_leftovers(
-                    self.workspace, self.f_m_repos, alone_print=self._fml_alone_print
-                )
+                self._describe_future_manifest_leftovers(self.workspace, self.f_m_repos)
         else:
             self._describe_workspace_is_empty()
 
@@ -789,7 +787,7 @@ class WorkspaceReposSummary:
             message = [ui.green, "*", ui.reset, dest.ljust(self.max_dest)]
 
             # do not report further if there is Error, just print it
-            if isinstance(status, MissingRepo) or isinstance(status, Exception):
+            if isinstance(status, MissingRepoError) or isinstance(status, Exception):
                 message += self._describe_deep_manifest(
                     False, None, dest, None, self.max_dm_desc
                 )
@@ -940,7 +938,7 @@ class WorkspaceReposSummary:
         fm_dest_is_empty: bool = False,
     ) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info()."""
-        if isinstance(status, MissingRepo):
+        if isinstance(status, MissingRepoError):
             return [ui.red, "error: missing repo"]
         if isinstance(status, Exception):
             return [ui.red, "error: ", status]
@@ -1205,7 +1203,6 @@ class WorkspaceReposSummary:
         self,
         workspace: Workspace,
         f_m_repos: Union[List[Repo], None],
-        alone_print: bool = False,
     ) -> None:
         if self.f_m_leftovers_displayed is True:
             return

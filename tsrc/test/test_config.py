@@ -7,7 +7,7 @@ import ruamel.yaml
 import schema
 
 from tsrc.config import parse_config
-from tsrc.errors import InvalidConfig
+from tsrc.errors import InvalidConfigError
 
 
 def test_invalid_syntax(tmp_path: Path) -> None:
@@ -23,7 +23,7 @@ def test_invalid_syntax(tmp_path: Path) -> None:
         """
         )
     )
-    with pytest.raises(InvalidConfig) as e:
+    with pytest.raises(InvalidConfigError) as e:
         dummy_schema = mock.Mock()
         parse_config(foo_yml, schema=dummy_schema)
     raised_error = e.value
@@ -42,7 +42,7 @@ def test_invalid_schema(tmp_path: Path) -> None:
         )
     )
     foo_schema = schema.Schema({"foo": {"bar": str}})
-    with pytest.raises(InvalidConfig) as e:
+    with pytest.raises(InvalidConfigError) as e:
         parse_config(foo_yml, schema=foo_schema)
     assert isinstance(e.value.cause, schema.SchemaError)
 
