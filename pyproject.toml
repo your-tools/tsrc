@@ -17,7 +17,7 @@ Issues = "https://github.com/your-tools/tsrc/issues"
 
 [tool.poetry.dependencies]
 # Note: keep this in sync with .github/workflows/tests.yml
-python = "^3.8"
+python = "^3.8.1"
 
 cli-ui = "^0.11.0"
 colored_traceback = "^0.3.0"
@@ -36,14 +36,14 @@ pytest-xdist = "^3.5.0"
 pygit2 = "^1.13"
 
 # Linters
-black = "^24.3"
-flake8 = "3.9.2"
-flake8-bugbear = "^21.4.3"
-flake8-comprehensions = "^3.4.0"
-pep8-naming = "^0.11.1"
-isort = "^5.7.0"
-types-mock = "^0.1.1"
-mypy = "^1.7"
+black = "^24.8"
+flake8 = "^7.1.1"
+flake8-bugbear = "^24.4.0"
+flake8-comprehensions = "^3.15.0"
+pep8-naming = "^0.14.1"
+isort = "^5.13.2"
+types-mock = "^0.1.5"
+mypy = "^1.11.1"
 
 # Docs
 mkdocs = "^1.5"

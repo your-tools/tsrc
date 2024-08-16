@@ -20,7 +20,7 @@ class Error(Exception):
         return f"<{self.__class__.__name__}>"
 
 
-class InvalidConfig(Error):
+class InvalidConfigError(Error):
     def __init__(self, config_path: Path, cause: Exception) -> None:
         self.config_path = config_path
         self.cause = cause
@@ -37,6 +37,6 @@ class InvalidConfig(Error):
         return self.detailed_message
 
 
-class MissingRepo(Error):
+class MissingRepoError(Error):
     def __init__(self, dest: str):
         super().__init__(f"No repo found in '{dest}'. Please run `tsrc sync`")

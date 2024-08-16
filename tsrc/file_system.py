@@ -89,7 +89,6 @@ def check_link(*, source: Path, target: Path) -> bool:
     remove_link = False
     if source.exists() and not source.is_symlink():
         raise Error("Specified symlink source exists but is not a link")
-        return False
     if source.is_symlink():
         if source.exists():
             # symlink exists and points to some target

@@ -13,7 +13,7 @@ from tsrc.cli import (
     get_num_jobs,
     get_workspace_with_repos,
 )
-from tsrc.errors import Error, MissingRepo
+from tsrc.errors import Error, MissingRepoError
 from tsrc.executor import Outcome, Task, process_items
 from tsrc.git import run_git_captured
 from tsrc.repo import Repo
@@ -60,7 +60,7 @@ class LogCollector(Task[Repo]):
         # so that the repo is not shown by OutcomeCollection.print_summary()
         repo_path = self.workspace_path / repo.dest
         if not repo_path.exists():
-            raise MissingRepo(repo.dest)
+            raise MissingRepoError(repo.dest)
 
         # The main reason for the `git log` command to fail is if `self.from_ref` or
         # `self.to_ref` references are not found for the repo, so check for this case

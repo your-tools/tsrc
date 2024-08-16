@@ -18,8 +18,9 @@ from tsrc.cli import (
     get_workspace_with_repos,
 )
 from tsrc.cli.env_setter import EnvSetter
-from tsrc.errors import Error, MissingRepo
+from tsrc.errors import Error, MissingRepoError
 from tsrc.executor import Outcome, Task, process_items
+from tsrc.pcs_repo import get_deep_manifest_pcsrepo
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 
@@ -45,6 +46,14 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     add_repos_selection_args(parser)
     add_num_jobs_arg(parser)
     parser.add_argument("cmd", nargs="*")
+    parser.add_argument(
+        "-X",
+        "--skip-manifest",
+        help="skip manifest repository if found",
+        dest="skip_manifest",
+        default=False,
+        action="store_true",
+    )
     parser.add_argument(
         "-c",
         help="use a shell to run the command",
@@ -87,6 +96,10 @@ def run(args: argparse.Namespace) -> None:
     workspace = get_workspace_with_repos(args)
     cmd_runner = CmdRunner(workspace.root_path, command, description, shell=shell)
     repos = workspace.repos
+    if args.skip_manifest is True:
+        m_repos, _ = get_deep_manifest_pcsrepo(repos, workspace.config.manifest_url)
+        if m_repos[0] and m_repos[0] in repos:
+            repos.remove(m_repos[0])
     ui.info_1(f"Running `{description}` on {len(repos)} repos")
     collection = process_items(repos, cmd_runner, num_jobs=num_jobs)
     errors = collection.errors
@@ -183,7 +196,7 @@ class CmdRunner(Task[Repo]):
         # in real time.
         full_path = self.workspace_path / repo.dest
         if not full_path.exists():
-            raise MissingRepo(repo.dest)
+            raise MissingRepoError(repo.dest)
         # fmt: off
         self.info(
             ui.brown,

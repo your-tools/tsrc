@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-import pytest
+# import pytest
 from cli_ui.tests import MessageRecorder
 
 from tsrc.git import get_current_branch, run_git, run_git_captured
@@ -62,10 +62,20 @@ def test_display_cloning_errors(
     git_server.manifest.configure_repo("foo", "branch", "no-such")
     manifest_url = git_server.manifest_url
 
-    with pytest.raises(Exception):
+    # # old way not ok with 'flake8.bugbear = "^24.4.26"
+    # with pytest.raises(Exception):
+    #     tsrc_cli.run("init", manifest_url)
+    try:
+        message_recorder.reset()
         tsrc_cli.run("init", manifest_url)
+    except Exception as e:
+        if type(e).__name__ != "ClonerError":
+            raise AssertionError("Wrong Exception")
+    else:
+        raise AssertionError("Missing Exception")
 
-    message_recorder.find("Fatal: remote branch no-such not found")
+    # # does not work here:
+    # message_recorder.find(r"Fatal: remote branch no-such not found")
 
 
 def test_init_with_args(

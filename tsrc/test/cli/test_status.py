@@ -3,6 +3,7 @@ from pathlib import Path
 
 from cli_ui.tests import MessageRecorder
 
+# import pytest
 from tsrc.git import run_git
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
@@ -213,3 +214,45 @@ def test_use_non_cloned_group(
 
     message_recorder.reset()
     tsrc_cli.run("status", "--group", "group2")
+
+
+def test_correct_missing_upstream(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Scenario:
+
+    * 1st: create single repo1
+    * 2nd: init Workspace
+    * 3rd: switch to branch 'dev'
+    * 4th: create tag with same name 'dev'
+    * 5th: push such branch 'dev' to 'origin'
+    * 6th: no (missing upstream) should be present now
+    """
+    # 1st: create single repo1
+    git_server.add_repo("repo1")
+    git_server.push_file("repo1", "CMakeLists.txt")
+
+    # 2nd: init Workspace
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+
+    # 3rd: switch to branch 'dev'
+    repo1_path = workspace_path / "repo1"
+    run_git(repo1_path, "checkout", "-b", "dev")
+
+    # 4th: create tag with same name 'dev'
+    run_git(repo1_path, "tag", "-a", "dev", "-m", "hunting bugs")
+
+    # 5th: push such branch 'dev' to 'origin'
+    run_git(repo1_path, "push", "-u", "origin", "heads/dev")
+    tsrc_cli.run("status")
+
+    # 6th: no (missing upstream) should be present now
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"\* repo1 heads/dev on dev \(expected: master\)")
+    assert not message_recorder.find(r"\(missing upstream\)")

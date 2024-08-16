@@ -215,3 +215,50 @@ def test_set_environment_variables(
     check_env_py.write_text("import os; print(os.environ['TSRC_PROJECT_DEST'])")
 
     tsrc_cli.run("foreach", sys.executable, str(check_env_py))
+
+
+def test_skip_manifest_option(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Scenario
+
+    * 1st: add repo prefixed by 'foo-'
+    * 2nd: add manifest prefixed by 'foo-'
+    * 3rd: init workspace on master
+    * 4th: create Python file to Workspace root
+    * 5th: execute it without restrictions
+    * 6th: execute it witho '--skip-manifest'
+    """
+    # 1st: add repo prefixed by 'foo-'
+    git_server.add_repo("foo-bar")
+
+    # 2nd: add manifest prefixed by 'foo-'
+    git_server.add_manifest_repo("foo-manifest")
+    git_server.manifest.change_branch("master")
+
+    # 3rd: init workspace on master
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+
+    # 4th: create Python file to Workspace root
+    check_env_py = workspace_path / "check-env.py"
+    check_env_py.write_text("import os; print(os.environ['TSRC_PROJECT_DEST'])")
+
+    # 5th: execute it without restrictions
+    message_recorder.reset()
+    tsrc_cli.run("foreach", "-j", "1", "--", sys.executable, str(check_env_py))
+    assert message_recorder.find(r"foo-bar")
+    assert message_recorder.find(r"manifest")
+
+    # 6th: execute it witho '--skip-manifest'
+    #   we should see that now the 'tsrc' does not go to 'foo-maniefest'
+    message_recorder.reset()
+    tsrc_cli.run(
+        "foreach", "--skip-manifest", "-j", "1", "--", sys.executable, str(check_env_py)
+    )
+    assert message_recorder.find(r"foo-bar")
+    assert not message_recorder.find(r"foo-manifest")

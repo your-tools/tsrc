@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import cli_ui as ui
 
-from tsrc.errors import MissingRepo
+from tsrc.errors import MissingRepoError
 from tsrc.executor import Outcome, Task
 from tsrc.git import GitStatus, get_git_status
 from tsrc.manifest import Manifest
@@ -77,7 +77,7 @@ class StatusCollector(Task[Repo]):
         full_path = self.workspace.root_path / repo.dest
         self.info_count(index, count, repo.dest, end="\r")
         if not full_path.exists():
-            self.statuses[repo.dest] = MissingRepo(repo.dest)
+            self.statuses[repo.dest] = MissingRepoError(repo.dest)
         try:
             git_status = get_git_status(full_path)
             manifest_status = ManifestStatus(repo, manifest=self.manifest)

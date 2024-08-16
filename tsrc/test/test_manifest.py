@@ -6,7 +6,7 @@ from typing import List, Optional
 import pytest
 import ruamel.yaml
 
-from tsrc.errors import Error, InvalidConfig
+from tsrc.errors import Error, InvalidConfigError
 from tsrc.file_system import Copy, Link
 from tsrc.manifest import Manifest, RepoNotFound, load_manifest
 from tsrc.repo import Remote, Repo
@@ -128,7 +128,7 @@ repos:
 """
     manifest_path = tmp_path / "manifest.yml"
     manifest_path.write_text(contents)
-    with pytest.raises(InvalidConfig):
+    with pytest.raises(InvalidConfigError):
         load_manifest(manifest_path)
 
 
@@ -144,9 +144,9 @@ def assert_invalid_schema(tmp_path: Path, contents: str) -> Error:
     manifest_path.write_text(textwrap.dedent(contents))
     try:
         load_manifest(manifest_path)
-    except InvalidConfig as error:
+    except InvalidConfigError as error:
         return error
-    pytest.fail("Did not raise InvalidConfig")
+    pytest.fail("Did not raise InvalidConfigError")
 
 
 def test_validates(tmp_path: Path) -> None:

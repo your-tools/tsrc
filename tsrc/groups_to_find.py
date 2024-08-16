@@ -25,7 +25,7 @@ class GroupsToFind:
             return True
         return False
 
-    def found_this(self, index: int, this_group: str) -> None:
+    def found_this(self, this_group: str) -> None:
         """mark single group as found"""
         if self.groups:
             if this_group not in self.found_groups:
