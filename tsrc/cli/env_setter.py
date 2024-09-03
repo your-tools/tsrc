@@ -37,7 +37,8 @@ def get_workspace_vars(workspace: Workspace) -> Dict[str, str]:
 def get_repo_vars(repo: Repo) -> Dict[str, str]:
     res = {}
     res["TSRC_PROJECT_DEST"] = repo.dest
-    res["TSRC_PROJECT_MANIFEST_BRANCH"] = repo.branch
+    if repo.branch:
+        res["TSRC_PROJECT_MANIFEST_BRANCH"] = repo.branch
     res["TSRC_PROJECT_CLONE_URL"] = repo.clone_url
     if repo.sha1:
         res["TSRC_PROJECT_SHA1"] = repo.sha1

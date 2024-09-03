@@ -8,9 +8,10 @@ from typing import Any, List, Optional
 import schema
 
 from tsrc.config import parse_config
-from tsrc.errors import Error
+from tsrc.errors import Error, InvalidConfigError, LoadManifestSchemaError
 from tsrc.file_system import Copy, FileSystemOperation, Link
 from tsrc.groups import GroupList
+from tsrc.manifest_common_data import ManifestsTypeOfData
 from tsrc.repo import Remote, Repo
 
 
@@ -29,7 +30,11 @@ class Manifest:
         self._repos: List[Repo] = []
         self.group_list: Optional[GroupList[str]] = None
 
-    def apply_config(self, config: Any) -> None:
+    def apply_config(
+        self,
+        config: Any,
+        ignore_on_mtod: Optional[ManifestsTypeOfData] = None,
+    ) -> None:
         """Apply config coming form the yaml file"""
         # Note: we cannot just serialize the yaml file into the class,
         # because we need to convert the plain old dicts into
@@ -43,17 +48,14 @@ class Manifest:
             self._handle_links(repo_config)
 
         groups_config = config.get("groups")
-        self._handle_groups(groups_config)
+        self._handle_groups(
+            groups_config,
+            ignore_on_mtod=ignore_on_mtod,
+        )
 
     def _handle_repo(self, repo_config: Any) -> None:
         dest = repo_config["dest"]
-        want_branch = repo_config.get("branch")
-        is_default_branch: bool = True
-        if want_branch:
-            branch = want_branch
-            is_default_branch = False
-        else:
-            branch = "master"
+        branch = orig_branch = repo_config.get("branch")
         tag = repo_config.get("tag")
         sha1 = repo_config.get("sha1")
         url = repo_config.get("url")
@@ -66,8 +68,7 @@ class Manifest:
         repo = Repo(
             dest=dest,
             branch=branch,
-            is_default_branch=is_default_branch,
-            want_branch=want_branch,
+            orig_branch=orig_branch,
             sha1=sha1,
             tag=tag,
             remotes=remotes,
@@ -104,7 +105,9 @@ class Manifest:
             link = Link(repo_config["dest"], source, target)
             self.file_system_operations.append(link)
 
-    def _handle_groups(self, groups_config: Any) -> None:
+    def _handle_groups(
+        self, groups_config: Any, ignore_on_mtod: Optional[ManifestsTypeOfData] = None
+    ) -> None:
         elements = [repo.dest for repo in self._repos]
         self.group_list = GroupList(elements=elements)
         if not groups_config:
@@ -112,7 +115,12 @@ class Manifest:
         for name, group_config in groups_config.items():
             elements = group_config["repos"]
             includes = group_config.get("includes", [])
-            self.group_list.add(name, elements, includes=includes)
+            self.group_list.add(
+                name,
+                elements,
+                includes=includes,
+                ignore_on_mtod=ignore_on_mtod,
+            )
 
     def get_repos(
         self,
@@ -207,4 +215,38 @@ def load_manifest(manifest_path: Path) -> Manifest:
     parsed = parse_config(manifest_path, schema=manifest_schema)
     res = Manifest()
     res.apply_config(parsed)
+    return res
+
+
+def load_manifest_safe_mode(manifest_path: Path, mtod: ManifestsTypeOfData) -> Manifest:
+    """Main entry point: return a manifest instance by parsing
+    a `manifest.yml` file.
+
+    if we have demaged Repo (like 'url' is missing), just ignore Manifest.
+    This is particulary useful when loading Manifest is not that important.
+
+    if we have Group that contain Repo that is not present in the Manifest,
+    ignore such Repo (do not add it to Group).
+    """
+    remote_git_server_schema = {"url": str}
+    repo_schema = schema.Use(validate_repo)
+    group_schema = {"repos": [str], schema.Optional("includes"): [str]}
+    # Note: gitlab and github_enterprise_url keys are ignored,
+    # and kept here only for backward compatibility reasons
+    manifest_schema = schema.Schema(
+        {
+            "repos": [repo_schema],
+            schema.Optional("gitlab"): remote_git_server_schema,
+            schema.Optional("github_enterprise"): remote_git_server_schema,
+            schema.Optional("groups"): {str: group_schema},
+        }
+    )
+    try:
+        parsed = parse_config(manifest_path, schema=manifest_schema)
+    except InvalidConfigError:
+        raise LoadManifestSchemaError(mtod)
+
+    parsed = parse_config(manifest_path, schema=manifest_schema)
+    res = Manifest()
+    res.apply_config(parsed, ignore_on_mtod=mtod)
     return res

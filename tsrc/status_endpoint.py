@@ -27,7 +27,7 @@ class ManifestStatus:
         """
         expected_branch = self.repo.branch
         actual_branch = git_status.branch
-        if actual_branch and actual_branch != expected_branch:
+        if actual_branch and expected_branch and actual_branch != expected_branch:
             self.incorrect_branch = (actual_branch, expected_branch)
         self.missing_upstream = not git_status.upstreamed
 

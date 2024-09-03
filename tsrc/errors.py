@@ -3,6 +3,8 @@
 from pathlib import Path
 from typing import Any
 
+from tsrc.manifest_common_data import ManifestsTypeOfData
+
 DOC_URL = "https://your-tools.github.io/tsrc"
 
 
@@ -35,6 +37,15 @@ class InvalidConfigError(Error):
 
     def __str__(self) -> str:
         return self.detailed_message
+
+
+class LoadManifestSchemaError(Error):
+    def __init__(self, mtod: ManifestsTypeOfData) -> None:
+        if mtod == ManifestsTypeOfData.DEEP:
+            msg = "Failed to get Deep Manifest"
+        if mtod == ManifestsTypeOfData.FUTURE:
+            msg = "Failed to get Future Manifest"
+        super().__init__(msg)
 
 
 class MissingRepoError(Error):

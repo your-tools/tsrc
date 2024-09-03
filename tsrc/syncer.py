@@ -10,13 +10,18 @@ from tsrc.repo import Remote, Repo
 
 
 class IncorrectBranch(Error):
-    def __init__(self, *, actual: Optional[str], expected: str):
+    def __init__(self, *, actual: Optional[str], expected: Optional[str]):
         self.actual = actual
         if actual:
-            self.message = (
-                f"Current branch: '{actual}' "
-                f"does not match expected branch: '{expected}'"
-            )
+            if expected:
+                self.message = (
+                    f"Current branch: '{actual}' "
+                    f"does not match expected branch: '{expected}'"
+                )
+            else:
+                self.message = (
+                    f"Current branch: '{actual}' " f"does not match empty branch"
+                )
         else:
             self.message = f"Not on any branch. Expected branch: '{expected}'"
 
@@ -163,18 +168,18 @@ class Syncer(Task[Repo]):
         if status.dirty:
             raise Error(f"git repo is dirty: cannot sync to ref: {ref}")
         try:
-            if repo.want_branch:
-                self.sync_repo_to_ref_and_branch(repo, ref, repo.want_branch)
+            if repo.orig_branch:
+                self.sync_repo_to_ref_and_branch(repo, ref, repo.orig_branch)
             else:
                 self.run_git(repo_path, "reset", "--hard", ref)
         except Error:
             raise Error("updating ref failed")
 
     def sync_repo_to_ref_and_branch(
-        self, repo: Repo, ref: str, want_branch: str
+        self, repo: Repo, ref: str, orig_branch: str
     ) -> None:
         # check branches related to 'ref'
-        self.info_3("Taking care of ref while respecting branch:", want_branch)
+        self.info_3("Taking care of ref while respecting branch:", orig_branch)
         repo_path = self.workspace_path / repo.dest
         if repo.tag:
             rc, ret = run_git_captured(repo_path, "rev-list", "-n", "1", repo.tag)
@@ -184,10 +189,10 @@ class Syncer(Task[Repo]):
                 raise Error(f"cannot determine commit for tag: {repo.tag}")
 
         # 'ref' now contains SHA1 hash to required commit
-        self.sync_repo_to_sha1_and_branch(repo, ref, want_branch)
+        self.sync_repo_to_sha1_and_branch(repo, ref, orig_branch)
 
     def sync_repo_to_sha1_and_branch(
-        self, repo: Repo, ref: str, want_branch: str
+        self, repo: Repo, ref: str, orig_branch: str
     ) -> None:
         repo_path = self.workspace_path / repo.dest
 
@@ -201,14 +206,14 @@ class Syncer(Task[Repo]):
             # filter only remote refs
             if i.startswith("refs/remotes/") is True:
                 rps: List[str] = i.split("/")
-                if want_branch == rps[-1]:
+                if orig_branch == rps[-1]:
                     sel_ref = i
                     break  # no need to search any further
 
         # check if SHA1 and branch are found
         if not sel_ref:
             raise Error(
-                f"configured branch: {want_branch} does not contain configured reference: {ref}"
+                f"configured branch: {orig_branch} does not contain configured reference: {ref}"
             )
 
         # check if we have local branch pointing to remote ref
@@ -224,14 +229,14 @@ class Syncer(Task[Repo]):
 
         # determine if we need to checkout remote
         if not lb_found:
-            self.info_3("Checking out remote branch", want_branch)
-            self.run_git(repo_path, "checkout", "--track", "-b", want_branch, sel_ref)
+            self.info_3("Checking out remote branch", orig_branch)
+            self.run_git(repo_path, "checkout", "--track", "-b", orig_branch, sel_ref)
         else:
             _, c_branch = run_git_captured(
                 repo_path, "branch", "--show-current", "--format=%(refname)"
             )
             if c_branch != lb_found:
-                self.info_3("Checking out branch", want_branch)
+                self.info_3("Checking out branch", orig_branch)
                 self.run_git(repo_path, "checkout", lb_found)
 
         # now we are ready to reset
@@ -242,10 +247,13 @@ class Syncer(Task[Repo]):
         status = get_git_status(repo_path)
         if status.dirty:
             raise Error(f"git repo is dirty: cannot checkout: {repo.branch}")
-        try:
-            self.run_git(repo_path, "checkout", repo.branch)
-        except Error:
-            raise Error("checking out failed")
+        if repo.branch:
+            try:
+                self.run_git(repo_path, "checkout", repo.branch)
+            except Error:
+                raise Error("checking out failed")
+        else:
+            raise Error("branch is not present, cannot checkout branch")
 
     def update_submodules(self, repo: Repo) -> str:
         repo_path = self.workspace_path / repo.dest

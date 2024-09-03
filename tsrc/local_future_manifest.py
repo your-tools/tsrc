@@ -14,10 +14,14 @@ after the 'sync'.
 
 from typing import Dict, Tuple, Union
 
+import cli_ui as ui
+
+from tsrc.errors import LoadManifestSchemaError
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.local_manifest import LocalManifest
 from tsrc.manifest import Manifest
 from tsrc.manifest_common import ManifestGetRepos
+from tsrc.manifest_common_data import ManifestsTypeOfData
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 
@@ -30,6 +34,7 @@ def get_local_future_manifests_manifest_and_repos(
 ) -> Tuple[
     Union[Manifest, None], Union[Dict[str, Repo], None], bool, GroupsToFind, bool
 ]:
+    # returns: lfm, lfm_repos, must_find_all_groups, gtf, report_skip_fm_update
     path = workspace.root_path / ".tsrc" / "future_manifest"
     path_to_m_file = path / "manifest.yml"
     report_skip_fm_update: bool = False
@@ -63,7 +68,13 @@ def get_local_future_manifests_manifest_and_repos(
         )
 
     # read manifest file and obtain raw data
-    lfmm = lfm.get_manifest()
+    # lfmm = lfm.get_manifest()
+    try:
+        lfmm = lfm.get_manifest_safe_mode(ManifestsTypeOfData.FUTURE)
+    except LoadManifestSchemaError as lmse:
+        ui.warning(lmse)
+        return None, None, must_find_all_groups, gtf, False
+
     mgr = ManifestGetRepos(workspace, lfmm, True, clone_all_repos)
 
     # get repos that match 'groups'

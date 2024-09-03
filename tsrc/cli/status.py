@@ -17,9 +17,9 @@ from tsrc.groups_to_find import GroupsToFind
 from tsrc.pcs_repo import get_deep_manifest_from_local_manifest_pcsrepo
 from tsrc.status_endpoint import StatusCollector
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
+from tsrc.utils import erase_last_line
 
 # from tsrc.status_header import header_manifest_branch
-from tsrc.utils import erase_last_line
 from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
 

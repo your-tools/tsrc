@@ -20,15 +20,28 @@ class Repo:
     # Note: a repo has at least one remote called 'origin' by default -
     # other remotes may be configured explicitly in the manifest file.
     remotes: List[Remote]
-    branch: str = "master"
-    is_default_branch: bool = True
-    # want_branch is usefull when syncing using 'ref'
-    # as there is different outcome when 'branch' is provided'
-    want_branch: Optional[str] = None
+    # Q: how to setup Repo with empty branch?
+    # A: branch = None, keep_branch = True
+    # this is necessary when dumping to Manifest, so we will know
+    # when to set SHA1 for sure
+    branch: Optional[str] = None
+    keep_branch: bool = False
+    is_default_branch: bool = False
+    # orig_branch should be set when Repo dataclass is created
+    # in order to keep original branch present, as after
+    # update(), branch may be changed loosing its original value.
+    # this is important when syncing using 'ref'
+    # see 'test/cli/test_sync_to_ref.py' for even more details
+    orig_branch: Optional[str] = None
     sha1: Optional[str] = None
     tag: Optional[str] = None
     shallow: bool = False
     ignore_submodules: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.branch and self.keep_branch is False:
+            object.__setattr__(self, "branch", "master")
+            object.__setattr__(self, "is_default_branch", True)
 
     @property
     def clone_url(self) -> str:
