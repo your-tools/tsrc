@@ -7,10 +7,16 @@ collection of tests dedicated to displaying related to:
 * Manifest marker
 
 contains:
+##### Normal display (check alignment)
 * 'test_status_2_x_mm': rare case of 2 MANIFEST markers
 * 'test_status_dm_fm': general test of DM and FM integrated together
-* 'test_status_cmd_param_3xm': test all '--no-XX' cmd param options
+* 'test_status_cmd_param_3x_no': test all '--no-XX' cmd param options
 * 'test_mm_alignment_in_all_types': test Manifest Marker alignment
+* 'test_mm_alignment_in_all_types_2'
+##### Errors on Manifest (that should be Warnings at best)
+* 'test_dm_manifests_schema_error'
+* 'test_fm_manifests_schema_error'
+* 'test_dm_and_fm_manifests_mising_group_item'
 """
 
 import os
@@ -23,6 +29,7 @@ import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
 from tsrc.git import run_git
+from tsrc.test.cli.test_groups_extra import ad_hoc_insert_to_manifests_groups
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
 from tsrc.workspace_config import WorkspaceConfig
@@ -772,3 +779,208 @@ def ad_hoc_update_to_fm_dest__for_test_mm(
     # write the file down
     with open(manifest_path, "w") as file:
         yaml.dump(parsed, file)
+
+
+def test_dm_manifests_schema_error(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Test how does 'status' get over the damaged Deep Manifest
+
+    Scenario:
+    * 1st: Create repositories and Manifest repository as well
+    * 2nd: init Workspace on master
+    * 3rd: damage Manifest file (on purpose)
+    * 4th: see if 'status' warns about it, while still prints the rest
+    """
+    # 1st: Create repositories and Manifest repository as well
+    git_server.add_repo("repo1")
+    git_server.push_file("repo1", "CMakeLists.txt")
+    git_server.add_repo("repo2")
+    git_server.push_file("repo2", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 2nd: init Workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 3rd: damage Manifest file (on purpose)
+    ad_hoc_delete_item_from_manifest(workspace_path)
+
+    # 4th: see if 'status' warns about it, while still prints the rest
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"Warning: Failed to get Deep Manifest")
+    assert message_recorder.find(r"\* manifest master \(dirty\) ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo1    master")
+    assert not message_recorder.find(r"=> Destination .*")
+
+
+def test_fm_manifests_schema_error(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Test is damaged Future Manifest does not cause terminating issue
+
+    Scenario:
+
+    # 1st: Create repositories and Manifest repository as well
+    # 2nd: init Workspace on master
+    # 3rd: Manifest repo: checkout new branch: 'damaged'
+    # 4th: damage Manifest's repo
+    # 5th: Manifest's repo: commit + push
+    # 6th: go back to 'master' for Manifest's repo
+    # 7th: switch future branch to 'damaged'
+    # 8th: verify if 'status' return proper Warning
+    """
+    # 1st: Create repositories and Manifest repository as well
+    git_server.add_repo("repo1")
+    git_server.push_file("repo1", "CMakeLists.txt")
+    git_server.add_repo("repo2")
+    git_server.push_file("repo2", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 2nd: init Workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 3rd: Manifest repo: checkout new branch: 'damaged'
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-B", "damaged")
+
+    # 4th: damage Manifest's repo
+    ad_hoc_delete_item_from_manifest(workspace_path)
+
+    # 5th: Manifest's repo: commit + push
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "go devel branch")
+    run_git(manifest_path, "push", "-u", "origin", "damaged")
+
+    # 6th: go back to 'master' for Manifest's repo
+    run_git(manifest_path, "checkout", "master")
+
+    # 7th: switch future branch to 'damaged'
+    #   also with Warning
+    message_recorder.reset()
+    tsrc_cli.run("manifest", "--branch", "damaged")
+    assert message_recorder.find(r"Warning: Failed to get Future Manifest")
+    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
+
+    # 8th: verify if 'status' return proper Warning
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(r"Warning: Failed to get Future Manifest")
+    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
+    assert message_recorder.find(r"\* repo1    \[ master \]  master")
+
+
+def ad_hoc_delete_item_from_manifest(
+    workspace_path: Path,
+) -> None:
+    manifest_path = workspace_path / "manifest" / "manifest.yml"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    yaml = ruamel.yaml.YAML(typ="rt")
+    parsed = yaml.load(manifest_path.read_text())
+
+    for _, value in parsed.items():
+        if isinstance(value, List):
+            for x in value:
+                if isinstance(x, ruamel.yaml.comments.CommentedMap):
+                    if x["dest"] == "repo1":
+                        del x["url"]
+
+    # write the file down
+    with open(manifest_path, "w") as file:
+        yaml.dump(parsed, file)
+
+
+def test_dm_and_fm_manifests_mising_group_item(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Simulate the case when Deem Manifest or Future Manifest
+    have Group with Item (Repo) that is not present.
+
+    Under normal circumstances this is Error, but
+    when we are talking about DM or FM, it should be just a Warning
+    as data from DM and FM are NOT mandatory as such.
+
+    So let us check if we can see the Warning
+
+    Scenario
+    # 1st: create a bunch of repos
+    # 2nd: add Manifest
+    # 3rd: add Group
+    # 4th: init Workspace
+    # 5th: checkout and push 'dev' branch of Manifest
+    # 6th: add Group with non-existing item (Repo)
+    # 7th: see if we have DM Warning
+    # 8th: set manifest branch to change to 'dev'
+    # 9th: go back to 'master' for Manifest repo
+    # 10th: add non-existent item to Group in Future Manifest
+    # 11th: check for Warking on FM, disabling FM to update
+    """
+
+    # 1st: create a bunch of repos
+    git_server.add_repo("repo_2")
+    git_server.push_file("repo_2", "my_file_in_repo_2.txt")
+    git_server.add_repo("repo_3")
+    git_server.push_file("repo_3", "my_file_in_repo_3.txt")
+
+    # 2nd: add Manifest
+    git_server.add_manifest_repo("manifest")
+    manifest_url = git_server.manifest_url
+
+    # 3rd: add Group
+    git_server.add_group("g23", ["repo_2", "repo_3"])
+
+    # 4th: init Workspace
+    tsrc_cli.run("init", manifest_url, "--branch", "master")
+
+    # 5th: checkout and push 'dev' branch of Manifest
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-b", "dev")
+    run_git(manifest_path, "push", "-u", "origin", "dev")
+
+    # 6th: add Group with non-existing item (Repo)
+    ad_hoc_insert_to_manifests_groups(workspace_path / "manifest" / "manifest.yml")
+
+    # 7th: see if we have DM Warning
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"Warning: Deep Manifest: Groups: cannot add 'repo_1' to 'gm'"
+    )
+
+    # 8th: set manifest branch to change to 'dev'
+    tsrc_cli.run("manifest", "--branch", "dev")
+
+    # 9th: go back to 'master' for Manifest repo
+    run_git(manifest_path, "checkout", "master")
+    run_git(manifest_path, "commit", "-a", "-m", "pre Group's missing item")
+    run_git(manifest_path, "push", "-u", "origin", "master")
+
+    # 10th: add non-existent item to Group in Future Manifest
+    ad_hoc_insert_to_manifests_groups(
+        workspace_path / ".tsrc" / "future_manifest" / "manifest.yml"
+    )
+
+    # 11th: check for Warking on FM, disabling FM to update
+    message_recorder.reset()
+    tsrc_cli.run("status", "--same-fm")
+    assert message_recorder.find(
+        r"Warning: Future Manifest: Groups: cannot add 'repo_1' to 'gm'"
+    )

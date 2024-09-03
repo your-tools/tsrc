@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from tsrc.git import get_current_branch, run_git
-from tsrc.manifest import Manifest, load_manifest
+from tsrc.manifest import Manifest, load_manifest, load_manifest_safe_mode
+from tsrc.manifest_common_data import ManifestsTypeOfData
 
 
 class LocalManifest:
@@ -49,6 +50,9 @@ class LocalManifest:
 
     def get_manifest(self) -> Manifest:
         return load_manifest(self.clone_path / "manifest.yml")
+
+    def get_manifest_safe_mode(self, mtod: ManifestsTypeOfData) -> Manifest:
+        return load_manifest_safe_mode(self.clone_path / "manifest.yml", mtod)
 
     def update(
         self, url: str, *, branch: str, show_output: bool = True, show_cmd: bool = True

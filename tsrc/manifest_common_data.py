@@ -11,6 +11,17 @@ class ManifestsTypeOfData(Enum):
     FUTURE = 4
 
 
+def get_mtod_str(tod: ManifestsTypeOfData) -> str:
+    if tod == ManifestsTypeOfData.LOCAL:
+        return "Local Manifest"
+    if tod == ManifestsTypeOfData.DEEP:
+        return "Deep Manifest"
+    if tod == ManifestsTypeOfData.DEEP_BLOCK:
+        return "Deep Manifest's block"
+    if tod == ManifestsTypeOfData.FUTURE:
+        return "Future Manifest"
+
+
 def get_main_color(tod: ManifestsTypeOfData) -> ui.Token:
     # for Local Manifest (using for Manifest's Marker color)
     if tod == ManifestsTypeOfData.LOCAL:

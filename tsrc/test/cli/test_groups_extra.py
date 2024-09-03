@@ -664,7 +664,7 @@ def test_leftovers_only_for_dm_fm_git_desc(
     run_git(manifest_path, "checkout", "-b", "fu")
 
     # 10th: insert new Group 'gm' to 'future' branch
-    ad_hoc_insert_to_dm_groups(workspace_path)
+    ad_hoc_insert_to_manifests_groups(workspace_path / "manifest" / "manifest.yml")
 
     # 11th: add, commit and push it to remote
     run_git(manifest_path, "add", "manifest.yml")
@@ -692,14 +692,13 @@ def test_leftovers_only_for_dm_fm_git_desc(
     )
 
 
-def ad_hoc_insert_to_dm_groups(
-    workspace_path: Path,
+def ad_hoc_insert_to_manifests_groups(
+    manifest_path: Path,
 ) -> None:
     """
     insert 'gm' Group into deep manifest's manifest.yml file
     such 'gm' Group contains 'repo_1' and 'manifest'
     """
-    manifest_path = workspace_path / "manifest" / "manifest.yml"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     yaml = ruamel.yaml.YAML(typ="rt")
     parsed = yaml.load(manifest_path.read_text())

@@ -16,7 +16,7 @@ from typing import Dict, List, Tuple, Union
 
 import cli_ui as ui
 
-from tsrc.errors import MissingRepoError
+from tsrc.errors import LoadManifestSchemaError, MissingRepoError
 from tsrc.git_remote import remote_urls_are_same
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.local_future_manifest import get_local_future_manifests_manifest_and_repos
@@ -107,14 +107,16 @@ class WorkspaceReposSummary:
 
         # Future Manifest repos (and max len)
         self.f_m_repos = self._ready_f_m_repos()
-        self.max_fm_desc = self._check_max_fm_desc(self.f_m_repos)
+        if self.f_m_repos:
+            self.max_fm_desc = self._check_max_fm_desc(self.f_m_repos)
 
         # Deep Manifest repos (and max len)
         self.d_m_repos, self.deep_manifest = self._ready_d_m_repos()
-        self.max_dm_desc = self._check_max_dm_desc(
-            self.dm,
-            self.d_m_repos,
-        )
+        if self.dm and self.d_m_repos:
+            self.max_dm_desc = self._check_max_dm_desc(
+                self.dm,
+                self.d_m_repos,
+            )
 
     def obtain_leftovers_repos(self, cur_repos: Union[List[Repo], None]) -> List[Repo]:
         """
@@ -479,9 +481,13 @@ class WorkspaceReposSummary:
         if self.dm:
             path = self.workspace.root_path / self.dm.dest
             ldm = LocalManifest(path)
-            ldmm = ldm.get_manifest()
+            try:
+                ldmm = ldm.get_manifest_safe_mode(ManifestsTypeOfData.DEEP)
+            except LoadManifestSchemaError as lmse:
+                ui.warning(lmse)
+                self.dm = None  # unset Deep Manifest
+                return None, None
 
-            #
             mgr = ManifestGetRepos(
                 self.workspace, ldmm, True, self.workspace.config.clone_all_repos
             )

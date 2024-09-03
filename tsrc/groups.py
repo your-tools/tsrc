@@ -4,7 +4,10 @@
 
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
+import cli_ui as ui
+
 from tsrc.errors import Error
+from tsrc.manifest_common_data import ManifestsTypeOfData, get_mtod_str
 
 T = TypeVar("T")
 
@@ -64,12 +67,24 @@ class GroupList(Generic[T]):
         return self._groups_seen
 
     def add(
-        self, name: str, elements: List[T], includes: Optional[List[str]] = None
+        self,
+        name: str,
+        elements: List[T],
+        includes: Optional[List[str]] = None,
+        ignore_on_mtod: Optional[ManifestsTypeOfData] = None,
     ) -> None:
+        can_add: bool = True
         for element in elements:
             if element not in self.all_elements:
-                raise UnknownGroupElement(name, element)
-        self.groups[name] = Group(name, elements, includes=includes)
+                if ignore_on_mtod:
+                    can_add = False
+                    ui.warning(
+                        f"{get_mtod_str(ignore_on_mtod)}: Groups: cannot add '{element}' to '{name}'."  # noqa: E501
+                    )
+                else:
+                    raise UnknownGroupElement(name, element)
+        if can_add is True:
+            self.groups[name] = Group(name, elements, includes=includes)
 
     def get_group(self, name: str) -> Optional[Group[T]]:
         return self.groups.get(name)
