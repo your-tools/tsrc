@@ -267,11 +267,14 @@ class WorkspaceReposSummary:
 
     """Groups related: check"""
 
-    def must_match_all_groups(self) -> None:
+    def must_match_all_groups(self, ignore_if_group_not_found: bool = False) -> None:
         is_all_found, missing_groups = self.gtf.all_found()
         if is_all_found is False:
             for missing_group in missing_groups:
-                raise ManifestGroupNotFound(missing_group)
+                if ignore_if_group_not_found is True:
+                    ui.warning("Missing group:", missing_group)
+                else:
+                    raise ManifestGroupNotFound(missing_group)
 
     """common helpers"""
 
@@ -471,6 +474,8 @@ class WorkspaceReposSummary:
                 has_d_m_d[dest] = d_m_repo_found
                 if d_m_repo_found is True:
                     self.d_m_repo_found_some = True
+            else:
+                has_d_m_d[dest] = False
         return has_d_m_d
 
     """Deep Manifest leftovers-only: gathering"""
