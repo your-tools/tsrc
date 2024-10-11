@@ -14,6 +14,44 @@ from tsrc.test.helpers.manifest_file import (
 from tsrc.workspace_config import WorkspaceConfig
 
 
+def test_manifest__no_dm(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Make sure that when we disable Deep Manifest (--no-dm)
+    the Local Manifest Repo will still be displayed.
+    This occurs on 'manifest' command only
+
+    Scenario:
+
+    * 1st: Create repositories and Manifest repository as well
+    * 2nd: init Workspace on master
+    * 3rd: check Local Manifest Repo, without Deep Manifest
+    """
+    # 1st: Create repositories and Manifest repository as well
+    git_server.add_repo("repo1")
+    git_server.push_file("repo1", "CMakeLists.txt")
+    git_server.add_repo("repo2")
+    git_server.push_file("repo2", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 2nd: init Workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 3rd: check Local Manifest Repo, without Deep Manifest
+    message_recorder.reset()
+    tsrc_cli.run("manifest", "--no-dm")
+    assert message_recorder.find(
+        r"\* manifest master ~~ MANIFEST"
+    ), "ignoring Deep Manifest blocking displaying Local Manifest Repo"
+
+
 def test_plain_manifest_on_change(
     tsrc_cli: CLI,
     git_server: GitServer,
