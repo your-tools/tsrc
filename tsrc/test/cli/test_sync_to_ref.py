@@ -39,7 +39,7 @@ such preparation taking plase, these test will surelly fail.
 from pathlib import Path
 from typing import List
 
-import pytest
+# import pytest
 import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
@@ -264,7 +264,6 @@ def test_sync_to_ref_case_2(
     assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
 
 
-@pytest.mark.last
 def test_sync_bug_unique_case_3(
     tsrc_cli: CLI,
     git_server: GitServer,

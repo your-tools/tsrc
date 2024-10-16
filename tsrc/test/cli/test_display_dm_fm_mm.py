@@ -131,7 +131,7 @@ def ad_hoc_update_dm_dest__for_status_2_x_mm(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "manifest":
+                    if "dest" in x and x["dest"] == "manifest":
                         x["dest"] = "FM_destination"
     # write the file down
     with open(manifest_path, "w") as file:
@@ -242,8 +242,8 @@ def ad_hoc_update_dm__for_status_dm_fm(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "repo1":
-                        if x["url"]:
+                    if "dest" in x and x["dest"] == "repo1":
+                        if "url" in x and x["url"]:
                             keep_url = x["url"]
 
     if keep_url:
@@ -269,8 +269,8 @@ def ad_hoc_update_dm_2__for_status_dm_fm(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "repo1":
-                        if x["url"]:
+                    if "dest" in x and x["dest"] == "repo1":
+                        if "url" in x and x["url"]:
                             keep_url = x["url"]
 
     if keep_url:
@@ -754,7 +754,7 @@ def ad_hoc_update_to_dm_dest__for_test_mm(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "manifest":
+                    if "dest" in x and x["dest"] == "manifest":
                         x["dest"] = "manifest-dm"
     # write the file down
     with open(manifest_path, "w") as file:
@@ -774,7 +774,7 @@ def ad_hoc_update_to_fm_dest__for_test_mm(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "manifest-dm":
+                    if "dest" in x and x["dest"] == "manifest-dm":
                         x["dest"] = "manifest-fm"
     # write the file down
     with open(manifest_path, "w") as file:
@@ -815,10 +815,12 @@ def test_dm_manifests_schema_error(
     # 4th: see if 'status' warns about it, while still prints the rest
     message_recorder.reset()
     tsrc_cli.run("status")
-    assert message_recorder.find(r"Warning: Failed to get Deep Manifest")
-    assert message_recorder.find(r"\* manifest master \(dirty\) ~~ MANIFEST")
-    assert message_recorder.find(r"\* repo1    master")
-    assert not message_recorder.find(r"=> Destination .*")
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+    assert message_recorder.find(r"\* repo2    \[ master                  \]  master")
+    assert message_recorder.find(
+        r"\* manifest \[ master                  \]= master \(dirty\) ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"\* repo1    \[ master \(missing remote\) \]  master")
 
 
 def test_fm_manifests_schema_error(
@@ -832,14 +834,14 @@ def test_fm_manifests_schema_error(
 
     Scenario:
 
-    # 1st: Create repositories and Manifest repository as well
-    # 2nd: init Workspace on master
-    # 3rd: Manifest repo: checkout new branch: 'damaged'
-    # 4th: damage Manifest's repo
-    # 5th: Manifest's repo: commit + push
-    # 6th: go back to 'master' for Manifest's repo
-    # 7th: switch future branch to 'damaged'
-    # 8th: verify if 'status' return proper Warning
+    * 1st: Create repositories and Manifest repository as well
+    * 2nd: init Workspace on master
+    * 3rd: Manifest repo: checkout new branch: 'damaged'
+    * 4th: damage Manifest's repo
+    * 5th: Manifest's repo: commit + push
+    * 6th: go back to 'master' for Manifest's repo
+    * 7th: switch future branch to 'damaged'
+    * 8th: verify if 'status' return proper Warning
     """
     # 1st: Create repositories and Manifest repository as well
     git_server.add_repo("repo1")
@@ -873,15 +875,28 @@ def test_fm_manifests_schema_error(
     #   also with Warning
     message_recorder.reset()
     tsrc_cli.run("manifest", "--branch", "damaged")
-    assert message_recorder.find(r"Warning: Failed to get Future Manifest")
-    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* manifest \[ master \]= \( master == master \) ~~ MANIFEST"
+    )
 
     # 8th: verify if 'status' return proper Warning
     message_recorder.reset()
     tsrc_cli.run("status")
-    assert message_recorder.find(r"Warning: Failed to get Future Manifest")
-    assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
-    assert message_recorder.find(r"\* repo1    \[ master \]  master")
+    assert message_recorder.find(
+        r"=> Destination \[Deep Manifest description\] \(Future Manifest description\)"
+    )
+    assert message_recorder.find(
+        r"\* repo1    \[ master \]  \( master \(missing remote\) << master \)"
+    )
+    assert message_recorder.find(
+        r"\* repo2    \[ master \]  \( master                  == master \)"
+    )
+    assert message_recorder.find(
+        r"\* manifest \[ master \]= \( master                  == master \) ~~ MANIFEST"
+    )
 
 
 def ad_hoc_delete_item_from_manifest(
@@ -896,7 +911,7 @@ def ad_hoc_delete_item_from_manifest(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "repo1":
+                    if "dest" in x and "url" in x and x["dest"] == "repo1":
                         del x["url"]
 
     # write the file down
