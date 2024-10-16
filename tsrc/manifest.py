@@ -11,7 +11,7 @@ from tsrc.config import parse_config
 from tsrc.errors import Error, InvalidConfigError, LoadManifestSchemaError
 from tsrc.file_system import Copy, FileSystemOperation, Link
 from tsrc.groups import GroupList
-from tsrc.manifest_common_data import ManifestsTypeOfData
+from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_can_ignore_remotes
 from tsrc.repo import Remote, Repo
 
 
@@ -194,6 +194,32 @@ def validate_repo(data: Any) -> None:
         )
 
 
+def validate_repo_no_remote_required(data: Any) -> None:
+    copy_schema = {"file": str, schema.Optional("dest"): str}
+    symlink_schema = {"source": str, "target": str}
+    remote_schema = {"name": str, "url": str}
+    repo_schema = schema.Schema(
+        {
+            "dest": str,
+            schema.Optional("branch"): str,
+            schema.Optional("copy"): [copy_schema],
+            schema.Optional("symlink"): [symlink_schema],
+            schema.Optional("sha1"): str,
+            schema.Optional("tag"): str,
+            schema.Optional("ignore_submodules"): bool,
+            schema.Optional("remotes"): [remote_schema],
+            schema.Optional("url"): str,
+        }
+    )
+    repo_schema.validate(data)
+    url = data.get("url")
+    remotes = data.get("remotes")
+    if url and remotes:
+        raise schema.SchemaError(
+            "Repo config cannot contain both an url and a list of remotes"
+        )
+
+
 def load_manifest(manifest_path: Path) -> Manifest:
     """Main entry point: return a manifest instance by parsing
     a `manifest.yml` file.
@@ -229,7 +255,10 @@ def load_manifest_safe_mode(manifest_path: Path, mtod: ManifestsTypeOfData) -> M
     ignore such Repo (do not add it to Group).
     """
     remote_git_server_schema = {"url": str}
-    repo_schema = schema.Use(validate_repo)
+    if mtod in mtod_can_ignore_remotes():
+        repo_schema = schema.Use(validate_repo_no_remote_required)
+    else:
+        repo_schema = schema.Use(validate_repo)
     group_schema = {"repos": [str], schema.Optional("includes"): [str]}
     # Note: gitlab and github_enterprise_url keys are ignored,
     # and kept here only for backward compatibility reasons

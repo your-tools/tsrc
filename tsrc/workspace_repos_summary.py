@@ -293,7 +293,7 @@ class WorkspaceReposSummary:
         r_repo: Union[Repo, None] = None
         if m_repo:
             if m_repos:
-                is_found, this_index = self._compare_repo_regardles_branch(
+                is_found, this_index, _ = self._compare_repo_regardles_branch(
                     m_repo, m_repos
                 )
                 if is_found is True and this_index >= 0:
@@ -333,6 +333,7 @@ class WorkspaceReposSummary:
             return self._repo_found_regardles_branch(
                 workspace_manifest, m_repo, m_repos, dest
             )
+
         return False, None
 
     def _repo_found_regardles_branch(
@@ -354,7 +355,9 @@ class WorkspaceReposSummary:
             self.gtf, self.must_find_all_groups
         )
         for repo in repos:
-            is_found, _ = self._compare_repo_regardles_branch(repo, m_repos)
+            is_found, _, is_empty_remote = self._compare_repo_regardles_branch(
+                repo, m_repos
+            )
             if is_found is True:
                 if repo.dest == dest:
                     for r_remote in repo.remotes:
@@ -365,13 +368,15 @@ class WorkspaceReposSummary:
                                     is True
                                 ):
                                     return True, m_repo
+                            if not m_repo.remotes and is_empty_remote is True:
+                                return True, m_repo
         return False, None
 
     def _compare_repo_regardles_branch(
         self,
         repo: Repo,
         in_repo: List[Repo],
-    ) -> Tuple[bool, int]:
+    ) -> Tuple[bool, int, bool]:
         """Suitable for using in deletion
         That can be used for preparing leftovers"""
         for index, i in enumerate(in_repo):
@@ -379,8 +384,12 @@ class WorkspaceReposSummary:
                 for this_remote in repo.remotes:
                     for remote in i.remotes:
                         if remote_urls_are_same(this_remote.url, remote.url) is True:
-                            return True, index
-        return False, -1
+                            return True, index, False
+                    if not i.remotes:
+                        return True, index, True
+                if not repo.remotes:
+                    return True, index, True
+        return False, -1, False
 
     def _compare_ui_token(self, a: List[ui.Token], b: List[ui.Token]) -> bool:
         if len(a) != len(b):
@@ -671,7 +680,9 @@ class WorkspaceReposSummary:
                         ):
                             return repo.len_of_describe()
             else:
-                max_dm_desc = max(x.len_of_describe() for x in d_m_repos)
+                max_dm_desc = max(
+                    x.len_of_describe(ManifestsTypeOfData.DEEP) for x in d_m_repos
+                )
         return max_dm_desc
 
     def _check_max_dest_fm_part(
@@ -705,7 +716,9 @@ class WorkspaceReposSummary:
     ) -> int:
         max_f_branch = 0
         if f_m_repos:
-            max_f_branch = max(x.len_of_describe() for x in f_m_repos)
+            max_f_branch = max(
+                x.len_of_describe(ManifestsTypeOfData.FUTURE) for x in f_m_repos
+            )
 
         return max_f_branch
 
@@ -906,7 +919,9 @@ class WorkspaceReposSummary:
         message: List[ui.Token] = []
         if d_m_r_found is True and isinstance(d_m_repo, Repo):
             message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "[", ui.green]
-            desc, _ = d_m_repo.describe_to_tokens(self.max_dm_desc)
+            desc, _ = d_m_repo.describe_to_tokens(
+                self.max_dm_desc, ManifestsTypeOfData.DEEP
+            )
             message += desc
             if sm and dest == sm.dest:
                 if self.d_m_root_point is True:
