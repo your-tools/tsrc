@@ -203,7 +203,7 @@ class ManifestHandler:
 
     def get_repo(self, name: str) -> RepoConfig:
         for repo in self.data["repos"]:
-            if repo["dest"] == name:
+            if "dest" in repo and repo["dest"] == name:
                 return cast(RepoConfig, repo)
         raise AssertionError(f"repo '{name}' not found in manifest")
 
@@ -340,15 +340,18 @@ class GitServer:
             self.manifest.add_repo(name, url, branch=default_branch)
         return url
 
-    def add_group(self, group_name: str, repos: List[str]) -> None:
+    def add_group(
+        self, group_name: str, repos: List[str], do_add_repos: bool = True
+    ) -> None:
         """
         adding new group should not be blocked when
         repositories inside are already exists.
         """
-        for repo in repos:
-            repo_path = self.bare_path / repo
-            if not repo_path.exists():
-                self.add_repo(repo)
+        if do_add_repos is True:
+            for repo in repos:
+                repo_path = self.bare_path / repo
+                if not repo_path.exists():
+                    self.add_repo(repo)
         self.manifest.configure_group(group_name, repos)
 
     def push_file(

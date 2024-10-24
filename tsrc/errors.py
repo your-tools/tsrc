@@ -43,8 +43,10 @@ class LoadManifestSchemaError(Error):
     def __init__(self, mtod: ManifestsTypeOfData) -> None:
         if mtod == ManifestsTypeOfData.DEEP:
             msg = "Failed to get Deep Manifest"
-        if mtod == ManifestsTypeOfData.FUTURE:
+        elif mtod == ManifestsTypeOfData.FUTURE:
             msg = "Failed to get Future Manifest"
+        else:
+            msg = "Failed to get Manifest"
         super().__init__(msg)
 
 

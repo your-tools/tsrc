@@ -2,11 +2,12 @@
 
 from dataclasses import dataclass
 from enum import Enum, unique
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import cli_ui as ui
 
-from tsrc.manifest_common_data import ManifestsTypeOfData, get_main_color
+from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_get_main_color
 
 
 @unique
@@ -47,11 +48,16 @@ class Repo:
     tag: Optional[str] = None
     shallow: bool = False
     ignore_submodules: bool = False
+    # only used by RepoGrabber
+    _grabbed_from_path: Optional[Path] = None
 
     def __post_init__(self) -> None:
         if not self.branch and self.keep_branch is False:
             object.__setattr__(self, "branch", "master")
             object.__setattr__(self, "is_default_branch", True)
+
+    def rename_dest(self, new_dest: str) -> None:
+        object.__setattr__(self, "dest", new_dest)
 
     @property
     def clone_url(self) -> str:
@@ -82,7 +88,6 @@ class Repo:
         if self.tag:
             present_dtt.append(DescribeToTokens.TAG)
         if not self.remotes:
-            # TODO: possibly consider FM as well
             if mtod == ManifestsTypeOfData.DEEP or mtod == ManifestsTypeOfData.FUTURE:
                 present_dtt.append(DescribeToTokens.MISSING_REMOTES)
         if not present_dtt:
@@ -102,7 +107,7 @@ class Repo:
         cs = ui.red  # color (for) SHA1
         ct = ui.brown  # color (for) tag
         if mtod == ManifestsTypeOfData.DEEP or mtod == ManifestsTypeOfData.FUTURE:
-            cb = cs = get_main_color(mtod)
+            cb = cs = mtod_get_main_color(mtod)
         res: List[ui.Token] = []
         able: List[ui.Token] = []
 

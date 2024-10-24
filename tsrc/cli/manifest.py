@@ -21,6 +21,7 @@ from tsrc.status_endpoint import StatusCollector
 
 # from tsrc.status_footer import StatusFooter
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
+from tsrc.utils import erase_last_line
 from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
 
@@ -67,6 +68,18 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="do not check for leftover's GIT descriptions",
         dest="strict_on_git_desc",
     )
+    parser.add_argument(
+        "--ignore-missing-groups",
+        action="store_true",
+        dest="ignore_if_group_not_found",
+        help="ignore configured group(s) if it is not found in groups defined in manifest. This may be particulary useful when switching Manifest version back when some Groups defined later, was not there yet. In which case we can avoid unecessary Error caused by missing group",  # noqa: E501
+    )
+    parser.add_argument(
+        "--ignore-missing-group-items",
+        action="store_true",
+        dest="ignore_group_item",
+        help="ignore group element if it is not found among Manifest's Repos. WARNING: If you end up in need of this option, you have to understand that you end up with useles Manifest. Warnings will be printed for each Group element that is missing, so it may be easier to fix that. Using this option is NOT RECOMMENDED for normal use",  # noqa: E501
+    )
     parser.set_defaults(run=run)
 
 
@@ -76,13 +89,19 @@ def run(args: argparse.Namespace) -> None:
     gtf.found_these(groups_seen)
 
     try:
-        workspace = get_workspace_with_repos(args)
+        workspace = get_workspace_with_repos(
+            args, ignore_group_item=args.ignore_group_item
+        )
     except GroupNotFound:
         # try to obtain workspace ignoring group error
         # if group is found in Deep Manifest or Future Manifest,
         # do not report GroupNotFound.
         # if not, than raise exception at the very end
-        workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
+        workspace = get_workspace_with_repos(
+            args,
+            ignore_if_group_not_found=True,
+            ignore_group_item=args.ignore_group_item,
+        )
 
     dm = None
     if args.use_deep_manifest is True:
@@ -114,7 +133,9 @@ def run(args: argparse.Namespace) -> None:
             cfg_update_data, [ConfigUpdateType.MANIFEST_BRANCH]
         )
     status_header.display()
-    status_collector = StatusCollector(workspace)
+    status_collector = StatusCollector(
+        workspace, ignore_group_item=args.ignore_group_item
+    )
 
     repos = deepcopy(workspace.repos)
 
@@ -129,6 +150,7 @@ def run(args: argparse.Namespace) -> None:
 
         # num_jobs=1 as we will have only (max) 1 repo to process
         process_items(these_repos, status_collector, num_jobs=1)
+        erase_last_line()
 
         statuses = status_collector.statuses
 
@@ -147,4 +169,4 @@ def run(args: argparse.Namespace) -> None:
 
     # check if we have found all Groups (if any provided)
     # and if not, throw exception ManifestGroupNotFound
-    wrs.must_match_all_groups()
+    wrs.must_match_all_groups(ignore_if_group_not_found=args.ignore_if_group_not_found)

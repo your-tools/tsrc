@@ -106,3 +106,13 @@ def check_link(*, source: Path, target: Path) -> bool:
     if remove_link:
         os.unlink(source)
     return True
+
+
+def make_relative(in_path: Path) -> Path:
+    # takes input Path and make it relative to current path
+    # if it is not relative already
+    if in_path.is_absolute() is True:
+        in_path_dir = os.path.dirname(in_path)
+        in_path_file = os.path.basename(in_path)
+        in_path = Path(os.path.join(os.path.relpath(in_path_dir), in_path_file))
+    return in_path

@@ -11,7 +11,9 @@ from typing import List, Optional
 import cli_ui as ui
 
 from tsrc.errors import Error
+from tsrc.groups_and_constraints_data import GroupsAndConstraints
 from tsrc.manifest import Manifest
+from tsrc.manifest_common_data import ManifestsTypeOfData
 from tsrc.repo import Repo
 from tsrc.workspace import Workspace
 from tsrc.workspace_config import WorkspaceConfig
@@ -105,6 +107,7 @@ def find_workspace_path() -> Path:
 def get_workspace_with_repos(
     namespace: argparse.Namespace,
     ignore_if_group_not_found: bool = False,
+    ignore_group_item: bool = False,
 ) -> Workspace:
     workspace = get_workspace(namespace, silent=ignore_if_group_not_found)
     workspace.repos = resolve_repos(
@@ -114,6 +117,7 @@ def get_workspace_with_repos(
         include_regex=namespace.include_regex,
         exclude_regex=namespace.exclude_regex,
         ignore_if_group_not_found=ignore_if_group_not_found,
+        ignore_group_item=ignore_group_item,
     )
     return workspace
 
@@ -129,6 +133,7 @@ def simulate_get_workspace_with_repos(
         include_regex=namespace.include_regex,
         exclude_regex=namespace.exclude_regex,
         ignore_if_group_not_found=True,
+        ignore_group_item=True,
     )
 
 
@@ -141,13 +146,17 @@ def simulate_resolve_repos(
     include_regex: str = "",
     exclude_regex: str = "",
     ignore_if_group_not_found: bool = False,
+    ignore_group_item: bool = False,
 ) -> List[str]:
     """
     just to obatin 'groups_seen'
     as if we hit the exception, we may miss some groups
     """
     # Handle --all-cloned and --groups
-    manifest = workspace.get_manifest()
+    if ignore_group_item is True:
+        manifest = workspace.get_manifest_safe_mode(ManifestsTypeOfData.LOCAL)
+    else:
+        manifest = workspace.get_manifest()
 
     if groups:
         manifest.get_repos(groups=groups, ignore_if_group_not_found=True)
@@ -165,6 +174,7 @@ def resolve_repos(
     include_regex: str = "",
     exclude_regex: str = "",
     ignore_if_group_not_found: bool = False,
+    ignore_group_item: bool = False,
 ) -> List[Repo]:
     """
     Given a workspace with its config and its local manifest,
@@ -172,7 +182,10 @@ def resolve_repos(
     return the list of repositories to operate on.
     """
     # Handle --all-cloned and --groups
-    manifest = workspace.get_manifest()
+    if ignore_group_item is True:
+        manifest = workspace.get_manifest_safe_mode(ManifestsTypeOfData.LOCAL)
+    else:
+        manifest = workspace.get_manifest()
     repos = []
 
     if groups:
@@ -207,6 +220,76 @@ def resolve_repos(
 
     # At this point, nothing was requested on the command line, time to
     # use the workspace configuration:
+    return repos
+
+
+def resolve_repos_without_workspace(
+    manifest: Manifest,
+    gac: GroupsAndConstraints,
+) -> List[Repo]:
+    """
+    Use just Manifest to get Repos in regard of Groups,
+    include_regex, exclude_regex. Also respect 'singular_remote'
+    If no Groups are provided, consider all Repos there are.
+    Return Repos to operate on.
+    """
+    repos = []
+
+    if gac.groups:
+        # due to we are working with Manifest, there is
+        # no reason to enforce group to exist
+        repos = manifest.get_repos(groups=gac.groups, ignore_if_group_not_found=True)
+    else:
+        repos = manifest.get_repos(all_=True)
+
+    if gac.singular_remote:
+        filtered_repos = []
+        for repo in repos:
+            remotes = [
+                remote
+                for remote in repo.remotes
+                if gac.singular_remote.lower() == remote.name.lower()
+            ]
+            if remotes:
+                filtered_repos.append(repo)
+        repos = filtered_repos
+
+    if gac.include_regex:
+        repos = [repo for repo in repos if re.search(gac.include_regex, repo.dest)]
+
+    if gac.exclude_regex:
+        repos = [repo for repo in repos if not re.search(gac.exclude_regex, repo.dest)]
+
+    return repos
+
+
+def resolve_repos_apply_constraints(
+    repos: List[Repo],
+    gac: GroupsAndConstraints,
+) -> List[Repo]:
+    """
+    Use just constraints on Repos in GroupAndConstraints class
+    to filter Repos. Consider:
+    include_regex, exclude_regex. Also respect 'singular_remote'
+    """
+    if gac.singular_remote:
+        filtered_repos = []
+        for repo in repos:
+            remotes = [
+                remote
+                for remote in repo.remotes
+                if gac.singular_remote.lower() == remote.name.lower()
+            ]
+            if remotes:
+                filtered_repos.append(repo)
+        repos = filtered_repos
+
+    if gac.include_regex:
+        repos = [repo for repo in repos if re.search(gac.include_regex, repo.dest)]
+
+    if gac.exclude_regex:
+        repos = [repo for repo in repos if not re.search(gac.exclude_regex, repo.dest)]
+
     return repos
 
 

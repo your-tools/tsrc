@@ -76,7 +76,6 @@ class GitStatus:
         self.tag: Optional[str] = None
         self.branch: Optional[str] = None
         self.sha1: Optional[str] = None
-        self.upstreamed = False
 
     def update(self) -> None:
         # Try and gather as many information about the git repository as
@@ -90,7 +89,6 @@ class GitStatus:
         self.update_tag()
         self.update_remote_status()
         self.update_worktree_status()
-        self.update_upstreamed()
 
     def update_sha1(self) -> None:
         self.sha1 = get_sha1(self.working_path, short=True)
@@ -136,27 +134,6 @@ class GitStatus:
             if line.startswith("A "):
                 self.added += 1
                 self.dirty = True
-
-    def update_upstreamed(self) -> None:
-        use_branch = self.branch
-        # if there is tag with same name as branch, it gets refered by 'heads/<branch_name>'
-        if use_branch:
-            if use_branch.startswith("heads/") is True:
-                use_branch = use_branch[6:]
-        else:
-            self.upstreamed = False
-            # skip git check if upstreamed when there is no branch
-            return
-
-        rc, _ = run_git_captured(
-            self.working_path,
-            "config",
-            "--get",
-            f"branch.{use_branch}.remote",
-            check=False,
-        )
-        if rc == 0:
-            self.upstreamed = True
 
     def describe(self) -> List[ui.Token]:
         """Return a list of tokens suitable for ui.info."""

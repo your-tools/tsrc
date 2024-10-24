@@ -23,7 +23,7 @@ from tsrc.local_future_manifest import get_local_future_manifests_manifest_and_r
 from tsrc.local_manifest import LocalManifest
 from tsrc.manifest import Manifest, RepoNotFound
 from tsrc.manifest_common import ManifestGetRepos, ManifestGroupNotFound
-from tsrc.manifest_common_data import ManifestsTypeOfData, get_main_color
+from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_get_main_color
 from tsrc.pcs_repo import PCSRepo
 from tsrc.repo import Repo
 from tsrc.status_endpoint import Status
@@ -918,7 +918,11 @@ class WorkspaceReposSummary:
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
         if d_m_r_found is True and isinstance(d_m_repo, Repo):
-            message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "[", ui.green]
+            message += [
+                mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                "[",
+                ui.green,
+            ]
             desc, _ = d_m_repo.describe_to_tokens(
                 self.max_dm_desc, ManifestsTypeOfData.DEEP
             )
@@ -926,26 +930,26 @@ class WorkspaceReposSummary:
             if sm and dest == sm.dest:
                 if self.d_m_root_point is True:
                     message += [
-                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
                         "]=",
                         ui.reset,
                     ]
                 else:
                     message += [
-                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
                         "]",
                         ui.reset,
                     ]
             else:
                 if self.d_m_root_point is True:
                     message += [
-                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
                         "] ",
                         ui.reset,
                     ]
                 else:
                     message += [
-                        get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                        mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
                         "]",
                         ui.reset,
                     ]
@@ -993,7 +997,7 @@ class WorkspaceReposSummary:
     ) -> List[ui.Token]:
         """usefull for Future Manifest"""
         message: List[ui.Token] = []
-        message += [get_main_color(ManifestsTypeOfData.FUTURE)]
+        message += [mtod_get_main_color(ManifestsTypeOfData.FUTURE)]
         message += ["("]
         if apprise_repo:
             desc, desc_cmp = apprise_repo.describe_to_tokens(
@@ -1008,7 +1012,7 @@ class WorkspaceReposSummary:
             if self.lfm and self.max_fm_desc > 0:
                 message += [" ".ljust(self.max_fm_desc), "<<"]
         message += desc_tokens
-        message += [get_main_color(ManifestsTypeOfData.FUTURE)]
+        message += [mtod_get_main_color(ManifestsTypeOfData.FUTURE)]
         message += [")", ui.reset]
         return message
 
@@ -1022,7 +1026,7 @@ class WorkspaceReposSummary:
         align_before: int = 0,
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
-        message += [get_main_color(tod)]
+        message += [mtod_get_main_color(tod)]
         l_just = 0
 
         if tod == ManifestsTypeOfData.DEEP:
@@ -1193,23 +1197,31 @@ class WorkspaceReposSummary:
         self, leftover: Repo
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
-        message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "["]
-        message += [get_main_color(ManifestsTypeOfData.DEEP)]
+        message += [mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "["]
+        message += [mtod_get_main_color(ManifestsTypeOfData.DEEP)]
         desc, _ = leftover.describe_to_tokens(
             self.max_dm_desc, ManifestsTypeOfData.DEEP
         )
         message += desc
         if self.d_m_root_point is True:
-            message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "] ", ui.reset]
+            message += [
+                mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                "] ",
+                ui.reset,
+            ]
         else:
-            message += [get_main_color(ManifestsTypeOfData.DEEP_BLOCK), "]", ui.reset]
+            message += [
+                mtod_get_main_color(ManifestsTypeOfData.DEEP_BLOCK),
+                "]",
+                ui.reset,
+            ]
         return message
 
     def _describe_leftover_repo_dest_column(
         self, leftover: Repo, tod: ManifestsTypeOfData
     ) -> List[ui.Token]:
         message: List[ui.Token] = []
-        main_color = get_main_color(tod)
+        main_color = mtod_get_main_color(tod)
         if (self.workspace.root_path / leftover.dest).is_dir() is True:
             if leftover.dest in self.leftover_statuses:
                 status = self.leftover_statuses[leftover.dest]

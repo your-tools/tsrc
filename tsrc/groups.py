@@ -62,6 +62,7 @@ class GroupList(Generic[T]):
         self.groups: Dict[str, Group[T]] = {}
         self.all_elements = elements
         self._groups_seen: List[str] = []
+        self.missing_elements: List[Dict[str, T]] = []
 
     def get_groups_seen(self) -> List[str]:
         return self._groups_seen
@@ -74,17 +75,23 @@ class GroupList(Generic[T]):
         ignore_on_mtod: Optional[ManifestsTypeOfData] = None,
     ) -> None:
         can_add: bool = True
+        ignored_elements: List[T] = []
         for element in elements:
             if element not in self.all_elements:
                 if ignore_on_mtod:
                     can_add = False
-                    ui.warning(
-                        f"{get_mtod_str(ignore_on_mtod)}: Groups: cannot add '{element}' to '{name}'."  # noqa: E501
-                    )
+                    if ignore_on_mtod != ManifestsTypeOfData.DEEP_ON_UPDATE:
+                        ui.warning(
+                            f"{get_mtod_str(ignore_on_mtod)}: Groups: cannot add '{element}' to '{name}'."  # noqa: E501
+                        )
+                    # store missing element, also keep its asignment to the Group name
+                    self.missing_elements.append({name: element})
+                    ignored_elements.append(element)
                 else:
                     raise UnknownGroupElement(name, element)
-        if can_add is True:
-            self.groups[name] = Group(name, elements, includes=includes)
+        if can_add is False:
+            elements = list(set(elements).difference(ignored_elements))
+        self.groups[name] = Group(name, elements, includes=includes)
 
     def get_group(self, name: str) -> Optional[Group[T]]:
         return self.groups.get(name)

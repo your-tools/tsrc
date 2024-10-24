@@ -22,7 +22,7 @@ from tsrc.config_status import ConfigStatus
 
 # import tsrc.config_status_rc
 from tsrc.config_status_rc import ConfigStatusReturnCode
-from tsrc.manifest_common_data import ManifestsTypeOfData, get_main_color
+from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_get_main_color
 from tsrc.status_header_dm import StatusHeaderDisplayMode
 from tsrc.workspace import Workspace
 
@@ -129,7 +129,10 @@ class StatusHeader:
 
     def _header_manifest_url(self, url: str) -> None:
         ui.info_1(
-            "Manifest's URL:", get_main_color(ManifestsTypeOfData.DEEP), url, ui.reset
+            "Manifest's URL:",
+            mtod_get_main_color(ManifestsTypeOfData.DEEP),
+            url,
+            ui.reset,
         )
 
     def _header_manifest_branch(

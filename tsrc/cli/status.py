@@ -2,6 +2,7 @@
 
 import argparse
 from copy import deepcopy
+from typing import Union
 
 from tsrc.cli import (
     add_num_jobs_arg,
@@ -15,7 +16,7 @@ from tsrc.executor import process_items
 from tsrc.groups import GroupNotFound
 from tsrc.groups_to_find import GroupsToFind
 from tsrc.pcs_repo import get_deep_manifest_from_local_manifest_pcsrepo
-from tsrc.status_endpoint import StatusCollector
+from tsrc.status_endpoint import StatusCollector, StatusCollectorLocalOnly
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
 from tsrc.utils import erase_last_line
 
@@ -25,24 +26,18 @@ from tsrc.workspace_repos_summary import WorkspaceReposSummary
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser = subparser.add_parser(
-        "status", description="Report Status of repositories of current Workspace."
+        "status",
+        description="Report Status of repositories of current Workspace. Also report Deep Manifest, Future Manifest and Manifest Marker if presnet.",  # noqa: E501
     )
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
     add_num_jobs_arg(parser)
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="more verbose if available",
-        dest="more_verbose",
-    )
     parser.add_argument(
         "--no-mm",
         action="store_false",
         help="do not display Manifest marker",
         dest="use_manifest_marker",
     )
-    # TODO: 'no_deep_manifest' now uses wrong logic
     parser.add_argument(
         "--no-dm",
         action="store_false",
@@ -56,6 +51,12 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         dest="use_future_manifest",
     )
     parser.add_argument(
+        "--local-git-only",
+        action="store_true",
+        help="do not process anything that will lead to remote connection",
+        dest="local_git_only",
+    )
+    parser.add_argument(
         "--same-fm",
         action="store_true",
         help="use buffered Future Manifest to speed-up execution",
@@ -67,6 +68,18 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="do not check for leftover's GIT descriptions",
         dest="strict_on_git_desc",
     )
+    parser.add_argument(
+        "--ignore-missing-groups",
+        action="store_true",
+        dest="ignore_if_group_not_found",
+        help="ignore configured group(s) if it is not found in groups defined in manifest. This may be particulary useful when switching Manifest version back when some Groups defined later, was not there yet. In which case we can avoid unecessary Error caused by missing group",  # noqa: E501
+    )
+    parser.add_argument(
+        "--ignore-missing-group-items",
+        action="store_true",
+        dest="ignore_group_item",
+        help="ignore group element if it is not found among Manifest's Repos. WARNING: If you end up in need of this option, you have to understand that you end up with useles Manifest. Warnings will be printed for each Group element that is missing, so it may be easier to fix that. Using this option is NOT RECOMMENDED for normal use",  # noqa: E501
+    )
     parser.set_defaults(run=run)
 
 
@@ -76,13 +89,21 @@ def run(args: argparse.Namespace) -> None:
     gtf.found_these(groups_seen)
 
     try:
-        workspace = get_workspace_with_repos(args)
+        workspace = get_workspace_with_repos(
+            args,
+            ignore_if_group_not_found=args.ignore_if_group_not_found,
+            ignore_group_item=args.ignore_group_item,
+        )
     except GroupNotFound:
         # try to obtain workspace ignoring group error
         # if group is found in Deep Manifest or Future Manifest,
         # do not report GroupNotFound.
         # if not, than raise exception at the very end
-        workspace = get_workspace_with_repos(args, ignore_if_group_not_found=True)
+        workspace = get_workspace_with_repos(
+            args,
+            ignore_if_group_not_found=True,
+            ignore_group_item=args.ignore_group_item,
+        )
 
     dm = None
     if args.use_deep_manifest is True:
@@ -105,7 +126,15 @@ def run(args: argparse.Namespace) -> None:
         [StatusHeaderDisplayMode.BRANCH],
     )
     status_header.display()
-    status_collector = StatusCollector(workspace)
+    status_collector: Union[StatusCollector, StatusCollectorLocalOnly]
+    if args.local_git_only is True:
+        status_collector = StatusCollectorLocalOnly(
+            workspace, ignore_group_item=args.ignore_group_item
+        )
+    else:
+        status_collector = StatusCollector(
+            workspace, ignore_group_item=args.ignore_group_item
+        )
 
     repos = deepcopy(workspace.repos)
 
@@ -139,4 +168,4 @@ def run(args: argparse.Namespace) -> None:
 
     # check if we have found all Groups (if any provided)
     # and if not, throw exception ManifestGroupNotFound
-    wrs.must_match_all_groups()
+    wrs.must_match_all_groups(ignore_if_group_not_found=args.ignore_if_group_not_found)

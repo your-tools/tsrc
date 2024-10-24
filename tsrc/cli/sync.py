@@ -16,7 +16,10 @@ from tsrc.cli import (
 
 
 def configure_parser(subparser: argparse._SubParsersAction) -> None:
-    parser = subparser.add_parser("sync")
+    parser = subparser.add_parser(
+        "sync",
+        description="Synchronize Workspace by current configuration of Manifest (see manifest_url and manifest_branch in config)",  # noqa: E501
+    )
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
     parser.set_defaults(update_manifest=True, force=False, correct_branch=True)
@@ -39,7 +42,13 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         "--ignore-missing-groups",
         action="store_true",
         dest="ignore_if_group_not_found",
-        help="ignore configured group(s) if it is not found in groups defined in manifest",
+        help="ignore configured group(s) if it is not found in groups defined in manifest. This may be particulary useful when switching Manifest version back when some Groups defined later, was not there yet. In which case we can avoid unecessary Error caused by missing group",  # noqa: E501
+    )
+    parser.add_argument(
+        "--ignore-missing-group-items",
+        action="store_true",
+        dest="ignore_group_item",
+        help="ignore group element if it is not found among Manifest's Repos. WARNING: If you end up in need of this option, you have to understand that you end up with useles Manifest. Warnings will be printed for each Group element that is missing, so it may be easier to fix that. Using this option is NOT RECOMMENDED for normal use",  # noqa: E501
     )
     parser.add_argument(
         "--no-correct-branch",
@@ -84,13 +93,17 @@ def run(args: argparse.Namespace) -> None:
                 found_groups = list(
                     set(groups).intersection(local_manifest.group_list.groups)
                 )
-                workspace.update_config_repo_groups(groups=found_groups)
+                workspace.update_config_repo_groups(
+                    groups=found_groups, ignore_group_item=args.ignore_group_item
+                )
                 report_update_repo_groups = True
 
         if update_config_repo_groups is True:
             if args.ignore_if_group_not_found is True:
                 ignore_if_group_not_found = True
-            workspace.update_config_repo_groups(groups=found_groups)
+            workspace.update_config_repo_groups(
+                groups=found_groups, ignore_group_item=args.ignore_group_item
+            )
             report_update_repo_groups = True
 
         if report_update_repo_groups is True:
@@ -108,6 +121,7 @@ def run(args: argparse.Namespace) -> None:
         include_regex=include_regex,
         exclude_regex=exclude_regex,
         ignore_if_group_not_found=ignore_if_group_not_found,
+        ignore_group_item=args.ignore_group_item,
     )
 
     workspace.clone_missing(num_jobs=num_jobs)
@@ -118,5 +132,5 @@ def run(args: argparse.Namespace) -> None:
         correct_branch=correct_branch,
         num_jobs=num_jobs,
     )
-    workspace.perform_filesystem_operations()
+    workspace.perform_filesystem_operations(ignore_group_item=args.ignore_group_item)
     ui.info_1("Workspace synchronized")

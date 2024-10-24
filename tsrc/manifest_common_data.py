@@ -11,6 +11,7 @@ class ManifestsTypeOfData(Enum):
     DEEP_ON_UPDATE = 3  # do not put warning about missing element
     DEEP_BLOCK = 4
     FUTURE = 5
+    SAVED = 6  # manifest created by '--save-to'
 
 
 def get_mtod_str(tod: ManifestsTypeOfData) -> str:
@@ -24,30 +25,38 @@ def get_mtod_str(tod: ManifestsTypeOfData) -> str:
         return "Deep Manifest's block"
     if tod == ManifestsTypeOfData.FUTURE:
         return "Future Manifest"
+    if tod == ManifestsTypeOfData.SAVED:
+        return "Saved Manifest"
 
 
 def mtod_can_ignore_remotes() -> List[ManifestsTypeOfData]:
     rl: List[ManifestsTypeOfData] = [
+        # only for LOCAL Manifest the missing remote
+        # cannot be ignored.
         ManifestsTypeOfData.DEEP,
         ManifestsTypeOfData.DEEP_ON_UPDATE,
         ManifestsTypeOfData.DEEP_BLOCK,
         ManifestsTypeOfData.FUTURE,
+        ManifestsTypeOfData.SAVED,
     ]
     return rl
 
 
-def get_main_color(tod: ManifestsTypeOfData) -> ui.Token:
-    # TODO: rename with prefix 'mtod'
+def mtod_get_main_color(tod: ManifestsTypeOfData) -> ui.Token:
     # for Local Manifest (using for Manifest's Marker color)
     if tod == ManifestsTypeOfData.LOCAL:
         return ui.reset
+
     # for Deep Manifest (for: 'dest' color, MM color)
     if tod == ManifestsTypeOfData.DEEP:
         return ui.purple
+
     # for Deep Manifest block (for: square brackets color)
     if tod == ManifestsTypeOfData.DEEP_BLOCK:
         return ui.brown
+
     # for Future Manifest (for 'dest' color, MM color)
     if tod == ManifestsTypeOfData.FUTURE:
         return ui.cyan
-    return ui.reset
+
+    return ui.reset  # we should never reach it

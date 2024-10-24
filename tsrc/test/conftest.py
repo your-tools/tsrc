@@ -9,6 +9,7 @@ from cli_ui.tests import MessageRecorder
 
 from tsrc.test.helpers.cli import tsrc_cli  # noqa: F401
 from tsrc.test.helpers.git_server import git_server  # noqa: F401
+from tsrc.test.helpers.message_recorder_ext import MessageRecorderExt
 from tsrc.workspace import Workspace
 
 
@@ -41,3 +42,11 @@ def message_recorder() -> Iterator[MessageRecorder]:
     res.start()
     yield res
     res.stop()
+
+
+@pytest.fixture
+def message_recorder_ext(request: Any) -> Iterator[MessageRecorderExt]:
+    recorder = MessageRecorderExt()
+    recorder.start()
+    yield recorder
+    recorder.stop()
