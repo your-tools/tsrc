@@ -15,6 +15,52 @@ from typing import List, Tuple, Union
 from urllib.parse import quote, urlparse
 
 from tsrc.git import run_git_captured
+from tsrc.repo import Remote
+
+
+class GitRemote:
+    def __init__(self, working_path: Path, cur_branch: Union[str, None]) -> None:
+        self.working_path = working_path
+        self.branch = cur_branch
+        self.remotes: List[Remote] = []
+        self.upstreamed = False  # only refers to current branch
+
+    def update(self) -> None:
+        self.update_remotes()
+        if self.remotes and self.branch:
+            self.update_upstreamed()
+
+    def update_remotes(self) -> None:
+        # obtain information about configured 'remotes'
+        # in 'GitStatus' obtaining such information
+        # is not useful as remotes are stored in Manifest
+        _, out = run_git_captured(self.working_path, "remote")
+        for line in out.splitlines():
+            _, url = run_git_captured(self.working_path, "remote", "get-url", line)
+            if line and url:
+                tmp_r = Remote(name=line, url=url)
+                self.remotes.append(tmp_r)
+
+    def update_upstreamed(self) -> None:
+        use_branch = self.branch
+        # if there is tag with same name as branch, it gets refered by 'heads/<branch_name>'
+        if use_branch:
+            if use_branch.startswith("heads/") is True:
+                use_branch = use_branch[6:]
+        else:
+            self.upstreamed = False
+            # skip git check if upstreamed when there is no branch
+            return
+
+        rc, _ = run_git_captured(
+            self.working_path,
+            "config",
+            "--get",
+            f"branch.{use_branch}.remote",
+            check=False,
+        )
+        if rc == 0:
+            self.upstreamed = True
 
 
 def remote_urls_are_same(url_1: str, url_2: str) -> bool:
@@ -77,6 +123,12 @@ def remote_branch_exist(url: str, branch: str) -> int:
         check=False,
     )
     return rc
+
+
+def get_git_remotes(working_path: Path, cur_branch: str) -> GitRemote:
+    remotes = GitRemote(working_path, cur_branch)
+    remotes.update()
+    return remotes
 
 
 def get_l_and_r_sha1_of_branch(

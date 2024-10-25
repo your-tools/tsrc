@@ -10,7 +10,16 @@ import cli_ui as ui
 import colored_traceback
 
 from tsrc import __version__
-from tsrc.cli import apply_manifest, foreach, init, log, manifest, status, sync
+from tsrc.cli import (
+    apply_manifest,
+    dump_manifest,
+    foreach,
+    init,
+    log,
+    manifest,
+    status,
+    sync,
+)
 from tsrc.errors import Error
 
 ArgsList = Optional[Sequence[str]]
@@ -85,6 +94,7 @@ def main_impl(args: ArgsList = None) -> None:
 
     for module in (
         apply_manifest,
+        dump_manifest,
         foreach,
         init,
         log,

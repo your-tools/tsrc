@@ -19,7 +19,7 @@ def ad_hoc_deep_manifest_manifest_branch(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "manifest":
+                    if "dest" in x and x["dest"] == "manifest":
                         x.insert(2, "branch", branch)
 
     with open(manifest_path, "w") as file:
@@ -38,7 +38,7 @@ def ad_hoc_deep_manifest_manifest_url(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "manifest":
+                    if "dest" in x and x["dest"] == "manifest":
                         x["url"] = url
 
     with open(manifest_path, "w") as file:

@@ -724,8 +724,7 @@ def ad_hoc_update_dm_branch(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    # if x["dest"] == "repo_1":
-                    if x["dest"] == "manifest":
+                    if "dest" in x and x["dest"] == "manifest":
                         x["branch"] = "br"
 
     # write the file down

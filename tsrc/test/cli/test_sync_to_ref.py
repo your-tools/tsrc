@@ -387,11 +387,12 @@ def ad_hoc_update_dm_repo_branch_and_sha1(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "main-proj-backend":
-                        x["branch"] = "dev"
-                        x["sha1"] = devs_sha1
-                    if x["dest"] == "manifest":
-                        x["branch"] = "cmp-1"
+                    if "dest" in x:
+                        if x["dest"] == "main-proj-backend":
+                            x["branch"] = "dev"
+                            x["sha1"] = devs_sha1
+                        if x["dest"] == "manifest":
+                            x["branch"] = "cmp-1"
     # write the file down
     with open(manifest_path, "w") as file:
         yaml.dump(parsed, file)
@@ -411,11 +412,12 @@ def ad_hoc_update_dm_repo_branch_and_tag(
         if isinstance(value, List):
             for x in value:
                 if isinstance(x, ruamel.yaml.comments.CommentedMap):
-                    if x["dest"] == "main-proj-backend":
-                        x["branch"] = "dev"
-                        x["tag"] = this_tag
-                    if x["dest"] == "manifest":
-                        x["branch"] = "cmp-1"
+                    if "dest" in x:
+                        if x["dest"] == "main-proj-backend":
+                            x["branch"] = "dev"
+                            x["tag"] = this_tag
+                        if x["dest"] == "manifest":
+                            x["branch"] = "cmp-1"
     # write the file down
     with open(manifest_path, "w") as file:
         yaml.dump(parsed, file)

@@ -388,7 +388,7 @@ def test_sync_on_groups_intersection__case_3_b(
     #   but with '--ignore-missing-groups' thus it will be ignored
     #   from provided list, and config will be updated only with
     #   proper Groups
-    #   (skiping 'group_5' as it was not entered in '--groups')
+    #   (skipping 'group_5' as it was not entered in '--groups')
     tsrc_cli.run(
         "sync", "--ignore-missing-groups", "--groups", "group_1", "group_2", "group_3"
     )
