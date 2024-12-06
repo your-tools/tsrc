@@ -24,7 +24,7 @@ class UpdateSource:
 
     def get_update_source_and_path(self) -> DumpManifestOperationDetails:
 
-        self._possible_mistmatch_on_dump_path()
+        self._possible_mismatch_on_dump_path()
 
         self._allow_only_1_update_on_a_time()
 
@@ -47,7 +47,7 @@ class UpdateSource:
 
         return self.dmod
 
-    def _possible_mistmatch_on_dump_path(self) -> None:
+    def _possible_mismatch_on_dump_path(self) -> None:
         # if we want to update Workspace Manifest with data from RAW dump
         if (
             self.args.raw_dump_path

@@ -7,7 +7,9 @@ from typing import List, Optional, Tuple
 
 import cli_ui as ui
 
+from tsrc.git import GitBareStatus
 from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_get_main_color
+from tsrc.utils import len_of_cli_ui
 
 
 @unique
@@ -16,7 +18,8 @@ class DescribeToTokens(Enum):
     BRANCH = 1
     SHA1 = 2
     TAG = 3
-    MISSING_REMOTES = 4
+    POSITION = 4  # ahead or behind HEAD
+    MISSING_REMOTES = 5
 
 
 @dataclass(frozen=True)
@@ -45,16 +48,26 @@ class Repo:
     # see 'test/cli/test_sync_to_ref.py' for even more details
     orig_branch: Optional[str] = None
     sha1: Optional[str] = None
+    # sha1_full: Optional[str] = None
     tag: Optional[str] = None
     shallow: bool = False
     ignore_submodules: bool = False
+    is_bare: bool = False
     # only used by RepoGrabber
     _grabbed_from_path: Optional[Path] = None
+    # only for BareCloner class
+    _bare_clone_path: Optional[Path] = None
+    _bare_clone_mtod: Optional[ManifestsTypeOfData] = None
+    _bare_clone_orig_dest: Optional[str] = None  # from what Repo.dest we have come
+    _bare_clone_is_ok: bool = True  # for relaying info about failed bare clone
 
     def __post_init__(self) -> None:
         if not self.branch and self.keep_branch is False:
             object.__setattr__(self, "branch", "master")
             object.__setattr__(self, "is_default_branch", True)
+
+    def _bare_clone_is_fail(self) -> None:
+        object.__setattr__(self, "_bare_clone_is_ok", False)
 
     def rename_dest(self, new_dest: str) -> None:
         object.__setattr__(self, "dest", new_dest)
@@ -64,20 +77,22 @@ class Repo:
         assert self.remotes
         return self.remotes[0].url
 
-    """copy from 'git.py'"""
-
     def describe_to_tokens(
-        self, ljust: int = 0, mtod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL
+        self,
+        ljust: int = 0,
+        mtod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL,
+        bare_dm_status: Optional[GitBareStatus] = None,
     ) -> Tuple[List[ui.Token], List[ui.Token]]:
         """returns:
-        1st: is properly left-align: for print
-        2nd: is NOT align: for 1:1 comparsion"""
+        1st list: is properly left-align for print
+        2nd list: is NOT align. it is for 1:1 comparsion"""
 
-        # 1st caluclate total length of all elements
         sha1: str = ""
         if self.sha1:
             sha1 = self.sha1[:7]  # artificially shorten
 
+        # keep all elements in this list and also
+        # keep order of checking the elements
         present_dtt: List[DescribeToTokens] = []
         if self.branch and (
             self.is_default_branch is False or (not self.sha1 and not self.tag)
@@ -87,6 +102,13 @@ class Repo:
             present_dtt.append(DescribeToTokens.SHA1)
         if self.tag:
             present_dtt.append(DescribeToTokens.TAG)
+
+        if self.sha1:
+            if DescribeToTokens.SHA1 not in present_dtt:
+                # obtain 'describe_position' for this flag
+                present_dtt.append(DescribeToTokens.POSITION)
+
+        # keep 'missing remotes' at the end
         if not self.remotes:
             if mtod == ManifestsTypeOfData.DEEP or mtod == ManifestsTypeOfData.FUTURE:
                 present_dtt.append(DescribeToTokens.MISSING_REMOTES)
@@ -94,15 +116,19 @@ class Repo:
             present_dtt.append(DescribeToTokens.NONE)
 
         # return res, able
-        return self._describe_to_token_output(present_dtt, ljust, mtod, sha1)
+        return self._describe_to_token_output(
+            present_dtt, ljust, mtod, sha1, bare_dm_status
+        )
 
-    def _describe_to_token_output(
+    def _describe_to_token_output(  # noqa: C901
         self,
         present_dtt: List[DescribeToTokens],
         ljust: int,
         mtod: ManifestsTypeOfData,
         sha1: str,
+        bare_dm_status: Optional[GitBareStatus] = None,
     ) -> Tuple[ui.Token, ui.Token]:
+        # 1st figure out colors
         cb = ui.green  # color (for) branch
         cs = ui.red  # color (for) SHA1
         ct = ui.brown  # color (for) tag
@@ -111,7 +137,7 @@ class Repo:
         res: List[ui.Token] = []
         able: List[ui.Token] = []
 
-        # 2nd detect last element for 'ljust' to apply'
+        # 2nd detect last element for 'ljust' to apply
         last_element: DescribeToTokens = present_dtt[-1]
 
         # 3rd fill the 'res' and 'able'
@@ -131,6 +157,27 @@ class Repo:
                 res += [ct, "on", self.tag.ljust(this_ljust - 3), ui.reset]
                 able += [ui.brown, "on", self.tag, ui.reset]
                 ljust -= len(self.tag) + 1 + 2 + 1  # + " on "
+            elif e == DescribeToTokens.POSITION:
+                if (
+                    mtod == ManifestsTypeOfData.DEEP
+                    or mtod == ManifestsTypeOfData.FUTURE  # noqa: W503
+                ):
+                    if bare_dm_status:
+                        tmp_res, tmp_able, ljust = bare_dm_status.describe_position(
+                            ljust, self.sha1
+                        )
+                        res += tmp_res
+                        able += tmp_able
+                        # TODO: any correction for 'ljust'?
+                    else:
+                        if self.sha1:
+                            res += [ui.red, f"?? {sha1}".ljust(this_ljust), ui.reset]
+                            able += [ui.red, f"?? {self.sha1}", ui.reset]
+                            ljust -= 3 + 7 + 1
+                        else:
+                            res += [ui.red, "?? commit".ljust(this_ljust), ui.reset]
+                            able += [ui.red, "?? commit", ui.reset]
+                            ljust -= 9 + 1
             elif e == DescribeToTokens.MISSING_REMOTES:
                 res += [ui.red, "(missing remote)".ljust(this_ljust), ui.reset]
                 able += [ui.red, "(missing remote)", ui.reset]
@@ -141,21 +188,9 @@ class Repo:
         return res, able
 
     def len_of_describe(
-        self, mtod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL
+        self,
+        mtod: ManifestsTypeOfData = ManifestsTypeOfData.LOCAL,
+        bare_dm_status: Optional[GitBareStatus] = None,
     ) -> int:
-        len_: int = 0
-        if self.branch and (
-            self.is_default_branch is False or (not self.sha1 and not self.tag)
-        ):
-            len_ += len(self.branch) + 1
-        elif self.sha1:
-            sha1 = self.sha1[:7]  # artificially shorten
-            len_ += len(sha1) + 1
-        if self.tag:
-            len_ += len(self.tag) + 4  # " on "
-        if not self.remotes:
-            if mtod == ManifestsTypeOfData.DEEP or mtod == ManifestsTypeOfData.FUTURE:
-                len_ += 16 + 1
-        if len_ > 0:
-            len_ -= 1
-        return len_
+        res, _ = self.describe_to_tokens(0, mtod, bare_dm_status)  # 0 cancel alignment
+        return len_of_cli_ui(res)

@@ -157,7 +157,8 @@ def run(args: argparse.Namespace) -> None:
         wrs.ready_data(
             statuses,
         )
-        wrs.separate_leftover_statuses(workspace.repos)
+        wrs.separate_statuses(workspace.repos)
+        wrs.calculate_fields_len()
 
         # only calculate summary when there are some Workspace repos
         if workspace.repos:

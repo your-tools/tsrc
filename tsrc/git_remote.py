@@ -23,7 +23,7 @@ class GitRemote:
         self.working_path = working_path
         self.branch = cur_branch
         self.remotes: List[Remote] = []
-        self.upstreamed = False  # only refers to current branch
+        self.upstreamed = False  # only related to current branch
 
     def update(self) -> None:
         self.update_remotes()
@@ -48,8 +48,7 @@ class GitRemote:
             if use_branch.startswith("heads/") is True:
                 use_branch = use_branch[6:]
         else:
-            self.upstreamed = False
-            # skip git check if upstreamed when there is no branch
+            # skip check if upstreamed when there is no branch
             return
 
         rc, _ = run_git_captured(

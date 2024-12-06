@@ -10,7 +10,7 @@ RAW dump (mode of operation):
     So we do not have '.tscr/config' or any other '.tsrc' data
     (not even Groups if they are not present in Manifest when we updating it)
 
-Siplest way to start a new 'tsrc' project by creating Manifest is to prepare
+Simplest way to start a new 'tsrc' project by creating Manifest is to prepare
 every repository into some dedicated directory and from there call:
 
 'tsrc dump-manifest --raw .'
@@ -26,7 +26,7 @@ Which will create 'tsrc' Workspace right there.
 import argparse
 import io
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, cast
 
 import cli_ui as ui
 from ruamel.yaml import YAML
@@ -50,7 +50,7 @@ from tsrc.errors import MissingRepoError
 from tsrc.executor import process_items
 from tsrc.file_system import make_relative
 from tsrc.repo import Repo
-from tsrc.status_endpoint import CollectedStatuses, StatusCollector
+from tsrc.status_endpoint import CollectedStatuses, Status, StatusCollector
 from tsrc.utils import erase_last_line
 
 
@@ -85,6 +85,28 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         action="store_true",
         help="Disallow to delete any Repo record from existing Manifest. This have only meaning when on UPDATE operation mode",  # noqa: E501
         dest="no_repo_delete",
+    )
+    parser.add_argument(
+        "--sha1-only",
+        action="store_true",
+        help="Use SHA1 as only value (with branch if available) for every considered Repo. This is particulary useful when we want to point to exact point of Repos states",  # noqa: E501
+        dest="sha1_only",
+    )
+    parser.add_argument(
+        "-X",
+        "--skip-manifest",
+        help="Skip manifest repository if found. If not, it is ignored. For this filter to work, the Workspace needs to be present. And it is only applied after the processing of the Repositories",  # noqa: E501
+        dest="skip_manifest",
+        default=False,
+        action="store_true",
+    )
+    parser.add_argument(
+        "-M",
+        "--only-manifest",
+        help="Only work with manifest repository if found. If not, the Error is thrown that list of Repositories ends up empty. For this filter to work, the Workspace needs to be present. And it is only applied after the processing of the Repositories",  # noqa: E501
+        dest="only_manifest",
+        default=False,
+        action="store_true",
     )
     parser.add_argument(
         "-p",
@@ -150,8 +172,6 @@ class DumpManifestsCMDLogic:
 
         # output data
         self.yy: Union[Dict, List, None] = None
-        self.load_path: Union[Path, None] = None  # may be useless
-        self.save_path: Union[Path, None] = None  # may be useless
         self.is_updated: Union[bool, None] = None
 
         # everything in regard of args
@@ -177,7 +197,7 @@ class DumpManifestsCMDLogic:
                 self.mris_h = MRISHelpers(repos=repos)
             elif self.a.dmod.source_mode == SourceModeEnum.WORKSPACE_DUMP:
                 statuses, w_repos = self._get_data_get_statuses()
-                for status in statuses:
+                for _, status in statuses.items():
                     if not (
                         isinstance(status, MissingRepoError)
                         or isinstance(status, Exception)  # noqa: W503
@@ -203,6 +223,27 @@ class DumpManifestsCMDLogic:
             if self.a.dmod.source_path:
                 mgr = ManifestRawGrabber(self.a, self.a.dmod.source_path)
                 repos, self.a = mgr.grab(self.num_jobs)
+                if (
+                    self.a.args.skip_manifest is True
+                    or self.a.args.only_manifest is True  # noqa: W503
+                ):
+                    if self.a.dmod.workspace:
+                        repos, _ = self.m_du.filter_repos_bo_manifest(
+                            self.a.dmod.workspace,
+                            self.a.args.skip_manifest,
+                            self.a.args.only_manifest,
+                            repos,
+                        )
+                    else:
+                        if self.a.args.skip_manifest is True:
+                            ui.warning(
+                                "Cannot skip Deep Manifest if there is no Workspace"
+                            )
+                        elif self.a.args.only_manifest is True:
+                            ui.warning(
+                                "Cannot look for Deep Manifest if there is no Workspace"
+                            )
+                            repos = []
         except Exception as e:
             raise (e)
 
@@ -212,12 +253,24 @@ class DumpManifestsCMDLogic:
         if self.a.dmod.workspace:
             status_collector = StatusCollector(self.a.dmod.workspace)
             w_repos = self.a.dmod.workspace.repos
+            if self.a.args.skip_manifest is True or self.a.args.only_manifest is True:
+                w_repos, _ = self.m_du.filter_repos_bo_manifest(
+                    self.a.dmod.workspace,
+                    self.a.args.skip_manifest,
+                    self.a.args.only_manifest,
+                    w_repos,
+                )
+
             if not w_repos:
                 raise Exception("Workspace is empty, therefore no valid data")
             ui.info_1(f"Collecting statuses of {len(w_repos)} repo(s)")
             process_items(w_repos, status_collector, num_jobs=self.num_jobs)
             erase_last_line()
-            return status_collector.statuses, w_repos
+            # TODO: we may want to get rid of BareStatus, but there should not be one in any anyway
+            return (
+                cast(Dict[str, Union[Status, Exception]], status_collector.statuses),
+                w_repos,
+            )
         return {}, []
 
     def _get_yaml_data(self) -> None:
@@ -240,17 +293,21 @@ class DumpManifestsCMDLogic:
                 self.yy, self.is_updated = self.m_du.on_update(
                     y,
                     self.mris_h.mris,
+                    self.a.dmod.workspace,
+                    self.a.dmod.manifest_data_options,
                     self.a.mdo,
                     self.a.gac,
                 )
 
             if not self.yy:
                 raise Exception(
-                    f"Not able to load YAML data from file: '{self.load_path}'"
+                    f"Not able to load YAML data from file: '{self.a.dmod.final_output_path_list.update_on_path}'"  # noqa: E501
                 )
 
         else:  # decided: create Manifest YAML data (not loading YAML data)
-            self.yy = self.m_du.do_create(self.mris_h.mris)
+            self.yy = self.m_du.do_create(
+                self.mris_h.mris, self.a.dmod.manifest_data_options
+            )
             if self.yy:
                 self.is_updated = True
 

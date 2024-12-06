@@ -53,6 +53,118 @@ def assert_working_path(path: Path) -> None:
         raise NoSuchWorkingPath(path)
 
 
+class GitBareStatus:
+    """
+    Represent a status of bare git repo
+
+    WARNING: only limited functionality is implemented
+    as only very few information is needed for related Use-Case
+    """
+
+    def __init__(self, working_path: Path) -> None:
+        self.working_path = working_path
+        self.branch: Optional[str] = None
+        self.ahead = 0
+        self.behind = 0
+        self.is_upstreamed: bool = False
+        self.is_ok: bool = True
+
+    def update(self) -> None:
+        self.update_branch()
+        if not self.branch:
+            return
+        self.update_upstream()
+        self.update_remote_status()
+
+    def update_branch(self) -> None:
+        try:
+            self.branch = get_current_branch(self.working_path)
+        except GitError:
+            pass
+
+    def update_upstream(self) -> None:
+        if self.branch:
+            rc, _ = run_git_captured(
+                self.working_path,
+                "branch",
+                self.branch,
+                "--set-upstream-to",
+                f"origin/{self.branch}",
+                check=False,
+            )
+            if rc == 0:
+                self.is_upstreamed = True
+
+    def update_remote_status(self) -> None:
+        rc, ahead_rev = run_git_captured(
+            self.working_path, "rev-list", "@{upstream}..HEAD", check=False
+        )
+        if rc == 0:
+            self.ahead = len(ahead_rev.splitlines())
+
+        rc, behind_rev = run_git_captured(
+            self.working_path, "rev-list", "HEAD..@{upstream}", check=False
+        )
+        if rc == 0:
+            self.behind = len(behind_rev.splitlines())
+
+    @staticmethod
+    def commit_string(number: int) -> str:
+        """Describe the number of commit with correct pluralization."""
+
+        if number == 1:
+            return "commit"
+        else:
+            return "commits"
+
+    def describe_position(
+        self,
+        ljust: int = 0,
+        m_sha1_full: Optional[str] = None,
+    ) -> Tuple[List[ui.Token], List[ui.Token], int]:
+        """Return a status looking like `↑2↓1` if the branch
+        is 2 commits ahead and one commit behind its upstream,
+        as a list of tokens suitable for `ui.info()`.
+
+        The difference here is that we have to report issue
+        if one is found, as some info about SHA1 commit
+        should be put out there in any case
+        """
+        m_sha1: Optional[str] = None
+        if m_sha1_full:
+            m_sha1 = m_sha1_full[:7]
+
+        res: List[ui.Token] = []
+        able: List[ui.Token] = []
+        if self.is_upstreamed is True and self.is_ok is True:
+            if self.ahead != 0:
+                n_commits = GitStatus.commit_string(self.ahead)
+                ahead_desc = f"{UP}{self.ahead} {n_commits}"
+                res += [ui.blue, ahead_desc.ljust(ljust), ui.reset]
+                ljust -= len(ahead_desc)
+                able += [ui.blue, f"~~ {m_sha1}", ui.reset]
+            if self.behind != 0:
+                n_commits = GitStatus.commit_string(self.behind)
+                behind_desc = f"{DOWN}{self.behind} {n_commits}"
+                res += [ui.blue, behind_desc.ljust(ljust), ui.reset]
+                ljust -= len(behind_desc)
+                able += [ui.blue, f"~~ {m_sha1}", ui.reset]
+            if self.ahead == 0 and self.behind == 0:
+                same_desc = "~~ commit"
+                res += [ui.blue, same_desc.ljust(ljust), ui.reset]
+                ljust -= len(same_desc)
+                able += [ui.blue, f"~~ {m_sha1}", ui.reset]
+        else:
+            if m_sha1:
+                wrong_desc = f"!! {m_sha1}"
+            else:
+                wrong_desc = "!! commit"
+            res += [ui.red, wrong_desc.ljust(ljust), ui.reset]
+            able += [ui.red, wrong_desc, ui.reset]
+            ljust -= len(wrong_desc)
+        return res, able, ljust
+
+
 class GitStatus:
     """Represent a status of a git repo.
 
@@ -76,6 +188,7 @@ class GitStatus:
         self.tag: Optional[str] = None
         self.branch: Optional[str] = None
         self.sha1: Optional[str] = None
+        self.sha1_full: Optional[str] = None
 
     def update(self) -> None:
         # Try and gather as many information about the git repository as
@@ -91,7 +204,8 @@ class GitStatus:
         self.update_worktree_status()
 
     def update_sha1(self) -> None:
-        self.sha1 = get_sha1(self.working_path, short=True)
+        self.sha1_full = get_sha1(self.working_path, short=False)
+        self.sha1 = self.sha1_full[:7]
 
     def update_branch(self) -> None:
         try:
@@ -334,6 +448,12 @@ def get_git_status(working_path: Path) -> GitStatus:
     status = GitStatus(working_path)
     status.update()
     return status
+
+
+def get_git_bare_status(working_path: Path) -> GitBareStatus:
+    bare_status = GitBareStatus(working_path)
+    bare_status.update()
+    return bare_status
 
 
 def is_git_repository(working_path: Path) -> bool:

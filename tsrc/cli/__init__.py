@@ -263,10 +263,26 @@ def resolve_repos_without_workspace(
     return repos
 
 
+def is_match_repo_dest_on_inc_excl(
+    gac: GroupsAndConstraints,
+    i_r_d: str,
+) -> bool:
+    if (
+        (gac.include_regex and re.search(gac.include_regex, i_r_d))  # noqa: W503
+        or not gac.include_regex  # noqa: W503
+    ) and (
+        (gac.exclude_regex and not re.search(gac.exclude_regex, i_r_d))  # noqa: W503
+        or not gac.exclude_regex  # noqa: W503
+    ):
+        return True
+    return False
+
+
 def resolve_repos_apply_constraints(
     repos: List[Repo],
     gac: GroupsAndConstraints,
 ) -> List[Repo]:
+    # NOTE: code duplication, see Fn above, and above above
     """
     Use just constraints on Repos in GroupAndConstraints class
     to filter Repos. Consider:

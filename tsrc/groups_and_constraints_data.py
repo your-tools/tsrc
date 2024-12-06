@@ -15,13 +15,14 @@ from typing import List, Optional
 class GroupsAndConstraints:
     groups: Optional[List[str]] = None  # just what was provided via cmd
     # not to be mistaken with Group class
-    singular_remote: str = ""
+    singular_remote: str = ""  # NOTE possibly unused by now
     include_regex: str = ""
     exclude_regex: str = ""
 
 
 def get_group_and_constraints_data(args: argparse.Namespace) -> GroupsAndConstraints:
 
+    # NOTE: does not obtains 'singular_remote'
     groups: Optional[List[str]] = None
     if args.groups:
         groups = args.groups

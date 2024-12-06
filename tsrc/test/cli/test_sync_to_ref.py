@@ -149,8 +149,12 @@ def test_sync_to_ref_case_1(
     #   here we can see if it was synced properly
     message_recorder.reset()
     tsrc_cli.run("status")
-    assert message_recorder.find(r"\* main-proj-backend \[ dev   \]  dev on v1.0")
-    assert message_recorder.find(r"\* manifest          \[ cmp-1 \]= cmp-1 ~~ MANIFEST")
+    assert message_recorder.find(
+        r"\* main-proj-backend \[ dev ~~ commit \]  dev on v1.0"
+    )
+    assert message_recorder.find(
+        r"\* manifest          \[ cmp-1         \]= cmp-1 ~~ MANIFEST"
+    )
     assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
 
 
@@ -259,8 +263,12 @@ def test_sync_to_ref_case_2(
     #   here we can see if it was synced properly
     message_recorder.reset()
     tsrc_cli.run("status")
-    assert message_recorder.find(r"\* main-proj-backend \[ dev   \]  dev on v1.0")
-    assert message_recorder.find(r"\* manifest          \[ cmp-1 \]= cmp-1 ~~ MANIFEST")
+    assert message_recorder.find(
+        r"\* main-proj-backend \[ dev ~~ commit \]  dev on v1.0"
+    )
+    assert message_recorder.find(
+        r"\* manifest          \[ cmp-1         \]= cmp-1 ~~ MANIFEST"
+    )
     assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
 
 
@@ -369,6 +377,364 @@ def test_sync_bug_unique_case_3(
     assert message_recorder.find(r"\* main-proj-backend \[ dev on v1.0 \]  dev on v1.0")
     assert message_recorder.find(
         r"\* manifest          \[ cmp-1       \]= cmp-1 ~~ MANIFEST"
+    )
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+
+
+def test_sync_to_ref_case_4(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Description:
+
+    sync to SHA1 that is behind
+
+    Scenario:
+
+    * 1st: Create repository
+    * 2nd: add Manifest repository
+    * 3rd: init workspace on master
+    * 4th: play with Workspace Repo
+        * checkout branch 'dev'
+        * add changes to file
+        * add tag
+        * push it all to 'origin'
+    * 5th: add more branches to same commit
+        to be sure it is able to choose the right one
+    * 6th: obtain SHA1 of such prepared (remote) branch
+    * 7th: return back to 'master'
+    * 8th: play with Manifest Repo
+    * 9th: CASE SPECIFIC: update Manifest with SHA1
+    * 10th: add, commit and push changes
+    * 11th: CASE SPECIFIC: add another commit to 'main-proj-backend'
+        so we can test if sync will respect SHA1 that is behind
+    * 12th: now switch Manifest's branch
+    * 13th: sync to new branch
+    * 14th: check if 'main-proj-backend' is behind (as it should)
+    """
+    # 1st: Create repository
+    git_server.add_repo("main-proj-backend")
+    git_server.push_file("main-proj-backend", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+
+    # 2nd: add Manifest repository
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 3rd: init workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 4th: play with Workspace Repo
+    #   * checkout branch 'dev'
+    #   * add changes to file
+    #   * add tag
+    #   * push it all to 'origin'
+    backend_path: Path = workspace_path / "main-proj-backend"
+    run_git(backend_path, "checkout", "-b", "dev")
+    with open(backend_path / "CMakeLists.txt", "a") as this_file:
+        this_file.write("adding some more data")
+    run_git(backend_path, "add", "CMakeLists.txt")
+    run_git(backend_path, "commit", "-m", "'extending data'")
+    run_git(backend_path, "push", "-u", "origin", "dev")
+    run_git(backend_path, "tag", "-a", "v1.0", "-m", "'on new version'")
+
+    # 5th: add more branches to same commit
+    #   to be sure it is able to choose the right one
+    run_git(backend_path, "checkout", "-b", "another")
+    run_git(backend_path, "push", "-u", "origin", "another")
+    run_git(backend_path, "checkout", "-b", "not_u")
+    run_git(backend_path, "push", "origin", "not_u")
+    run_git(backend_path, "push", "--all")
+
+    # 6th: obtain SHA1 of such prepared (remote) branch
+    _, ret = run_git_captured(
+        backend_path, "ls-remote", "--exit-code", "--head", "origin", "refs/heads/dev"
+    )
+    backend_sha1 = ret.split()[0]
+
+    # 7th: return back to 'master'
+    run_git(backend_path, "checkout", "master")
+
+    # 8th: play with Manifest Repo
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-b", "cmp-1")
+
+    # 9th: CASE SPECIFIC: update Manifest with SHA1
+    ad_hoc_update_dm_repo_branch_and_sha1(workspace_path, backend_sha1)
+
+    # 10th: add, commit and push changes
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "'new composition'")
+    run_git(manifest_path, "push", "-u", "origin", "cmp-1")
+
+    # 11th: CASE SPECIFIC: add another commit to 'main-proj-backend'
+    #   so we can test if sync will respect SHA1 that is behind
+    run_git(backend_path, "checkout", "dev")
+    with open(backend_path / "new_file.txt", "a") as this_file:
+        this_file.write("adding some new data")
+    run_git(backend_path, "add", "new_file.txt")
+    run_git(backend_path, "commit", "-m", "new file")
+    run_git(backend_path, "push", "origin", "dev")
+
+    # 12th: now switch Manifest's branch
+    tsrc_cli.run("manifest", "--branch", "cmp-1")
+
+    # 13th: sync to new branch
+    tsrc_cli.run("sync")
+
+    # 14th: check if 'main-proj-backend' is behind (as it should)
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"\* manifest          \[ cmp-1         \]= cmp-1 ~~ MANIFEST"
+    )
+    assert message_recorder.find(
+        r"\* main-proj-backend \[ dev .1 commit \]  dev on v1\.0 .1 commit",
+    ), "Repo is not behind as it should"
+    assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
+
+
+def test_sync_to_ref_case_5(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Should FAIL: update Manifest with
+    SHA1 that does not match Tag
+
+    At first we get SHA1 from 1st commit, than we
+    Tag the second commit. Update Deep Manifest
+    with this infomration, so next 'sync' on such
+    branch should fail.
+
+    Scenario:
+
+    * 1st: Create repository
+    * 2nd: add Manifest repository
+    * 3rd: init workspace on master
+    * 4th: play with Workspace Repo
+        * checkout branch 'dev'
+        * add changes to file
+        * push it all to 'origin'
+    * 5th: add more branches to same commit
+    *   to be sure it is able to choose the right one
+    * 6th: obtain SHA1 of such prepared (remote) branch
+    * 7th: change Manifest branch to 'cmp-1'
+    * 8th: CASE SPECIFIC: add another commit to 'main-proj-backend'
+        * add tag 'v1.0'
+    * 9th: CASE SPECIFIC: update Manifest with SHA1
+        here saved SHA1 (backedn_sha1) and Tag's sha1 does not match
+        update Manifest with both of such values
+    * 10th: add, commit and push changes
+    * 11th: now switch Manifest's branch
+    * 12th: check if proper Exception was thrown
+    * 13th: check also some output of '--verbose'
+    """
+    # 1st: Create repository
+    git_server.add_repo("main-proj-backend")
+    git_server.push_file("main-proj-backend", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+
+    # 2nd: add Manifest repository
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 3rd: init workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 4th: play with Workspace Repo
+    #   * checkout branch 'dev'
+    #   * add changes to file
+    #   * push it all to 'origin'
+    backend_path: Path = workspace_path / "main-proj-backend"
+    run_git(backend_path, "checkout", "-b", "dev")
+    with open(backend_path / "CMakeLists.txt", "a") as this_file:
+        this_file.write("adding some more data")
+    run_git(backend_path, "add", "CMakeLists.txt")
+    run_git(backend_path, "commit", "-m", "'extending data'")
+    run_git(backend_path, "push", "-u", "origin", "dev")
+
+    # 5th: add more branches to same commit
+    #   to be sure it is able to choose the right one
+    run_git(backend_path, "checkout", "-b", "another")
+    run_git(backend_path, "push", "-u", "origin", "another")
+    run_git(backend_path, "checkout", "-b", "not_u")
+    run_git(backend_path, "push", "origin", "not_u")
+    run_git(backend_path, "push", "--all")
+
+    # 6th: obtain SHA1 of such prepared (remote) branch
+    _, ret = run_git_captured(
+        backend_path, "ls-remote", "--exit-code", "--head", "origin", "refs/heads/dev"
+    )
+    backend_sha1 = ret.split()[0]
+
+    # 7th: change Manifest branch to 'cmp-1'
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-b", "cmp-1")
+
+    # 8th: CASE SPECIFIC: add another commit to 'main-proj-backend'
+    #   * add tag 'v1.0'
+    run_git(backend_path, "checkout", "dev")
+    with open(backend_path / "new_file.txt", "a") as this_file:
+        this_file.write("adding some new data")
+    run_git(backend_path, "add", "new_file.txt")
+    run_git(backend_path, "commit", "-m", "new file")
+    run_git(backend_path, "tag", "-a", "v1.0", "-m", "'on new version'")
+    run_git(backend_path, "push", "--tags", "origin", "dev")
+
+    # 9th: CASE SPECIFIC: update Manifest with SHA1
+    #   here saved SHA1 (backedn_sha1) and Tag's sha1 does not match
+    #   update Manifest with both of such values
+    ad_hoc_update_dm_repo_branch_and_sha1(workspace_path, backend_sha1)
+    ad_hoc_update_dm_repo_branch_and_tag(workspace_path, "v1.0")
+
+    # 10th: add, commit and push changes
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "'new composition'")
+    run_git(manifest_path, "push", "-u", "origin", "cmp-1")
+
+    # 11th: now switch Manifest's branch
+    tsrc_cli.run("manifest", "--branch", "cmp-1")
+
+    # 12th: check if proper Exception was thrown
+    try:
+        message_recorder.reset()
+        tsrc_cli.run("--verbose", "sync", "-j", "1")
+    except Exception as e:
+        if type(e).__name__ != "SyncError":
+            raise AssertionError("Wrong Exception")
+    else:
+        raise AssertionError("Missing Exception")
+
+    # 13th: check also some output of '--verbose'
+    assert message_recorder.find(r"Mismatch of sha1 and tag")
+    assert message_recorder.find(r"\* main-proj-backend : updating ref failed")
+
+
+def test_sync_to_ref_case_6(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Description:
+
+    sync to SHA1 and Tag that is behind.
+    Here, both SHA1 and Tags's sha should be the same,
+    therefore it is success
+
+    Scenario:
+
+    * 1st: Create repository
+    * 2nd: add Manifest repository
+    * 3rd: init workspace on master
+    * 4th: play with Workspace Repo
+        * checkout branch 'dev'
+        * add changes to file
+        * set Tag 'v1.0'
+        * push it all to 'origin'
+    * 5th: add more branches to same commit
+        * to be sure it is able to choose the right one
+    * 6th: obtain SHA1 of such prepared (remote) branch
+    * 7th: CASE SPECIFIC: update Manifest with SHA1
+        * here save SHA1
+        * also save Tag
+        update Manifest with both of such values
+    * 8th: change Manifest branch to 'cmp-1'
+    * 9th: add, commit and push changes
+    * 10th: CASE SPECIFIC: add another commit to 'main-proj-backend'
+    * 11th: now switch Manifest's branch
+    * 12th: sync to new branch
+    * 13th: check if 'main-proj-backend' is behind (as it should)
+    """
+    # 1st: Create repository
+    git_server.add_repo("main-proj-backend")
+    git_server.push_file("main-proj-backend", "CMakeLists.txt")
+    manifest_url = git_server.manifest_url
+
+    # 2nd: add Manifest repository
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 3rd: init workspace on master
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 4th: play with Workspace Repo
+    #   * checkout branch 'dev'
+    #   * add changes to file
+    #   * set Tag 'v1.0'
+    #   * push it all to 'origin'
+    backend_path: Path = workspace_path / "main-proj-backend"
+    run_git(backend_path, "checkout", "-b", "dev")
+    with open(backend_path / "CMakeLists.txt", "a") as this_file:
+        this_file.write("adding some more data")
+    run_git(backend_path, "add", "CMakeLists.txt")
+    run_git(backend_path, "commit", "-m", "'extending data'")
+    run_git(backend_path, "tag", "-a", "v1.0", "-m", "'on new version'")
+    run_git(backend_path, "push", "-u", "--tags", "origin", "dev")
+
+    # 5th: add more branches to same commit
+    #   to be sure it is able to choose the right one
+    run_git(backend_path, "checkout", "-b", "another")
+    run_git(backend_path, "push", "-u", "origin", "another")
+    run_git(backend_path, "checkout", "-b", "not_u")
+    run_git(backend_path, "push", "origin", "not_u")
+    run_git(backend_path, "push", "--all")
+
+    # 6th: obtain SHA1 of such prepared (remote) branch
+    _, ret = run_git_captured(
+        backend_path, "ls-remote", "--exit-code", "--head", "origin", "refs/heads/dev"
+    )
+    backend_sha1 = ret.split()[0]
+
+    # 7th: CASE SPECIFIC: update Manifest with SHA1
+    #   * here save SHA1
+    #   * also save Tag
+    #   update Manifest with both of such values
+    ad_hoc_update_dm_repo_branch_and_sha1(workspace_path, backend_sha1)
+    ad_hoc_update_dm_repo_branch_and_tag(workspace_path, "v1.0")
+
+    # 8th: change Manifest branch to 'cmp-1'
+    manifest_path = workspace_path / "manifest"
+    run_git(manifest_path, "checkout", "-b", "cmp-1")
+
+    # 9th: add, commit and push changes
+    run_git(manifest_path, "add", "manifest.yml")
+    run_git(manifest_path, "commit", "-m", "'new composition'")
+    run_git(manifest_path, "push", "-u", "origin", "cmp-1")
+
+    # 10th: CASE SPECIFIC: add another commit to 'main-proj-backend'
+    run_git(backend_path, "checkout", "dev")
+    with open(backend_path / "new_file.txt", "a") as this_file:
+        this_file.write("adding some new data")
+    run_git(backend_path, "add", "new_file.txt")
+    run_git(backend_path, "commit", "-m", "new file")
+    run_git(backend_path, "push", "origin", "dev")
+
+    # 11th: now switch Manifest's branch
+    tsrc_cli.run("manifest", "--branch", "cmp-1")
+
+    # 12th: sync to new branch
+    tsrc_cli.run("sync")
+
+    # 13th: check if 'main-proj-backend' is behind (as it should)
+    message_recorder.reset()
+    tsrc_cli.run("status")
+    assert message_recorder.find(
+        r"\* main-proj-backend \[ dev on v1\.0 .1 commit \]  dev on v1\.0 .1 commit"
+    )
+    assert message_recorder.find(
+        # r"\* manifest          \[ cmp-1       \]= cmp-1 ~~ MANIFEST"
+        r"\* manifest          \[ cmp-1                 \]= cmp-1 ~~ MANIFEST"
     )
     assert message_recorder.find(r"=> Destination \[Deep Manifest description\]")
 

@@ -2,7 +2,7 @@
 
 import argparse
 from copy import deepcopy
-from typing import Union
+from typing import Dict, List, Union, cast
 
 from tsrc.cli import (
     add_num_jobs_arg,
@@ -15,8 +15,20 @@ from tsrc.cli import (
 from tsrc.executor import process_items
 from tsrc.groups import GroupNotFound
 from tsrc.groups_to_find import GroupsToFind
+from tsrc.local_tmp_bare_repos import (
+    prepare_tmp_bare_dm_repos,
+    process_bare_repos,
+    ready_tmp_bare_repos,
+)
+from tsrc.manifest_common_data import ManifestsTypeOfData
 from tsrc.pcs_repo import get_deep_manifest_from_local_manifest_pcsrepo
-from tsrc.status_endpoint import StatusCollector, StatusCollectorLocalOnly
+from tsrc.repo import Repo
+from tsrc.status_endpoint import (
+    BareStatus,
+    Status,
+    StatusCollector,
+    StatusCollectorLocalOnly,
+)
 from tsrc.status_header import StatusHeader, StatusHeaderDisplayMode
 from tsrc.utils import erase_last_line
 
@@ -32,6 +44,12 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     add_workspace_arg(parser)
     add_repos_selection_args(parser)
     add_num_jobs_arg(parser)
+    parser.add_argument(
+        "--show-leftovers-status",
+        action="store_true",
+        help="show full GIT status also for leftovers, if there are some, that have valid repository on the filesystem. here hard error about the repository is ignored and no status is displayed",  # noqa: E501
+        dest="show_leftovers_status",
+    )
     parser.add_argument(
         "--no-mm",
         action="store_false",
@@ -105,12 +123,19 @@ def run(args: argparse.Namespace) -> None:
             ignore_group_item=args.ignore_group_item,
         )
 
+    # DM (if present) + bare DM (if DM and present)
     dm = None
+    bare_dm_repos: List[Repo] = []
     if args.use_deep_manifest is True:
         dm, gtf = get_deep_manifest_from_local_manifest_pcsrepo(
             workspace,
             gtf,
         )
+        if dm and args.local_git_only is False:
+            # this require to check remote
+            bare_dm_repos = prepare_tmp_bare_dm_repos(
+                workspace, dm, gtf, num_jobs=get_num_jobs(args)
+            )
 
     wrs = WorkspaceReposSummary(
         workspace,
@@ -119,6 +144,7 @@ def run(args: argparse.Namespace) -> None:
         manifest_marker=args.use_manifest_marker,
         future_manifest=args.use_future_manifest,
         use_same_future_manifest=args.use_same_future_manifest,
+        show_leftovers_status=args.show_leftovers_status,
     )
 
     status_header = StatusHeader(
@@ -137,15 +163,27 @@ def run(args: argparse.Namespace) -> None:
         )
 
     repos = deepcopy(workspace.repos)
+    bare_fm_repos = wrs.get_bare_fm_repos()
+    bare_fm_repos = ready_tmp_bare_repos(
+        workspace, ManifestsTypeOfData.FUTURE, bare_fm_repos
+    )
+    bare_repos = bare_fm_repos + bare_dm_repos
+    bare_repos = process_bare_repos(workspace, bare_repos, num_jobs=get_num_jobs(args))
+    repos += bare_repos
 
     wrs.prepare_repos()
 
+    leftovers_repos: List[Repo] = []
     if args.strict_on_git_desc is False:
-        repos += wrs.obtain_leftovers_repos(repos)
+        leftovers_repos = wrs.obtain_leftovers_repos(repos)
+        repos += leftovers_repos
 
     if repos:
 
-        status_header.report_collecting(len(repos))
+        # status_header.report_collecting(len(repos))
+        status_header.report_collecting(
+            len(workspace.repos), len(leftovers_repos), len(bare_repos)
+        )
 
         num_jobs = get_num_jobs(args)
         process_items(repos, status_collector, num_jobs=num_jobs)
@@ -154,9 +192,11 @@ def run(args: argparse.Namespace) -> None:
         statuses = status_collector.statuses
 
         wrs.ready_data(
-            statuses,
+            # TODO: this crazines is there due to 'StatusCollectorLocalOnly' is possible
+            cast(Dict[str, Union[Status, Exception, BareStatus, Exception]], statuses),
         )
-        wrs.separate_leftover_statuses(workspace.repos)
+        wrs.separate_statuses(bare_repos)
+        wrs.calculate_fields_len()
 
         # only calculate summary when there are some Workspace repos
         if workspace.repos:

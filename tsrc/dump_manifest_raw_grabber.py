@@ -5,6 +5,7 @@ from typing import List, Tuple, Union
 
 import cli_ui as ui
 
+from tsrc.cli import is_match_repo_dest_on_inc_excl
 from tsrc.dump_manifest_args import DumpManifestArgs
 from tsrc.dump_manifest_args_data import DumpManifestOperationDetails
 from tsrc.executor import process_items
@@ -42,9 +43,20 @@ class ManifestRawGrabber:
 
         # find maximum common Path
         if int_path:
-            tmp_list = deepcopy(this_path)
-            for i, _ in enumerate(tmp_list):
-                if len(int_path) > i and tmp_list[i] != int_path[i]:
+            len_int_path = len(int_path)
+            len_this_path = len(this_path)
+
+            # cut-down 'int_path' to length of 'this_path'
+            if len_int_path > len_this_path:
+                tmp_int_path = deepcopy(int_path)
+                for c, _ in reversed(list(enumerate(tmp_int_path))):
+                    if c > len_this_path - 1:
+                        del int_path[c]
+
+            # check from backwards and delete that does not match
+            tmp_list = deepcopy(int_path)
+            for i, _ in reversed(list(enumerate(tmp_list))):
+                if tmp_list[i] != this_path[i]:
                     del int_path[i]
         else:
             int_path = deepcopy(this_path)
@@ -147,6 +159,16 @@ class ManifestRawGrabber:
             if name == ".git":
                 repo_path, clean_dest = self._grab_on_repo_path(path, common_path)
                 if not repo_path:
+                    continue
+
+                # check constraints (except for Groups and singular_remote)
+                if (
+                    clean_dest
+                    and is_match_repo_dest_on_inc_excl(  # noqa: W503
+                        self.a.gac, os.path.basename(clean_dest)
+                    )
+                    is False
+                ):
                     continue
 
                 # create pseudo-Repo for 'process_items' to eat

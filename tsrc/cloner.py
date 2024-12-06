@@ -1,3 +1,4 @@
+import os
 import textwrap
 from pathlib import Path
 from typing import List, Optional
@@ -6,6 +7,7 @@ import cli_ui as ui
 
 from tsrc.errors import Error
 from tsrc.executor import Outcome, Task
+from tsrc.git import run_git_captured
 from tsrc.repo import Remote, Repo
 
 
@@ -118,3 +120,133 @@ class Cloner(Task[Repo]):
         summary += self.clone_repo(repo)
         summary += self.reset_repo(repo)
         return Outcome.from_summary(summary)
+
+
+"""
+===================
+Bare-dedicated part
+"""
+
+
+class BareCloner(Task[Repo]):
+    """Implement bare cloning of missing repos.
+
+    When Manifest contain some Repo that has set SHA1,
+    than when we want to display such information,
+    it is not very useful to display the SHA1 alone.
+    Instead displaying the position of such commit
+    is much more helpful.
+
+    Thus bare Repo is used to obatin such information.
+
+    Someone might say that Tag is also reference, that
+    can be translated to specific commit. Sure. While
+    people can easily recognize Tag name, they does not
+    able to do the same with SHA1. That is why Tag
+    does not need to be translated to position,
+    to be understood, unlike SHA1 does.
+    """
+
+    def __init__(
+        self,
+        workspace_path: Path,
+        *,
+        remote_name: Optional[str] = None,
+    ) -> None:
+        self.workspace_path = workspace_path
+        # self.prefix_path = prefix_path  # Workspace Path alone is not it
+        self.remote_name = remote_name
+
+    def describe_process_start(self, item: Repo) -> List[ui.Token]:
+        # return ["Cloning", item.dest]
+        return []
+
+    def describe_process_end(self, item: Repo) -> List[ui.Token]:
+        # return [ui.green, "ok", ui.reset, item.dest]
+        return []
+
+    def describe_item(self, item: Repo) -> str:
+        return item.dest
+
+    def _choose_remote(self, repo: Repo) -> Remote:
+        if self.remote_name:
+            for remote in repo.remotes:
+                if remote.name == self.remote_name:
+                    return remote
+            message = (
+                f"Remote '{self.remote_name}' not found for repository '{repo.dest}'"
+            )
+            raise Error(message)
+
+        return repo.remotes[0]
+
+    def bare_clone_repo(self, repo: Repo) -> None:
+        # check if our Repo is bare
+        repo_path = self.workspace_path / repo.dest
+        parent = repo_path.parent
+        parent.mkdir(parents=True, exist_ok=True)
+        remote = self._choose_remote(repo)
+        remote_url = remote.url
+        if Path(str(repo_path) + os.sep + ".git").is_dir():
+            return
+        if repo._bare_clone_path:
+            clone_args = [
+                "clone",
+                "--mirror",
+                str(repo._bare_clone_path),
+                str(repo_path) + os.sep + ".git",
+            ]
+        else:
+            clone_args = [
+                "clone",
+                "--mirror",
+                remote_url,
+                str(repo_path) + os.sep + ".git",
+            ]
+
+        self.run_git(parent, *clone_args)
+
+    def bare_set_branch(self, repo: Repo) -> bool:
+
+        if repo.branch:
+            self.run_git(
+                Path(repo.dest), "symbolic-ref", "HEAD", f"refs/heads/{repo.branch}"
+            )
+
+        # check if 'Tag' is reference to same SHA1 provided, if not, it is an Error
+        if repo.tag:
+            # get Tag's SHA1 of commit
+            rc, t_sha1 = run_git_captured(
+                Path(repo.dest),
+                "rev-list",
+                "-n",
+                "1",
+                f"refs/tags/{repo.tag}",
+                check=False,
+            )
+            if rc != 0 or t_sha1 != repo.sha1:
+                repo._bare_clone_is_fail()  # mark repo: fail state
+                return False
+        return True
+
+    def bare_reset_repo(self, repo: Repo) -> None:
+
+        ref = repo.sha1
+        if not ref:
+            return
+        else:
+            try:
+                self.run_git(Path(repo.dest), "reset", "--soft", ref)
+            except Error:
+                repo._bare_clone_is_fail()
+                raise Error("Resetting to", ref, "failed")
+
+    def process(self, index: int, count: int, repo: Repo) -> Outcome:
+
+        self.info_count(index, count, repo.dest, end="\r")
+        self.bare_clone_repo(repo)
+        if self.bare_set_branch(repo) is True:
+            self.bare_reset_repo(repo)
+        # NOTE: not considering submodules (not useful for bare Repo)
+
+        return Outcome.empty()
