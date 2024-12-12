@@ -21,6 +21,19 @@ class UpdateSourceEnum(Enum):
     DEEP_MANIFEST = 2
 
 
+@dataclass
+class ManifestDataOptions:
+    sha1_only: bool = False
+    skip_manifest: bool = False
+    only_manifest: bool = False
+    ignore_groups: bool = False  # not implemented
+
+    def clean(self) -> None:
+        for i in dir(self):
+            if isinstance(getattr(self, i), bool) is True:
+                setattr(self, i, False)
+
+
 class FinalOutputModeFlag(Flag):
     NONE = 0
     PREVIEW = 1
@@ -75,6 +88,9 @@ class DumpManifestOperationDetails:
     update_source = UpdateSourceEnum.NONE
     update_source_path: Optional[Path] = None
 
+    # OPTIONS applied when processing Manifest (optional to change, using defaults)
+    manifest_data_options = ManifestDataOptions()
+
     # FINAL OUTPUT MODE (must be determined)
     final_output_mode: List[FinalOutputModeFlag] = field(default_factory=list)
     final_output_path_list = FinalOutputAllPaths()
@@ -96,6 +112,7 @@ class DumpManifestOperationDetails:
     def clean(self) -> None:
         self.final_output_path_list.clean_all_paths()
         self.final_output_mode = []
+        self.manifest_data_options.clean()
 
     # ----------
     # 'get_path' - section

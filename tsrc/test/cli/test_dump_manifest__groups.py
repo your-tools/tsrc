@@ -30,6 +30,7 @@ import ruamel.yaml
 from cli_ui.tests import MessageRecorder
 
 from tsrc.dump_manifest import ManifestDumper
+from tsrc.dump_manifest_args_data import ManifestDataOptions
 from tsrc.dump_manifest_helper import MRISHelpers
 from tsrc.git import run_git
 from tsrc.manifest import Manifest, load_manifest, load_manifest_safe_mode
@@ -38,8 +39,105 @@ from tsrc.repo import Remote, Repo
 from tsrc.test.cli.test_dump_manifest import ad_hoc_delete_remote_from_manifest
 from tsrc.test.helpers.cli import CLI
 from tsrc.test.helpers.git_server import GitServer
+from tsrc.workspace_config import WorkspaceConfig
 
 # from tsrc.test.helpers.message_recorder_ext import MessageRecorderExt
+
+
+# @pytest.mark.last
+def test_dump_manifest_raw__constraints__incl_excl(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    test if include_regex|eclude_regex also work
+    when on RAW dump (without update)
+
+    filtering works only for Repo's dest, filtering
+    by previous directories names (if present) is not possible
+
+    Scenario:
+
+    * 1st: create repositories representing project
+    * 2nd: add there a Manifest Repo
+    * 3rd: init Workspace
+    * 4th: dump manifest: test (only) exclude
+    * 5th: dump_manifest: test include_regex and exclude_regex
+    * 6th: dump_manifest: test when we exclude everything
+    """
+    # 1st: create repositories representing project
+    git_server.add_repo("frontend-proj")
+    git_server.push_file("frontend-proj", "frontend-proj.txt")
+    git_server.add_repo("backend-proj")
+    git_server.push_file("backend-proj", "backend-proj.txt")
+    git_server.add_repo("extra-lib")
+    git_server.push_file("extra-lib", "extra-lib.txt")
+    manifest_url = git_server.manifest_url
+
+    # 2nd: add there a Manifest Repo
+    git_server.add_manifest_repo("manifest")
+    git_server.manifest.change_branch("master")
+
+    # 3rd: init Workspace
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 4th: dump manifest: test (only) exclude
+    tsrc_cli.run(
+        "dump-manifest", "--raw", ".", "-e", "extra|proj", "--save-to", "m_1.yml"
+    )
+
+    m_1_file = workspace_path / "m_1.yml"
+    if m_1_file.is_file() is False:
+        raise Exception("Manifest file does not exists")
+    m_1 = load_manifest(m_1_file)  # this Manifest should be fine
+    m_1_repos = m_1.get_repos()
+    count: int = 0
+    for repo in m_1_repos:
+        if repo.dest == "manifest":
+            count += 1
+        else:
+            count += 2
+    if count != 1:
+        raise Exception("Manifest repo contains wrong items")
+
+    # 5th: dump_manifest: test include_regex and exclude_regex
+    tsrc_cli.run(
+        "dump-manifest",
+        "--raw",
+        ".",
+        "-i",
+        "extra|proj",
+        "-e",
+        "backend",
+        "--save-to",
+        "m_2.yml",
+    )
+
+    m_2_file = workspace_path / "m_2.yml"
+    if m_2_file.is_file() is False:
+        raise Exception("Manifest file does not exists")
+    m_2 = load_manifest(m_2_file)  # this Manifest should be fine
+    m_2_repos = m_2.get_repos()
+    count = 0
+    for repo in m_2_repos:
+        if repo.dest == "frontend-proj":
+            count += 1
+        elif repo.dest == "extra-lib":
+            count += 2
+        else:
+            count += 4
+    if count != 3:
+        raise Exception("Manifest repo contains wrong items")
+
+    # 6th: dump_manifest: test when we exclude everything
+    message_recorder.reset()
+    tsrc_cli.run(
+        "dump-manifest", "--raw", ".", "-i", "extra", "-e", "extra", "--preview"
+    )
+    message_recorder.find(r"=> No Repos were found")
 
 
 def test_dump_manifest__constraints__no_remote_must_match_dest__on_update(
@@ -610,7 +708,8 @@ def ad_hoc_update_manifest_repo(
 
     is_updated_tmp: List[bool] = [False]  # dummy
     m_d = ManifestDumper()
-    m_d._walk_yaml_update_repos_items(y, 0, mris, False, u_m_list, is_updated_tmp)
+    mdo = ManifestDataOptions()
+    m_d._walk_yaml_update_repos_items(y, 0, mris, mdo, False, u_m_list, is_updated_tmp)
 
     # write the file down
     with open(manifest_path, "w") as file:

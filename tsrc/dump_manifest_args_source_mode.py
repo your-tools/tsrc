@@ -5,6 +5,7 @@ from typing import Tuple
 
 from tsrc.cli import get_workspace_with_repos
 from tsrc.dump_manifest_args_data import DumpManifestOperationDetails, SourceModeEnum
+from tsrc.errors import Error
 
 
 class SourceMode:
@@ -24,6 +25,9 @@ class SourceMode:
         self._decide_source_mode()
 
         self._get_workspace_if_needed()
+
+        if not self.dmod.workspace:
+            self._get_workspace_optionally()
 
         return self.dmod, self.args
 
@@ -55,3 +59,16 @@ class SourceMode:
         ):
             # it will throw Error if there is no Workspace
             self.dmod.workspace = get_workspace_with_repos(self.args)
+
+    def _get_workspace_optionally(self) -> None:
+        # do not throw and Error if Workspace is not found
+        if self.args.raw_dump_path and (
+            self.args.skip_manifest is True or self.args.only_manifest is True
+        ):
+            try:
+                self.dmod.workspace = get_workspace_with_repos(self.args)
+            except Exception as e:
+                if isinstance(e, Error):
+                    pass
+                else:
+                    raise e

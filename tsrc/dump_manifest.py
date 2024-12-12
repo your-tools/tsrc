@@ -14,17 +14,25 @@ as possible
 import hashlib
 import re
 from collections import OrderedDict
+from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from tsrc.cli import resolve_repos_apply_constraints, resolve_repos_without_workspace
+from tsrc.cli import (
+    is_match_repo_dest_on_inc_excl,
+    resolve_repos_apply_constraints,
+    resolve_repos_without_workspace,
+)
+from tsrc.dump_manifest_args_data import ManifestDataOptions
 from tsrc.dump_manifest_helper import ManifestRepoItem
 from tsrc.groups_and_constraints_data import GroupsAndConstraints
 from tsrc.manifest import Manifest
 from tsrc.manifest_common_data import ManifestsTypeOfData
+from tsrc.pcs_repo import get_deep_manifest_pcsrepo
 from tsrc.repo import Remote, Repo
+from tsrc.workspace import Workspace
 
 
 @dataclass(frozen=True)
@@ -42,6 +50,8 @@ class ManifestDumper:
         self,
         y: Union[Dict, List],
         mris: Dict[str, ManifestRepoItem],
+        workspace: Union[Workspace, None],
+        mdo: ManifestDataOptions,
         opt: ManifestDumpersOptions,
         gac: GroupsAndConstraints,
     ) -> Tuple[Union[Dict, List], bool]:
@@ -56,8 +66,7 @@ class ManifestDumper:
         Update Repo records in YAML:
         * 1st delete Repo(s) that does not exists
             * also delete Group item
-            * and if such Group is empty, delete it
-        * 2nd update surch Repo(s) that does exists
+        * 2nd update such Repo(s) that does exists
         * 3rd add new Repo(s) that was not updated
 
         * finaly return something that can be dumped as YAML
@@ -69,6 +78,13 @@ class ManifestDumper:
         # this will print Warning if Group item is not found
         u_m.apply_config(y, ignore_on_mtod=ManifestsTypeOfData.DEEP)
         repos = resolve_repos_without_workspace(u_m, gac)
+        this_m_repo: Optional[Repo] = None
+
+        # get rid of Manifest Repo (Deep Manifest) if requested
+        if workspace:
+            repos, this_m_repo = self.filter_repos_bo_manifest(
+                workspace, mdo.skip_manifest, mdo.only_manifest, repos
+            )
 
         # rename Repos of UPDATE source (early)
         tmp_is_updated: bool
@@ -94,18 +110,27 @@ class ManifestDumper:
         us_rs: List[str] = []
         self._walk_yaml_get_repos_keys(y, 0, us_rs, False)
 
+        # correction for 'skip_manifest' so it will not be candidate for deletion
+        if this_m_repo:
+            if mdo.skip_manifest is True:
+                if this_m_repo.dest in us_rs:
+                    us_rs.remove(this_m_repo.dest)
+
         # check if there is some constrain on Repos
-        is_constrained: bool = self._is_constrained(us_rs, repos)
+        is_constrained: bool = self._is_constrained(us_rs, repos, this_m_repo)
 
         # start calculating change lists (Add|Remove|Update Repos)
-
         a_rs: List[str]  # add these Repo(s)
         d_rs: List[str] = []  # remove these Repo(s)
         u_rs: List[str]  # update these Repo(s)
 
         # check for some constraints applied on Repos
         if is_constrained is True:
-            a_rs = list(set(ds_rs).difference(us_rs).intersection(ignored_repos_dests))
+            a_rs = list(
+                set(ds_rs)
+                .difference(us_rs)
+                .intersection(repos_dests + ignored_repos_dests)
+            )
             u_rs = list(set(ds_rs).intersection(us_rs).intersection(repos_dests))
             if opt.delete_repo is True:
                 d_rs = list(set(us_rs).difference(ds_rs).intersection(repos_dests))
@@ -127,22 +152,51 @@ class ManifestDumper:
 
         # 2nd update surch Repo(s) that does exists
         is_updated_tmp[0] = False
-        self._walk_yaml_update_repos_items(y, 0, mris, False, u_rs, is_updated_tmp)
+        self._walk_yaml_update_repos_items(y, 0, mris, mdo, False, u_rs, is_updated_tmp)
         is_updated |= is_updated_tmp[0]
 
         # 3rd add new Repo(s) that was not updated
         is_updated_tmp[0] = False
-        self._walk_yaml_add_repos_items(y, 0, mris, False, a_rs, is_updated_tmp)
+        self._walk_yaml_add_repos_items(y, 0, mris, mdo, False, a_rs, is_updated_tmp)
         is_updated |= is_updated_tmp[0]
 
         return y, is_updated
 
     """
-    ================================
+    ===========================
+    Filter section of all kinds
+
+    ____________________________________
+    Filter based on Manifest constraints
+    """
+
+    def filter_repos_bo_manifest(
+        self,
+        workspace: Workspace,
+        is_skip: bool,
+        is_only: bool,
+        repos: List[Repo],
+    ) -> Tuple[List[Repo], Optional[Repo]]:
+        m_repos, _ = get_deep_manifest_pcsrepo(repos, workspace.config.manifest_url)
+        x_repo: Optional[Repo] = None
+        if m_repos and m_repos[0] in repos:
+            if is_skip is True:
+                x_repo = deepcopy(m_repos[0])
+                repos.remove(m_repos[0])
+            elif is_only is True:
+                repos = m_repos
+        elif is_only is True:
+            repos = []
+        return repos, x_repo
+
+    """
+    ________________________________
     Filter by Groups and constraints
     """
 
-    def _is_constrained(self, us_rs: List[str], repos: List[Repo]) -> bool:
+    def _is_constrained(
+        self, us_rs: List[str], repos: List[Repo], this_m_repo: Optional[Repo]
+    ) -> bool:
         for dest in us_rs:
             is_found: bool = False
             for repo in repos:
@@ -150,9 +204,12 @@ class ManifestDumper:
                     is_found = True
                     break
             if is_found is False:
+                if this_m_repo and dest == this_m_repo.dest:
+                    continue
                 return True
         return False
 
+    # flake8: noqa: C901
     def _filter_by_groups_and_constraints(
         self,
         y: Union[Dict, List],
@@ -176,35 +233,13 @@ class ManifestDumper:
             if u_m.group_list and u_m.group_list.missing_elements:
                 for mi in u_m.group_list.missing_elements:
                     for k_r_d, i_r_d in mi.items():
-                        i_r_d_value = self._ready_ignored_repos_dests(k_r_d, gac, i_r_d)
-                        if i_r_d_value:
-                            ignored_repos_dests.append(i_r_d_value)
+                        if gac.groups and k_r_d in gac.groups:
+                            if is_match_repo_dest_on_inc_excl(gac, i_r_d) is True:
+                                ignored_repos_dests.append(i_r_d)
 
         repos = resolve_repos_apply_constraints(repos, gac)
 
         return repos, ignored_repos_dests
-
-    def _ready_ignored_repos_dests(
-        self,
-        k_r_d: str,
-        gac: GroupsAndConstraints,
-        i_r_d: str,
-    ) -> str:
-        if gac.groups and k_r_d in gac.groups:
-            if (
-                (
-                    gac.include_regex and re.search(gac.include_regex, i_r_d)
-                )  # noqa: W503
-                or not gac.include_regex  # noqa: W503
-            ) and (
-                (
-                    gac.exclude_regex
-                    and not re.search(gac.exclude_regex, i_r_d)  # noqa: W503
-                )
-                or not gac.exclude_regex  # noqa: W503
-            ):
-                return i_r_d
-        return ""
 
     """
     =================================
@@ -313,6 +348,7 @@ class ManifestDumper:
         return rename_repo_dict_pre, rename_repo_dict_post
 
     def _get_sha1_plus(self, name: str, p: int = 0) -> str:
+        # helps create temporary unique name when renaming
         str_sha1 = hashlib.sha1()
         name = name + str(p)
         str_sha1.update(name.encode("utf-8"))
@@ -527,6 +563,7 @@ class ManifestDumper:
         y: List,
         a_rs: List[str],
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
         is_updated: List[bool],
     ) -> bool:
         ret_updated: bool = is_updated[0]
@@ -547,7 +584,9 @@ class ManifestDumper:
                     rr["branch"] = mri.branch
                 if mri.tag:
                     rr["tag"] = mri.tag
-                if not mri.branch and not mri.tag and mri.sha1:
+                if (
+                    not mri.branch and not mri.tag and mri.sha1
+                ) or mdo.sha1_only is True:
                     rr["sha1"] = mri.sha1
 
                 # TODO: add comment in form of '\n' just to better separate Repos
@@ -561,6 +600,7 @@ class ManifestDumper:
         y: Union[Dict, List],
         level: int,
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
         on_repos: bool,
         a_rs: List[str],  # (to) add: (list of) Repos
         is_updated: List[bool],
@@ -575,7 +615,7 @@ class ManifestDumper:
                 elif level == 0:
                     on_repos = False
             self._walk_yaml_add_repos_items(
-                y[key], level + 1, mris, on_repos, a_rs, is_updated
+                y[key], level + 1, mris, mdo, on_repos, a_rs, is_updated
             )
         return ready_return
 
@@ -584,6 +624,7 @@ class ManifestDumper:
         y: Union[Dict, List],
         level: int,
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
         on_repos: bool,
         a_rs: List[str],  # (to) add (from) Repos
         is_updated: List[bool],
@@ -591,7 +632,7 @@ class ManifestDumper:
     ) -> None:
         if isinstance(y, dict):
             ready_return = self._walk_yaml_add_repos_items_on_dict(
-                y, level, mris, on_repos, a_rs, is_updated
+                y, level, mris, mdo, on_repos, a_rs, is_updated
             )
             if ready_return is True:
                 return
@@ -608,11 +649,18 @@ class ManifestDumper:
                         go_add = True
 
                         self._walk_yaml_add_repos_items(
-                            item, level, mris, on_repos, a_rs, is_updated, item["dest"]
+                            item,
+                            level,
+                            mris,
+                            mdo,
+                            on_repos,
+                            a_rs,
+                            is_updated,
+                            item["dest"],
                         )
                     else:
                         self._walk_yaml_add_repos_items(
-                            item, level, mris, False, a_rs, is_updated
+                            item, level, mris, mdo, False, a_rs, is_updated
                         )
             else:  # there are no items at all, therefore we are at the end
                 go_add = True
@@ -620,7 +668,7 @@ class ManifestDumper:
             if go_add is True and on_repos is True:
                 # add all Repos in here
                 is_updated[0] |= self._add_repos_based_on_mris(
-                    y, a_rs, mris, is_updated
+                    y, a_rs, mris, mdo, is_updated
                 )
 
     """
@@ -645,6 +693,7 @@ class ManifestDumper:
         self,
         y: Dict,
         mri: ManifestRepoItem,
+        mdo: ManifestDataOptions,
         u_is: List[str],  # update (these) items
     ) -> bool:
         ret_updated: bool = False
@@ -662,12 +711,14 @@ class ManifestDumper:
                 ret_updated = True
 
             # 'sha1' is only updated on special case
-            if (
-                u_i == "sha1"
-                and not mri.branch  # noqa: W503
-                and not mri.tag  # noqa: W503
-                and mri.sha1  # noqa: W503
-                and y[u_i] != mri.sha1  # noqa: W503
+            if u_i == "sha1" and (
+                (
+                    not mri.branch
+                    and not mri.tag  # noqa: W503
+                    and mri.sha1  # noqa: W503
+                    and y[u_i] != mri.sha1  # noqa: W503
+                )
+                or (mdo.sha1_only is True and y[u_i] != mri.sha1)  # noqa: W503
             ):
                 y[u_i] = mri.sha1
                 ret_updated = True
@@ -765,6 +816,7 @@ class ManifestDumper:
         self,
         y: Dict,
         mri: ManifestRepoItem,
+        mdo: ManifestDataOptions,
     ) -> bool:
         ret_updated: bool = False
 
@@ -781,6 +833,8 @@ class ManifestDumper:
         if not s_item:
             if mri.sha1:
                 s_item.append("sha1")
+        if "sha1" not in s_item and mdo.sha1_only is True:
+            s_item.append("sha1")
 
         # add these on item
         a_is: List[str] = list(set(s_item).difference(c_item))
@@ -793,7 +847,7 @@ class ManifestDumper:
 
         # perform action(s) and check if it gets updated
         ret_updated |= self._delete_on_update_on_items_on_repo(y, d_is)
-        ret_updated |= self._update_on_update_on_items_on_repo(y, mri, u_is)
+        ret_updated |= self._update_on_update_on_items_on_repo(y, mri, mdo, u_is)
         ret_updated |= self._add_on_update_on_items_on_repo(y, mri, a_is)
 
         ret_updated |= self._remotes_on_update_on_items_on_repo(y, mri)
@@ -805,6 +859,7 @@ class ManifestDumper:
         y: Dict,
         u_rs: List[str],
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
         is_updated: List[bool],
     ) -> bool:
         ret_updated: bool = is_updated[0]
@@ -812,7 +867,7 @@ class ManifestDumper:
         if "dest" in y and y["dest"] in u_rs:
             dest = y["dest"]
             if mris[dest]:
-                ret_updated |= self._update_on_items_on_repo(y, mris[dest])
+                ret_updated |= self._update_on_items_on_repo(y, mris[dest], mdo)
 
         return ret_updated
 
@@ -821,6 +876,7 @@ class ManifestDumper:
         y: Union[Dict, List],
         level: int,
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
         on_repos: bool,
         u_rs: List[str],  # update (list of) Repos
         is_updated: List[bool],
@@ -835,7 +891,7 @@ class ManifestDumper:
                 elif level == 0:
                     on_repos = False
             self._walk_yaml_update_repos_items(
-                y[key], level + 1, mris, on_repos, u_rs, is_updated
+                y[key], level + 1, mris, mdo, on_repos, u_rs, is_updated
             )
         return ready_return
 
@@ -844,13 +900,14 @@ class ManifestDumper:
         y: Union[Dict, List],
         level: int,
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
         on_repos: bool,
         u_rs: List[str],  # update (this list of) Repos
         is_updated: List[bool],
     ) -> None:
         if isinstance(y, dict):
             ready_return = self._walk_yaml_update_repos_items_on_dict(
-                y, level, mris, on_repos, u_rs, is_updated
+                y, level, mris, mdo, on_repos, u_rs, is_updated
             )
             if ready_return is True:
                 return
@@ -864,11 +921,11 @@ class ManifestDumper:
 
                     # Update it here
                     is_updated[0] |= self._update_repos_based_on_mris(
-                        y[index], u_rs, mris, is_updated
+                        y[index], u_rs, mris, mdo, is_updated
                     )
 
                 self._walk_yaml_update_repos_items(
-                    item, level, mris, False, u_rs, is_updated
+                    item, level, mris, mdo, False, u_rs, is_updated
                 )
 
     """
@@ -1066,6 +1123,7 @@ class ManifestDumper:
     def do_create(
         self,
         mris: Dict[str, ManifestRepoItem],
+        mdo: ManifestDataOptions,
     ) -> Dict:
         y: Dict[str, Any] = {"repos": []}
 
@@ -1086,7 +1144,9 @@ class ManifestDumper:
                 rr["branch"] = items.branch
             if items.tag:
                 rr["tag"] = items.tag
-            if not items.branch and not items.tag and items.sha1:
+            if (
+                not items.branch and not items.tag and items.sha1
+            ) or mdo.sha1_only is True:
                 rr["sha1"] = items.sha1
 
             y["repos"].append(rr)
@@ -1095,7 +1155,7 @@ class ManifestDumper:
     """
     ===========================================
     Check YAML data structure if all Repos have
-        at leas one remote.
+        at least one remote.
     """
 
     def some_remote_is_missing(self, yy: Union[Dict, List, None]) -> bool:

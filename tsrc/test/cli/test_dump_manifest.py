@@ -127,6 +127,7 @@ def test_raw_dump_save_to(
 
     # 3rd: RAW dump with different --save-to path
     os.chdir(workspace_path)
+    message_recorder.reset()
     tsrc_cli.run("dump-manifest", "--raw", "common path lvl1", "--save-to", sub1_path)
 
     # 4th: verify last command output
@@ -207,6 +208,95 @@ def test_raw_dump_1_repo_no_workspace__long_input_path(
             raise Exception("Manifest contain wrong item")
     if count != 1:
         raise Exception("Manifest does not contain all items")
+
+
+def test_of_calculation_common_path_only(
+    tsrc_cli: CLI,
+    git_server: GitServer,
+    workspace_path: Path,
+    message_recorder: MessageRecorder,
+) -> None:
+    """
+    Check calculation of COMMON PATH:
+
+    * test of cut-down from longer path to shorter
+    * test of cutting down sub-dir due to mutual mismatch
+    * do not fall to '.' COMMON PATH
+
+    Scenario:
+
+    * 1st: init (empty) Workspace
+    * 2nd: place various new Repos to various sub-directories
+    * 3rd: test mismatch cut-down of COMMON PATH
+    * 4th: new Repo that should cut-down due to shorter Path
+    * 5th: test COMMON PATH now
+    """
+
+    # 1st: init (empty) Workspace
+    manifest_url = git_server.manifest_url
+    tsrc_cli.run("init", "--branch", "master", manifest_url)
+    WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
+
+    # 2nd: place various new Repos to various sub-directories
+    ad_hoc_place_repo_on_path(
+        workspace_path,
+        Path("a_sub" + os.sep + "a_sub_sub" + os.sep + "a_sub_sub_sub"),
+        "repo_a",
+    )
+    ad_hoc_place_repo_on_path(
+        workspace_path,
+        Path("a_sub" + os.sep + "a_sub_sub" + os.sep + "b_sub_sub_sub"),
+        "repo_b",
+    )
+
+    # 3rd: test mismatch cut-down of COMMON PATH
+    message_recorder.reset()
+    tsrc_cli.run("dump-manifest", "--raw", ".")
+    if os.name == "nt":
+        assert message_recorder.find(
+            r"=> Using Repo\(s\) COMMON PATH on: '.*\\a_sub\\a_sub_sub.*'"
+        )
+    else:
+        assert message_recorder.find(
+            r"=> Using Repo\(s\) COMMON PATH on: '.*"
+            + os.sep
+            + "a_sub"
+            + os.sep
+            + "a_sub_sub'"
+        )
+
+    # 4th: new Repo that should cut-down due to shorter Path
+    ad_hoc_place_repo_on_path(
+        workspace_path, Path("a_sub" + os.sep + "b_sub_sub"), "repo_c"
+    )
+
+    # 5th: test COMMON PATH now
+    message_recorder.reset()
+    tsrc_cli.run("dump-manifest", "--raw", ".")
+    if os.name == "nt":
+        assert message_recorder.find(r"=> Using Repo\(s\) COMMON PATH on: '.*a_sub'")
+    else:
+        assert message_recorder.find(
+            r"=> Using Repo\(s\) COMMON PATH on: '." + os.sep + "a_sub'"
+        )
+
+
+def ad_hoc_place_repo_on_path(
+    workspace_path: Path, repo_path: Path, repo_name: str
+) -> None:
+    os.makedirs(repo_path)
+    os.chdir(repo_path)
+    sub1_1_path = Path(repo_name)
+    os.mkdir(sub1_1_path)
+    os.chdir(sub1_1_path)
+    full1_path: Path = Path(os.path.join(workspace_path, repo_path, sub1_1_path))
+    run_git(full1_path, "init")
+    sub1_1_1_file = Path("in_repo.txt")
+    sub1_1_1_file.touch()
+    run_git(full1_path, "add", "in_repo.txt")
+    run_git(full1_path, "commit", "in_repo.txt", "-m", "adding in_repo.txt file")
+
+    os.chdir(workspace_path)
 
 
 def test_raw_dump_from_abs_path(
@@ -1112,8 +1202,8 @@ def test_update_update__by_status(
     pattern = re.compile("^.*repo2.*([0-9a-f]{7}).*([0-9a-f]{7}).*$")
     if chck_ptrn:
         restr = pattern.match(chck_ptrn)
-    if not (restr and restr.group(1) == restr.group(2)):
-        raise Exception("SHA1 does not match")
+        if not (restr and restr.group(1) == restr.group(2)):
+            raise Exception("SHA1 does not match")
 
     assert message_recorder.find(
         r"\* repo3    \[ point_c           \]  point_c \(expected: main\) \(missing upstream\)"

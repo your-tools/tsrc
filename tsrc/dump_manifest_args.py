@@ -10,6 +10,7 @@ from tsrc.dump_manifest import ManifestDumpersOptions
 from tsrc.dump_manifest_args_data import (
     DumpManifestOperationDetails,
     FinalOutputModeFlag,
+    ManifestDataOptions,
 )
 from tsrc.dump_manifest_args_final_output import FinalOutput
 from tsrc.dump_manifest_args_source_mode import SourceMode, SourceModeEnum
@@ -51,6 +52,9 @@ class DumpManifestArgs:
         self.u_s = UpdateSource(args, self.dmod)
         self.dmod = self.u_s.get_update_source_and_path()
 
+        # take care of OPTIONS of Manifest's handling
+        self.dmod.manifest_data_options = self._get_manifest_data_options()
+
         # take care of Final Output Mode Flag and All Paths
         self.f_o = FinalOutput(args, self.dmod)
         self.dmod = self.f_o.get_final_output_modes_and_paths()
@@ -60,6 +64,20 @@ class DumpManifestArgs:
 
         # take care of Warning of common purpose
         self._take_care_of_common_warnings()
+
+    def _get_manifest_data_options(self) -> ManifestDataOptions:
+        mdo = ManifestDataOptions()
+        if self.args.sha1_only is True:
+            mdo.sha1_only = True
+        if self.args.skip_manifest is True:
+            mdo.skip_manifest = True
+        if self.args.only_manifest is True:
+            mdo.only_manifest = True
+        if self.args.skip_manifest is True and self.args.only_manifest is True:
+            raise Exception(
+                "'--skip-manifest' and '--only-manifest' are mutually exclusive"
+            )
+        return mdo
 
     def _check_default_mode_and_path(self) -> DumpManifestOperationDetails:
         # use default only if COMMON PATH will not be calculated
@@ -108,6 +126,8 @@ class DumpManifestArgs:
         if self.args.raw_dump_path and not self.args.save_to:  # noqa: W503
             grab_save_path = tmp_save_file_path
             if grab_save_path.is_file():
+                if FinalOutputModeFlag.PREVIEW in self.dmod.final_output_mode:
+                    return self.dmod
                 if self.args.use_force is True:
                     self.dmod.final_output_mode.append(FinalOutputModeFlag.OVERWRITE)
                 else:

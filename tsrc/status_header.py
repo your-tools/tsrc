@@ -96,28 +96,44 @@ class StatusHeader:
                 else:
                     self._header_manifest_branch(self.branch, self.branch_0)
 
-    def report_collecting(self, c_all: int) -> None:
-        """report about how much Repos will be processed
-        in order to obatain its Status"""
-        c_w_repos = len(self.workspace.repos)
-        c_w_repos_s = self._is_plural(c_w_repos, "s")
-        c_l_repos = c_all - c_w_repos
-        c_l_repos_s = self._is_plural(c_l_repos, "s")
-        c_all_es = self._is_plural(c_w_repos + c_l_repos, "es")
+    def report_collecting(self, cw: int, cl: int = 0, cb: int = 0) -> None:
+        """
+        Properly display counters of Repos of various kind,
+        that will be processed together, like:
+        * 'cw' - count of Workspace Repos
+        * 'cl' - count of leftovers Repo (both DM and FM)
+        * 'cb' - count of temporary Bare Repos (both DM and FM)
+        """
+        cw_pl = self._is_plural(cw, "s")
+        cl_pl = self._is_plural(cl, "s")
+        cb_pl = self._is_plural(cb, "s")
+        str_cw = f"{cw} workspace repo{cw_pl}"
+        str_cl = f"{cl} leftovers repo{cl_pl}"
+        str_cb = f"{cb} tmp bare repo{cb_pl}"
+        start_pl = ""
+        if cw > 0:
+            start_pl = self._is_plural(cw, "es")
+        elif cl > 0:
+            start_pl = self._is_plural(cl, "es")
+        else:
+            start_pl = self._is_plural(cb, "es")
 
-        if c_w_repos == c_all:  # no leftover repo(s)
-            ui.info_1(
-                f"Collecting status{c_all_es} of {c_w_repos} workspace repo{c_w_repos_s}"
-            )
-        else:  # with leftover repo(s)
-            if c_w_repos == 0:  # without workspace repo(s)
-                ui.info_1(
-                    f"Collecting status{c_all_es} of {c_l_repos} leftover repo{c_l_repos_s}"  # noqa: E501
-                )
-            else:  # combined workspace and leftover repo(s)
-                ui.info_1(
-                    f"Collecting status{c_all_es} of {c_w_repos} workspace repo{c_w_repos_s} + {c_l_repos} leftover repo{c_l_repos_s}"  # noqa: E501
-                )
+        str_out = ""
+        if cw > 0 or cl > 0 or cb > 0:
+            str_out = f"Collecting status{start_pl} of "
+        if cw > 0:
+            str_out += str_cw
+            if cl > 0 or cb > 0:
+                str_out += " + "
+        if cl > 0:
+            str_out += str_cl
+            if cb > 0:
+                str_out += " + "
+        if cb > 0:
+            str_out += str_cb
+
+        if str_out:
+            ui.info_1(str_out)
 
     """ internal functions """
 

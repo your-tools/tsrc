@@ -54,6 +54,7 @@ class MRISHelpers:
         return ManifestRepoItem(
             branch=repo.branch,
             tag=repo.tag,
+            # sha1=repo.sha1_full,
             sha1=repo.sha1,
             ignore_submodules=repo.ignore_submodules,
             remotes=repo.remotes,
@@ -80,7 +81,7 @@ class MRISHelpers:
             return ManifestRepoItem(
                 branch=status.git.branch,
                 tag=status.git.tag,
-                sha1=status.git.sha1,
+                sha1=status.git.sha1_full,
                 empty=status.git.empty,
                 ignore_submodules=w_repo.ignore_submodules,
                 remotes=w_repo.remotes,

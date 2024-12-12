@@ -66,10 +66,10 @@ class Syncer(Task[Repo]):
 
         summary_lines = []
         ref = None
-        if repo.tag:
-            ref = repo.tag
-        elif repo.sha1:
+        if repo.sha1:
             ref = repo.sha1
+        elif repo.tag:
+            ref = repo.tag
 
         if ref:
             self.info_3("Resetting to", ref)
@@ -182,8 +182,14 @@ class Syncer(Task[Repo]):
         self.info_3("Taking care of ref while respecting branch:", orig_branch)
         repo_path = self.workspace_path / repo.dest
         if repo.tag:
-            rc, ret = run_git_captured(repo_path, "rev-list", "-n", "1", repo.tag)
+            rc, ret = run_git_captured(
+                repo_path, "rev-list", "-n", "1", repo.tag, check=False
+            )
             if rc == 0:
+                if repo.sha1 == ref:
+                    if ref != ret:
+                        self.info_3("Mismatch of sha1 and tag")
+                        raise Error("git tag and sha1 does not match")
                 ref = ret
             else:
                 raise Error(f"cannot determine commit for tag: {repo.tag}")
@@ -197,18 +203,34 @@ class Syncer(Task[Repo]):
         repo_path = self.workspace_path / repo.dest
 
         # obtain all branches that points to SHA1 ref
-        rc, ret = run_git_captured(
-            repo_path, "for-each-ref", "--format=%(refname)", "--points-at", ref
-        )
-        rets: List[str] = ret.splitlines()
         sel_ref: str = ""
-        for i in rets:
-            # filter only remote refs
-            if i.startswith("refs/remotes/") is True:
-                rps: List[str] = i.split("/")
-                if orig_branch == rps[-1]:
-                    sel_ref = i
-                    break  # no need to search any further
+        rc, _ = run_git_captured(
+            repo_path, "merge-base", ref, f"refs/heads/{orig_branch}", check=False
+        )
+        if rc == 0:
+            sel_ref = f"refs/heads/{orig_branch}"
+            self.info_3("Found ref match in local branch")
+        else:
+            # we need to check for match in remotes
+
+            # get all possible remotes
+            _, our_remotes = run_git_captured(repo_path, "remote", check=False)
+            for our_remote in our_remotes.splitlines():
+
+                # check single remote
+                # NOTE: as tsrc's Manifest does not support anything like 'remote branch'
+                #   thus only /remotes/branch will be checked, we will not check any other
+                #   remote branch that does not match configured (local) branch
+                rc, _ = run_git_captured(
+                    repo_path,
+                    "merge-base",
+                    ref,
+                    f"refs/remotes/{our_remote}/{orig_branch}",
+                    check=False,
+                )
+                if rc == 0:
+                    sel_ref = f"refs/remotes/{our_remote}/{orig_branch}"
+                    self.info_3("Found ref match in remote:", our_remote)
 
         # check if SHA1 and branch are found
         if not sel_ref:
@@ -217,14 +239,19 @@ class Syncer(Task[Repo]):
             )
 
         # check if we have local branch pointing to remote ref
-        rc, ret = run_git_captured(
-            repo_path, "branch", "--format=%(refname) %(upstream)", "--points-at", ref
+        _, ret = run_git_captured(
+            repo_path,
+            "branch",
+            "--format=%(refname) %(upstream)",
+            "--points-at",
+            sel_ref,
+            check=False,
         )
         ret_lines: List[str] = ret.splitlines()
         lb_found: str = ""  # local branch (is) found (here)
         for rl in ret_lines:
             rfs: List[str] = rl.split()
-            if len(rfs) == 2 and rfs[1] == sel_ref:
+            if len(rfs) == 2 and rfs[0] == sel_ref:
                 lb_found = rfs[0].split("/")[-1]
 
         # determine if we need to checkout remote

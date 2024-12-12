@@ -1,11 +1,12 @@
 import collections
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import cli_ui as ui
 
 from tsrc.errors import MissingRepoError
 from tsrc.executor import Outcome, Task
-from tsrc.git import GitStatus, get_git_status
+from tsrc.git import GitBareStatus, GitStatus, get_git_bare_status, get_git_status
 from tsrc.git_remote import GitRemote, get_git_remotes
 from tsrc.manifest import Manifest
 from tsrc.manifest_common_data import ManifestsTypeOfData
@@ -21,7 +22,7 @@ class ManifestStatus:
         self.repo = repo
         self.manifest = manifest
         self.incorrect_branch: Optional[Tuple[str, str]] = None
-        self.missing_upstream = True
+        self.missing_upstream = False
         self.git_remote: Union[GitRemote, None] = None
 
     def update(self, git_status: GitStatus, git_remote: Union[GitRemote, None]) -> None:
@@ -58,7 +59,7 @@ class Status:
         *,
         git: GitStatus,
         git_remote: Union[GitRemote, None],
-        manifest: ManifestStatus
+        manifest: ManifestStatus,
     ):
         self.git = git
         self.git_remote = git_remote
@@ -70,13 +71,19 @@ class StatusCollector(Task[Repo]):
     stats w.r.t the manifest for each repo.
     """
 
-    def __init__(self, workspace: Workspace, ignore_group_item: bool = False) -> None:
+    def __init__(
+        self,
+        workspace: Workspace,
+        only_full_status: bool = False,
+        ignore_group_item: bool = False,
+    ) -> None:
         self.workspace = workspace
         if ignore_group_item is True:
             self.manifest = workspace.get_manifest_safe_mode(ManifestsTypeOfData.LOCAL)
         else:
             self.manifest = workspace.get_manifest()
-        self.statuses: CollectedStatuses = collections.OrderedDict()
+        self.only_full_status = only_full_status
+        self.statuses: CollectedAllStatuses = collections.OrderedDict()
 
     def describe_item(self, item: Repo) -> str:
         return item.dest
@@ -91,10 +98,27 @@ class StatusCollector(Task[Repo]):
         # Note: Outcome is always empty here, because we
         # use self.statuses in the main `run()` function instead
         # of calling OutcomeCollection.print_summary()
-        full_path = self.workspace.root_path / repo.dest
         self.info_count(index, count, repo.dest, end="\r")
-        if not full_path.exists():
-            self.statuses[repo.dest] = MissingRepoError(repo.dest)
+        if repo.is_bare is True and self.only_full_status is False:
+            self._process_bare(Path(repo.dest), repo)
+        else:
+            full_path = self.workspace.root_path / repo.dest
+            if not full_path.exists():
+                self.statuses[repo.dest] = MissingRepoError(repo.dest)
+            self._process_default(full_path, repo)
+        if not self.parallel:
+            erase_last_line()
+        return Outcome.empty()
+
+    def _process_bare(self, full_path: Path, repo: Repo) -> None:
+        git_bare_status = get_git_bare_status(full_path)
+        if repo._bare_clone_is_ok is False:
+            git_bare_status.is_ok = False
+        bare_status = BareStatus(git=git_bare_status)
+        self.statuses[repo.dest] = bare_status
+        pass
+
+    def _process_default(self, full_path: Path, repo: Repo) -> None:
         try:
             git_status = get_git_status(full_path)
             git_remote: Union[GitRemote, None] = None
@@ -108,9 +132,6 @@ class StatusCollector(Task[Repo]):
             self.statuses[repo.dest] = status
         except Exception as e:
             self.statuses[repo.dest] = e
-        if not self.parallel:
-            erase_last_line()
-        return Outcome.empty()
 
 
 class StatusCollectorLocalOnly(Task[Repo]):
@@ -159,5 +180,23 @@ class StatusCollectorLocalOnly(Task[Repo]):
         return Outcome.empty()
 
 
+class BareStatus:
+    """Wrapper class for both ManifestStatus and GitStatus"""
+
+    def __init__(
+        self,
+        *,
+        git: GitBareStatus,
+        # git_remote: Union[GitRemote, None],
+        # manifest: ManifestStatus
+    ):
+        self.git = git
+        # self.git_remote = git_remote
+        # self.manifest = manifest
+
+
 StatusOrError = Union[Status, Exception]
 CollectedStatuses = Dict[str, StatusOrError]
+BareStatusOrError = Union[BareStatus, Exception]
+CollectedAllStatuses = Dict[str, Union[StatusOrError, BareStatusOrError]]
+CollectedBareStatuses = Dict[str, BareStatusOrError]
