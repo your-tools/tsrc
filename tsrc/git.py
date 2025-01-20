@@ -61,8 +61,10 @@ class GitBareStatus:
     as only very few information is needed for related Use-Case
     """
 
-    def __init__(self, working_path: Path) -> None:
+    def __init__(self, working_path: Path, remote_name: str, remote_url: str) -> None:
         self.working_path = working_path
+        self.remote_name = remote_name
+        self.remote_url = remote_url
         self.branch: Optional[str] = None
         self.ahead = 0
         self.behind = 0
@@ -84,12 +86,45 @@ class GitBareStatus:
 
     def update_upstream(self) -> None:
         if self.branch:
+
+            # check if upstream is already set
+            rc, is_upstr = run_git_captured(
+                self.working_path,
+                "rev-parse",
+                "--symbolic-full-name",
+                f"{self.branch}@{{u}}",
+                check=False,
+            )
+            if rc == 0:
+                self.is_upstreamed = True
+                return
+
+            # if we are here, than we need to take some measures
+            # so to setting upstream will be possible
+
+            # refresh remotes so setting upstream will be possible later
+            run_git_captured(
+                self.working_path, "remote", "remove", self.remote_name, check=False
+            )
+            run_git_captured(
+                self.working_path,
+                "remote",
+                "add",
+                self.remote_name,
+                self.remote_url,
+                check=False,
+            )
+            run_git_captured(
+                self.working_path, "fetch", "--all", "--prune", check=False
+            )
+
+            # only set upstream if it is not set
             rc, _ = run_git_captured(
                 self.working_path,
                 "branch",
                 self.branch,
                 "--set-upstream-to",
-                f"origin/{self.branch}",
+                f"{self.remote_name}/{self.branch}",
                 check=False,
             )
             if rc == 0:
@@ -450,8 +485,10 @@ def get_git_status(working_path: Path) -> GitStatus:
     return status
 
 
-def get_git_bare_status(working_path: Path) -> GitBareStatus:
-    bare_status = GitBareStatus(working_path)
+def get_git_bare_status(
+    working_path: Path, remote_name: str, remote_url: str
+) -> GitBareStatus:
+    bare_status = GitBareStatus(working_path, remote_name, remote_url)
     bare_status.update()
     return bare_status
 

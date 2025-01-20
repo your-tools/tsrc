@@ -23,7 +23,8 @@ class UpdateSourceEnum(Enum):
 
 @dataclass
 class ManifestDataOptions:
-    sha1_only: bool = False
+    sha1_on: bool = False
+    sha1_off: bool = False
     skip_manifest: bool = False
     only_manifest: bool = False
     ignore_groups: bool = False  # not implemented

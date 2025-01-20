@@ -7,6 +7,7 @@ from typing import List, Optional
 import cli_ui as ui
 import ruamel.yaml
 
+from tsrc.cleaner import Cleaner
 from tsrc.cloner import Cloner
 from tsrc.errors import Error
 from tsrc.executor import process_items
@@ -188,6 +189,36 @@ class Workspace:
             ui.error("Failed to synchronize the following repos:")
             collection.print_errors()
             raise SyncError
+
+    def clean(
+        self, *, do_clean: bool = False, do_hard_clean: bool = False, num_jobs: int = 1
+    ) -> None:
+        """
+        optional. only runs when some of the cleans are True
+        WARNING: this may lead to data loss of files that are not under the
+        version control
+        """
+        if do_clean is True and do_hard_clean is True:
+            ui.warning(
+                "'--hard-clean' also performs '--clean', no need for extra option"
+            )
+
+        clean_mode: int = 0
+        if do_hard_clean is True:
+            clean_mode = 2
+        else:
+            if do_clean is True:
+                clean_mode = 1
+
+        if clean_mode > 0:
+            this_hard: bool = False
+            if clean_mode == 2:
+                this_hard = True
+
+            cleaner = Cleaner(self.root_path, do_hard_clean=this_hard)
+            repos = self.repos
+            ui.info_2("Cleaning repos:")
+            process_items(repos, cleaner, num_jobs=num_jobs)
 
 
 class SyncError(Error):

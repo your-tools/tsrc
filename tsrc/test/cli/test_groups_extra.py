@@ -295,10 +295,8 @@ def test_intersectioned_groups(
     #   selected groups: 'group_1','group_3','group_4'
     #   which translated to:
     #   'repo_1','manifest','repo_3','repo_5'
-    #   However:
-    #   configuration also have 'clone_all_repos'=True
-    #   Therefore:
-    #   we should consider all defined repository for Deep Manifest as well
+    #   Deep Manifest respects '--clone-all-repos', which
+    #   translated to take all repos from Deep Manifest
     message_recorder.reset()
     tsrc_cli.run("status")
     assert message_recorder.find(r"\* repo_1   \[ master \]  master")

@@ -63,8 +63,11 @@ class RepoGrabber(Task[Repo]):
                     is_default_branch=False,
                     orig_branch=gits.branch,
                     sha1=gits.sha1,
+                    sha1_full=gits.sha1_full,
                     tag=gits.tag,
                     remotes=gitr.remotes,
+                    _grabbed_ahead=gits.ahead,
+                    _grabbed_behind=gits.behind,
                 )
             )
 

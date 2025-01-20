@@ -15,6 +15,7 @@ import cli_ui as ui
 from tsrc.config_data import ConfigUpdateData, ConfigUpdateType
 from tsrc.config_status_rc import ConfigStatusReturnCode
 from tsrc.config_tools import ConfigTools
+from tsrc.errors import Error
 from tsrc.status_header_dm import StatusHeaderDisplayMode
 from tsrc.workspace import Workspace
 
@@ -110,6 +111,7 @@ class ConfigStatus:
                 "ignoring",
                 ui.reset,
             )
+            raise Error("aborting Manifest branch change")
         if rc == ConfigStatusReturnCode.CANCEL:
             branch_0 = self.workspace.config.manifest_branch_0
             if branch == branch_0:

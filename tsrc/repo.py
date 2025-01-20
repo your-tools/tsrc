@@ -48,13 +48,15 @@ class Repo:
     # see 'test/cli/test_sync_to_ref.py' for even more details
     orig_branch: Optional[str] = None
     sha1: Optional[str] = None
-    # sha1_full: Optional[str] = None
+    sha1_full: Optional[str] = None  # used for RepoGrabber
     tag: Optional[str] = None
     shallow: bool = False
     ignore_submodules: bool = False
     is_bare: bool = False
     # only used by RepoGrabber
     _grabbed_from_path: Optional[Path] = None
+    _grabbed_ahead: int = 0  # position-related data from Status
+    _grabbed_behind: int = 0  # position-related data from Status
     # only for BareCloner class
     _bare_clone_path: Optional[Path] = None
     _bare_clone_mtod: Optional[ManifestsTypeOfData] = None
@@ -168,7 +170,6 @@ class Repo:
                         )
                         res += tmp_res
                         able += tmp_able
-                        # TODO: any correction for 'ljust'?
                     else:
                         if self.sha1:
                             res += [ui.red, f"?? {sha1}".ljust(this_ljust), ui.reset]

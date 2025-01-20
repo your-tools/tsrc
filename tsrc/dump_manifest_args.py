@@ -67,15 +67,19 @@ class DumpManifestArgs:
 
     def _get_manifest_data_options(self) -> ManifestDataOptions:
         mdo = ManifestDataOptions()
-        if self.args.sha1_only is True:
-            mdo.sha1_only = True
+        if self.args.sha1_on is True and self.args.sha1_off is True:
+            raise Exception("'--sha1-on' and '--sha1-off' are mutually exclusive")
+        elif self.args.sha1_on is True:
+            mdo.sha1_on = True
+        elif self.args.sha1_off is True:
+            mdo.sha1_off = True
         if self.args.skip_manifest is True:
             mdo.skip_manifest = True
         if self.args.only_manifest is True:
             mdo.only_manifest = True
         if self.args.skip_manifest is True and self.args.only_manifest is True:
             raise Exception(
-                "'--skip-manifest' and '--only-manifest' are mutually exclusive"
+                "'--skip-manifest-repo' and '--only-manifest-repo' are mutually exclusive"
             )
         return mdo
 

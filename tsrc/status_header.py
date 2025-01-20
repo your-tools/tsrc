@@ -22,6 +22,7 @@ from tsrc.config_status import ConfigStatus
 
 # import tsrc.config_status_rc
 from tsrc.config_status_rc import ConfigStatusReturnCode
+from tsrc.errors import Error
 from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_get_main_color
 from tsrc.status_header_dm import StatusHeaderDisplayMode
 from tsrc.workspace import Workspace
@@ -53,7 +54,7 @@ class StatusHeader:
         self,
         cfgud: ConfigUpdateData,
         cfguts: List[ConfigUpdateType],
-    ) -> None:
+    ) -> bool:
         """this function should be called only once (as only once will work)"""
         if not self._config_update_data:
             self._config_update_data = cfgud
@@ -61,17 +62,23 @@ class StatusHeader:
 
             # pre-check all provided updates to config
             cs = ConfigStatus(self.workspace, self.shdms)
-            found_some = False
-            (
-                self._config_status_rc,
-                self._config_update_type,
-                found_some,
-            ) = cs.pre_check_change(cfgud, cfguts)
-            if found_some is True:
-                self.shdms += [StatusHeaderDisplayMode.CONFIG_CHANGE]
+            try:
+                found_some = False
+                (
+                    self._config_status_rc,
+                    self._config_update_type,
+                    found_some,
+                ) = cs.pre_check_change(cfgud, cfguts)
+            except Error as e:
+                ui.error(e)
+                return False
+            else:
+                if found_some is True:
+                    self.shdms += [StatusHeaderDisplayMode.CONFIG_CHANGE]
 
-            # do not care if you want to display it, if data are OK, config will be updated
-            cs.proceed_to_change(cfgud, self._config_update_type)
+                # do not care if you want to display it, if data are OK, config will be updated
+                cs.proceed_to_change(cfgud, self._config_update_type)
+        return True
 
     def display(self) -> None:
         if StatusHeaderDisplayMode.CONFIG_CHANGE in self.shdms:

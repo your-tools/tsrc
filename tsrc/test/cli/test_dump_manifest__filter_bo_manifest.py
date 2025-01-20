@@ -1,12 +1,12 @@
 """
 Dump Manifest: filter by:
-* considering only Manifest Repo ('--only-manifest')
-* disregarding other then Manifest Repo ('--skip-manifest')
+* considering only Manifest Repo ('--only-manifest-repo')
+* disregarding other then Manifest Repo ('--skip-manifest-repo')
 
-* test if '--only-manifest' fails when no Workspace is there
-* same for '--skip-manifest'
+* test if '--only-manifest-repo' fails when no Workspace is there
+* same for '--skip-manifest-repo'
 
-* test if it disregard using '--skip-manifest' and '--only-manifest' at the same time
+* test if it disregard using '--skip-manifest-repo' and '--only-manifest-repo' at the same time
 """
 
 from pathlib import Path
@@ -23,7 +23,7 @@ from tsrc.workspace_config import WorkspaceConfig
 
 """
 =================================
-'--skip-manifest' section follows
+'--skip-manifest-repo' section follows
 """
 
 
@@ -35,7 +35,7 @@ def test_skip_manifest__on_raw(
 ) -> None:
     """
     Description:
-    Test if '--skip-manifest' is respected when
+    Test if '--skip-manifest-repo' is respected when
     on RAW dump
 
     Scenario:
@@ -61,7 +61,7 @@ def test_skip_manifest__on_raw(
     WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
 
     # 4th: RAW dump, while skipping manifest
-    tsrc_cli.run("dump-manifest", "--raw", ".", "--skip-manifest")
+    tsrc_cli.run("dump-manifest", "--raw", ".", "--skip-manifest-repo")
 
     # 5th: test if 'manifest' repository is not present
     m_path = workspace_path / "manifest.yml"
@@ -79,7 +79,7 @@ def test_skip_manifest__on_workspace(
 ) -> None:
     """
     Description:
-    Test if '--skip-manifest' is respected when
+    Test if '--skip-manifest-repo' is respected when
     dump from Workspace (no UPDATE)
 
     Scenario:
@@ -106,7 +106,7 @@ def test_skip_manifest__on_workspace(
 
     # 4th: dump manifest, while skipping DM
     message_recorder.reset()
-    tsrc_cli.run("dump-manifest", "--skip-manifest")
+    tsrc_cli.run("dump-manifest", "--skip-manifest-repo")
     assert message_recorder.find(r"=> Creating NEW file 'manifest\.yml'")
     assert message_recorder.find(r":: Dump complete")
 
@@ -126,7 +126,7 @@ def test_skip_manifest__on_workspace__on_update(
 ) -> None:
     """
     Description:
-    Test if '--skip-manifest' is respected when
+    Test if '--skip-manifest-repo' is respected when
     dump from Workspace no UPDATE
 
     Scenario:
@@ -157,7 +157,7 @@ def test_skip_manifest__on_workspace__on_update(
     ad_hoc_update_manifest_repo_dest(dm_path_file)
 
     # 5th: dump manifest, while skipping DM
-    tsrc_cli.run("dump-manifest", "--update", "--skip-manifest", "--force")
+    tsrc_cli.run("dump-manifest", "--update", "--skip-manifest-repo", "--force")
 
     # 6th: verify if Manifest's dest was not updated
     w_m_path = workspace_path / "manifest" / "manifest.yml"
@@ -188,7 +188,7 @@ def ad_hoc_update_manifest_repo_dest(
 
 """
 =================================
-'--only-manifest' section follows
+'--only-manifest-repo' section follows
 """
 
 
@@ -201,7 +201,7 @@ def test_if_stop_on_mutually_exclusive(
     """
     Description:
     Test if it stops when using mutually exclusive options:
-    '--skip-manifest' and '--only-manifest' at the same time
+    '--skip-manifest-repo' and '--only-manifest-repo' at the same time
 
     Scenario:
     * 1st: Create repositories
@@ -226,9 +226,9 @@ def test_if_stop_on_mutually_exclusive(
 
     # 4th: test conflicting options
     message_recorder.reset()
-    tsrc_cli.run("dump-manifest", "--only-manifest", "--skip-manifest")
+    tsrc_cli.run("dump-manifest", "--only-manifest-repo", "--skip-manifest-repo")
     assert message_recorder.find(
-        r"Error: '--skip-manifest' and '--only-manifest' are mutually exclusive"
+        r"Error: '--skip-manifest-repo' and '--only-manifest-repo' are mutually exclusive"
     )
 
 
@@ -240,7 +240,7 @@ def test_only_manifest__on_workspace(
 ) -> None:
     """
     Description:
-    Test if '--only-manifest' is respected when
+    Test if '--only-manifest-repo' is respected when
     dump from Workspace (no UPDATE)
 
     Scenario:
@@ -267,7 +267,7 @@ def test_only_manifest__on_workspace(
 
     # 4th: dump manifest, while only considering DM
     message_recorder.reset()
-    tsrc_cli.run("dump-manifest", "--only-manifest")
+    tsrc_cli.run("dump-manifest", "--only-manifest-repo")
     assert message_recorder.find(r"=> Creating NEW file 'manifest\.yml'")
     assert message_recorder.find(r":: Dump complete")
 
@@ -293,7 +293,7 @@ def test_only_manifest__on_raw(
 ) -> None:
     """
     Description:
-    Test if '--skip-manifest' is respected when
+    Test if '--skip-manifest-repo' is respected when
     on RAW dump
 
     Scenario:
@@ -319,7 +319,7 @@ def test_only_manifest__on_raw(
     WorkspaceConfig.from_file(workspace_path / ".tsrc" / "config.yml")
 
     # 4th: RAW dump, while we are interrestend only in manifest's Repo
-    tsrc_cli.run("dump-manifest", "--raw", ".", "--only-manifest")
+    tsrc_cli.run("dump-manifest", "--raw", ".", "--only-manifest-repo")
 
     # 5th: test if 'manifest' is only Repo in Manifest
     m_path = workspace_path / "manifest.yml"
@@ -344,7 +344,7 @@ def test_only_manifest__on_update(
     Description:
 
     'dump-manifest':
-    test option '--only-manifest' when Workspace dump on UPDATE
+    test option '--only-manifest-repo' when Workspace dump on UPDATE
 
     Scenario:
 
@@ -381,7 +381,7 @@ def test_only_manifest__on_update(
 
     # 6th: dump-manifest, only manifest, UPDATE existin DM
     message_recorder.reset()
-    tsrc_cli.run("dump-manifest", "--update", "--only-manifest", "--force")
+    tsrc_cli.run("dump-manifest", "--update", "--only-manifest-repo", "--force")
     assert message_recorder.find(r"=> UPDATING Deep Manifest on")
     assert message_recorder.find(r":: Dump complete")
 

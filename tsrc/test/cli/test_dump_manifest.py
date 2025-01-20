@@ -902,12 +902,16 @@ def test_raw_dump_update__use_workspace__without_workspace(
     message_recorder: MessageRecorder,
 ) -> None:
     """
-    Check if Workspace gets ignored even if it is called to be used
+    Check if Workspace gets ignored even if it is called to be used.
+    Also check if '--skip-manifest-repo'|'--only-manifest-repo' throws a Warning
+    as without Workspace it is not possible to determine Deep Manifest
 
     Scenario:
 
-    # 1nd: create 'repo 1', GIT init, add, commit
-    # 2nd: try to dump manifest by RAW mode, while want to update DM
+    * 1nd: create 'repo 1', GIT init, add, commit
+    * 2nd: try to dump manifest by RAW mode, while want to update DM
+    * 3rd: test Warning when '--skip-manifest-repo'
+    * 4th: test Warning and Error when '--only-manifest-repo'
     """
     # 1nd: create 'repo 1', GIT init, add, commit
     sub1_path = workspace_path
@@ -931,6 +935,25 @@ def test_raw_dump_update__use_workspace__without_workspace(
     tsrc_cli.run("dump-manifest", "--raw", ".", "--update")
 
     assert message_recorder.find(r"Error: Could not find current workspace")
+
+    # 3rd: test Warning when '--skip-manifest-repo'
+    #   without Workspace, we cannot know which is manifest,
+    #   thus we cannot skip it. This is just a Warning
+    message_recorder.reset()
+    tsrc_cli.run("dump-manifest", "--raw", ".", "--skip-manifest-repo")
+    assert message_recorder.find(
+        r"Warning: Cannot skip Deep Manifest if there is no Workspace"
+    )
+
+    # 4th: test Warning and Error when '--only-manifest-repo'
+    #   not only manifest without Workspace can be determined,
+    #   there is no data, thus Error is also throwed
+    message_recorder.reset()
+    tsrc_cli.run("dump-manifest", "--raw", ".", "--only-manifest-repo", "--force")
+    assert message_recorder.find(
+        r"Warning: Cannot look for Deep Manifest if there is no Workspace"
+    )
+    assert message_recorder.find(r"Error: cannot obtain data: no Repos were found")
 
 
 # flake8: noqa: C901
