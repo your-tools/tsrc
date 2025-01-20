@@ -40,7 +40,7 @@ class WorkspaceReposSummary:
         self,
         workspace: Workspace,
         gtf: GroupsToFind,
-        dm: Union[PCSRepo, None],
+        dm_pcsr: Union[PCSRepo, None],
         only_manifest: bool = False,
         manifest_marker: bool = True,
         future_manifest: bool = True,
@@ -49,7 +49,7 @@ class WorkspaceReposSummary:
     ) -> None:
         self.workspace = workspace
         self.gtf = gtf
-        self.dm = dm  # presence is also a marker
+        self.dm_pcsr = dm_pcsr  # presence is also a marker
         self.is_manifest_marker = manifest_marker
         self.is_future_manifest = future_manifest
         self.use_same_future_manifest = use_same_future_manifest
@@ -229,17 +229,16 @@ class WorkspaceReposSummary:
         Called to print all the reasonable data
         of Workspace, when there are some
         """
-
         # no need to perform dry run check and calculation
         self.is_dry_run = False
 
         # side-quest: check Deep Manifest for root point
-        if self.deep_manifest and self.dm:
+        if self.deep_manifest and self.dm_pcsr:
             self.d_m_root_point = self._check_d_m_root_point(
                 self.workspace,
                 cast(Dict[str, StatusOrError], self.statuses),
                 self.deep_manifest,
-                self.dm.dest,
+                self.dm_pcsr.dest,
             )
 
         # alignment for 'dest'
@@ -278,6 +277,9 @@ class WorkspaceReposSummary:
             self.d_m_repos, self.must_find_all_groups, self.gtf = mgr.by_groups(
                 self.gtf, self.must_find_all_groups
             )
+
+            # updating 'd_m_repos' may cause different 'max_dm_desc'
+            self.max_dm_desc = self._calculate_max_dm_desc()
 
         # print main part with current workspace repositories
         self._core_message_print(
@@ -509,7 +511,7 @@ class WorkspaceReposSummary:
     ) -> "OrderedDict[str, bool]":
         # sort based on: bool: is there a Deep Manifest corelated repository?
         s_has_d_m_d: OrderedDict[str, bool] = OrderedDict()
-        if not self.dm:  # do not sort if there is no reason
+        if not self.dm_pcsr:  # do not sort if there is no reason
             s_has_d_m_d = OrderedDict(has_d_m_d)
             return s_has_d_m_d
         for key in sorted(has_d_m_d, key=has_d_m_d.__getitem__):
@@ -547,10 +549,12 @@ class WorkspaceReposSummary:
         # for dest in o_stats.keys():
         for dest in self.statuses.keys():
             # following condition is only here to minimize execution
-            if self.only_manifest is False or (self.dm and dest == self.dm.dest):
+            if self.only_manifest is False or (
+                self.dm_pcsr and dest == self.dm_pcsr.dest
+            ):
                 # produce just [True|False] to be used as key in sorting items
                 d_m_repo_found: bool = False
-                if self.dm:
+                if self.dm_pcsr:
                     d_m_repo_found, _ = self._repo_matched_manifest_dest(
                         self.workspace,
                         deep_manifest,
@@ -568,14 +572,14 @@ class WorkspaceReposSummary:
     def _ready_d_m_repos(
         self,
     ) -> Tuple[Union[List[Repo], None], Union[Manifest, None]]:
-        if self.dm:
-            path = self.workspace.root_path / self.dm.dest
+        if self.dm_pcsr:
+            path = self.workspace.root_path / self.dm_pcsr.dest
             ldm = LocalManifest(path)
             try:
                 ldmm = ldm.get_manifest_safe_mode(ManifestsTypeOfData.DEEP)
             except LoadManifestSchemaError as lmse:
                 ui.warning(lmse)
-                self.dm = None  # unset Deep Manifest
+                self.dm_pcsr = None  # unset Deep Manifest
                 return None, None
 
             mgr = ManifestGetRepos(
@@ -847,9 +851,9 @@ class WorkspaceReposSummary:
 
     def _calculate_max_dm_desc(self) -> int:
         max_len: int = 0
-        if self.dm and self.d_m_repos:
+        if self.dm_pcsr and self.d_m_repos:
             max_len = self._check_max_dm_desc(
-                self.dm,
+                self.dm_pcsr,
                 self.d_m_repos,
             )
         return max_len
@@ -930,14 +934,20 @@ class WorkspaceReposSummary:
             d_m_repo_found = False
             d_m_repo = None
             # following condition is only here to minimize execution
-            if self.only_manifest is False or (self.dm and dest == self.dm.dest):
+            if self.only_manifest is False or (
+                self.dm_pcsr and dest == self.dm_pcsr.dest
+            ):
                 d_m_repo_found, d_m_repo = self._repo_matched_manifest_dest(
                     self.workspace,
                     deep_manifest,
                     dest,
                 )
 
-            if self.dm and dest != self.dm.dest and self.only_manifest is True:
+            if (
+                self.dm_pcsr
+                and dest != self.dm_pcsr.dest  # noqa: 503
+                and self.only_manifest is True  # noqa: 503
+            ):
                 continue
 
             message = [ui.green, "*", ui.reset, dest.ljust(self.max_dest)]
@@ -1039,7 +1049,7 @@ class WorkspaceReposSummary:
             d_m_repo_found,
             r_d_m_repo,
             dest,
-            self.dm,
+            self.dm_pcsr,
             self.max_dm_desc,
         )
         return message
@@ -1148,7 +1158,6 @@ class WorkspaceReposSummary:
         git: Union[GitStatus, GitBareStatus],
         apprise_repo: Union[Repo, None],
     ) -> List[ui.Token]:
-        # TODO: WIP
         """
         produce comparable list of tokens to take place in
         '_compare_ui_token()'. this produce reference part
@@ -1166,9 +1175,6 @@ class WorkspaceReposSummary:
             if apprise_repo and apprise_repo.sha1:
                 gd_message += [ui.blue, f"~~ {git.sha1}", ui.reset]
             gd_message += git.describe_dirty()
-            # TODO: add also (missing remote)
-            #   when there is missing remote, it should not be compared
-            #   instead it should be always marked as '<<' (trasition to)
 
         return gd_message
 

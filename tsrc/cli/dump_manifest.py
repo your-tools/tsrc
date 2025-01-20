@@ -76,7 +76,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "-U",
         "--update-on",
-        help="Set UPDATE operation mode, by setting the UPDATE source and DESTINATION default to provided UPDATE_AT path to YAML file. Such path must exists",  # noqa: E501
+        help="Set UPDATE operation mode, by setting the UPDATE source and DESTINATION default to provided UPDATE_ON path to YAML file. Such path must exists",  # noqa: E501
         type=Path,
         dest="update_on",
     )
@@ -87,14 +87,20 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         dest="no_repo_delete",
     )
     parser.add_argument(
-        "--sha1-only",
+        "--sha1-on",
         action="store_true",
-        help="Use SHA1 as only value (with branch if available) for every considered Repo. This is particulary useful when we want to point to exact point of Repos states",  # noqa: E501
-        dest="sha1_only",
+        help="Explicitly set SHA1 for every considered Repo. This is particulary useful when we want to point to exact commit in Repos",  # noqa: E501
+        dest="sha1_on",
+    )
+    parser.add_argument(
+        "--sha1-off",
+        action="store_true",
+        help="Tell dumping mechanism that we do not care about excat Repo commit, as long as it keep 'branch' and 'tag's. This option is ignored, when there is no 'branch' or 'tag'",  # noqa: E501
+        dest="sha1_off",
     )
     parser.add_argument(
         "-X",
-        "--skip-manifest",
+        "--skip-manifest-repo",
         help="Skip manifest repository if found. If not, it is ignored. For this filter to work, the Workspace needs to be present. And it is only applied after the processing of the Repositories",  # noqa: E501
         dest="skip_manifest",
         default=False,
@@ -102,7 +108,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
     )
     parser.add_argument(
         "-M",
-        "--only-manifest",
+        "--only-manifest-repo",
         help="Only work with manifest repository if found. If not, the Error is thrown that list of Repositories ends up empty. For this filter to work, the Workspace needs to be present. And it is only applied after the processing of the Repositories",  # noqa: E501
         dest="only_manifest",
         default=False,

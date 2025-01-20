@@ -21,7 +21,7 @@ from tsrc.local_tmp_bare_repos import (
     ready_tmp_bare_repos,
 )
 from tsrc.manifest_common_data import ManifestsTypeOfData
-from tsrc.pcs_repo import get_deep_manifest_from_local_manifest_pcsrepo
+from tsrc.pcs_repo import PCSRepo, get_deep_manifest_from_local_manifest_pcsrepo
 from tsrc.repo import Repo
 from tsrc.status_endpoint import (
     BareStatus,
@@ -102,7 +102,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
-    gtf = GroupsToFind(args.groups)
+    gtf = GroupsToFind(args.groups, args.ignore_if_group_not_found)
     groups_seen = simulate_get_workspace_with_repos(args)
     gtf.found_these(groups_seen)
 
@@ -124,23 +124,23 @@ def run(args: argparse.Namespace) -> None:
         )
 
     # DM (if present) + bare DM (if DM and present)
-    dm = None
+    dm_pcsr: Union[PCSRepo, None] = None
     bare_dm_repos: List[Repo] = []
     if args.use_deep_manifest is True:
-        dm, gtf = get_deep_manifest_from_local_manifest_pcsrepo(
+        dm_pcsr, gtf = get_deep_manifest_from_local_manifest_pcsrepo(
             workspace,
             gtf,
         )
-        if dm and args.local_git_only is False:
+        if dm_pcsr and args.local_git_only is False:
             # this require to check remote
             bare_dm_repos = prepare_tmp_bare_dm_repos(
-                workspace, dm, gtf, num_jobs=get_num_jobs(args)
+                workspace, dm_pcsr, gtf, num_jobs=get_num_jobs(args)
             )
 
     wrs = WorkspaceReposSummary(
         workspace,
         gtf,
-        dm,
+        dm_pcsr,
         manifest_marker=args.use_manifest_marker,
         future_manifest=args.use_future_manifest,
         use_same_future_manifest=args.use_same_future_manifest,

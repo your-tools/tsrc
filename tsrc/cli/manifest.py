@@ -84,7 +84,7 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
-    gtf = GroupsToFind(args.groups)
+    gtf = GroupsToFind(args.groups, args.ignore_if_group_not_found)
     groups_seen = simulate_get_workspace_with_repos(args)
     gtf.found_these(groups_seen)
 
@@ -129,9 +129,13 @@ def run(args: argparse.Namespace) -> None:
     )
     if args.manifest_branch:
         cfg_update_data = ConfigUpdateData(manifest_branch=args.manifest_branch)
-        status_header.register_change(
-            cfg_update_data, [ConfigUpdateType.MANIFEST_BRANCH]
-        )
+        if (
+            status_header.register_change(
+                cfg_update_data, [ConfigUpdateType.MANIFEST_BRANCH]
+            )
+            is False
+        ):
+            return
     status_header.display()
     status_collector = StatusCollector(
         workspace, ignore_group_item=args.ignore_group_item

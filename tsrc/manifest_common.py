@@ -161,6 +161,8 @@ class ManifestGetRepos:
 
         repos: List[Repo] = []
         found_items = list(set(w_group_items).intersection(m_group_items))
+        found_items_wd = found_items + m_group_items
+        found_items = list(set(found_items_wd))
         for item in found_items:
             repos.append(self.manifest.get_repo(item))
         return repos
@@ -188,18 +190,20 @@ class ManifestGetRepos:
                     # m_group_items = self.manifest.get_repos(all_=True)
                     for repo in self.manifest.get_repos(all_=True):
                         m_group_items.append(repo.dest)
-                pass
             else:
                 # we need to consider all groups in such case
                 return self.manifest.get_repos(all_=True)
 
             if self._local_m.group_list and self._local_m.group_list.groups:
                 w_group_items = self._local_m.group_list.get_elements(
-                    self.workspace.config.repo_groups
+                    self.workspace.config.repo_groups,
+                    ignore_if_group_not_found=self.gtf.ignore_missing_groups,
                 )
             else:
                 return self._local_m.get_repos(all_=True)
             found_items = list(set(w_group_items).intersection(m_group_items))
+            found_items_wd = found_items + m_group_items
+            found_items = list(set(found_items_wd))
 
         repos: List[Repo] = []
         for item in found_items:

@@ -390,7 +390,7 @@ def test_manifest_cmd_branch(
         r"=> Such Manifest's branch: xxx was not found on remote, ignoring"
     ), "manifest branch change must be resistant against non-existant branch"
     assert message_recorder.find(
-        r":: Manifest's branch: devel"
+        r"Error: aborting Manifest branch change"
     ), "report that wrong value does not impact current state"
 
     # 9th: change to already present branch (should not change)

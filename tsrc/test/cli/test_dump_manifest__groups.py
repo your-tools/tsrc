@@ -44,7 +44,6 @@ from tsrc.workspace_config import WorkspaceConfig
 # from tsrc.test.helpers.message_recorder_ext import MessageRecorderExt
 
 
-# @pytest.mark.last
 def test_dump_manifest_raw__constraints__incl_excl(
     tsrc_cli: CLI,
     git_server: GitServer,
@@ -255,7 +254,7 @@ def test_dump_manifest_workspace__update_with_constraints__add_repo(
     Story:
 
     when using RAW dump and UPDATE and we want
-    to limit such update on selected Group(s),
+    to limit such update to only selected Group(s),
     then other Repos that does not match such
     Group(s) should be left alone (not updated).
     However when there is Repo in Manifest we
@@ -375,7 +374,13 @@ def test_dump_manifest_workspace__update_with_constraints__add_repo(
     sub1_1_1_file.touch()
     run_git(full1_path, "add", "in_repo.txt")
     run_git(full1_path, "commit", "in_repo.txt", "-m", "adding in_repo.txt file")
-    run_git(full1_path, "remote", "add", "origin", repo_4_url)
+    # take care about remote
+    sub_1_1_url = git_server.get_url(str(sub1_1_path))
+    sub_1_1_url_path = Path(git_server.url_to_local_path(sub_1_1_url))
+    sub_1_1_url_path.mkdir()
+    run_git(sub_1_1_url_path, "init", "--bare")
+    run_git(full1_path, "remote", "add", "origin", sub_1_1_url)
+    run_git(full1_path, "push", "-u", "origin", "refs/heads/master")
 
     # 12th: RAW dump when with Group 'group_1'
     #   First, let us try how RAW dump + UPDATE + Group constraints

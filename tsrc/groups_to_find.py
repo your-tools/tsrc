@@ -16,8 +16,11 @@ from typing import List, Tuple, Union
 
 
 class GroupsToFind:
-    def __init__(self, groups: Union[List[str], None]) -> None:
+    def __init__(
+        self, groups: Union[List[str], None], ignore_missing_groups: bool = False
+    ) -> None:
         self.groups = groups
+        self.ignore_missing_groups = ignore_missing_groups
         self.found_groups: List[str] = []
 
     def found_some(self) -> bool:

@@ -70,7 +70,7 @@ def test_create_new_assembly_chain_by_tag_and_sha1(
     run_git(el, "tag", "-a", "ver_x", "-m", "version x")
     _, sha1_of_tag = run_git_captured(el, "rev-parse", "HEAD", check=False)
     run_git(el, "commit", "-m", "adding latest changes")
-    run_git(el, "push", "origin", "master")
+    run_git(el, "push", "--tags", "origin", "master")
 
     # 5th: consider reaching some consistant state, thus
     #   start to create new assembly chain
@@ -79,7 +79,7 @@ def test_create_new_assembly_chain_by_tag_and_sha1(
     run_git(mp, "checkout", "-b", "ac_1.0")
 
     # 6th: create Manifest with SHA1 marks while skipping Manifest Repo
-    tsrc_cli.run("dump-manifest", "--sha1-only", "--update", "--skip-manifest")
+    tsrc_cli.run("dump-manifest", "--sha1-on", "--update", "--skip-manifest")
 
     # 7th: let us update Manifest, but only with its branch (no SHA1)
     tsrc_cli.run("dump-manifest", "--update", "--only-manifest", "--force")
@@ -116,7 +116,7 @@ def test_create_new_assembly_chain_by_tag_and_sha1(
 
     # 10th: dumping and updating Manifest
     tsrc_cli.run(
-        "dump-manifest", "--raw", ".", "--sha1-only", "--update", "--skip-manifest"
+        "dump-manifest", "--raw", ".", "--sha1-on", "--update", "--skip-manifest"
     )
 
     # checkout new branch for Manifest in order to dump it to Manifest later
@@ -159,7 +159,7 @@ def test_create_new_assembly_chain_by_tag_and_sha1(
     message_recorder.reset()
     tsrc_cli.run("status")
     assert message_recorder.find(
-        r"\* extra-lib     \[ master on ver_x .1 commit \]  master .1 commit"
+        r"\* extra-lib     \[ master on ver_x .2 commits \]  master .1 commit"
     )
 
 
@@ -257,7 +257,7 @@ def test_create_new_assembly_chain_by_sha1(
     run_git(mp, "checkout", "-b", "ac_1.0")
 
     # 6th: create Manifest with SHA1 marks while skipping Manifest Repo
-    tsrc_cli.run("dump-manifest", "--sha1-only", "--update", "--skip-manifest")
+    tsrc_cli.run("dump-manifest", "--sha1-on", "--update", "--skip-manifest")
 
     # 7th: let us update Manifest, but only with its branch (no SHA1)
     tsrc_cli.run("dump-manifest", "--update", "--only-manifest", "--force")
@@ -315,7 +315,7 @@ def test_create_new_assembly_chain_by_sha1(
 
     # 10th: dumping and updating Manifest
     tsrc_cli.run(
-        "dump-manifest", "--raw", ".", "--sha1-only", "--update", "--skip-manifest"
+        "dump-manifest", "--raw", ".", "--sha1-on", "--update", "--skip-manifest"
     )
 
     # checkout new branch for Manifest in order to dump it to Manifest later
@@ -429,11 +429,11 @@ def test_create_new_assembly_chain_by_sha1(
     tsrc_cli.run("status", "--show-leftovers-status")
     if os.name == "nt":
         assert message_recorder.find(
-            r"\+ inside\\repo_inside \[ master \]  \( master ~~ commit  << master \) \(dirty\)"
+            r"\+ inside\\repo_inside \[ master           \]  \( master ~~ commit  << master \) \(dirty\)"
         )
     else:
         assert message_recorder.find(
-            rf"\+ inside{os.sep}repo_inside \[ master \]  \( master ~~ commit  << master \) \(dirty\)"
+            rf"\+ inside{os.sep}repo_inside \[ master           \]  \( master ~~ commit  << master \) \(dirty\)"
         )
 
     # 24th: get rid of dirty repo
@@ -442,14 +442,14 @@ def test_create_new_assembly_chain_by_sha1(
     tsrc_cli.run("status")
     if os.name == "nt":
         assert message_recorder.find(
-            r"\+ inside\\repo_inside \[ master \]  \( master ~~ commit  == master \)"
+            r"\+ inside\\repo_inside \[ master           \]  \( master ~~ commit  == master \)"
         )
     else:
         assert message_recorder.find(
-            rf"\+ inside{os.sep}repo_inside \[ master \]  \( master ~~ commit  == master \)"
+            rf"\+ inside{os.sep}repo_inside \[ master           \]  \( master ~~ commit  == master \)"
         )
     assert message_recorder.find(
-        r"\* backend-proj       \[ master \]  \( master ~~ commit  << master \) .1 commit"
+        r"\* backend-proj       \[ master .1 commit \]  \( master ~~ commit  << master \) .1 commit"
     )
 
 

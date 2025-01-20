@@ -180,7 +180,7 @@ class BareCloner(Task[Repo]):
 
         return repo.remotes[0]
 
-    def bare_clone_repo(self, repo: Repo) -> None:
+    def bare_clone_repo(self, repo: Repo) -> Path:
         # check if our Repo is bare
         repo_path = self.workspace_path / repo.dest
         parent = repo_path.parent
@@ -188,23 +188,28 @@ class BareCloner(Task[Repo]):
         remote = self._choose_remote(repo)
         remote_url = remote.url
         if Path(str(repo_path) + os.sep + ".git").is_dir():
-            return
-        if repo._bare_clone_path:
-            clone_args = [
-                "clone",
-                "--mirror",
-                str(repo._bare_clone_path),
-                str(repo_path) + os.sep + ".git",
-            ]
-        else:
-            clone_args = [
-                "clone",
-                "--mirror",
-                remote_url,
-                str(repo_path) + os.sep + ".git",
-            ]
+            return repo_path
+        clone_args = [
+            "clone",
+            "--mirror",
+            remote_url,
+            str(repo_path) + os.sep + ".git",
+        ]
 
-        self.run_git(parent, *clone_args)
+        run_git_captured(parent, *clone_args)
+
+        # make sure from this moment on to use 'repo_path'
+
+        run_git_captured(
+            repo_path, "config", "--bool", "core.bare", "false", check=False
+        )
+
+        run_git_captured(repo_path, "remote", "remove", remote.name, check=False)
+        run_git_captured(
+            repo_path, "remote", "add", remote.name, remote_url, check=False
+        )
+
+        return repo_path
 
     def bare_set_branch(self, repo: Repo) -> bool:
 
@@ -244,7 +249,8 @@ class BareCloner(Task[Repo]):
     def process(self, index: int, count: int, repo: Repo) -> Outcome:
 
         self.info_count(index, count, repo.dest, end="\r")
-        self.bare_clone_repo(repo)
+        repo_path = self.bare_clone_repo(repo)
+        self.run_git(repo_path, "fetch", "--all", "--prune")
         if self.bare_set_branch(repo) is True:
             self.bare_reset_repo(repo)
         # NOTE: not considering submodules (not useful for bare Repo)

@@ -24,6 +24,10 @@ class ManifestRepoItem:
     ignore_submodules: Optional[bool] = False
     remotes: Optional[List[Remote]] = None
     groups_considered: Optional[bool] = False
+
+    # positon-related
+    ahead: int = 0
+    behind: int = 0
     # TODO: implement test if required variables are set
 
     @property
@@ -54,10 +58,12 @@ class MRISHelpers:
         return ManifestRepoItem(
             branch=repo.branch,
             tag=repo.tag,
-            # sha1=repo.sha1_full,
-            sha1=repo.sha1,
+            sha1=repo.sha1_full,
+            # sha1=repo.sha1,
             ignore_submodules=repo.ignore_submodules,
             remotes=repo.remotes,
+            ahead=repo._grabbed_ahead,
+            behind=repo._grabbed_behind,
         )
 
     def _repos_to_mris(
@@ -86,6 +92,8 @@ class MRISHelpers:
                 ignore_submodules=w_repo.ignore_submodules,
                 remotes=w_repo.remotes,
                 groups_considered=True,
+                ahead=status.git.ahead,
+                behind=status.git.behind,
             )
         return ManifestRepoItem()
 

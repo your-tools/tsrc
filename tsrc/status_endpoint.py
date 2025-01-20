@@ -111,7 +111,9 @@ class StatusCollector(Task[Repo]):
         return Outcome.empty()
 
     def _process_bare(self, full_path: Path, repo: Repo) -> None:
-        git_bare_status = get_git_bare_status(full_path)
+        git_bare_status = get_git_bare_status(
+            full_path, repo.remotes[0].name, repo.remotes[0].url
+        )
         if repo._bare_clone_is_ok is False:
             git_bare_status.is_ok = False
         bare_status = BareStatus(git=git_bare_status)

@@ -584,9 +584,7 @@ class ManifestDumper:
                     rr["branch"] = mri.branch
                 if mri.tag:
                     rr["tag"] = mri.tag
-                if (
-                    not mri.branch and not mri.tag and mri.sha1
-                ) or mdo.sha1_only is True:
+                if (not mri.branch and not mri.tag and mri.sha1) or mdo.sha1_on is True:
                     rr["sha1"] = mri.sha1
 
                 # TODO: add comment in form of '\n' just to better separate Repos
@@ -718,7 +716,12 @@ class ManifestDumper:
                     and mri.sha1  # noqa: W503
                     and y[u_i] != mri.sha1  # noqa: W503
                 )
-                or (mdo.sha1_only is True and y[u_i] != mri.sha1)  # noqa: W503
+                or (mdo.sha1_on is True and y[u_i] != mri.sha1)  # noqa: W503
+                or (
+                    mdo.sha1_off is False
+                    and (mri.ahead > 0 or mri.behind > 0)
+                    and y[u_i] != mri.sha1
+                )
             ):
                 y[u_i] = mri.sha1
                 ret_updated = True
@@ -833,7 +836,10 @@ class ManifestDumper:
         if not s_item:
             if mri.sha1:
                 s_item.append("sha1")
-        if "sha1" not in s_item and mdo.sha1_only is True:
+        if "sha1" not in s_item and (
+            mdo.sha1_on is True
+            or (mdo.sha1_off is False and (mri.behind > 0 or mri.ahead > 0))
+        ):
             s_item.append("sha1")
 
         # add these on item
@@ -1145,8 +1151,10 @@ class ManifestDumper:
             if items.tag:
                 rr["tag"] = items.tag
             if (
-                not items.branch and not items.tag and items.sha1
-            ) or mdo.sha1_only is True:
+                (not items.branch and not items.tag and items.sha1)
+                or mdo.sha1_on is True
+                or (mdo.sha1_off is False and (items.ahead > 0 or items.behind > 0))
+            ):
                 rr["sha1"] = items.sha1
 
             y["repos"].append(rr)

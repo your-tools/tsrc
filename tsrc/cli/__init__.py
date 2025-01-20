@@ -334,7 +334,7 @@ def repos_from_config(
                 ", ".join(repo_groups),
             )
         # fmt: on
-        return manifest.get_repos(groups=repo_groups)
+        return manifest.get_repos(groups=repo_groups, ignore_if_group_not_found=silent)
     else:
         # workspace config does not specify clone_all_repos nor
         # a list of groups, ask the manifest for the list of default
