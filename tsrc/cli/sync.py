@@ -1,7 +1,7 @@
 """ Entry point for `tsrc sync` """
 
 import argparse
-from typing import List
+from typing import List, Union
 
 import cli_ui as ui
 
@@ -51,6 +51,12 @@ def configure_parser(subparser: argparse._SubParsersAction) -> None:
         help="ignore group element if it is not found among Manifest's Repos. WARNING: If you end up in need of this option, you have to understand that you end up with useles Manifest. Warnings will be printed for each Group element that is missing, so it may be easier to fix that. Using this option is NOT RECOMMENDED for normal use",  # noqa: E501
     )
     parser.add_argument(
+        "--switch",
+        action="store_true",
+        dest="do_switch",
+        help="change config in accordance to Manifest's switch section. this is pariculary usefull when we wish to change Manifest branch to some version that may have different Groups configured.",  # noqa: E501
+    )
+    parser.add_argument(
         "--clean",
         action="store_true",
         dest="do_clean",
@@ -89,42 +95,50 @@ def run(args: argparse.Namespace) -> None:
     correct_branch = args.correct_branch
     workspace = get_workspace(args)
     num_jobs = get_num_jobs(args)
+    do_switch = args.do_switch
     do_clean = args.do_clean
     do_hard_clean = args.do_hard_clean
 
     ignore_if_group_not_found: bool = False
-    report_update_repo_groups: bool = False
+    report_update_repo_groups: Union[bool, None] = False
 
     if update_manifest:
+        repo_groups_0 = workspace.config.repo_groups.copy()
         ui.info_2("Updating manifest")
         workspace.update_manifest()
 
-        # check if groups needs to be ignored
+        # check if groups needs to be updated on config
         found_groups: List[str] = []
-        if groups and args.ignore_if_group_not_found is True:
+        if groups:
             local_manifest = workspace.local_manifest.get_manifest()
             if local_manifest.group_list and local_manifest.group_list.groups:
                 found_groups = list(
                     set(groups).intersection(local_manifest.group_list.groups)
                 )
-                if update_config_repo_groups is True:
-                    workspace.update_config_repo_groups(
-                        groups=found_groups, ignore_group_item=args.ignore_group_item
-                    )
-                    report_update_repo_groups = True
 
-        if update_config_repo_groups is True:
-            if args.ignore_if_group_not_found is True:
-                ignore_if_group_not_found = True
+        if do_switch is True:
+
+            report_update_repo_groups = workspace.update_config_on_switch(
+                workspace.local_manifest.get_manifest(), found_groups, groups
+            )
+            if not isinstance(report_update_repo_groups, bool):
+                ui.error("Provided Groups does not match any in the Manifest")
+                return
+        elif update_config_repo_groups is True:
             workspace.update_config_repo_groups(
-                groups=found_groups, ignore_group_item=args.ignore_group_item
+                groups=found_groups,
+                ignore_group_item=args.ignore_group_item,
+                want_groups=groups,
             )
             report_update_repo_groups = True
 
-        if report_update_repo_groups is True:
-            ui.info_2("Updating repo_groups")
+        if (
+            report_update_repo_groups is True
+            and repo_groups_0 != workspace.config.repo_groups  # noqa: W503
+        ):
+            ui.info_2("Updating Workspace Groups configuration")
         else:
-            ui.info_2("Leaving repo_groups intact")
+            ui.info_2("Leaving Workspace Groups configuration intact")
     else:
         ui.info_2("Not updating manifest")
     if args.ignore_if_group_not_found is True:
@@ -137,6 +151,7 @@ def run(args: argparse.Namespace) -> None:
         all_cloned=all_cloned,
         include_regex=include_regex,
         exclude_regex=exclude_regex,
+        do_switch=do_switch,
         ignore_if_group_not_found=ignore_if_group_not_found,
         ignore_group_item=args.ignore_group_item,
     )
