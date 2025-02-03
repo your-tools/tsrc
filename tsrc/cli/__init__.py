@@ -173,6 +173,7 @@ def resolve_repos(
     all_cloned: bool,
     include_regex: str = "",
     exclude_regex: str = "",
+    do_switch: bool = False,
     ignore_if_group_not_found: bool = False,
     ignore_group_item: bool = False,
 ) -> List[Repo]:
@@ -192,6 +193,8 @@ def resolve_repos(
         repos = manifest.get_repos(
             groups=groups, ignore_if_group_not_found=ignore_if_group_not_found
         )
+    elif do_switch is True:
+        repos = manifest.get_repos(groups, do_switch)
     elif all_cloned:
         repos = manifest.get_repos(all_=True)
         repos = [repo for repo in repos if (workspace.root_path / repo.dest).exists()]

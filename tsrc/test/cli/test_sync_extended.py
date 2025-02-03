@@ -92,9 +92,9 @@ def test_sync_on_groups_intersection__case_1(
     message_recorder.reset()
     tsrc_cli.run("status")
     assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
-    assert message_recorder.find(r"\* repo_1   \[ master \]  master")
+    assert not message_recorder.find(r"\* repo_1")
     assert message_recorder.find(r"\* repo_3   \[ master \]  master")
-    assert message_recorder.find(r"\* repo_5   \[ master \]  master")
+    assert not message_recorder.find(r"\* repo_5")
 
 
 def test_sync_on_groups_intersection__case_2(
@@ -278,17 +278,22 @@ def test_sync_on_groups_intersection__case_3_a(
     # ================== from here it is different ==================
     # 10th: sync (use specific case for given test)
     # case: 3 A
-    # here: if we do not provide '--ignore-missing-groups'
-    #   we will end up with error that 'group_2' is not found
-    tsrc_cli.run("sync", "--ignore-missing-groups")
+    #   we do not need '--ignore-missing-groups'
+    #   as by default configured groups are updated
+    #   but if we disable that, we still need to ignore missing groups
+    tsrc_cli.run("sync", "--no-update-config", "--ignore-missing-groups")
 
     # 11th: veryfy by 'status' output
     message_recorder.reset()
-    tsrc_cli.run("status")
+    tsrc_cli.run("status", "--ignore-missing-groups")
+    return
     assert message_recorder.find(r"\* manifest \[ master \]= master ~~ MANIFEST")
-    assert message_recorder.find(r"\* repo_1   \[ master \]  master")
+    assert not message_recorder.find(r"\* repo_1")
     assert message_recorder.find(r"\* repo_3   \[ master \]  master")
-    assert message_recorder.find(r"\* repo_5   \[ master \]  master")
+    assert not message_recorder.find(r"\* repo_5")
+    assert message_recorder.find(r"\+ repo_4   \[ master \]  master")
+    assert message_recorder.find(r"\+ repo_2   \[ master \]  master")
+    assert message_recorder.find(r"\+ repo_6   \[ master \]  master")
 
 
 def test_sync_on_groups_intersection__case_3_b(

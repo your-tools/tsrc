@@ -8,11 +8,17 @@ from typing import Any, List, Optional
 import schema
 
 from tsrc.config import parse_config
-from tsrc.errors import Error, InvalidConfigError, LoadManifestSchemaError
+from tsrc.errors import (
+    Error,
+    InvalidConfigError,
+    LoadManifestSchemaError,
+    LoadManifestSwitchConfigGroupsError,
+)
 from tsrc.file_system import Copy, FileSystemOperation, Link
 from tsrc.groups import GroupList
 from tsrc.manifest_common_data import ManifestsTypeOfData, mtod_can_ignore_remotes
 from tsrc.repo import Remote, Repo
+from tsrc.switch import Switch
 
 
 class RepoNotFound(Error):
@@ -29,6 +35,7 @@ class Manifest:
     def __init__(self) -> None:
         self._repos: List[Repo] = []
         self.group_list: Optional[GroupList[str]] = None
+        self._switch: Optional[Switch] = None
 
     def apply_config(
         self,
@@ -52,6 +59,9 @@ class Manifest:
             groups_config,
             ignore_on_mtod=ignore_on_mtod,
         )
+
+        switch_config = config.get("switch")
+        self._handle_switch(switch_config)
 
     def _handle_repo(self, repo_config: Any) -> None:
         dest = repo_config["dest"]
@@ -122,14 +132,32 @@ class Manifest:
                 ignore_on_mtod=ignore_on_mtod,
             )
 
+    def _handle_switch(self, switch_config: Any) -> None:
+        self._switch = Switch(switch_config)
+
+        # verify if groups in switch>config>groups are present in 'groups'
+        if self.group_list and self.group_list.groups and self._switch._groups:
+            switch_groups = list(self._switch._groups)
+            groups_groups = self.group_list.groups.keys()
+            if switch_groups and groups_groups:
+                if set(switch_groups) != set(groups_groups).intersection(switch_groups):
+                    raise LoadManifestSwitchConfigGroupsError()
+        elif self._switch._groups:
+            # you cannot have 'swtich>config>groups' alone (without 'groups')
+            raise LoadManifestSwitchConfigGroupsError()
+
     def get_repos(
         self,
         groups: Optional[List[str]] = None,
+        do_switch: bool = False,
         all_: bool = False,
         ignore_if_group_not_found: bool = False,
     ) -> List[Repo]:
         if all_:
             return self._repos
+
+        if do_switch is True:
+            return self._get_repos_on_switch(groups)
 
         if not groups:
             if self._has_default_group():
@@ -142,6 +170,13 @@ class Manifest:
     def _has_default_group(self) -> bool:
         assert self.group_list
         return self.group_list.get_group("default") is not None
+
+    def _get_repos_on_switch(self, groups: Optional[List[str]]) -> List[Repo]:
+        if self._switch:
+            if self._switch._groups:
+                matched_groups = list(self._switch._groups)
+                return self._get_repos_in_groups(matched_groups)
+        return self._repos  # all repos
 
     def _get_repos_in_groups(
         self,
@@ -220,6 +255,21 @@ def validate_repo_no_remote_required(data: Any) -> None:
         )
 
 
+def validate_switch_config(data: Any) -> None:
+    switch_config_schema = schema.Schema(
+        {
+            schema.Optional("groups"): [str],
+        }
+    )
+    switch_config_schema.validate(data)
+
+
+def validate_switch(data: Any) -> None:
+    on_config_schema = schema.Use(validate_switch_config)
+    switch_schema = schema.Schema({schema.Optional("config"): on_config_schema})
+    switch_schema.validate(data)
+
+
 def load_manifest(manifest_path: Path) -> Manifest:
     """Main entry point: return a manifest instance by parsing
     a `manifest.yml` file.
@@ -230,12 +280,14 @@ def load_manifest(manifest_path: Path) -> Manifest:
     group_schema = {"repos": [str], schema.Optional("includes"): [str]}
     # Note: gitlab and github_enterprise_url keys are ignored,
     # and kept here only for backward compatibility reasons
+    on_switch_schema = schema.Use(validate_switch)
     manifest_schema = schema.Schema(
         {
             "repos": [repo_schema],
             schema.Optional("gitlab"): remote_git_server_schema,
             schema.Optional("github_enterprise"): remote_git_server_schema,
             schema.Optional("groups"): {str: group_schema},
+            schema.Optional("switch"): on_switch_schema,
         }
     )
     parsed = parse_config(manifest_path, schema=manifest_schema)
@@ -262,12 +314,14 @@ def load_manifest_safe_mode(manifest_path: Path, mtod: ManifestsTypeOfData) -> M
     group_schema = {"repos": [str], schema.Optional("includes"): [str]}
     # Note: gitlab and github_enterprise_url keys are ignored,
     # and kept here only for backward compatibility reasons
+    on_switch_schema = schema.Use(validate_switch)
     manifest_schema = schema.Schema(
         {
             "repos": [repo_schema],
             schema.Optional("gitlab"): remote_git_server_schema,
             schema.Optional("github_enterprise"): remote_git_server_schema,
             schema.Optional("groups"): {str: group_schema},
+            schema.Optional("switch"): on_switch_schema,
         }
     )
     try:

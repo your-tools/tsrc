@@ -6,7 +6,7 @@ from typing import List, Optional
 import pytest
 import ruamel.yaml
 
-from tsrc.errors import Error, InvalidConfigError
+from tsrc.errors import Error, InvalidConfigError, LoadManifestSwitchConfigGroupsError
 from tsrc.file_system import Copy, Link
 from tsrc.manifest import Manifest, RepoNotFound, load_manifest
 from tsrc.repo import Remote, Repo
@@ -251,6 +251,70 @@ groups:
         "linux1",
         "linux2",
     ]
+
+
+def test_switch_and_groups__is_error__on_switch() -> None:
+    contents = """
+repos:
+  - { dest: any, url: any.com }
+  - { dest: linux1, url: linux1.com }
+  - { dest: linux2, url: linux2.com }
+
+groups:
+  linux:
+    repos: [linux1, linux2]
+  foo_gr:
+    repos: [any, linux1]
+
+switch:
+  config:
+    groups: [linux, tux]
+"""
+    try:
+        parse_manifest(contents)
+    except LoadManifestSwitchConfigGroupsError:
+        pass
+    else:
+        raise AssertionError()
+
+
+def test_switch_and_groups__is_error__missing_groups() -> None:
+    contents = """
+repos:
+  - { dest: any, url: any.com }
+  - { dest: linux1, url: linux1.com }
+  - { dest: linux2, url: linux2.com }
+
+switch:
+  config:
+    groups: [linux]
+"""
+    try:
+        parse_manifest(contents)
+    except LoadManifestSwitchConfigGroupsError:
+        pass
+    else:
+        raise AssertionError()
+
+
+def test_switch_and_groups() -> None:
+    contents = """
+repos:
+  - { dest: any, url: any.com }
+  - { dest: linux1, url: linux1.com }
+  - { dest: linux2, url: linux2.com }
+
+groups:
+  linux:
+    repos: [linux1, linux2]
+  foo_gr:
+    repos: [any, linux1]
+
+switch:
+  config:
+    groups: [linux]
+"""
+    parse_manifest(contents)
 
 
 def test_inclusion(repos_getter: ReposGetter) -> None:

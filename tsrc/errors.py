@@ -50,6 +50,12 @@ class LoadManifestSchemaError(Error):
         super().__init__(msg)
 
 
+class LoadManifestSwitchConfigGroupsError(Error):
+    def __init__(self) -> None:
+        msg = "Manifest's Switch Config Groups does not match Groups"
+        super().__init__(msg)
+
+
 class MissingRepoError(Error):
     def __init__(self, dest: str):
         super().__init__(f"No repo found in '{dest}'. Please run `tsrc sync`")

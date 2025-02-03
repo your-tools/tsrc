@@ -282,7 +282,6 @@ def test_only_manifest__on_workspace(
             raise Exception("There should be only Manifest")
     if count != 1:
         raise Exception("Manifest processing error")
-    print("DEBUG PATH =", workspace_path)
 
 
 def test_only_manifest__on_raw(
