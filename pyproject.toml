@@ -47,7 +47,7 @@ mypy = "^1.11.1"
 
 # Docs
 mkdocs = "^1.5"
-mkdocs-material = "^9.5"
+mkdocs-material = "^9.7"
 
 [tool.poetry.scripts]
 tsrc = "tsrc.cli.main:main"
